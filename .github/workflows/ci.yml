@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-latest
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # SonarQube Cloud needs the history to tell new code from old
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      # Angular build and tests, Java unit tests, integration tests on Testcontainers
+      # (the runner has Docker), JaCoCo reports.
+      - name: Build and test
+        run: ./mvnw -B -ntp verify
+
+      # Runs once the SONAR_TOKEN secret exists; fails the job when the quality gate fails.
+      - name: SonarQube Cloud
+        if: ${{ env.SONAR_TOKEN != '' }}
+        run: ./mvnw -B -ntp sonar:sonar -Dsonar.qualitygate.wait=true

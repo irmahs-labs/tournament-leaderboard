@@ -1,0 +1,11 @@
+# Local Postgres for development. Spring Boot starts it on `mvn spring-boot:run`
+# (spring-boot-docker-compose) and connects to it automatically.
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: leaderboard
+      POSTGRES_USER: leaderboard
+      POSTGRES_PASSWORD: leaderboard
+    ports:
+      - "5432"
