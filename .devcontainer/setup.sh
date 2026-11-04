@@ -2,6 +2,9 @@
 # Runs once when the cloud container is first created.
 set -euo pipefail
 
+# The current Next.js app lives in legacy/ while the Spring Boot + Angular rewrite is built.
+cd "$(dirname "$0")/../legacy"
+
 echo "Installing dependencies..."
 npm install
 
@@ -21,4 +24,4 @@ fi
 # Optional: Claude Code CLI, so you can run \`claude\` in the container terminal.
 npm install -g @anthropic-ai/claude-code || echo "Skipped Claude Code CLI install."
 
-echo "Done. Run 'npm run dev' and open the forwarded port 3000."
+echo "Done. Run 'cd legacy && npm run dev' and open the forwarded port 3000."
