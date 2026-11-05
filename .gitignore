@@ -3,3 +3,7 @@ node_modules
 out
 .env*
 .DS_Store
+target/
+.angular/
+frontend/dist/
+.flattened-pom.xml
