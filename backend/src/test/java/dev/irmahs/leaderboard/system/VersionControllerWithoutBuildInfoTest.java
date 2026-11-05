@@ -10,14 +10,15 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
 @WebMvcTest(VersionController.class)
 class VersionControllerWithoutBuildInfoTest {
 
-  @Autowired MockMvcTester mvc;
+    @Autowired
+    MockMvcTester mvc;
 
-  @Test
-  void reportsUnknownWhenTheBuildDidNotRecordAVersion() {
-    assertThat(mvc.get().uri("/api/version"))
-        .hasStatusOk()
-        .bodyJson()
-        .extractingPath("$.version")
-        .isEqualTo(VersionController.UNKNOWN);
-  }
+    @Test
+    void reportsUnknownWhenTheBuildDidNotRecordAVersion() {
+        assertThat(mvc.get().uri("/api/version"))
+                .hasStatusOk()
+                .bodyJson()
+                .extractingPath("$.version")
+                .isEqualTo(VersionController.UNKNOWN);
+    }
 }

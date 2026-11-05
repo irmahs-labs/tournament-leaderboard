@@ -21,25 +21,24 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 @Testcontainers(disabledWithoutDocker = true)
 class ApplicationIT {
 
-  @Container @ServiceConnection
-  static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:17");
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:17");
 
-  @Autowired MockMvcTester mvc;
+    @Autowired
+    MockMvcTester mvc;
 
-  @Test
-  void startsAndReportsHealthy() {
-    assertThat(mvc.get().uri("/actuator/health"))
-        .hasStatusOk()
-        .bodyJson()
-        .extractingPath("$.status")
-        .isEqualTo("UP");
-  }
+    @Test
+    void startsAndReportsHealthy() {
+        assertThat(mvc.get().uri("/actuator/health"))
+                .hasStatusOk()
+                .bodyJson()
+                .extractingPath("$.status")
+                .isEqualTo("UP");
+    }
 
-  @Test
-  void servesTheAngularApp() {
-    assertThat(mvc.get().uri("/index.html"))
-        .hasStatusOk()
-        .bodyText()
-        .contains("<app-root");
-  }
+    @Test
+    void servesTheAngularApp() {
+        assertThat(mvc.get().uri("/index.html")).hasStatusOk().bodyText().contains("<app-root");
+    }
 }

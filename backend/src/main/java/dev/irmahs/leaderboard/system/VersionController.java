@@ -13,23 +13,23 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class VersionController {
 
-  /** Version reported when the build didn't produce build-info, such as some IDE runs. */
-  static final String UNKNOWN = "unknown";
+    /** Version reported when the build didn't produce build-info, such as some IDE runs. */
+    static final String UNKNOWN = "unknown";
 
-  private final ObjectProvider<BuildProperties> buildProperties;
+    private final ObjectProvider<BuildProperties> buildProperties;
 
-  public VersionController(ObjectProvider<BuildProperties> buildProperties) {
-    this.buildProperties = buildProperties;
-  }
-
-  @GetMapping("/api/version")
-  public VersionInfo version() {
-    BuildProperties build = buildProperties.getIfAvailable();
-    if (build == null) {
-      return new VersionInfo(UNKNOWN, null);
+    public VersionController(ObjectProvider<BuildProperties> buildProperties) {
+        this.buildProperties = buildProperties;
     }
-    return new VersionInfo(build.getVersion(), build.getTime());
-  }
 
-  public record VersionInfo(String version, Instant builtAt) {}
+    @GetMapping("/api/version")
+    public VersionInfo version() {
+        BuildProperties build = buildProperties.getIfAvailable();
+        if (build == null) {
+            return new VersionInfo(UNKNOWN, null);
+        }
+        return new VersionInfo(build.getVersion(), build.getTime());
+    }
+
+    public record VersionInfo(String version, Instant builtAt) {}
 }

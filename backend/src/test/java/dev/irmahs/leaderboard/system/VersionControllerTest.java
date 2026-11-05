@@ -17,25 +17,26 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
 @Import(VersionControllerTest.Build.class)
 class VersionControllerTest {
 
-  @Autowired MockMvcTester mvc;
+    @Autowired
+    MockMvcTester mvc;
 
-  @Test
-  void reportsTheBuildVersion() {
-    assertThat(mvc.get().uri("/api/version"))
-        .hasStatusOk()
-        .bodyJson()
-        .extractingPath("$.version")
-        .isEqualTo("1.4.0");
-  }
-
-  @TestConfiguration
-  static class Build {
-    @Bean
-    BuildProperties buildProperties() {
-      Properties properties = new Properties();
-      properties.setProperty("version", "1.4.0");
-      properties.setProperty("time", Instant.parse("2026-11-05T10:00:00Z").toString());
-      return new BuildProperties(properties);
+    @Test
+    void reportsTheBuildVersion() {
+        assertThat(mvc.get().uri("/api/version"))
+                .hasStatusOk()
+                .bodyJson()
+                .extractingPath("$.version")
+                .isEqualTo("1.4.0");
     }
-  }
+
+    @TestConfiguration
+    static class Build {
+        @Bean
+        BuildProperties buildProperties() {
+            Properties properties = new Properties();
+            properties.setProperty("version", "1.4.0");
+            properties.setProperty("time", Instant.parse("2026-11-05T10:00:00Z").toString());
+            return new BuildProperties(properties);
+        }
+    }
 }

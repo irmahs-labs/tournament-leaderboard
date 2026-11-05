@@ -18,8 +18,8 @@
     <skipTests>false</skipTests>
     <sonar.sources>src</sonar.sources>
     <sonar.tests>src</sonar.tests>
-    <sonar.test.inclusions>**/*.spec.ts</sonar.test.inclusions>
-    <sonar.exclusions>**/*.spec.ts</sonar.exclusions>
+    <sonar.test.inclusions>**/*.test.ts</sonar.test.inclusions>
+    <sonar.exclusions>**/*.test.ts</sonar.exclusions>
   </properties>
 
   <build>
@@ -40,6 +40,19 @@
             <id>npm-ci</id>
             <goals><goal>npm</goal></goals>
             <configuration><arguments>ci --no-audit --no-fund</arguments></configuration>
+          </execution>
+          <!-- Ultracite (oxlint + oxfmt) and the typecheck, as in irmahs-labs/template. -->
+          <execution>
+            <id>npm-check</id>
+            <goals><goal>npm</goal></goals>
+            <phase>generate-resources</phase>
+            <configuration><arguments>run check</arguments></configuration>
+          </execution>
+          <execution>
+            <id>npm-typecheck</id>
+            <goals><goal>npm</goal></goals>
+            <phase>generate-resources</phase>
+            <configuration><arguments>run typecheck</arguments></configuration>
           </execution>
           <execution>
             <id>npm-build</id>

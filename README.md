@@ -26,7 +26,16 @@ site moves to `tournament-leaderboard.irmahs.dev`.
 
 That builds and tests everything: the Angular app (Vitest), the Spring Boot app (JUnit 5,
 Mockito), and the integration tests against a real PostgreSQL (Testcontainers, needs Docker;
-skipped when Docker isn't running). The result is `backend/target/tournament-leaderboard.jar`.
+skipped when Docker isn't running). It also fails on lint and formatting: Ultracite (Oxlint +
+Oxfmt) and the typecheck for the Angular app, Spotless (palantir-java-format) for Java. The result
+is `backend/target/tournament-leaderboard.jar`.
+
+To fix formatting:
+
+```bash
+cd frontend && npm run fix   # Ultracite
+./mvnw spotless:apply        # Java
+```
 
 To work on it locally, with Docker running:
 
