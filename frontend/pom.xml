@@ -41,7 +41,8 @@
             <goals><goal>npm</goal></goals>
             <configuration><arguments>ci --no-audit --no-fund</arguments></configuration>
           </execution>
-          <!-- Ultracite (oxlint + oxfmt) and the typecheck, as in irmahs-labs/template. -->
+          <!-- Ultracite (oxlint + oxfmt), as in irmahs-labs/template, and the typecheck of the
+               tests (ng build below typechecks the app itself). -->
           <execution>
             <id>npm-check</id>
             <goals><goal>npm</goal></goals>
@@ -52,7 +53,7 @@
             <id>npm-typecheck</id>
             <goals><goal>npm</goal></goals>
             <phase>generate-resources</phase>
-            <configuration><arguments>run typecheck</arguments></configuration>
+            <configuration><arguments>run typecheck:test</arguments></configuration>
           </execution>
           <execution>
             <id>npm-build</id>

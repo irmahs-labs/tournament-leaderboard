@@ -7,12 +7,12 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "test:ci": "ng test --watch=false",
     "check": "ultracite check",
     "fix": "ultracite fix",
-    "typecheck": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.spec.json"
+    "typecheck": "tsc --noEmit -p tsconfig.app.json && npm run typecheck:test",
+    "typecheck:test": "tsc --noEmit -p tsconfig.spec.json"
   },
   "dependencies": {
     "@angular/common": "^22.2.0",

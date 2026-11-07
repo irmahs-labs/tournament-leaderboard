@@ -38,6 +38,15 @@ class ApplicationIT {
     }
 
     @Test
+    void servesTheVersion() {
+        assertThat(mvc.get().uri("/api/version"))
+                .hasStatusOk()
+                .bodyJson()
+                .extractingPath("$.version")
+                .isNotNull();
+    }
+
+    @Test
     void servesTheAngularApp() {
         assertThat(mvc.get().uri("/index.html")).hasStatusOk().bodyText().contains("<app-root");
     }

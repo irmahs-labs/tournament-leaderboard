@@ -52,7 +52,7 @@ cloud sessions, `.claude/hooks/session-start.sh` installs the Maven and npm depe
   touching anything in that folder. All `npm` commands run from `legacy/`.
 - The rewrite, built with Maven from the root `pom.xml` (parent: Spring Boot 4.1, Java 21):
   - `frontend/` — Angular 22 (standalone components, Vitest, tests named `*.test.ts`).
-    `frontend/pom.xml` runs `npm ci`, `npm run check`, `npm run typecheck`, `npm run build` and
+    `frontend/pom.xml` runs `npm ci`, `npm run check`, `npm run typecheck:test`, `npm run build` and
     `npm run test:ci` through frontend-maven-plugin and packages `dist/browser` under `static/` in
     a jar.
   - `backend/` — Spring Boot (Web MVC, JPA, Flyway, PostgreSQL, Actuator). Package
