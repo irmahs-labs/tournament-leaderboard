@@ -3,16 +3,16 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 <!-- The sections down to "Checks before pushing" come from irmahs-labs/template. They are
-adapted here because this repo works through `dev` before `main`. -->
+adapted here because, for now, all work on the rewrite goes into the `migration` branch. -->
 
 ## Git branches
 
-Always pull before making changes: run `git fetch origin` and start from the latest `origin/dev`
-before the first edit.
+Always pull before making changes: run `git fetch origin` and start from the latest
+`origin/migration` before the first edit.
 
-- On a branch whose PR is open, bring it up to date with `origin/dev` first
-- On `dev` or `main`, or on a branch whose PR is already merged, create a new branch from
-  `origin/dev` instead
+- On a branch whose PR is open, bring it up to date with `origin/migration` first
+- On `migration`, `dev` or `main`, or on a branch whose PR is already merged, create a new branch
+  from `origin/migration` instead
 
 Always name the branch after the feature or fix it contains, never a random or generated name.
 
@@ -24,12 +24,12 @@ Always name the branch after the feature or fix it contains, never a random or g
 
 ## Pull requests
 
-- Never push to `dev` or `main`. Every change goes in through a pull request into `dev`; `dev`
-  goes into `main` through a pull request too.
+- For now, every change goes in through a pull request into `migration`. Never push to
+  `migration`, `dev` or `main` directly, and don't open pull requests into `dev` or `main`:
+  merging there would rebuild the frozen legacy site on Vercel.
 - Open the PR and stop there: never merge it, not even when CI is green. Irma reviews and clicks
   merge.
-- Vercel no longer builds `legacy/`: the live site stays on its last deployment. Don't trigger a
-  Vercel deploy.
+- The legacy site stays on its last Vercel deployment. Don't trigger a Vercel deploy.
 
 ## Checks before pushing
 
@@ -72,15 +72,15 @@ cd backend && ../mvnw spring-boot:run   # API on :8080; starts compose.yaml's Po
 cd frontend && npm start             # Angular on :4200, proxies /api and /actuator to :8080
 ```
 
-CI (`.github/workflows/ci.yml`) runs `./mvnw verify` on pull requests and on pushes to `main` and
-`dev`, then SonarQube Cloud once the `SONAR_TOKEN` secret exists. The version comes from
+CI (`.github/workflows/ci.yml`) runs `./mvnw verify` on pull requests and on pushes to `main`,
+`dev` and `migration`, then SonarQube Cloud once the `SONAR_TOKEN` secret exists. The version comes from
 `-Drevision=…` (CI-friendly versions + flatten-maven-plugin); it defaults to `0.0.0-SNAPSHOT`.
 
 ## Rules
 
 - Don't touch `legacy/`: no edits, no dependency updates, no builds.
-- `main` is protected by a ruleset: changes land through pull requests only. Work goes into `dev`
-  first, then `dev` is merged into `main`.
+- `main` is protected by a ruleset: changes land through pull requests only. Until the rewrite is
+  ready, work stays in `migration`; it reaches `dev` and `main` only when Irma decides.
 - Commit messages and pull request titles follow Conventional Commits (`feat:`, `fix:`, `chore:`,
   `docs:`, `refactor:`, `test:`, `ci:`), since release versions will be derived from them.
 - Repository: `irmahs-labs/tournament-leaderboard` (moved from `irmahs/alsace-arena-spike-tournament`;
