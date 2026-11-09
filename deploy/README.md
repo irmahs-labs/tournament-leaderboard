@@ -32,8 +32,9 @@ the GitHub secret **and** run `ALTER ROLE … PASSWORD '…'` in the database.
 
 1. **Secrets** (GitHub → this repo → Settings → Secrets and variables → Actions), each made with
    `openssl rand -base64 32`:
-   - `TOURNAMENT_LEADERBOARD_POSTGRES_PASSWORD`: `leaderboard_owner`'s password
-   - `TOURNAMENT_LEADERBOARD_APP_DB_PASSWORD`: `leaderboard_app`'s password
+   - `TOURNAMENT_LEADERBOARD_ADMIN_POSTGRES_PASSWORD`: the admin, `leaderboard_owner`, used by
+     Flyway only
+   - `TOURNAMENT_LEADERBOARD_POSTGRES_PASSWORD`: the app's own user, `leaderboard_app`
 
    `DEPLOY_SSH_KEY`, `DEPLOY_KNOWN_HOSTS` and `DEPLOY_HOST` come from the organization.
 2. **DNS** (Cloudflare): `A` and `AAAA` for `tournament-leaderboard.irmahs.dev`, proxied, like
