@@ -11,12 +11,12 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
       POSTGRES_DB: leaderboard
       # Read by db-init on the first start only, to create the app's own role.
-      LEADERBOARD_APP_PASSWORD: ${APP_DB_PASSWORD:?set in .env}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?set in .env}
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./deploy/db-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U leaderboard_owner -d leaderboard"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 2s
       timeout: 3s
       retries: 15
@@ -29,11 +29,13 @@ services:
     restart: unless-stopped
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/leaderboard
-      # Rows only, so the organisation row-level security policies apply to the app.
       SPRING_DATASOURCE_USERNAME: leaderboard_app
       SPRING_DATASOURCE_PASSWORD: ${APP_DB_PASSWORD:?set in .env}
       SPRING_FLYWAY_USER: leaderboard_owner
       SPRING_FLYWAY_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+      # The JVM sizes its heap from the container limit below; tune both here, no rebuild.
+      JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=75
+    mem_limit: 1g
     depends_on:
       db:
         condition: service_healthy

@@ -28,23 +28,19 @@ jobs:
         env:
           POSTGRES_PASSWORD: ${{ secrets.TOURNAMENT_LEADERBOARD_POSTGRES_PASSWORD }}
           APP_DB_PASSWORD: ${{ secrets.TOURNAMENT_LEADERBOARD_APP_DB_PASSWORD }}
-          REF: ${{ github.ref_name }}
         run: |
           [ -n "$POSTGRES_PASSWORD" ] || { echo "Secret TOURNAMENT_LEADERBOARD_POSTGRES_PASSWORD is not set"; exit 1; }
           [ -n "$APP_DB_PASSWORD" ] || { echo "Secret TOURNAMENT_LEADERBOARD_APP_DB_PASSWORD is not set"; exit 1; }
-          [[ "$REF" =~ ^[A-Za-z0-9._/-]+$ ]] || { echo "Unexpected ref name: $REF"; exit 1; }
           # .env is sent over stdin so the secrets never appear in a command line.
-          # $REF expands here, on purpose: it was checked against a strict pattern above.
-          # shellcheck disable=SC2029
+          # Deploys exactly the commit the run was started on.
           printf 'POSTGRES_PASSWORD=%s\nAPP_DB_PASSWORD=%s\n' "$POSTGRES_PASSWORD" "$APP_DB_PASSWORD" |
-          ssh deploy@${{ secrets.DEPLOY_HOST }} "set -e
-            cd /srv/tournament-leaderboard
+          ssh deploy@${{ secrets.DEPLOY_HOST }} 'set -e
+            cd /srv/${{ github.event.repository.name }}
             [ -d .git ] || git clone https://github.com/${{ github.repository }}.git .
-            git fetch --depth 1 origin '$REF'
+            git fetch --depth 1 origin ${{ github.sha }}
             git reset --hard FETCH_HEAD
             (umask 077 && cat > .env)
             export COMPOSE_FILE=compose.prod.yaml
-            docker compose up -d --wait db
-            docker compose up -d --build --remove-orphans --wait app
+            docker compose up -d --build --remove-orphans --wait
             docker image prune -f
-            docker builder prune -f --filter until=168h"
+            docker builder prune -f --filter until=168h'

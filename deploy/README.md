@@ -16,7 +16,7 @@ visitor ──HTTPS──▶ Cloudflare ──▶ Caddy (irmahs-labs/proxy) ─�
 | `Dockerfile` (repo root) | Builds the Spring Boot jar, Angular included, into one image on port 8080 |
 | `compose.prod.yaml` (repo root) | Postgres on `internal` only; the app on `internal` and `proxy`, publishing no port |
 | `deploy/db-init/01-app-role.sh` | First start only: creates `leaderboard_app`, the role the app connects with |
-| `.github/workflows/deploy.yml` | SSH in as `deploy`, update the code, write `.env`, `docker compose up --build --wait` |
+| `.github/workflows/deploy.yml` | SSH in as `deploy`, check out the run's commit, write `.env`, `docker compose up --build --wait` |
 
 ## Database roles
 
@@ -55,14 +55,3 @@ the GitHub secret **and** run `ALTER ROLE … PASSWORD '…'` in the database.
    ```
 
    Merge it after the DNS records exist; Caddy gets the certificate on the first visit.
-
-## Running it locally
-
-```bash
-docker network create proxy   # once; on the server it already exists
-printf 'POSTGRES_PASSWORD=local-owner\nAPP_DB_PASSWORD=local-app\n' > .env
-docker compose -f compose.prod.yaml up -d --build --wait
-```
-
-The app has no published port here either; use `cd backend && ../mvnw spring-boot:run` for
-everyday development.

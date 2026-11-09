@@ -16,6 +16,8 @@
 
   <properties>
     <skipTests>false</skipTests>
+    <!-- The production image build sets it: CI has already run Ultracite and the typecheck. -->
+    <frontend.checks.skip>false</frontend.checks.skip>
     <sonar.sources>src</sonar.sources>
     <sonar.tests>src</sonar.tests>
     <sonar.test.inclusions>**/*.test.ts</sonar.test.inclusions>
@@ -47,13 +49,19 @@
             <id>npm-check</id>
             <goals><goal>npm</goal></goals>
             <phase>generate-resources</phase>
-            <configuration><arguments>run check</arguments></configuration>
+            <configuration>
+              <arguments>run check</arguments>
+              <skip>${frontend.checks.skip}</skip>
+            </configuration>
           </execution>
           <execution>
             <id>npm-typecheck</id>
             <goals><goal>npm</goal></goals>
             <phase>generate-resources</phase>
-            <configuration><arguments>run typecheck:test</arguments></configuration>
+            <configuration>
+              <arguments>run typecheck:test</arguments>
+              <skip>${frontend.checks.skip}</skip>
+            </configuration>
           </execution>
           <execution>
             <id>npm-build</id>
