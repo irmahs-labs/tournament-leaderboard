@@ -1,7 +1,7 @@
 package dev.irmahs.leaderboard.system;
 
 import java.time.Instant;
-import org.springframework.beans.factory.ObjectProvider;
+import java.util.Optional;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,19 +16,17 @@ public class VersionController {
     /** Version reported when the build didn't produce build-info, such as some IDE runs. */
     static final String UNKNOWN = "unknown";
 
-    private final ObjectProvider<BuildProperties> buildProperties;
+    private final VersionInfo info;
 
-    public VersionController(ObjectProvider<BuildProperties> buildProperties) {
-        this.buildProperties = buildProperties;
+    public VersionController(Optional<BuildProperties> buildProperties) {
+        this.info = buildProperties
+                .map(build -> new VersionInfo(build.getVersion(), build.getTime()))
+                .orElse(new VersionInfo(UNKNOWN, null));
     }
 
     @GetMapping("/api/version")
     public VersionInfo version() {
-        BuildProperties build = buildProperties.getIfAvailable();
-        if (build == null) {
-            return new VersionInfo(UNKNOWN, null);
-        }
-        return new VersionInfo(build.getVersion(), build.getTime());
+        return info;
     }
 
     public record VersionInfo(String version, Instant builtAt) {}

@@ -3,7 +3,8 @@
 # ultracite.sh for the three parts of this repo. On the one file just written:
 #   frontend/  Ultracite (Oxlint with the anti-slop plugin, and Oxfmt), then the typecheck
 #   backend/   Spotless (palantir-java-format), then compiling main and test code
-#   legacy/    the typecheck only (it has no linter that works with Next.js 16)
+#
+# legacy/ is frozen: nobody edits it, so it isn't checked.
 #
 # Exit 0: clean. Exit 2: the problems left over go to stderr, which Claude Code
 # hands back to Claude to fix. The auto-fixer can change types, so a clean lint
@@ -16,10 +17,8 @@ file=$(jq -r '.tool_response.filePath // .tool_input.file_path // empty')
 [ -n "$file" ] && [ -f "$file" ] || exit 0
 file=$(realpath "$file")
 
-# Never dependencies or build output.
-case "$file" in
-  */node_modules/* | */target/* | */dist/* | */.angular/* | */.next/*) exit 0 ;;
-esac
+# Never dependencies or build output: whatever git ignores.
+git check-ignore -q "$file" && exit 0
 
 report() {
   echo "$1" >&2
@@ -28,53 +27,29 @@ report() {
 }
 
 case "$file" in
-  "$root"/frontend/*)
-    case "$file" in
-      *.ts | *.js | *.mjs | *.cjs | *.json | *.jsonc | *.css | *.md | *.html) ;;
-      *) exit 0 ;;
-    esac
+  "$root"/frontend/*.ts | "$root"/frontend/*.js | "$root"/frontend/*.mjs | "$root"/frontend/*.cjs | \
+  "$root"/frontend/*.json | "$root"/frontend/*.jsonc | "$root"/frontend/*.css | \
+  "$root"/frontend/*.md | "$root"/frontend/*.html)
     cd "$root/frontend" || exit 0
     npx --no-install ultracite fix "$file" > /dev/null 2>&1
 
-    # Oxlint only lints script files; the rest is formatted above and that is
-    # all. Failure is judged by reported errors, not the exit code.
-    case "$file" in
-      *.ts | *.js | *.mjs | *.cjs)
-        lint=$(npx --no-install ultracite check "$file" 2>&1)
-        count=$(printf '%s\n' "$lint" | grep -c ': error ' || true)
-        [ "$count" -gt 0 ] && report \
-          "Ultracite: $count problem(s) in $file it could not fix itself. Run: cd frontend && npx ultracite check" \
-          "$(printf '%s\n' "$lint" | grep ': error ')"
-        ;;
-    esac
-    case "$file" in
-      *.ts)
-        types=$(npm run --silent typecheck 2>&1) || report "Typecheck fails after this edit:" "$types"
-        ;;
-    esac
+    # Oxlint only lints script files; the rest is formatted above and that is all.
+    if [[ $file =~ \.(ts|js|mjs|cjs)$ ]] && ! lint=$(npx --no-install ultracite check "$file" 2>&1); then
+      report "Ultracite: problems in $file it could not fix itself. Run: cd frontend && npx ultracite check" \
+        "$(printf '%s\n' "$lint" | grep ': error ')"
+    fi
+    if [[ $file == *.ts ]] && ! types=$(npm run --silent typecheck 2>&1); then
+      report "Typecheck fails after this edit:" "$types"
+    fi
     ;;
 
   "$root"/backend/*.java)
     # One Maven run: format this file, then compile main and test code.
-    out=$(./mvnw -B -ntp -q -pl backend spotless:apply test-compile "-DspotlessFiles=$file" 2>&1)
-    if [ $? -ne 0 ]; then
-      hint=""
-      case "$out" in
-        *tournament-leaderboard-frontend*) hint=" (the frontend jar is missing: run ./mvnw install -DskipTests once)" ;;
-      esac
-      report "Backend does not compile after this edit$hint:" \
-        "$(printf '%s\n' "$out" | grep -E '^\[ERROR\]' || printf '%s\n' "$out")"
+    if ! out=$(./mvnw -B -ntp -q -pl backend spotless:apply test-compile "-DspotlessFiles=$file" 2>&1); then
+      report "Backend does not compile after this edit:" "$(printf '%s\n' "$out" | grep -E '^\[ERROR\]')"
     fi
     ;;
 
-  "$root"/legacy/*)
-    case "$file" in
-      *.ts | *.tsx) ;;
-      *) exit 0 ;;
-    esac
-    cd "$root/legacy" || exit 0
-    types=$(npx --no-install tsc --noEmit --incremental false 2>&1) || report "Typecheck fails after this edit (legacy):" "$types"
-    ;;
 esac
 
 exit 0

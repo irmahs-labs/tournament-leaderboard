@@ -14,10 +14,6 @@
   <name>Tournament Leaderboard - backend</name>
   <description>Spring Boot API. Its jar also serves the Angular app.</description>
 
-  <properties>
-    <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml,${project.build.directory}/site/jacoco-it/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>dev.irmahs</groupId>
@@ -101,18 +97,11 @@
           </execution>
         </executions>
       </plugin>
-      <!-- *Test classes run in `test` (surefire), *IT classes in `verify` (failsafe). -->
+      <!-- *Test classes run in `test` (surefire), *IT classes in `verify` (failsafe; the Spring
+           Boot parent binds its goals). -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
