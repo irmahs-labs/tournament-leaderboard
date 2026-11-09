@@ -34,6 +34,9 @@ jobs:
       - name: Build and test
         run: ./mvnw -B -ntp verify
 
+      - name: Check compose.prod.yaml
+        run: docker compose -f compose.prod.yaml config --quiet --no-interpolate
+
       # Runs once the SONAR_TOKEN secret exists; fails the job when the quality gate fails.
       - name: SonarQube Cloud
         if: ${{ env.SONAR_TOKEN != '' }}

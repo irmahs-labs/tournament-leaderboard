@@ -1,0 +1,47 @@
+name: Deploy
+
+# Started by hand for now (Actions → Deploy → Run workflow, choosing the branch or tag).
+# Once the rewrite replaces the legacy site, it deploys version tags.
+on:
+  workflow_dispatch:
+
+# Reads the repository and nothing else.
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          echo "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519
+
+      - name: Deploy on server
+        env:
+          # The admin (owner) password and the app's own password; see deploy/README.md.
+          POSTGRES_PASSWORD: ${{ secrets.TOURNAMENT_LEADERBOARD_ADMIN_POSTGRES_PASSWORD }}
+          APP_DB_PASSWORD: ${{ secrets.TOURNAMENT_LEADERBOARD_POSTGRES_PASSWORD }}
+        run: |
+          [ -n "$POSTGRES_PASSWORD" ] || { echo "Secret TOURNAMENT_LEADERBOARD_ADMIN_POSTGRES_PASSWORD is not set"; exit 1; }
+          [ -n "$APP_DB_PASSWORD" ] || { echo "Secret TOURNAMENT_LEADERBOARD_POSTGRES_PASSWORD is not set"; exit 1; }
+          # .env is sent over stdin so the secrets never appear in a command line.
+          # Deploys exactly the commit the run was started on.
+          printf 'POSTGRES_PASSWORD=%s\nAPP_DB_PASSWORD=%s\n' "$POSTGRES_PASSWORD" "$APP_DB_PASSWORD" |
+          ssh deploy@${{ secrets.DEPLOY_HOST }} 'set -e
+            cd /srv/${{ github.event.repository.name }}
+            [ -d .git ] || git clone https://github.com/${{ github.repository }}.git .
+            git fetch --depth 1 origin ${{ github.sha }}
+            git reset --hard FETCH_HEAD
+            (umask 077 && cat > .env)
+            export COMPOSE_FILE=compose.prod.yaml
+            docker compose up -d --build --remove-orphans --wait
+            docker image prune -f
+            docker builder prune -f --filter until=168h'
