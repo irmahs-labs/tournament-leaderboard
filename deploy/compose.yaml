@@ -1,0 +1,42 @@
+# Production on the Hetzner server, from /opt/leaderboard. See deploy/README.md.
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp" # HTTP/3
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+  app:
+    image: ghcr.io/irmahs-labs/tournament-leaderboard:${APP_TAG:?set APP_TAG in .env}
+    restart: unless-stopped
+    env_file: .env # chmod 600: database and Google secrets
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    env_file: .env.db # chmod 600: Postgres superuser and role passwords
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d:ro # creates the roles and the database, once
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d leaderboard"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    # No published port: only the app reaches Postgres, over Compose's internal network.
+
+volumes:
+  caddy_data: {}
+  caddy_config: {}
+  pgdata: {}

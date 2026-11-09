@@ -1,0 +1,6 @@
+# Caddy gets and renews the Let's Encrypt certificate itself; the DNS records must point here
+# (DNS only, not proxied) before the first start.
+tournament-leaderboard.irmahs.dev {
+	encode zstd gzip
+	reverse_proxy app:8080
+}
