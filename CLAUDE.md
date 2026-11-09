@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 <!-- The sections down to "Checks before pushing" come from irmahs-labs/template. They are
-adapted here because this repo works through `dev` (Vercel previews it) before `main`. -->
+adapted here because this repo works through `dev` before `main`. -->
 
 ## Git branches
 
@@ -28,8 +28,8 @@ Always name the branch after the feature or fix it contains, never a random or g
   goes into `main` through a pull request too.
 - Open the PR and stop there: never merge it, not even when CI is green. Irma reviews and clicks
   merge.
-- Vercel deploys `legacy/` on merge to `main` and previews `dev`. Re-run a deploy only when Irma
-  asks.
+- Vercel no longer builds `legacy/`: the live site stays on its last deployment. Don't trigger a
+  Vercel deploy.
 
 ## Checks before pushing
 
@@ -38,18 +38,17 @@ Always name the branch after the feature or fix it contains, never a random or g
 cd frontend && npm run check   # Ultracite (oxlint + oxfmt); `npm run fix` fixes what it can
 cd frontend && npm run typecheck
 ./mvnw spotless:apply          # formats Java; verify fails on unformatted code
-cd legacy && npm run build     # only when legacy/ changed
 ```
 
 The PostToolUse hook in `.claude/hooks/check.sh` runs on every file you edit: Ultracite and the
-typecheck in `frontend/`, Spotless and a compile in `backend/`, the typecheck in `legacy/`. In
-cloud sessions, `.claude/hooks/session-start.sh` installs the Maven and npm dependencies.
+typecheck in `frontend/`, Spotless and a compile in `backend/`. In cloud sessions,
+`.claude/hooks/session-start.sh` installs the Maven and npm dependencies of the rewrite.
 
 ## Layout
 
 - `legacy/` — the current live app (Next.js 16 + Supabase), deployed by Vercel with **Root
-  Directory `legacy`**. Its own guide is [`legacy/CLAUDE.md`](legacy/CLAUDE.md); read it before
-  touching anything in that folder. All `npm` commands run from `legacy/`.
+  Directory `legacy`**. It is **frozen**: don't change, install or build anything in it. Its last
+  Vercel deployment stays live until the rewrite replaces it. Its own guide is [`legacy/CLAUDE.md`](legacy/CLAUDE.md).
 - The rewrite, built with Maven from the root `pom.xml` (parent: Spring Boot 4.1, Java 21):
   - `frontend/` — Angular 22 (standalone components, Vitest, tests named `*.test.ts`).
     `frontend/pom.xml` runs `npm ci`, `npm run check`, `npm run typecheck:test`, `npm run build` and
@@ -79,9 +78,9 @@ CI (`.github/workflows/ci.yml`) runs `./mvnw verify` on pull requests and on pus
 
 ## Rules
 
-- Keep `legacy/` deployable: Vercel builds it on every merge to `main`.
+- Don't touch `legacy/`: no edits, no dependency updates, no builds.
 - `main` is protected by a ruleset: changes land through pull requests only. Work goes into `dev`
-  first (Vercel previews it), then `dev` is merged into `main`.
+  first, then `dev` is merged into `main`.
 - Commit messages and pull request titles follow Conventional Commits (`feat:`, `fix:`, `chore:`,
   `docs:`, `refactor:`, `test:`, `ci:`), since release versions will be derived from them.
 - Repository: `irmahs-labs/tournament-leaderboard` (moved from `irmahs/alsace-arena-spike-tournament`;

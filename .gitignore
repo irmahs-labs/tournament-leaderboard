@@ -7,4 +7,3 @@ target/
 .angular/
 frontend/dist/
 .flattened-pom.xml
-*.tsbuildinfo

@@ -15,7 +15,7 @@ https://tournament-leaderboard.irmahs.dev)
 | `frontend/` | The rewrite's Angular 22 app, built by Maven into the backend jar. |
 | _(coming)_ `deploy/` | Docker Compose, Caddy and backups for the Hetzner server. |
 
-The legacy app keeps running, and keeps taking scores, until the rewrite reaches parity and the
+The legacy app is frozen: no more changes or builds. Its last deployment keeps running, and keeps taking scores, until the rewrite reaches parity and the
 site moves to `tournament-leaderboard.irmahs.dev`.
 
 ## Building the rewrite
@@ -44,16 +44,6 @@ To work on it locally, with Docker running:
 cd backend && ../mvnw spring-boot:run   # API on :8080, starts Postgres from compose.yaml
 cd frontend && npm install && npm start # Angular on :4200, /api proxied to :8080
 ```
-
-## Running the legacy app
-
-```bash
-cd legacy
-npm install
-npm run dev
-```
-
-It needs `legacy/.env.local`; see [`legacy/README.md`](legacy/README.md) for the variables.
 
 ---
 

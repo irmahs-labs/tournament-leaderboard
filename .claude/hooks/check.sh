@@ -3,7 +3,8 @@
 # ultracite.sh for the three parts of this repo. On the one file just written:
 #   frontend/  Ultracite (Oxlint with the anti-slop plugin, and Oxfmt), then the typecheck
 #   backend/   Spotless (palantir-java-format), then compiling main and test code
-#   legacy/    the typecheck only (it has no linter that works with Next.js 16)
+#
+# legacy/ is frozen: nobody edits it, so it isn't checked.
 #
 # Exit 0: clean. Exit 2: the problems left over go to stderr, which Claude Code
 # hands back to Claude to fix. The auto-fixer can change types, so a clean lint
@@ -49,12 +50,6 @@ case "$file" in
     fi
     ;;
 
-  "$root"/legacy/*.ts | "$root"/legacy/*.tsx)
-    cd "$root/legacy" || exit 0
-    if ! types=$(npm run --silent typecheck 2>&1); then
-      report "Typecheck fails after this edit (legacy):" "$types"
-    fi
-    ;;
 esac
 
 exit 0
