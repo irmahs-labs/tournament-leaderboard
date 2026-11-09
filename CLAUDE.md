@@ -25,11 +25,11 @@ Always name the branch after the feature or fix it contains, never a random or g
 ## Pull requests
 
 - For now, every change goes in through a pull request into `migration`. Never push to
-  `migration`, `dev` or `main` directly, and don't open pull requests into `dev` or `main`:
-  merging there would rebuild the frozen legacy site on Vercel.
+  `migration`, `dev` or `main` directly, and don't open pull requests into `dev` or `main`.
 - Open the PR and stop there: never merge it, not even when CI is green. Irma reviews and clicks
   merge.
-- The legacy site stays on its last Vercel deployment. Don't trigger a Vercel deploy.
+- Vercel only builds production, from `main`: anything merged into `main` rebuilds the frozen
+  legacy site. Its last deployment stays live; don't trigger a Vercel deploy.
 
 ## Checks before pushing
 
