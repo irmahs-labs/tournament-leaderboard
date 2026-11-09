@@ -1,0 +1,52 @@
+# Production, on the shared irmahs.dev server in /srv/tournament-leaderboard. The deploy workflow
+# writes .env (the two passwords) and runs it; the shared proxy (irmahs-labs/proxy) routes
+# tournament-leaderboard.irmahs.dev to the app. See deploy/README.md.
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      # Owns the database and its tables; Flyway migrates as this role.
+      POSTGRES_USER: leaderboard_owner
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+      POSTGRES_DB: leaderboard
+      # Read by db-init on the first start only, to create the app's own role.
+      LEADERBOARD_APP_PASSWORD: ${APP_DB_PASSWORD:?set in .env}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./deploy/db-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U leaderboard_owner -d leaderboard"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+    # Only on the internal network: nothing outside this app can reach the database.
+    networks: [internal]
+
+  app:
+    build: .
+    image: tournament-leaderboard
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/leaderboard
+      # Rows only, so the organisation row-level security policies apply to the app.
+      SPRING_DATASOURCE_USERNAME: leaderboard_app
+      SPRING_DATASOURCE_PASSWORD: ${APP_DB_PASSWORD:?set in .env}
+      SPRING_FLYWAY_USER: leaderboard_owner
+      SPRING_FLYWAY_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+    depends_on:
+      db:
+        condition: service_healthy
+    # Publishes no port: Caddy reaches it on the proxy network as tournament-leaderboard:8080.
+    networks:
+      internal:
+      proxy:
+        aliases: [tournament-leaderboard]
+
+networks:
+  internal:
+  proxy:
+    external: true
+
+volumes:
+  db_data:

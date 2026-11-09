@@ -34,6 +34,13 @@ jobs:
       - name: Build and test
         run: ./mvnw -B -ntp verify
 
+      # The production Compose file must stay valid; the values are placeholders.
+      - name: Check compose.prod.yaml
+        env:
+          POSTGRES_PASSWORD: placeholder
+          APP_DB_PASSWORD: placeholder
+        run: docker compose -f compose.prod.yaml config --quiet
+
       # Runs once the SONAR_TOKEN secret exists; fails the job when the quality gate fails.
       - name: SonarQube Cloud
         if: ${{ env.SONAR_TOKEN != '' }}

@@ -58,8 +58,10 @@ typecheck in `frontend/`, Spotless and a compile in `backend/`. In cloud session
     `dev.irmahs.leaderboard`. Depends on the frontend jar, so `backend/target/tournament-leaderboard.jar`
     serves the UI and the API. Flyway migrations in `backend/src/main/resources/db/migration`,
     named by date (`V2026_11_05_1__description.sql`); Hibernate runs with `ddl-auto: validate`.
-  - `deploy/` — the Hetzner server: `bootstrap.sh` (run once as root), Docker Compose with Caddy
-    and Postgres, the database roles, and `.env` examples. See [`deploy/README.md`](deploy/README.md).
+  - Deployment — on the shared irmahs.dev server, like the other irmahs-labs apps: `Dockerfile`,
+    `compose.prod.yaml` (Postgres on `internal`, the app on the shared `proxy` network as
+    `tournament-leaderboard:8080`), `deploy/db-init/` (the app's database role) and
+    `.github/workflows/deploy.yml` (started by hand). See [`deploy/README.md`](deploy/README.md).
 - The full plan (schema, endpoints, screens, phases) is the migration plan page kept with the
   project designs; ask the user for the link when you need it.
 
