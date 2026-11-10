@@ -14,6 +14,11 @@
   <name>Tournament Leaderboard - backend</name>
   <description>Spring Boot API. Its jar also serves the Angular app.</description>
 
+  <properties>
+    <!-- main() only starts the app; ApplicationIT starts it through @SpringBootTest instead. -->
+    <sonar.coverage.exclusions>**/TournamentLeaderboardApplication.java</sonar.coverage.exclusions>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>dev.irmahs</groupId>
