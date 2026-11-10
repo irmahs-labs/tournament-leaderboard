@@ -1,8 +1,12 @@
 name: Deploy
 
-# Started by hand for now (Actions → Deploy → Run workflow, choosing the branch or tag).
+# Deploys every merge into migration, the rewrite's branch for now. Pull requests into
+# migration have already passed CI, and the run fails if the app doesn't become healthy.
 # Once the rewrite replaces the legacy site, it deploys version tags.
 on:
+  push:
+    branches: [migration]
+  # Also by hand (Actions → Deploy → Run workflow), once this file is on the default branch.
   workflow_dispatch:
 
 # Reads the repository and nothing else.

@@ -16,7 +16,7 @@ visitor ──HTTPS──▶ Cloudflare ──▶ Caddy (irmahs-labs/proxy) ─�
 | `Dockerfile` (repo root) | Builds the Spring Boot jar, Angular included, into one image on port 8080 |
 | `compose.prod.yaml` (repo root) | Postgres on `internal` only; the app on `internal` and `proxy`, publishing no port |
 | `deploy/db-init/01-app-role.sh` | First start only: creates `leaderboard_app`, the role the app connects with |
-| `.github/workflows/deploy.yml` | SSH in as `deploy`, check out the run's commit, write `.env`, `docker compose up --build --wait` |
+| `.github/workflows/deploy.yml` | On each merge into `migration`: SSH in as `deploy`, check out the run's commit, write `.env`, `docker compose up --build --wait` |
 
 ## Database roles
 
@@ -41,8 +41,8 @@ the GitHub secret **and** run `ALTER ROLE … PASSWORD '…'` in the database.
    the other apps.
 3. **Folder**, as admin on the server, if the deploy can't create it:
    `sudo mkdir /srv/tournament-leaderboard && sudo chown deploy:deploy /srv/tournament-leaderboard`
-4. **Deploy**: Actions → Deploy → Run workflow, on the branch or tag to deploy. It waits until
-   the app's health check passes, so a broken start fails the run.
+4. **Deploy**: every merge into `migration` deploys that commit (Actions → Deploy shows the
+   runs). It waits until the app's health check passes, so a broken start fails the run.
 5. **Route the name**: a pull request in irmahs-labs/proxy adding to `caddy/Caddyfile`:
 
    ```
