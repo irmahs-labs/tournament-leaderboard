@@ -22,6 +22,10 @@
     <sonar.tests>src</sonar.tests>
     <sonar.test.inclusions>**/*.test.ts</sonar.test.inclusions>
     <sonar.exclusions>**/*.test.ts</sonar.exclusions>
+    <!-- Written by `npm run test:ci` (ng test with coverage). -->
+    <sonar.javascript.lcov.reportPaths>coverage/frontend/lcov.info</sonar.javascript.lcov.reportPaths>
+    <!-- Only bootstraps the app in a browser; tests start the app through TestBed instead. -->
+    <sonar.coverage.exclusions>src/main.ts</sonar.coverage.exclusions>
   </properties>
 
   <build>
