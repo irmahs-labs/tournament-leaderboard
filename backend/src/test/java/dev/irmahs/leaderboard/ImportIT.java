@@ -47,10 +47,10 @@ class ImportIT {
             11,Gold 2,11
             """;
     static final String PLAYERS = """
-            id,username,nickname,current_rank_id
-            %s,Kestrel#EUW,Kes,11
-            %s,Wren#EUW,,3
-            %s,Heron#EUW,heron#euw,
+            id,username,current_rank_id
+            %s,Kestrel#EUW,11
+            %s,Wren#EUW,3
+            %s,Heron#EUW,
             """.formatted(KESTREL, WREN, HERON);
     static final String MATCHES = """
             id,match_number,match_date,match_season
@@ -135,11 +135,11 @@ class ImportIT {
                         .query((rs, row) -> List.of(rs.getString(1), rs.getInt(2)))
                         .single())
                 .containsExactly("Kestrel#EUW", 11);
-        // A nickname becomes an alias, unless it's empty or only repeats the Riot ID.
-        assertThat(jdbc.sql("SELECT alias || ' ' || kind FROM player_aliases")
-                        .query(String.class)
-                        .list())
-                .containsExactly("Kes NICKNAME");
+        assertThat(jdbc.sql("SELECT discord_username FROM players WHERE id = :id::uuid")
+                        .param("id", KESTREL)
+                        .query((rs, row) -> rs.getString(1) == null)
+                        .single())
+                .isTrue();
 
         assertThat(jdbc.sql("""
                         SELECT r.stat || ' ' || r.recorded || ' ' || r.effect FROM season_stat_rules r
@@ -240,7 +240,7 @@ class ImportIT {
         assertThat(counts())
                 .containsEntry("ranks", 2L)
                 .containsEntry("players", 3L)
-                .containsEntry("player_aliases", 1L)
+                .containsEntry("player_aliases", 0L)
                 .containsEntry("seasons", 2L)
                 .containsEntry("season_stat_rules", 28L)
                 .containsEntry("season_bonuses", 10L)

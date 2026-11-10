@@ -42,7 +42,8 @@ lists them all and imports nothing. Fix them in Supabase and export again.
 
 ## What maps where
 
-- `players.username` becomes the Riot ID; a nickname becomes an alias.
+- `players.username` becomes the Riot ID. Nicknames aren't imported: players start with no
+  alias and no Discord username.
 - Each `match_season` becomes a season: 8 matches, 1 to 5 games, 50 points per win, today's
   stat rules, and five bonuses at 10 (FB, LD, MA, MP, MD).
 - `acs` is Valorant's performance score, so it goes into `performance_score`. ACS (the
@@ -50,6 +51,6 @@ lists them all and imports nothing. Fix them in Supabase and export again.
 - Each `bonus_*` flag becomes an awarded bonus, copied as recorded, so totals match the live
   site.
 - Ids of ranks, players, matches, games and stats are kept.
-- Not imported: `auth.users` and `profiles`. Admins sign in with Google on the new site.
+- Not imported: `players.nickname`, `auth.users` and `profiles`. Admins sign in with Google on the new site.
 
 The production run, on the server, is part of the cutover checklist.

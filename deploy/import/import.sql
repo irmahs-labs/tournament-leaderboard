@@ -4,7 +4,7 @@
 -- again; its organisation row and its members are kept.
 --
 -- What maps where:
---   players.username         → players.riot_id; a nickname becomes a NICKNAME alias
+--   players.username         → players.riot_id; nicknames aren't imported
 --   matches.match_season     → one season per value: 8 matches, 1 to 5 games, 50 per win,
 --                              today's stat rules and five bonuses at 10
 --   game_stats.acs           → game_stats.performance_score (Valorant's own score); the
@@ -15,7 +15,7 @@
 BEGIN;
 
 CREATE TEMP TABLE old_ranks (id smallint, rank_name varchar, rank_value smallint) ON COMMIT DROP;
-CREATE TEMP TABLE old_players (id uuid, username varchar, nickname text, current_rank_id integer) ON COMMIT DROP;
+CREATE TEMP TABLE old_players (id uuid, username varchar, current_rank_id integer) ON COMMIT DROP;
 CREATE TEMP TABLE old_matches (id integer, match_number smallint, match_date date, match_season smallint) ON COMMIT DROP;
 CREATE TEMP TABLE old_games (id integer, match_id integer, game_number smallint) ON COMMIT DROP;
 CREATE TEMP TABLE old_game_stats (
@@ -108,11 +108,6 @@ WHERE s.organization_id = (SELECT id FROM org);
 
 INSERT INTO players (id, organization_id, riot_id, current_rank_id)
 SELECT id, (SELECT id FROM org), username, current_rank_id FROM old_players;
-
-INSERT INTO player_aliases (player_id, alias, kind)
-SELECT id, btrim(nickname), 'NICKNAME'
-FROM old_players
-WHERE btrim(coalesce(nickname, '')) <> '' AND lower(btrim(nickname)) <> lower(username);
 
 INSERT INTO matches (id, organization_id, season_id, match_number, match_date)
 SELECT m.id, s.organization_id, s.id, m.match_number, m.match_date
