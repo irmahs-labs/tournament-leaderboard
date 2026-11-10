@@ -19,9 +19,12 @@ class ScoringServiceTest {
 
     private final ScoringService scoring = new ScoringService();
 
-    /** The live site's formula, copied from legacy/src/constants/scoring.ts. */
+    /**
+     * The live site's formula, copied from legacy/src/constants/scoring.ts. Its "performanceScore" is the
+     * performance score here.
+     */
     private static long legacyScore(
-            int acs,
+            int performanceScore,
             int kills,
             int deaths,
             int assists,
@@ -31,7 +34,7 @@ class ScoringServiceTest {
             int defuses,
             int bonusCount,
             int wins) {
-        return acs
+        return performanceScore
                 + kills
                 + assists
                 + econRating
@@ -51,7 +54,7 @@ class ScoringServiceTest {
         "412, 31, 9, 11, 97, 7, 4, 3, 5, true",
     })
     void todaysRulesGiveTheLiveSitesGamePoints(
-            int acs,
+            int performanceScore,
             int kills,
             int deaths,
             int assists,
@@ -62,12 +65,13 @@ class ScoringServiceTest {
             int bonusCount,
             boolean win) {
         Season season = TodaysRules.season();
-        StatLine line = TodaysRules.line(acs, kills, deaths, assists, econRating, firstBloods, plants, defuses);
+        StatLine line =
+                TodaysRules.line(performanceScore, kills, deaths, assists, econRating, firstBloods, plants, defuses);
         List<SeasonBonus> won = season.getBonuses().subList(0, bonusCount);
 
         assertThat(scoring.gamePoints(season, line, won, win))
                 .isEqualTo(legacyScore(
-                        acs,
+                        performanceScore,
                         kills,
                         deaths,
                         assists,
@@ -82,7 +86,7 @@ class ScoringServiceTest {
     @Test
     void todaysRulesGiveTheLiveSitesTotalOverSeveralGames() {
         Map<Stat, Long> sums = Map.of(
-                Stat.ACS, 1890L,
+                Stat.PERFORMANCE_SCORE, 1890L,
                 Stat.KILLS, 132L,
                 Stat.DEATHS, 101L,
                 Stat.ASSISTS, 44L,
@@ -107,7 +111,7 @@ class ScoringServiceTest {
     @Test
     void aStatWithoutARuleIsNotCounted() {
         Season season = TodaysRules.season();
-        StatLine line = new StatLine(300, null, null, null, null, 10, null, null, null, null, null, null, null, 4);
+        StatLine line = new StatLine(null, 300, null, null, null, 10, null, null, null, null, null, null, null, 4);
 
         assertThat(scoring.gamePoints(season, line, List.of(), false)).isEqualTo(10);
     }
@@ -115,7 +119,7 @@ class ScoringServiceTest {
     @Test
     void aSeasonThatStopsRecordingAStatKeepsCountingItsOldGames() {
         Season season = TodaysRules.season();
-        season.setStatRule(Stat.ACS, new StatRule(false, 1));
+        season.setStatRule(Stat.PERFORMANCE_SCORE, new StatRule(false, 1));
         StatLine oldGame = TodaysRules.line(240, 18, 12, 5, 60, 3, 2, 1);
 
         assertThat(scoring.gamePoints(season, oldGame, List.of(), false))

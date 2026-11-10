@@ -85,7 +85,7 @@ class BonusCalculatorTest {
 
     @Test
     void aPlayerWhoseStatIsEmptyCannotWinIt() {
-        StatLine noDeathsRecorded = new StatLine(null, 200, null, null, null, 10, null, 4, 50, 1, 0, 0, null, null);
+        StatLine noDeathsRecorded = new StatLine(200, null, null, null, null, 10, null, 4, 50, 1, 0, 0, null, null);
         Map<String, Set<String>> awarded = award(
                 season, Map.of("kestrel", noDeathsRecorded, "wren", TodaysRules.line(180, 12, 9, 3, 40, 0, 0, 0)));
 
@@ -120,6 +120,43 @@ class BonusCalculatorTest {
 
         // Nobody's damage delta is above 0, so that bonus goes to nobody.
         assertThat(awarded).containsEntry("kestrel", Set.of("DMG")).containsEntry("wren", Set.of("DMG"));
+    }
+
+    @Test
+    void theHighestPercentageWinsItsBonus() {
+        Season cup = new Season(season.getOrganizationId(), 2, "Winter Cup", 4, new Season.GameRange(3, 3), 30);
+        cup.addBonus("KAST", "Highest KAST %", BonusAward.HIGHEST, Stat.KAST_PCT, 10);
+        cup.addBonus("HS", "Highest headshot %", BonusAward.HIGHEST, Stat.HEADSHOT_PCT, 10);
+
+        Map<String, Set<String>> awarded = award(
+                cup,
+                Map.of(
+                        "kestrel", percentages("74.00", "21.50"),
+                        "wren", percentages("68.25", "33.00"),
+                        "heron", percentages("74.00", "12.00")));
+
+        assertThat(awarded)
+                .containsEntry("kestrel", Set.of("KAST"))
+                .containsEntry("wren", Set.of("HS"))
+                .containsEntry("heron", Set.of("KAST"));
+    }
+
+    private static StatLine percentages(String kastPct, String headshotPct) {
+        return new StatLine(
+                null,
+                null,
+                null,
+                null,
+                new BigDecimal(kastPct),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                new BigDecimal(headshotPct),
+                null);
     }
 
     private static StatLine averages(String adr, String damageDelta) {

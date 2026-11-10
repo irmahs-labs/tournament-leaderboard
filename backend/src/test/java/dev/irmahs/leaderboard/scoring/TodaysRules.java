@@ -9,11 +9,20 @@ import dev.irmahs.leaderboard.stats.StatLine;
 import java.util.List;
 import java.util.UUID;
 
-/** The live site's fixed formula, written as a season's rules, plus short ways to build lines. */
+/**
+ * The live site's fixed formula, written as a season's rules, plus short ways to build lines. What
+ * the live site calls "performanceScore" is Valorant's performance score here; ACS is the tracker's own number.
+ */
 final class TodaysRules {
 
-    static final List<Stat> ADDING =
-            List.of(Stat.ACS, Stat.KILLS, Stat.ASSISTS, Stat.ECON_RATING, Stat.FIRST_BLOODS, Stat.PLANTS, Stat.DEFUSES);
+    static final List<Stat> ADDING = List.of(
+            Stat.PERFORMANCE_SCORE,
+            Stat.KILLS,
+            Stat.ASSISTS,
+            Stat.ECON_RATING,
+            Stat.FIRST_BLOODS,
+            Stat.PLANTS,
+            Stat.DEFUSES);
 
     private TodaysRules() {}
 
@@ -32,10 +41,17 @@ final class TodaysRules {
 
     /** A line with the eight stats the live site records, in its column order. */
     static StatLine line(
-            int acs, int kills, int deaths, int assists, int econRating, int firstBloods, int plants, int defuses) {
+            int performanceScore,
+            int kills,
+            int deaths,
+            int assists,
+            int econRating,
+            int firstBloods,
+            int plants,
+            int defuses) {
         return new StatLine(
+                performanceScore,
                 null,
-                acs,
                 null,
                 null,
                 null,
