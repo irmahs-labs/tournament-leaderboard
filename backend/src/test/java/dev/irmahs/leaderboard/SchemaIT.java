@@ -64,7 +64,21 @@ class SchemaIT {
 
         Match match = save(new Match(season, 1, LocalDate.of(2026, 10, 2)));
         Game game = save(new Game(match, 2));
-        StatLine line = new StatLine(240, 18, 12, 5, 60, 3, 2, 1, new BigDecimal("27.50"), null);
+        StatLine line = new StatLine(
+                240,
+                231,
+                new BigDecimal("152.3"),
+                new BigDecimal("-12.5"),
+                new BigDecimal("74.00"),
+                18,
+                12,
+                5,
+                60,
+                3,
+                2,
+                1,
+                new BigDecimal("27.50"),
+                null);
         GameStat stat = new GameStat(game, kestrel, line, true);
         stat.award(firstBloods);
         save(stat);
@@ -123,6 +137,23 @@ class SchemaIT {
         assertThat(bonus.getStat()).isEqualTo(Stat.FIRST_BLOODS);
         assertThat(bonus.getPoints()).isEqualTo(10);
         assertThat(bonus.getPosition()).isEqualTo(1);
+    }
+
+    @Test
+    void aStatLineCanBeEmpty() {
+        UUID alsace = organisation("alsace-arena");
+        Player kestrel = save(new Player(alsace, "Kestrel#EUW", null, null));
+        Game game = save(new Game(save(new Match(save(season(alsace, 1)), 1, null)), 1));
+        StatLine empty =
+                new StatLine(null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        GameStat stat = save(new GameStat(game, kestrel, empty, false));
+        em.flush();
+        em.clear();
+
+        GameStat reloaded = em.find(GameStat.class, stat.getId());
+        assertThat(reloaded.getLine()).isEqualTo(empty);
+        assertThat(reloaded.isWin()).isFalse();
+        assertThat(reloaded.getBonuses()).isEmpty();
     }
 
     @Test

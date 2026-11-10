@@ -120,9 +120,10 @@ CREATE TABLE seasons (
 
 CREATE TABLE season_stat_rules (
   season_id  integer NOT NULL REFERENCES seasons(id) ON DELETE CASCADE,
-  stat       varchar NOT NULL CHECK (stat IN ('PERFORMANCE_SCORE', 'KILLS', 'DEATHS', 'ASSISTS',
-                                     'ECON_RATING', 'FIRST_BLOODS', 'PLANTS', 'DEFUSES',
-                                     'HEADSHOT_PCT', 'CLUTCHES')),
+  stat       varchar NOT NULL CHECK (stat IN ('PERFORMANCE_SCORE', 'ACS', 'ADR', 'DAMAGE_DELTA',
+                                     'KAST_PCT', 'KILLS', 'DEATHS', 'ASSISTS', 'ECON_RATING',
+                                     'FIRST_BLOODS', 'PLANTS', 'DEFUSES', 'HEADSHOT_PCT',
+                                     'CLUTCHES')),
   recorded   boolean NOT NULL,                                 -- asked for in games entered from now on
   effect     smallint NOT NULL CHECK (effect IN (-1, 0, 1)),   -- subtracts, not counted, adds
   PRIMARY KEY (season_id, stat)
@@ -134,9 +135,9 @@ CREATE TABLE season_bonuses (
   code       varchar NOT NULL,                        -- FB, LD, MA, MP, MD, or an admin's own
   label      varchar NOT NULL,
   award      varchar NOT NULL CHECK (award IN ('HIGHEST', 'LOWEST', 'MANUAL')),
-  stat       varchar CHECK (stat IN ('PERFORMANCE_SCORE', 'KILLS', 'DEATHS', 'ASSISTS',
-                            'ECON_RATING', 'FIRST_BLOODS', 'PLANTS', 'DEFUSES',
-                            'HEADSHOT_PCT', 'CLUTCHES')),   -- the stat compared; empty for MANUAL
+  stat       varchar CHECK (stat IN ('PERFORMANCE_SCORE', 'ACS', 'ADR', 'DAMAGE_DELTA', 'KAST_PCT',
+                            'KILLS', 'DEATHS', 'ASSISTS', 'ECON_RATING', 'FIRST_BLOODS',
+                            'PLANTS', 'DEFUSES', 'HEADSHOT_PCT', 'CLUTCHES')),   -- the stat compared; empty for MANUAL
   points     smallint NOT NULL,
   position   smallint NOT NULL,
   UNIQUE (season_id, code),
@@ -168,6 +169,10 @@ CREATE TABLE game_stats (
   game_id            integer NOT NULL REFERENCES games(id) ON DELETE CASCADE,
   player_id          uuid NOT NULL REFERENCES players(id),
   performance_score  integer,
+  acs                integer,                       -- average combat score
+  adr                numeric(5,1),                  -- average damage per round
+  damage_delta       numeric(5,1),                  -- average damage dealt minus taken, per round; can be negative
+  kast_pct           numeric(5,2),                  -- % of rounds with a kill, an assist, survived or traded
   kills              smallint,
   deaths             smallint,
   assists            smallint,

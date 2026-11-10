@@ -8,6 +8,10 @@ import java.math.BigDecimal;
  */
 public record StatLine(
         Integer performanceScore,
+        Integer acs,
+        BigDecimal adr,
+        BigDecimal damageDelta,
+        BigDecimal kastPct,
         Integer kills,
         Integer deaths,
         Integer assists,

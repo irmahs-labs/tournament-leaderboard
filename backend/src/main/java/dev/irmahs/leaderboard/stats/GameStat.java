@@ -40,6 +40,17 @@ public class GameStat {
 
     private Integer performanceScore;
 
+    private Integer acs;
+
+    @Column(precision = 5, scale = 1)
+    private BigDecimal adr;
+
+    @Column(precision = 5, scale = 1)
+    private BigDecimal damageDelta;
+
+    @Column(precision = 5, scale = 2)
+    private BigDecimal kastPct;
+
     @JdbcTypeCode(SqlTypes.SMALLINT)
     private Integer kills;
 
@@ -82,6 +93,10 @@ public class GameStat {
         this.game = game;
         this.player = player;
         this.performanceScore = line.performanceScore();
+        this.acs = line.acs();
+        this.adr = line.adr();
+        this.damageDelta = line.damageDelta();
+        this.kastPct = line.kastPct();
         this.kills = line.kills();
         this.deaths = line.deaths();
         this.assists = line.assists();
@@ -113,6 +128,10 @@ public class GameStat {
     public StatLine getLine() {
         return new StatLine(
                 performanceScore,
+                acs,
+                adr,
+                damageDelta,
+                kastPct,
                 kills,
                 deaths,
                 assists,
