@@ -103,7 +103,14 @@ public class Season {
         this.endsOn = endsOn;
     }
 
+    /**
+     * @throws IllegalArgumentException when the rule counts a stat that can't count, such as a
+     *     percentage
+     */
     public void setStatRule(Stat stat, StatRule rule) {
+        if (rule.effect() != 0 && !stat.isCountable()) {
+            throw new IllegalArgumentException(stat + " can be shown but can't count towards points");
+        }
         statRules.put(stat, rule);
     }
 
