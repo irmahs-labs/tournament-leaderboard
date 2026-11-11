@@ -4,7 +4,7 @@
 #   export SUPABASE_DB_URL='postgresql://…'   # Supabase → Connect → Session pooler
 #   deploy/import/export.sh
 set -euo pipefail
-: "${SUPABASE_DB_URL:?Set SUPABASE_DB_URL to Supabase's session pooler connection string}"
+: "${SUPABASE_DB_URL:?Set SUPABASE_DB_URL to the Supabase session pooler connection string}"
 
 dir="$(cd "$(dirname "$0")" && pwd)"
 mkdir -p "$dir/data"
