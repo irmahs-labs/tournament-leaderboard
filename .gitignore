@@ -7,3 +7,6 @@ target/
 .angular/
 frontend/dist/
 .flattened-pom.xml
+
+# Supabase exports for deploy/import: real player data, never committed.
+deploy/import/data/
