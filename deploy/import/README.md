@@ -8,6 +8,7 @@ until the real run at cutover is routine.
 |---|---|
 | `export.sh`, `export.sql` | Reads the five Supabase tables into `data/*.csv`. Read-only. |
 | `import.sh`, `import.sql` | Loads `data/*.csv` into a database that already has the schema, in one transaction. |
+| `parity-check.py` | Compares the new API with the live site, season by season and match by match. |
 | `data/` | The exports. Real player data: ignored by git, never committed. |
 
 Both scripts run `psql` in a `postgres:17` container, so only Docker is needed.
@@ -39,6 +40,23 @@ it first empties `alsace-arena`'s tournament.
 If the export has rows the new schema would refuse (a player twice in one game, two games with
 the same number in a match, two players with the same Riot ID, a match without a season), it
 lists them all and imports nothing. Fix them in Supabase and export again.
+
+## 3. Check the totals against the live site
+
+With the new app running on the database you just imported into (`cd backend && ../mvnw
+spring-boot:run` serves it on port 8080):
+
+```bash
+deploy/import/parity-check.py --new http://localhost:8080
+```
+
+For every season, and for every match in `data/matches.csv`, it reads the table on the live
+site and the new API's answer, and compares each player's points, eight stats, five bonus
+counts and wins. The formula only uses whole numbers, so any difference is a bug. It lists
+them and exits with 1; with none, it prints "No differences."
+
+Export again first if scores were entered on the live site since the last export, or those
+games will show up as differences.
 
 ## What maps where
 
