@@ -70,8 +70,11 @@ typecheck in `frontend/`, Spotless and a compile in `backend/`. In cloud session
                                      # integration tests (*IT, Testcontainers; skipped without Docker)
 ./mvnw install -DskipTests           # once, before running the backend alone
 cd backend && ../mvnw spring-boot:run   # API on :8080; starts compose.yaml's Postgres (needs Docker)
-cd frontend && npm start             # Angular on :4200, proxies /api and /actuator to :8080
+cd frontend && npm start             # Angular on :4200, proxies /api, /actuator and sign-in to :8080
 ```
+
+Signing in locally needs the dev Google client in `backend/local.yml` (ignored by git): copy
+`backend/local.example.yml`. Without it the backend doesn't start.
 
 CI (`.github/workflows/ci.yml`) runs `./mvnw verify` on pull requests and on pushes to `main`,
 `dev` and `migration`, then SonarQube Cloud once the `SONAR_TOKEN` secret exists. The version comes from

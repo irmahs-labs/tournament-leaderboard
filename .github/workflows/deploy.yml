@@ -33,12 +33,21 @@ jobs:
           # The admin (owner) password and the app's own password; see deploy/README.md.
           POSTGRES_PASSWORD: ${{ secrets.TOURNAMENT_LEADERBOARD_ADMIN_POSTGRES_PASSWORD }}
           APP_DB_PASSWORD: ${{ secrets.TOURNAMENT_LEADERBOARD_POSTGRES_PASSWORD }}
+          # The production Google client.
+          GOOGLE_CLIENT_ID: ${{ secrets.TOURNAMENT_LEADERBOARD_GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.TOURNAMENT_LEADERBOARD_GOOGLE_CLIENT_SECRET }}
+          # Repository variables, not secrets: emails, kept out of the code.
+          PLATFORM_ADMINS: ${{ vars.TOURNAMENT_LEADERBOARD_PLATFORM_ADMINS }}
+          INITIAL_MEMBERS: ${{ vars.TOURNAMENT_LEADERBOARD_INITIAL_MEMBERS }}
         run: |
           [ -n "$POSTGRES_PASSWORD" ] || { echo "Secret TOURNAMENT_LEADERBOARD_ADMIN_POSTGRES_PASSWORD is not set"; exit 1; }
           [ -n "$APP_DB_PASSWORD" ] || { echo "Secret TOURNAMENT_LEADERBOARD_POSTGRES_PASSWORD is not set"; exit 1; }
+          [ -n "$GOOGLE_CLIENT_ID" ] || { echo "Secret TOURNAMENT_LEADERBOARD_GOOGLE_CLIENT_ID is not set"; exit 1; }
+          [ -n "$GOOGLE_CLIENT_SECRET" ] || { echo "Secret TOURNAMENT_LEADERBOARD_GOOGLE_CLIENT_SECRET is not set"; exit 1; }
           # .env is sent over stdin so the secrets never appear in a command line.
           # Deploys exactly the commit the run was started on.
-          printf 'POSTGRES_PASSWORD=%s\nAPP_DB_PASSWORD=%s\n' "$POSTGRES_PASSWORD" "$APP_DB_PASSWORD" |
+          printf 'POSTGRES_PASSWORD=%s\nAPP_DB_PASSWORD=%s\nGOOGLE_CLIENT_ID=%s\nGOOGLE_CLIENT_SECRET=%s\nPLATFORM_ADMINS=%s\nINITIAL_MEMBERS=%s\n' \
+            "$POSTGRES_PASSWORD" "$APP_DB_PASSWORD" "$GOOGLE_CLIENT_ID" "$GOOGLE_CLIENT_SECRET" "$PLATFORM_ADMINS" "$INITIAL_MEMBERS" |
           ssh deploy@${{ secrets.DEPLOY_HOST }} 'set -e
             cd /srv/${{ github.event.repository.name }}
             [ -d .git ] || git clone https://github.com/${{ github.repository }}.git .

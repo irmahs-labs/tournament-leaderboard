@@ -36,6 +36,19 @@ the GitHub secret **and** run `ALTER ROLE … PASSWORD '…'` in the database.
      Flyway only
    - `TOURNAMENT_LEADERBOARD_POSTGRES_PASSWORD`: the app's own user, `leaderboard_app`
 
+   - `TOURNAMENT_LEADERBOARD_GOOGLE_CLIENT_ID` and `TOURNAMENT_LEADERBOARD_GOOGLE_CLIENT_SECRET`:
+     the **production** Google client (Google Cloud → APIs & Services → Credentials, a web
+     application with the redirect URI
+     `https://tournament-leaderboard.irmahs.dev/login/oauth2/code/google`)
+
+   And two **variables** (the Variables tab next to Secrets), since they're emails rather than
+   secrets, kept out of the code:
+   - `TOURNAMENT_LEADERBOARD_PLATFORM_ADMINS`: the platform admins' Google emails, separated by
+     commas
+   - `TOURNAMENT_LEADERBOARD_INITIAL_MEMBERS`: each organisation's first members, as
+     `slug:OWNER:email` or `slug:ADMIN:email`, separated by commas. They're added when they first
+     sign in; an organisation has one owner at most.
+
    `DEPLOY_SSH_KEY`, `DEPLOY_KNOWN_HOSTS` and `DEPLOY_HOST` come from the organization.
 2. **DNS** (Cloudflare): `A` and `AAAA` for `tournament-leaderboard.irmahs.dev`, proxied, like
    the other apps.

@@ -1,6 +1,18 @@
 spring:
   application:
     name: tournament-leaderboard
+  config:
+    # Local development only: the dev Google client, from local.example.yml. Ignored by git.
+    import: optional:file:./local.yml
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            # The app's own Google client: dev in local.yml, prod from the deploy's .env.
+            client-id: ${GOOGLE_CLIENT_ID:}
+            client-secret: ${GOOGLE_CLIENT_SECRET:}
+            scope: openid, email, profile
   threads:
     virtual:
       enabled: true
@@ -17,6 +29,14 @@ spring:
 server:
   # Behind Caddy: build redirect URLs (Google sign-in) with https, not http.
   forward-headers-strategy: framework
+
+leaderboard:
+  access:
+    # Google emails, separated by commas. A platform admin can suspend any organisation.
+    platform-admins: ${PLATFORM_ADMINS:}
+    # slug:OWNER:email or slug:ADMIN:email, separated by commas: made a member of that
+    # organisation when they sign in. How the first admins of an organisation are made.
+    initial-members: ${INITIAL_MEMBERS:}
 
 management:
   endpoints:
