@@ -4,6 +4,10 @@ spring:
   threads:
     virtual:
       enabled: true
+  mvc:
+    problemdetails:
+      # Errors are JSON problem details (RFC 9457): { "status": 404, "detail": "…" }
+      enabled: true
   jpa:
     open-in-view: false
     hibernate:
