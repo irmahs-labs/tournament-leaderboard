@@ -1,5 +1,6 @@
 package dev.irmahs.leaderboard.organizations;
 
+import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,14 +17,18 @@ public class OrganizationService {
         this.organizations = organizations;
     }
 
+    /** The organisation with this slug, unless there's none or it's suspended. */
+    public Optional<Organization> findActive(String slug) {
+        return organizations.findBySlugAndStatus(slug, OrganizationStatus.ACTIVE);
+    }
+
     /**
      * The organisation with this slug. A suspended organisation is treated as if it didn't exist.
      *
      * @throws ResponseStatusException 404 when there's no such active organisation
      */
     public Organization requireActive(String slug) {
-        return organizations
-                .findBySlugAndStatus(slug, OrganizationStatus.ACTIVE)
+        return findActive(slug)
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "There's no organisation called " + slug));
     }

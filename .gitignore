@@ -10,3 +10,6 @@ frontend/dist/
 
 # Supabase exports for deploy/import: real player data, never committed.
 deploy/import/data/
+
+# The dev Google client, for signing in locally; see backend/local.example.yml.
+backend/local.yml

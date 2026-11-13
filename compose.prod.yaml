@@ -1,5 +1,5 @@
 # Production, on the shared irmahs.dev server in /srv/tournament-leaderboard. The deploy workflow
-# writes .env (the two passwords) and runs it; the shared proxy (irmahs-labs/proxy) routes
+# writes .env (passwords, the Google client, the admins' emails) and runs it; the shared proxy (irmahs-labs/proxy) routes
 # tournament-leaderboard.irmahs.dev to the app. See deploy/README.md.
 services:
   db:
@@ -33,6 +33,15 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${APP_DB_PASSWORD:?set in .env}
       SPRING_FLYWAY_USER: leaderboard_owner
       SPRING_FLYWAY_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+      # The production Google client; see deploy/README.md.
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?set in .env}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:?set in .env}
+      # Emails, so they're kept out of the repository: platform admins, and each organisation's
+      # first members (slug:OWNER:email or slug:ADMIN:email), separated by commas.
+      PLATFORM_ADMINS: ${PLATFORM_ADMINS:-}
+      INITIAL_MEMBERS: ${INITIAL_MEMBERS:-}
+      # Caddy serves HTTPS, so the session cookie is only ever sent over it.
+      SERVER_SERVLET_SESSION_COOKIE_SECURE: "true"
       # The JVM sizes its heap from the container limit below; tune both here, no rebuild.
       JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=75
     mem_limit: 1g
