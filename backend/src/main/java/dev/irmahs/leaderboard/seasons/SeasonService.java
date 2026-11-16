@@ -47,6 +47,7 @@ public class SeasonService {
     public RulesView rules(String slug, int number) {
         Season season = require(slug, number);
         List<StatRuleView> stats = season.getStatRules().entrySet().stream()
+                .sorted(java.util.Map.Entry.comparingByKey())
                 .map(rule -> new StatRuleView(
                         rule.getKey(),
                         rule.getValue().recorded(),
