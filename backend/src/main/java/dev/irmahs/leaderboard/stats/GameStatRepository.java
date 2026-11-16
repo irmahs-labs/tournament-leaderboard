@@ -1,5 +1,6 @@
 package dev.irmahs.leaderboard.stats;
 
+import dev.irmahs.leaderboard.matches.Game;
 import dev.irmahs.leaderboard.seasons.Season;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,4 +18,13 @@ interface GameStatRepository extends JpaRepository<GameStat, Integer> {
             where match.season = :season
             """)
     List<GameStat> findBySeason(Season season);
+
+    /** Every line of one game, with its player and bonuses already loaded. */
+    @Query("""
+            select distinct line from GameStat line
+            join fetch line.player
+            left join fetch line.bonuses
+            where line.game = :game
+            """)
+    List<GameStat> findByGame(Game game);
 }

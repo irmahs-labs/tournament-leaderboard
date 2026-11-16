@@ -1,6 +1,8 @@
 package dev.irmahs.leaderboard.organizations;
 
+import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +17,12 @@ public class OrganizationService {
 
     OrganizationService(OrganizationRepository organizations) {
         this.organizations = organizations;
+    }
+
+    /** Notes that one of the organisation's games was just saved or cleared. */
+    @Transactional
+    public void recordActivity(UUID organizationId) {
+        organizations.findById(organizationId).ifPresent(organization -> organization.recordActivity(Instant.now()));
     }
 
     /** The organisation with this slug, unless there's none or it's suspended. */

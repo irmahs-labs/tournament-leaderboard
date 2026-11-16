@@ -47,6 +47,11 @@ public class Match {
         this.matchDate = matchDate;
     }
 
+    /** Moves the match to another day, or leaves it undated. */
+    public void reschedule(LocalDate matchDate) {
+        this.matchDate = matchDate;
+    }
+
     public Integer getId() {
         return id;
     }
