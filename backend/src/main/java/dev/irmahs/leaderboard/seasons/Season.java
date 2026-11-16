@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -112,6 +113,46 @@ public class Season {
             throw new IllegalArgumentException(stat + " can be shown but can't count towards points");
         }
         statRules.put(stat, rule);
+    }
+
+    /** Renames the season and changes its shape: dates, number of matches and games per match. */
+    public void edit(String name, LocalDate startsOn, LocalDate endsOn, int matchCount, GameRange games) {
+        this.name = name;
+        setDates(startsOn, endsOn);
+        this.matchCount = matchCount;
+        this.minGames = games.min();
+        this.maxGames = games.max();
+    }
+
+    /** Closes the season. Closing it again keeps the first time. */
+    public void finish(Instant at) {
+        if (finishedAt == null) {
+            finishedAt = at;
+        }
+    }
+
+    public void reopen() {
+        finishedAt = null;
+    }
+
+    /**
+     * The Record switches: the season asks for these stats in games entered from now on, and for
+     * no other. What each stat does to the points stays as it was.
+     */
+    public void recordOnly(Set<Stat> recorded) {
+        for (Stat stat : Stat.values()) {
+            StatRule rule = statRules.get(stat);
+            statRules.put(stat, new StatRule(recorded.contains(stat), rule == null ? 0 : rule.effect()));
+        }
+    }
+
+    /** Takes another season's stat rules and bonuses, for a new season with no games yet. */
+    public void copyRulesFrom(Season other) {
+        statRules.clear();
+        statRules.putAll(other.statRules);
+        bonuses.clear();
+        other.bonuses.forEach(bonus ->
+                addBonus(bonus.getCode(), bonus.getLabel(), bonus.getAward(), bonus.getStat(), bonus.getPoints()));
     }
 
     /** Adds a bonus at the end of the season's list. */

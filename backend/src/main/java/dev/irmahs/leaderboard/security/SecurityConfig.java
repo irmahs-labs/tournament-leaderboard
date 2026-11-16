@@ -33,7 +33,7 @@ class SecurityConfig {
     SecurityFilterChain security(HttpSecurity http, GoogleUserService googleUsers) throws Exception {
         http.authorizeHttpRequests(requests -> requests.requestMatchers("/api/orgs/*/admin/**")
                         .authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/version", "/api/orgs/**")
+                        .requestMatchers(HttpMethod.GET, "/api/version", "/api/ranks", "/api/orgs/**")
                         .permitAll()
                         .requestMatchers("/actuator/health/**", "/actuator/info")
                         .permitAll()
