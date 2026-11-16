@@ -60,6 +60,11 @@ public class Organization {
         this.tournamentName = tournamentName;
     }
 
+    /** Notes that a game was just saved or cleared; the home page features the most recent. */
+    void recordActivity(Instant when) {
+        this.lastActivityAt = when;
+    }
+
     public UUID getId() {
         return id;
     }

@@ -1,6 +1,7 @@
 package dev.irmahs.leaderboard.accounts;
 
 import dev.irmahs.leaderboard.accounts.AccessProperties.InitialMember;
+import dev.irmahs.leaderboard.members.MemberRole;
 import dev.irmahs.leaderboard.members.Membership;
 import dev.irmahs.leaderboard.members.OrganizationMember;
 import dev.irmahs.leaderboard.members.OrganizationMemberRepository;
@@ -72,6 +73,18 @@ public class AccountService {
             }
             members.save(OrganizationMember.admin(userId, organizationId));
         }
+    }
+
+    /** Whether the account with this Google id is an admin of the active organisation. */
+    @Transactional(readOnly = true)
+    public boolean isAdmin(String googleSub, String slug) {
+        return users.findByGoogleSub(googleSub)
+                .flatMap(user -> organizations
+                        .findActive(slug)
+                        .flatMap(organization ->
+                                members.findById(new OrganizationMember.Key(user.getId(), organization.getId()))))
+                .filter(member -> member.getRole() == MemberRole.ADMIN)
+                .isPresent();
     }
 
     /** The signed-in person, or nothing when their account no longer exists. */

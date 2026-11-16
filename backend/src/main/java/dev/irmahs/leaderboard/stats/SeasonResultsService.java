@@ -143,20 +143,7 @@ public class SeasonResultsService {
     }
 
     private GameLine gameLine(Season season, GameStat line) {
-        Map<Stat, BigDecimal> stats = new EnumMap<>(Stat.class);
-        for (Stat stat : Stat.values()) {
-            BigDecimal value = line.getLine().value(stat);
-            if (value != null) {
-                stats.put(stat, value);
-            }
-        }
-        return new GameLine(
-                line.getPlayer().getId(),
-                line.getPlayer().getRiotId(),
-                stats,
-                line.isWin(),
-                line.getBonuses().stream().map(SeasonBonus::getCode).sorted().toList(),
-                scoring.gamePoints(season, line.getLine(), line.getBonuses(), line.isWin()));
+        return GameLine.of(scoring, season, line);
     }
 
     /** The players of these lines, best first. Players level on points share a rank. */
@@ -269,12 +256,29 @@ public class SeasonResultsService {
      * @param bonuses the codes of the bonuses the player won in the game
      */
     public record GameLine(
-            UUID playerId,
-            String riotId,
-            Map<Stat, BigDecimal> stats,
-            boolean win,
-            List<String> bonuses,
-            long points) {}
+            UUID playerId, String riotId, Map<Stat, BigDecimal> stats, boolean win, List<String> bonuses, long points) {
+
+        /** A saved line, with its points under the season's rules. */
+        public static GameLine of(ScoringService scoring, Season season, GameStat line) {
+            Map<Stat, BigDecimal> stats = new EnumMap<>(Stat.class);
+            for (Stat stat : Stat.values()) {
+                BigDecimal value = line.getLine().value(stat);
+                if (value != null) {
+                    stats.put(stat, value);
+                }
+            }
+            return new GameLine(
+                    line.getPlayer().getId(),
+                    line.getPlayer().getRiotId(),
+                    stats,
+                    line.isWin(),
+                    line.getBonuses().stream()
+                            .map(SeasonBonus::getCode)
+                            .sorted()
+                            .toList(),
+                    scoring.gamePoints(season, line.getLine(), line.getBonuses(), line.isWin()));
+        }
+    }
 
     public record GameView(int gameNumber, List<GameLine> lines) {}
 
