@@ -204,3 +204,26 @@ a {
   color: var(--text);
   border: 1px solid var(--ghost-line);
 }
+
+/* A player's Valorant rank, in the rank's colour made readable for the theme (rankText). */
+.rank {
+  display: inline-block;
+  box-sizing: border-box;
+  padding: 3px 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--rank-dark, var(--text));
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .rank {
+    color: var(--rank-light, var(--text));
+  }
+}
+
+:root[data-theme="light"] .rank {
+  color: var(--rank-light, var(--text));
+}

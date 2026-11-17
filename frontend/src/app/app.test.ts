@@ -35,7 +35,10 @@ describe("the app's pages", () => {
     http.verify();
   });
 
-  /** Opens an address of the organisation, answering its `GET /api/orgs/{slug}`. */
+  /**
+   * Opens an address of the organisation, answering its `GET /api/orgs/{slug}`, and its seasons
+   * with none, so the leaderboard asks for nothing more.
+   */
   const open = async (url: string): Promise<HTMLElement> => {
     const harness = await RouterTestingHarness.create();
     const navigation = harness.navigateByUrl(url);
@@ -45,6 +48,10 @@ describe("the app's pages", () => {
       http.expectOne(`/api/orgs/${ALSACE.slug}`).flush(ALSACE);
     });
     await navigation;
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      http.expectOne(`/api/orgs/${ALSACE.slug}/seasons`).flush([]);
+    });
     harness.detectChanges();
 
     return rendered(harness);

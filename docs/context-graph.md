@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-17, with sign-in in the header (Phase 3, second pull request).
+Last updated: 2026-11-17, with the season leaderboard (Phase 3, third pull request).
 
 ## System
 
@@ -53,6 +53,7 @@ flowchart LR
     stats --> matches
     stats --> organizations
     stats --> players
+    stats --> ranks
     stats --> scoring
     stats --> seasons
     system
@@ -70,7 +71,7 @@ flowchart LR
 | `seasons` | `Season` (rules, bonuses, shape), `Stat` (`isCountable`), `StatRule`, `SeasonBonus`, `PlatformDefaults`, `SeasonService` (public), `SeasonAdminService` |
 | `matches` | `Match`, `Game` and their repositories |
 | `scoring` | `ScoringService` (the only place totals are computed), `BonusCalculator` (HIGHEST/LOWEST, ties all win) |
-| `stats` | `GameStat`, `StatLine`, `PlayerTally`, `SeasonResultsService` (public results), `ScoresService` (Enter scores) |
+| `stats` | `GameStat`, `StatLine`, `PlayerTally`, `SeasonResultsService` (public results; each standing carries the player's current rank), `ScoresService` (Enter scores) |
 | `system` | `/api/version`; `SpaController` forwards the Angular router's addresses (`/o/**`, `/not-found`, `/sign-in`) to `index.html` |
 
 ## API
@@ -149,15 +150,20 @@ flowchart TD
     routes -->|"/o/:slug, organizationResolver"| shell[OrgShell<br/>accent, language, title]
     routes -->|"/not-found, **"| nf[NotFoundPage]
     routes -->|"/sign-in"| si[SignInPage<br/>Google, your organisations, sign out]
-    shell --> header[SiteHeader<br/>logo, nav, EN/FR, theme, Sign in or account]
+    shell --> header[SiteHeader<br/>logo, nav, season, EN/FR, theme, Sign in or account]
     shell --> footer[SiteFooter<br/>org name, credit, GitHub, contact]
+    shell -->|"organisation, ?season="| current[CurrentSeason]
+    current -->|GET| seasonsApi["…/seasons"]
+    header -->|season picker| current
     nf --> header
     nf --> footer
     si --> header
     si -->|"leaves for"| google["/oauth2/authorization/google"]
     google -->|"back to /sign-in, then the page sign-in began on"| si
     header --> session[SessionService] -->|GET /api/me, POST /api/logout| meApi["/api/me"]
-    shell --> lb["LeaderboardPage (placeholder)"]
+    shell --> lb["LeaderboardPage<br/>top three, tiles, standings, how points are counted"]
+    lb --> current
+    lb -->|GET| lbApi["…/seasons/{n}/leaderboard, /summary, /rules"]
     shell --> mt["MatchesPage (placeholder)"]
     shell -.->|"/o/:slug/matches/:season/:match"| md[Match detail]
     shell -.->|Phase 4| adm[Enter scores, Players, Seasons, Record switches]
@@ -167,17 +173,20 @@ flowchart TD
 
 | Part | Holds |
 |---|---|
-| `core/colour.ts` | WCAG contrast and mixing: the text colour on the accent and a readable accent text per theme |
+| `core/colour.ts` | WCAG contrast and mixing: the text colour on the accent, a readable accent text per theme, and readable rank colours (`rankText`) |
 | `core/theme.ts` | `ThemeService`: dark or light (system setting until the visitor picks; remembered), sets the accent CSS variables |
 | `core/language.ts` | `LanguageService`: EN or FR through Transloco; the visitor's pick wins over the organisation's default |
 | `core/session.ts` | `SessionService`: who is signed in (`/api/me`), sign-in through Google with a safe return address, sign-out |
+| `core/seasons.ts` | The API's season types; `CurrentSeason`: the organisation on screen, its seasons (newest first) and the one picked (`?season=`, the most recent otherwise) |
+| `core/stats.ts` | Results-table helpers: stat columns (K, D and A folded into KDA), decimals, number formatting, the points formula, Riot ID name and tag |
 | `core/organization.ts` | `OrganizationService`, `organizationResolver` (an unknown organisation shows Not found at the same address) |
 | `layout/` | `OrgShell`, `SiteHeader`, `SiteFooter`, page layout |
-| `pages/` | `NotFoundPage`, `SignInPage`; placeholders for the leaderboard and matches |
-| `styles.css` | The template's tokens for both themes, Barlow fonts (bundled from `@fontsource`), shared classes |
+| `pages/` | `LeaderboardPage`, `NotFoundPage`, `SignInPage`; a placeholder for matches |
+| `styles.css` | The template's tokens for both themes, Barlow fonts (bundled from `@fontsource`), shared classes (`.panel`, `.pill`, `.rank`, buttons) |
 | `public/i18n/` | `en.json`, `fr.json` |
 
-Not in the shell yet: the online count (no backend), social links (branding API, phase 7).
+Not in the shell yet: the online count (no backend), social links (branding API, phase 7). Not on the
+leaderboard yet: Export CSV and Export poster (phase 11).
 
 ## Phases
 

@@ -8,10 +8,11 @@ import org.springframework.data.jpa.repository.Query;
 
 interface GameStatRepository extends JpaRepository<GameStat, Integer> {
 
-    /** Every line of a season, with its player, game, match and bonuses already loaded. */
+    /** Every line of a season, with its player and their rank, game, match and bonuses already loaded. */
     @Query("""
             select distinct line from GameStat line
-            join fetch line.player
+            join fetch line.player player
+            left join fetch player.currentRank
             join fetch line.game game
             join fetch game.match match
             left join fetch line.bonuses

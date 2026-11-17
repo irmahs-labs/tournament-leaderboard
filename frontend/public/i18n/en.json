@@ -10,10 +10,58 @@
     "toDark": "Switch to dark theme",
     "toLight": "Switch to light theme",
     "signIn": "Sign in",
-    "account": "Your account: {{name}}"
+    "account": "Your account: {{name}}",
+    "season": "Season"
   },
   "leaderboard": {
-    "title": "Season leaderboard"
+    "title": "Season leaderboard",
+    "lede": "Points from every game played so far this season.",
+    "played": "{{played}} of {{planned}} matches played",
+    "loading": "Loading the season…",
+    "failed": "The leaderboard couldn't be loaded. Try again in a moment.",
+    "noSeason": "No season has started yet.",
+    "noGames": "No game has been played this season yet.",
+    "place": {
+      "0": "Season MVP",
+      "1": "Second",
+      "2": "Third"
+    },
+    "points": "{{points}} pts",
+    "kills": {
+      "one": "{{kills}} kill",
+      "other": "{{kills}} kills"
+    },
+    "wins": {
+      "one": "{{wins}} win",
+      "other": "{{wins}} wins"
+    },
+    "tiles": {
+      "matches": "Matches played",
+      "matchesOf": "of {{planned}} this season",
+      "games": "Games",
+      "perMatch": "{{games}} per match",
+      "players": "Players",
+      "next": "Next match",
+      "match": "Match {{match}}",
+      "none": "None planned",
+      "finished": "Season finished"
+    },
+    "standings": "Standings",
+    "sorted": "Sorted by total points",
+    "columns": {
+      "rank": "Rank",
+      "player": "Player",
+      "games": "Games",
+      "wins": "Wins",
+      "total": "Total",
+      "avg": "Avg {{stat}}",
+      "average": "{{stat}}, average per game"
+    },
+    "how": "How points are counted",
+    "perBonus": "{{points}} per bonus",
+    "perWin": "{{points}} per win",
+    "bonuses": "Bonuses:",
+    "setBy": "Set by {{org}} admins for {{season}}."
   },
   "matches": {
     "title": "Matches"
@@ -45,5 +93,41 @@
     "open": "Open",
     "noOrganisations": "You don't belong to any organisation yet.",
     "separate": "Each organisation keeps its own players, scores and admins. Being an admin in one gives you no access to another."
+  },
+  "stats": {
+    "short": {
+      "PERFORMANCE_SCORE": "Perf.",
+      "ACS": "ACS",
+      "ADR": "ADR",
+      "DAMAGE_DELTA": "DD",
+      "KAST_PCT": "KAST",
+      "KDA": "KDA",
+      "KILLS": "K",
+      "DEATHS": "D",
+      "ASSISTS": "A",
+      "ECON_RATING": "Eco",
+      "FIRST_BLOODS": "FB",
+      "PLANTS": "Plants",
+      "DEFUSES": "Defuses",
+      "HEADSHOT_PCT": "HS%",
+      "CLUTCHES": "Clutches"
+    },
+    "long": {
+      "PERFORMANCE_SCORE": "Performance",
+      "ACS": "Average combat score",
+      "ADR": "Average damage per round",
+      "DAMAGE_DELTA": "Damage delta",
+      "KAST_PCT": "KAST",
+      "KDA": "Kills plus assists, per death",
+      "KILLS": "Kills",
+      "DEATHS": "Deaths",
+      "ASSISTS": "Assists",
+      "ECON_RATING": "Economy rating",
+      "FIRST_BLOODS": "First bloods",
+      "PLANTS": "Plants",
+      "DEFUSES": "Defuses",
+      "HEADSHOT_PCT": "Headshot percentage",
+      "CLUTCHES": "Clutches"
+    }
   }
 }

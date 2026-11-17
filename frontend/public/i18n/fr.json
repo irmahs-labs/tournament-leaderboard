@@ -10,10 +10,58 @@
     "toDark": "Passer au thème sombre",
     "toLight": "Passer au thème clair",
     "signIn": "Se connecter",
-    "account": "Votre compte : {{name}}"
+    "account": "Votre compte : {{name}}",
+    "season": "Saison"
   },
   "leaderboard": {
-    "title": "Classement de la saison"
+    "title": "Classement de la saison",
+    "lede": "Les points de chaque partie jouée jusqu'ici cette saison.",
+    "played": "{{played}} matchs joués sur {{planned}}",
+    "loading": "Chargement de la saison…",
+    "failed": "Le classement n'a pas pu être chargé. Réessayez dans un instant.",
+    "noSeason": "Aucune saison n'a encore commencé.",
+    "noGames": "Aucune partie n'a encore été jouée cette saison.",
+    "place": {
+      "0": "MVP de la saison",
+      "1": "Deuxième",
+      "2": "Troisième"
+    },
+    "points": "{{points}} pts",
+    "kills": {
+      "one": "{{kills}} élimination",
+      "other": "{{kills}} éliminations"
+    },
+    "wins": {
+      "one": "{{wins}} victoire",
+      "other": "{{wins}} victoires"
+    },
+    "tiles": {
+      "matches": "Matchs joués",
+      "matchesOf": "sur {{planned}} cette saison",
+      "games": "Parties",
+      "perMatch": "{{games}} par match",
+      "players": "Joueurs",
+      "next": "Prochain match",
+      "match": "Match {{match}}",
+      "none": "Aucun de prévu",
+      "finished": "Saison terminée"
+    },
+    "standings": "Classement",
+    "sorted": "Trié par total de points",
+    "columns": {
+      "rank": "Rang",
+      "player": "Joueur",
+      "games": "Parties",
+      "wins": "Victoires",
+      "total": "Total",
+      "avg": "Moy. {{stat}}",
+      "average": "{{stat}}, moyenne par partie"
+    },
+    "how": "Comment les points sont comptés",
+    "perBonus": "{{points}} par bonus",
+    "perWin": "{{points}} par victoire",
+    "bonuses": "Bonus :",
+    "setBy": "Règles de {{season}}, fixées par les admins de l'organisation {{org}}."
   },
   "matches": {
     "title": "Matchs"
@@ -45,5 +93,41 @@
     "open": "Ouvrir",
     "noOrganisations": "Vous ne faites encore partie d'aucune organisation.",
     "separate": "Chaque organisation a ses propres joueurs, scores et admins. Être admin dans l'une ne donne aucun accès à une autre."
+  },
+  "stats": {
+    "short": {
+      "PERFORMANCE_SCORE": "Perf.",
+      "ACS": "ACS",
+      "ADR": "ADR",
+      "DAMAGE_DELTA": "DD",
+      "KAST_PCT": "KAST",
+      "KDA": "KDA",
+      "KILLS": "K",
+      "DEATHS": "D",
+      "ASSISTS": "A",
+      "ECON_RATING": "Éco",
+      "FIRST_BLOODS": "FB",
+      "PLANTS": "Poses",
+      "DEFUSES": "Désam.",
+      "HEADSHOT_PCT": "HS%",
+      "CLUTCHES": "Clutchs"
+    },
+    "long": {
+      "PERFORMANCE_SCORE": "Performance",
+      "ACS": "Score de combat moyen",
+      "ADR": "Dégâts moyens par round",
+      "DAMAGE_DELTA": "Écart de dégâts",
+      "KAST_PCT": "KAST",
+      "KDA": "Éliminations plus assistances, par mort",
+      "KILLS": "Éliminations",
+      "DEATHS": "Morts",
+      "ASSISTS": "Assistances",
+      "ECON_RATING": "Note d'économie",
+      "FIRST_BLOODS": "Premiers sangs",
+      "PLANTS": "Spikes posés",
+      "DEFUSES": "Désamorçages",
+      "HEADSHOT_PCT": "Pourcentage de tirs à la tête",
+      "CLUTCHES": "Clutchs"
+    }
   }
 }

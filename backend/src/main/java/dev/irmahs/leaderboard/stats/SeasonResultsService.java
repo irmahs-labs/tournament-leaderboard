@@ -3,6 +3,7 @@ package dev.irmahs.leaderboard.stats;
 import dev.irmahs.leaderboard.matches.Match;
 import dev.irmahs.leaderboard.matches.MatchRepository;
 import dev.irmahs.leaderboard.players.Player;
+import dev.irmahs.leaderboard.ranks.Rank;
 import dev.irmahs.leaderboard.scoring.ScoringService;
 import dev.irmahs.leaderboard.seasons.BonusView;
 import dev.irmahs.leaderboard.seasons.Season;
@@ -159,6 +160,7 @@ public class SeasonResultsService {
                         0,
                         tally.player().getId(),
                         tally.player().getRiotId(),
+                        RankRef.of(tally.player().getCurrentRank()),
                         tally.games(),
                         tally.wins(),
                         scoring.points(season, tally.totals(), tally.bonusPoints(), tally.wins()),
@@ -207,6 +209,7 @@ public class SeasonResultsService {
     /**
      * One player's row in a leaderboard or a match's combined table.
      *
+     * @param currentRank the player's Valorant rank today; nothing when nobody set it
      * @param totals the countable stats added up
      * @param averages each stat per game that recorded it
      * @param kda (kills + assists) / deaths, counting no deaths as one
@@ -216,6 +219,7 @@ public class SeasonResultsService {
             int rank,
             UUID playerId,
             String riotId,
+            RankRef currentRank,
             int games,
             int wins,
             long points,
@@ -225,7 +229,20 @@ public class SeasonResultsService {
             Map<String, Integer> bonuses) {
 
         Standing ranked(int newRank) {
-            return new Standing(newRank, playerId, riotId, games, wins, points, totals, averages, kda, bonuses);
+            return new Standing(
+                    newRank, playerId, riotId, currentRank, games, wins, points, totals, averages, kda, bonuses);
+        }
+    }
+
+    /**
+     * A rank as the public pages show it.
+     *
+     * @param color the rank's colour, as #RRGGBB; nothing when it has none
+     */
+    public record RankRef(String name, String color) {
+
+        static RankRef of(Rank rank) {
+            return rank == null ? null : new RankRef(rank.getRankName(), rank.getColor());
         }
     }
 

@@ -6,6 +6,7 @@ import dev.irmahs.leaderboard.matches.Game;
 import dev.irmahs.leaderboard.matches.Match;
 import dev.irmahs.leaderboard.organizations.Organization;
 import dev.irmahs.leaderboard.players.Player;
+import dev.irmahs.leaderboard.ranks.Rank;
 import dev.irmahs.leaderboard.seasons.BonusAward;
 import dev.irmahs.leaderboard.seasons.Season;
 import dev.irmahs.leaderboard.seasons.Season.GameRange;
@@ -73,7 +74,8 @@ class PublicApiIT {
         tx.executeWithoutResult(status -> {
             UUID alsace = save(new Organization("alsace-arena", "Alsace Arena", "Spike Tournament"))
                     .getId();
-            Player kestrel = save(new Player(alsace, "Kestrel#EUW", null, null));
+            Rank radiant = save(new Rank("Radiant", 27, "#D6C07E"));
+            Player kestrel = save(new Player(alsace, "Kestrel#EUW", null, radiant));
             Player wren = save(new Player(alsace, "Wren#EUW", null, null));
             Player heron = save(new Player(alsace, "Heron#EUW", null, null));
             kestrelId = kestrel.getId();
@@ -168,6 +170,7 @@ class PublicApiIT {
                              "FIRST_BLOODS", "PLANTS", "DEFUSES"],
                  "standings": [
                    {"rank": 1, "riotId": "Kestrel#EUW", "games": 2, "wins": 1, "points": 669,
+                    "currentRank": {"name": "Radiant", "color": "#D6C07E"},
                     "totals": {"PERFORMANCE_SCORE": 440, "KILLS": 33, "DEATHS": 26, "ASSISTS": 8,
                                "ECON_RATING": 115, "FIRST_BLOODS": 5, "PLANTS": 3, "DEFUSES": 1},
                     "kda": 1.58, "bonuses": {"FB": 2, "MP": 2}},
@@ -175,6 +178,10 @@ class PublicApiIT {
                     "bonuses": {"LD": 1, "MA": 1, "MD": 1}},
                    {"rank": 3, "riotId": "Heron#EUW", "games": 1, "wins": 1, "points": 261}
                  ]}""");
+        assertThat(leaderboard)
+                .bodyJson()
+                .extractingPath("$.standings[1].currentRank")
+                .isNull();
         // An average is per game that recorded the stat: ADR was recorded in one of Kestrel's two games.
         assertThat(leaderboard)
                 .bodyJson()
