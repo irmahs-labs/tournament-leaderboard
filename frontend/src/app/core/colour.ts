@@ -70,3 +70,17 @@ export const readableAccent = (
 
   return colour;
 };
+
+/**
+ * A rank's colour made readable as text on the pills' surface, in each theme: the same mixing as
+ * the accent, against `--surface-2`.
+ */
+export const rankText = (
+  colour: string | null | undefined
+): { dark: string; light: string } | null =>
+  colour && /^#[\da-f]{6}$/iu.test(colour)
+    ? {
+        dark: readableAccent(colour, "#1e2733", "#ece8e1"),
+        light: readableAccent(colour, "#e2ddd3", "#0f141b"),
+      }
+    : null;

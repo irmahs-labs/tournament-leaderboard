@@ -101,6 +101,10 @@ describe("the sign-in page", () => {
     await vi.waitFor(() => {
       http.expectOne(`/api/orgs/${ALSACE.slug}`).flush(ALSACE);
     });
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      http.expectOne(`/api/orgs/${ALSACE.slug}/seasons`).flush([]);
+    });
     await harness.fixture.whenStable();
 
     expect(TestBed.inject(Router).url).toBe("/o/alsace-arena/matches");

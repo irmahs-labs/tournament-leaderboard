@@ -28,6 +28,23 @@
     <span class="nav"></span>
     }
     <div class="tools">
+      @if (organization() && current.seasons().length > 0) {
+      <select
+        #picker
+        class="tool season"
+        [attr.aria-label]="t('header.season')"
+        (change)="pickSeason(picker.value)"
+      >
+        @for (season of current.seasons(); track season.number) {
+        <option
+          [value]="season.number"
+          [selected]="season.number === current.season()?.number"
+        >
+          {{ season.name }}
+        </option>
+        }
+      </select>
+      }
       <div
         class="languages"
         role="group"

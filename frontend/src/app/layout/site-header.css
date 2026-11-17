@@ -159,3 +159,15 @@
     flex-basis: 100%;
   }
 }
+
+.season {
+  padding: 0 10px;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 0;
+}
+
+.season option {
+  background: var(--nav-bg);
+  color: var(--nav-text);
+}

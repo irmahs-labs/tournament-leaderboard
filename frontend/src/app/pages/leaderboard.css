@@ -1,0 +1,262 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.intro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.heading {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 760px;
+}
+
+.lede {
+  margin: 0;
+  font-size: 17px;
+}
+
+.played {
+  padding: 8px 14px;
+  font-size: 14px;
+}
+
+.notice {
+  margin: 0;
+  padding: 24px;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: var(--label-track);
+}
+
+.podium {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: 20px;
+}
+
+.podium-card {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.podium-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.podium-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 40px;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  overflow-wrap: anywhere;
+}
+
+.podium-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.mvp {
+  padding: 28px;
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.mvp .label,
+.mvp .podium-stats {
+  color: inherit;
+  font-weight: 600;
+}
+
+.mvp .label {
+  font-weight: 700;
+}
+
+.mvp .podium-name {
+  font-size: clamp(44px, 6vw, 64px);
+  line-height: 0.95;
+}
+
+.mvp .podium-stats {
+  font-size: 15px;
+  gap: 6px 22px;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
+  gap: 20px;
+}
+
+.tile {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tile-value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 40px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.tile-note {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.block {
+  padding: 22px;
+}
+
+.block-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 18px;
+}
+
+.heading-2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.spaced {
+  margin-bottom: 18px;
+}
+
+.small {
+  font-size: 14px;
+}
+
+.scroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.table th {
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: var(--label-track);
+  border-bottom: 1px solid var(--head-line);
+  white-space: nowrap;
+}
+
+.table abbr {
+  text-decoration: none;
+}
+
+.table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--row-line);
+  white-space: nowrap;
+}
+
+.table tbody tr:nth-child(even) {
+  background: var(--zebra);
+}
+
+.table tbody tr.leader {
+  background: var(--accent-soft);
+}
+
+.table .num {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.position,
+.total {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.position {
+  width: 40px;
+}
+
+.total {
+  color: var(--accent-text);
+}
+
+.fixed {
+  width: 116px;
+  text-align: center;
+  padding: 3px 6px;
+}
+
+.player {
+  font-size: 16px;
+}
+
+.tag {
+  margin-left: 2px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.formula {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.term {
+  font-size: 14px;
+}
+
+.term.win {
+  background: var(--accent-soft);
+}
+
+.note {
+  margin: 14px 0 0;
+}

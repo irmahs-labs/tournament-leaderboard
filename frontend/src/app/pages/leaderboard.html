@@ -1,0 +1,193 @@
+<ng-container *transloco="let t">
+  <div class="intro">
+    <div class="heading">
+      @if (current.season(); as season) {
+      <span class="eyebrow"
+        >{{ season.name }}@if (current.organization()?.tournamentName; as
+        tournament) { · {{ tournament }} }</span
+      >
+      }
+      <h1 class="display">{{ t("leaderboard.title") }}</h1>
+      <p class="lede muted">{{ t("leaderboard.lede") }}</p>
+    </div>
+    @if (summary.hasValue()) {
+    <span class="pill played"
+      >{{ t("leaderboard.played", { played: summary.value().matchesPlayed,
+      planned: summary.value().matchCount }) }}</span
+    >
+    }
+  </div>
+
+  @if (current.failed() || board.error()) {
+  <p class="panel notice" role="alert">{{ t("leaderboard.failed") }}</p>
+  } @else if (current.settled() && !current.season()) {
+  <p class="panel notice">{{ t("leaderboard.noSeason") }}</p>
+  } @else if (board.hasValue()) { @if (podium().length > 0) {
+  <div class="podium">
+    @for (standing of podium(); track standing.playerId; let place = $index) {
+    <section
+      class="panel podium-card"
+      [class.mvp]="place === 0"
+      [attr.aria-label]="t('leaderboard.place.' + place)"
+    >
+      <div class="podium-top">
+        <span class="label">{{ t("leaderboard.place." + place) }}</span>
+        @if (standing.currentRank; as rank) {
+        <span class="rank" [style]="rankStyle(rank)">{{ rank.name }}</span>
+        }
+      </div>
+      <strong class="podium-name"
+        >{{ splitRiotId(standing.riotId).name }}</strong
+      >
+      <div class="podium-stats">
+        <span
+          >{{ t("leaderboard.points", { points: number(standing.points) })
+          }}</span
+        >
+        @if (standing.totals.KILLS !== undefined) {
+        <span
+          >{{ t(plural("leaderboard.kills", standing.totals.KILLS), { kills:
+          number(standing.totals.KILLS) }) }}</span
+        >
+        }
+        <span
+          >{{ t(plural("leaderboard.wins", standing.wins), { wins: standing.wins
+          }) }}</span
+        >
+      </div>
+    </section>
+    }
+  </div>
+  } @if (summary.hasValue()) {
+  <div class="tiles">
+    <section class="panel tile">
+      <span class="label">{{ t("leaderboard.tiles.matches") }}</span>
+      <strong class="tile-value">{{ summary.value().matchesPlayed }}</strong>
+      <span class="tile-note"
+        >{{ t("leaderboard.tiles.matchesOf", { planned:
+        summary.value().matchCount }) }}</span
+      >
+    </section>
+    <section class="panel tile">
+      <span class="label">{{ t("leaderboard.tiles.games") }}</span>
+      <strong class="tile-value">{{ summary.value().gamesPlayed }}</strong>
+      @if (summary.value().matchesPlayed > 0) {
+      <span class="tile-note"
+        >{{ t("leaderboard.tiles.perMatch", { games:
+        number(summary.value().gamesPlayed / summary.value().matchesPlayed, 0)
+        }) }}</span
+      >
+      }
+    </section>
+    <section class="panel tile">
+      <span class="label">{{ t("leaderboard.tiles.players") }}</span>
+      <strong class="tile-value">{{ summary.value().players }}</strong>
+    </section>
+    <section class="panel tile">
+      <span class="label">{{ t("leaderboard.tiles.next") }}</span>
+      @if (summary.value().nextMatch; as next) {
+      <strong class="tile-value">{{ day(next.matchDate) }}</strong>
+      <span class="tile-note"
+        >{{ t("leaderboard.tiles.match", { match: next.matchNumber }) }}</span
+      >
+      } @else {
+      <strong class="tile-value">–</strong>
+      <span class="tile-note"
+        >{{ t(current.season()?.finished ? "leaderboard.tiles.finished" :
+        "leaderboard.tiles.none") }}</span
+      >
+      }
+    </section>
+  </div>
+  }
+  <section class="panel block" [attr.aria-label]="t('leaderboard.standings')">
+    <div class="block-head">
+      <h2 class="heading-2">{{ t("leaderboard.standings") }}</h2>
+      <span class="muted small">{{ t("leaderboard.sorted") }}</span>
+    </div>
+    @if (standings().length === 0) {
+    <p class="muted">{{ t("leaderboard.noGames") }}</p>
+    } @else {
+    <div class="scroll">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">{{ t("leaderboard.columns.rank") }}</th>
+            <th scope="col">{{ t("leaderboard.columns.player") }}</th>
+            <th scope="col" class="num">
+              {{ t("leaderboard.columns.games") }}
+            </th>
+            @for (column of columns(); track column) {
+            <th scope="col" class="num">
+              <abbr
+                [attr.title]="t('leaderboard.columns.average', { stat: t('stats.long.' + column) })"
+                >{{ t("leaderboard.columns.avg", { stat: t("stats.short." +
+                column) }) }}</abbr
+              >
+            </th>
+            }
+            <th scope="col" class="num">{{ t("leaderboard.columns.wins") }}</th>
+            <th scope="col" class="num">
+              {{ t("leaderboard.columns.total") }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (standing of standings(); track standing.playerId; let first =
+          $first) {
+          <tr [class.leader]="first">
+            <td class="position">{{ standing.rank }}</td>
+            <td>
+              @if (standing.currentRank; as rank) {
+              <span class="rank fixed" [style]="rankStyle(rank)"
+                >{{ rank.name }}</span
+              >
+              }
+            </td>
+            <td>
+              <strong class="player"
+                >{{ splitRiotId(standing.riotId).name }}</strong
+              ><span class="tag">{{ splitRiotId(standing.riotId).tag }}</span>
+            </td>
+            <td class="num">{{ standing.games }}</td>
+            @for (column of columns(); track column) {
+            <td class="num">
+              {{ number(valueOf(standing, column), decimalsOf(column)) }}
+            </td>
+            }
+            <td class="num">{{ standing.wins }}</td>
+            <td class="num total">{{ number(standing.points) }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    }
+  </section>
+  @if (rules.hasValue()) {
+  <section class="panel block" [attr.aria-label]="t('leaderboard.how')">
+    <h2 class="heading-2 spaced">{{ t("leaderboard.how") }}</h2>
+    <ul class="formula">
+      @for (term of formula(); track $index; let first = $first) {
+      <li class="pill term" [class.win]="term.kind === 'win'">
+        {{ termText(term, first) }}
+      </li>
+      }
+    </ul>
+    @if (rules.value().bonuses.length > 0) {
+    <p class="muted small note">
+      {{ t("leaderboard.bonuses") }} @for (bonus of rules.value().bonuses; track
+      bonus.code; let last = $last) { {{ bonus.label }} ({{ bonus.code }}){{
+      last ? "." : "," }} }
+    </p>
+    }
+    <p class="muted small note">
+      {{ t("leaderboard.setBy", { org: current.organization()?.name, season:
+      current.season()?.name }) }}
+    </p>
+  </section>
+  } } @else {
+  <p class="muted" aria-live="polite">{{ t("leaderboard.loading") }}</p>
+  }
+</ng-container>
