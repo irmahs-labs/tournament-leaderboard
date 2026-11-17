@@ -83,6 +83,22 @@
         </svg>
         }
       </button>
+      @if (session.me(); as me) {
+      <a
+        class="account"
+        routerLink="/sign-in"
+        [attr.aria-label]="t('header.account', { name: name() })"
+      >
+        <span class="avatar" aria-hidden="true"
+          >{{ name().slice(0, 1).toUpperCase() }}</span
+        >
+        <span class="account-name">{{ name() }}</span>
+      </a>
+      } @else if (session.me() === null && !here().startsWith("/sign-in")) {
+      <a class="account" routerLink="/sign-in" [queryParams]="{ from: here() }"
+        >{{ t("header.signIn") }}</a
+      >
+      }
     </div>
   </div>
 </header>

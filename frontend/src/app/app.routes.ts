@@ -5,6 +5,7 @@ import { OrgShell } from "./layout/org-shell";
 import { LeaderboardPage } from "./pages/leaderboard";
 import { MatchesPage } from "./pages/matches";
 import { NotFoundPage } from "./pages/not-found";
+import { SignInPage } from "./pages/sign-in";
 
 export const routes: Routes = [
   // Release 1 has one organisation; the home page with the featured one comes in release 2.
@@ -19,6 +20,7 @@ export const routes: Routes = [
     resolve: { organization: organizationResolver },
     runGuardsAndResolvers: "pathParamsChange",
   },
+  { component: SignInPage, path: "sign-in" },
   { component: NotFoundPage, path: "not-found" },
   { component: NotFoundPage, path: "**" },
 ];

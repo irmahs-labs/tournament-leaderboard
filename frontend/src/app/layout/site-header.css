@@ -112,7 +112,48 @@
   place-items: center;
 }
 
+.account {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  color: var(--nav-text);
+  border: 1px solid var(--nav-ghost);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: var(--button-track);
+  white-space: nowrap;
+}
+
+.avatar {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--nav-text);
+  color: var(--nav-bg);
+  font-size: 13px;
+  letter-spacing: 0;
+}
+
+.account-name {
+  max-width: 12ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 @media (max-width: 640px) {
+  .account-name {
+    display: none;
+  }
+
   .nav {
     order: 3;
     flex-basis: 100%;

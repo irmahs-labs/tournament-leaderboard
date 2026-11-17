@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-17, with the Angular shell (Phase 3, first pull request).
+Last updated: 2026-11-17, with sign-in in the header (Phase 3, second pull request).
 
 ## System
 
@@ -63,7 +63,7 @@ flowchart LR
 | `accounts` | `AppUser`, `GoogleProfile`, `AccountService` (sign-in, initial memberships, platform admins), `AccessProperties`, `MeController` |
 | `members` | `OrganizationMember` (role ADMIN or PLAYER, one owner), `Membership` |
 | `organizations` | `Organization`, `OrganizationService` (`requireActive`, `recordActivity`), public org endpoint |
-| `security` | `SecurityConfig` (CSRF for SPAs, 401 on `/api/**`), `GoogleUserService` (verified email only), `OrgAccess` (`@orgAccess.isAdmin`) |
+| `security` | `SecurityConfig` (CSRF for SPAs, 401 on `/api/**`, Google sign-in ending on the Angular `/sign-in`), `GoogleUserService` (verified email only), `OrgAccess` (`@orgAccess.isAdmin`) |
 | `tenancy` | `OrganizationScopeFilter` + `OrganizationScopedTransactionManager`: sets `app.organization_id` per transaction for row-level security |
 | `players` | `Player`, `PlayerAlias`, `AliasKind`, `PlayerAdminService` (search, add, edit; rename keeps the old Riot ID as an alias) |
 | `ranks` | `Rank`, public rank list |
@@ -144,18 +144,22 @@ entities: `season_stat_rules` (a map on `Season`) and `game_stat_bonuses` (a man
 
 ```mermaid
 flowchart TD
-    app[App<br/>starts ThemeService and LanguageService] --> routes[app.routes.ts]
+    app[App<br/>starts ThemeService, LanguageService, SessionService] --> routes[app.routes.ts]
     routes -->|"/ redirects to /o/alsace-arena"| shell
     routes -->|"/o/:slug, organizationResolver"| shell[OrgShell<br/>accent, language, title]
     routes -->|"/not-found, **"| nf[NotFoundPage]
-    shell --> header[SiteHeader<br/>logo, nav, EN/FR, theme]
+    routes -->|"/sign-in"| si[SignInPage<br/>Google, your organisations, sign out]
+    shell --> header[SiteHeader<br/>logo, nav, EN/FR, theme, Sign in or account]
     shell --> footer[SiteFooter<br/>org name, credit, GitHub, contact]
     nf --> header
     nf --> footer
+    si --> header
+    si -->|"leaves for"| google["/oauth2/authorization/google"]
+    google -->|"back to /sign-in, then the page sign-in began on"| si
+    header --> session[SessionService] -->|GET /api/me, POST /api/logout| meApi["/api/me"]
     shell --> lb["LeaderboardPage (placeholder)"]
     shell --> mt["MatchesPage (placeholder)"]
     shell -.->|"/o/:slug/matches/:season/:match"| md[Match detail]
-    header -.-> signin[Sign in, /api/me]
     shell -.->|Phase 4| adm[Enter scores, Players, Seasons, Record switches]
     resolver[organizationResolver] -->|GET| orgApi["/api/orgs/{slug}"]
     shell --- resolver
@@ -166,14 +170,14 @@ flowchart TD
 | `core/colour.ts` | WCAG contrast and mixing: the text colour on the accent and a readable accent text per theme |
 | `core/theme.ts` | `ThemeService`: dark or light (system setting until the visitor picks; remembered), sets the accent CSS variables |
 | `core/language.ts` | `LanguageService`: EN or FR through Transloco; the visitor's pick wins over the organisation's default |
+| `core/session.ts` | `SessionService`: who is signed in (`/api/me`), sign-in through Google with a safe return address, sign-out |
 | `core/organization.ts` | `OrganizationService`, `organizationResolver` (an unknown organisation shows Not found at the same address) |
 | `layout/` | `OrgShell`, `SiteHeader`, `SiteFooter`, page layout |
-| `pages/` | `NotFoundPage`; placeholders for the leaderboard and matches |
+| `pages/` | `NotFoundPage`, `SignInPage`; placeholders for the leaderboard and matches |
 | `styles.css` | The template's tokens for both themes, Barlow fonts (bundled from `@fontsource`), shared classes |
 | `public/i18n/` | `en.json`, `fr.json` |
 
-Not in the shell yet: the online count (no backend), social links (branding API, phase 7),
-sign-in (next pull request).
+Not in the shell yet: the online count (no backend), social links (branding API, phase 7).
 
 ## Phases
 

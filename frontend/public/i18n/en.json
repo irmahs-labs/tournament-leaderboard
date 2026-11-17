@@ -1,13 +1,23 @@
 {
-  "common": { "comingSoon": "This page is on its way." },
-  "footer": { "createdBy": "created by" },
+  "common": {
+    "comingSoon": "This page is on its way."
+  },
+  "footer": {
+    "createdBy": "created by"
+  },
   "header": {
     "language": "Language",
     "toDark": "Switch to dark theme",
-    "toLight": "Switch to light theme"
+    "toLight": "Switch to light theme",
+    "signIn": "Sign in",
+    "account": "Your account: {{name}}"
   },
-  "leaderboard": { "title": "Season leaderboard" },
-  "matches": { "title": "Matches" },
+  "leaderboard": {
+    "title": "Season leaderboard"
+  },
+  "matches": {
+    "title": "Matches"
+  },
   "nav": {
     "label": "Main",
     "leaderboard": "Leaderboard",
@@ -17,5 +27,23 @@
     "body": "This page doesn't exist, or the organisation behind it is no longer available. Check the address, or start from the home page.",
     "home": "Go to the home page",
     "title": "Page not found"
+  },
+  "roles": {
+    "ADMIN": "Admin",
+    "OWNER": "Owner",
+    "PLAYER": "Player"
+  },
+  "signIn": {
+    "title": "Sign in",
+    "why": "Admins sign in to enter scores and run their organisation. Players sign in to follow their own stats.",
+    "google": "Continue with Google",
+    "privacy": "We only receive your name, email address and profile picture from Google. No password is stored here.",
+    "failed": "Signing in didn't work. Try again, with a Google account whose email address is verified.",
+    "signedIn": "Signed in",
+    "organisations": "Your organisations",
+    "notYou": "Not you? Sign out",
+    "open": "Open",
+    "noOrganisations": "You don't belong to any organisation yet.",
+    "separate": "Each organisation keeps its own players, scores and admins. Being an admin in one gives you no access to another."
   }
 }

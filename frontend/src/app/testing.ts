@@ -9,6 +9,7 @@ import en from "../../public/i18n/en.json";
 import fr from "../../public/i18n/fr.json";
 import { routes } from "./app.routes";
 import type { Organization } from "./core/organization";
+import type { Me } from "./core/session";
 
 export const ALSACE: Organization = {
   accentColor: "#2F5BFF",
@@ -18,6 +19,16 @@ export const ALSACE: Organization = {
   playersPerMatch: 10,
   slug: "alsace-arena",
   tournamentName: "Spike Tournament",
+};
+
+export const ME: Me = {
+  avatarUrl: null,
+  displayName: "Camille Martin",
+  email: "camille@example.com",
+  memberships: [
+    { name: "Alsace Arena", owner: true, role: "ADMIN", slug: "alsace-arena" },
+  ],
+  platformAdmin: false,
 };
 
 /** The app's routes, a fake back end, and both languages loaded from the real files. */

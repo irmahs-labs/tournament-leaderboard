@@ -21,6 +21,8 @@ import org.springframework.security.web.servlet.util.matcher.PathPatternRequestM
  *       in to read results.
  *   <li>Every other /api address needs someone signed in, and answers 401 otherwise. An
  *       organisation's /admin addresses also need its admin: see {@link OrgAccess}.
+ *   <li>Signing in starts at /oauth2/authorization/google and ends on the Angular /sign-in page;
+ *       Spring's own login page is off.
  *   <li>Changes need the CSRF token the Angular app sends back from the XSRF-TOKEN cookie.
  * </ul>
  */
@@ -28,6 +30,12 @@ import org.springframework.security.web.servlet.util.matcher.PathPatternRequestM
 @EnableConfigurationProperties(AccessProperties.class)
 @EnableMethodSecurity
 class SecurityConfig {
+
+    /**
+     * The Angular sign-in page. Google sends people back to it, signed in or with an error, and it
+     * takes them on to the page they started from.
+     */
+    static final String SIGN_IN = "/sign-in";
 
     @Bean
     SecurityFilterChain security(HttpSecurity http, GoogleUserService googleUsers) throws Exception {
@@ -41,7 +49,10 @@ class SecurityConfig {
                         .authenticated()
                         .anyRequest()
                         .permitAll())
-                .oauth2Login(login -> login.userInfoEndpoint(userInfo -> userInfo.oidcUserService(googleUsers)))
+                .oauth2Login(login -> login.loginPage(SIGN_IN)
+                        .defaultSuccessUrl(SIGN_IN, true)
+                        .failureUrl(SIGN_IN + "?error")
+                        .userInfoEndpoint(userInfo -> userInfo.oidcUserService(googleUsers)))
                 .logout(logout -> logout.logoutUrl("/api/logout")
                         .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.NO_CONTENT)))
                 .csrf(csrf -> csrf.spa())

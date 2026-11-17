@@ -12,6 +12,20 @@ const isLanguage = (value: string | null | undefined): value is Language =>
   value === "en" || value === "fr";
 
 /**
+ * The visitor's remembered pick, read once when the app starts so Transloco begins in it;
+ * English when there's none.
+ */
+export const startingLanguage = (): Language => {
+  try {
+    const value = globalThis.localStorage?.getItem(STORAGE_KEY);
+
+    return isLanguage(value) ? value : "en";
+  } catch {
+    return "en";
+  }
+};
+
+/**
  * English or French. A visitor's own pick wins; otherwise each organisation's default language
  * applies.
  */
@@ -24,11 +38,6 @@ export class LanguageService {
     this.#transloco.langChanges$.subscribe((lang) => {
       this.#document.documentElement.lang = lang;
     });
-    const stored = this.#read();
-
-    if (stored) {
-      this.#transloco.setActiveLang(stored);
-    }
   }
 
   get active(): Language {

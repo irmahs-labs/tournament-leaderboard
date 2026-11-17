@@ -5,7 +5,7 @@ import { provideRouter, withComponentInputBinding } from "@angular/router";
 import { provideTransloco } from "@jsverse/transloco";
 
 import { routes } from "./app.routes";
-import { LANGUAGES } from "./core/language";
+import { LANGUAGES, startingLanguage } from "./core/language";
 import { TranslocoHttpLoader } from "./core/transloco-loader";
 
 export const appConfig: ApplicationConfig = {
@@ -16,7 +16,7 @@ export const appConfig: ApplicationConfig = {
     provideTransloco({
       config: {
         availableLangs: [...LANGUAGES],
-        defaultLang: "en",
+        defaultLang: startingLanguage(),
         fallbackLang: "en",
         prodMode: !isDevMode(),
         reRenderOnLangChange: true,
