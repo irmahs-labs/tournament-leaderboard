@@ -4,7 +4,9 @@ import { RouterTestingHarness } from "@angular/router/testing";
 import { TranslocoService } from "@jsverse/transloco";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ALSACE, testProviders } from "./testing";
+import { App } from "./app";
+import { SessionService } from "./core/session";
+import { ALSACE, ME, testProviders } from "./testing";
 
 const text = (element: Element | null | undefined) =>
   element?.textContent?.replaceAll(/\s+/gu, " ").trim();
@@ -143,5 +145,21 @@ describe("the app's pages", () => {
     const harness = await RouterTestingHarness.create("/no/such/page");
 
     expect(text(rendered(harness).querySelector("h1"))).toBe("Page not found");
+  });
+});
+
+describe("the app itself", () => {
+  it("asks who is signed in once it starts", async () => {
+    TestBed.configureTestingModule({ providers: testProviders() });
+
+    const fixture = TestBed.createComponent(App);
+    const http = TestBed.inject(HttpTestingController);
+
+    fixture.detectChanges();
+    http.expectOne("/api/me").flush(ME);
+    await fixture.whenStable();
+
+    expect(TestBed.inject(SessionService).me()).toStrictEqual(ME);
+    http.match(() => true);
   });
 });

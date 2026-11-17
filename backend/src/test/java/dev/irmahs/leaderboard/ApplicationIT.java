@@ -54,7 +54,14 @@ class ApplicationIT {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"/o/alsace-arena", "/o/alsace-arena/matches", "/o/alsace-arena/matches/3/4", "/not-found"})
+    @ValueSource(
+            strings = {
+                "/o/alsace-arena",
+                "/o/alsace-arena/matches",
+                "/o/alsace-arena/matches/3/4",
+                "/not-found",
+                "/sign-in"
+            })
     void servesTheAngularAppForItsOwnAddresses(String address) {
         assertThat(mvc.get().uri(address)).hasStatusOk().hasForwardedUrl("/index.html");
     }

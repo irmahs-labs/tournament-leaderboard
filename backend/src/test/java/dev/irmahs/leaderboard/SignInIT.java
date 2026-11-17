@@ -173,6 +173,21 @@ class SignInIT {
     }
 
     @Test
+    void aFailedSignInComesBackToTheAngularSignInPage() {
+        MvcTestResult result = mvc.get()
+                .uri("/login/oauth2/code/google?error=access_denied&state=unknown")
+                .exchange();
+
+        assertThat(result).hasStatus(302);
+        assertThat(result.getResponse().getHeader("Location")).isEqualTo("/sign-in?error");
+    }
+
+    @Test
+    void springsOwnLoginPageIsOff() {
+        assertThat(mvc.get().uri("/login")).hasStatus(404);
+    }
+
+    @Test
     void signingOutNeedsTheCsrfToken() {
         assertThat(mvc.post().uri("/api/logout").with(oidcLogin())).hasStatus(403);
         assertThat(mvc.post().uri("/api/logout").with(oidcLogin()).with(csrf())).hasStatus(204);

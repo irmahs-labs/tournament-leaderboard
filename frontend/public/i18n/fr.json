@@ -1,13 +1,23 @@
 {
-  "common": { "comingSoon": "Cette page arrive bientôt." },
-  "footer": { "createdBy": "créé par" },
+  "common": {
+    "comingSoon": "Cette page arrive bientôt."
+  },
+  "footer": {
+    "createdBy": "créé par"
+  },
   "header": {
     "language": "Langue",
     "toDark": "Passer au thème sombre",
-    "toLight": "Passer au thème clair"
+    "toLight": "Passer au thème clair",
+    "signIn": "Se connecter",
+    "account": "Votre compte : {{name}}"
   },
-  "leaderboard": { "title": "Classement de la saison" },
-  "matches": { "title": "Matchs" },
+  "leaderboard": {
+    "title": "Classement de la saison"
+  },
+  "matches": {
+    "title": "Matchs"
+  },
   "nav": {
     "label": "Principal",
     "leaderboard": "Classement",
@@ -17,5 +27,23 @@
     "body": "Cette page n'existe pas, ou l'organisation à laquelle elle appartient n'est plus disponible. Vérifiez l'adresse, ou repartez de l'accueil.",
     "home": "Aller à l'accueil",
     "title": "Page introuvable"
+  },
+  "roles": {
+    "ADMIN": "Admin",
+    "OWNER": "Propriétaire",
+    "PLAYER": "Joueur"
+  },
+  "signIn": {
+    "title": "Connexion",
+    "why": "Les admins se connectent pour saisir les scores et gérer leur organisation. Les joueurs se connectent pour suivre leurs propres stats.",
+    "google": "Continuer avec Google",
+    "privacy": "Nous ne recevons de Google que votre nom, votre adresse e-mail et votre photo de profil. Aucun mot de passe n'est enregistré ici.",
+    "failed": "La connexion n'a pas abouti. Réessayez avec un compte Google dont l'adresse e-mail est vérifiée.",
+    "signedIn": "Connecté",
+    "organisations": "Vos organisations",
+    "notYou": "Pas vous ? Se déconnecter",
+    "open": "Ouvrir",
+    "noOrganisations": "Vous ne faites encore partie d'aucune organisation.",
+    "separate": "Chaque organisation a ses propres joueurs, scores et admins. Être admin dans l'une ne donne aucun accès à une autre."
   }
 }
