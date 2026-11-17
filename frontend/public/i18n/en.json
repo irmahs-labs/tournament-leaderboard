@@ -1,0 +1,21 @@
+{
+  "common": { "comingSoon": "This page is on its way." },
+  "footer": { "createdBy": "created by" },
+  "header": {
+    "language": "Language",
+    "toDark": "Switch to dark theme",
+    "toLight": "Switch to light theme"
+  },
+  "leaderboard": { "title": "Season leaderboard" },
+  "matches": { "title": "Matches" },
+  "nav": {
+    "label": "Main",
+    "leaderboard": "Leaderboard",
+    "matches": "Matches"
+  },
+  "notFound": {
+    "body": "This page doesn't exist, or the organisation behind it is no longer available. Check the address, or start from the home page.",
+    "home": "Go to the home page",
+    "title": "Page not found"
+  }
+}

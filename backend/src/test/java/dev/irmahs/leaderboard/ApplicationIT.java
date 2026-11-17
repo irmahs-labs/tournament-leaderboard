@@ -3,6 +3,8 @@ package dev.irmahs.leaderboard;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -49,5 +51,16 @@ class ApplicationIT {
     @Test
     void servesTheAngularApp() {
         assertThat(mvc.get().uri("/index.html")).hasStatusOk().bodyText().contains("<app-root");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/o/alsace-arena", "/o/alsace-arena/matches", "/o/alsace-arena/matches/3/4", "/not-found"})
+    void servesTheAngularAppForItsOwnAddresses(String address) {
+        assertThat(mvc.get().uri(address)).hasStatusOk().hasForwardedUrl("/index.html");
+    }
+
+    @Test
+    void leavesTheApiAlone() {
+        assertThat(mvc.get().uri("/api/orgs/nowhere")).hasStatus(404);
     }
 }
