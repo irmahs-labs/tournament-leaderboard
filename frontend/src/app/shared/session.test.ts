@@ -3,7 +3,12 @@ import { TestBed } from "@angular/core/testing";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { ME, testProviders } from "../testing";
-import { displayName, isSafeReturn, SessionService } from "./session";
+import {
+  displayName,
+  isSafeReturn,
+  SessionService,
+  takeReturn,
+} from "./session";
 
 describe(SessionService, () => {
   let http: HttpTestingController;
@@ -50,8 +55,8 @@ describe(SessionService, () => {
   it("returns to a page only once", () => {
     sessionStorage.setItem("signInReturnTo", "/o/alsace-arena/matches");
 
-    expect(session.takeReturn()).toBe("/o/alsace-arena/matches");
-    expect(session.takeReturn()).toBeNull();
+    expect(takeReturn()).toBe("/o/alsace-arena/matches");
+    expect(takeReturn()).toBeNull();
   });
 });
 

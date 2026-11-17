@@ -148,6 +148,35 @@ a {
   text-transform: uppercase;
 }
 
+.heading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.lede {
+  margin: 0;
+  font-size: 17px;
+}
+
+.small {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* A small uppercase label above a value, such as a tile's or a card's. */
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: var(--label-track);
+}
+
 .eyebrow {
   font-size: 12px;
   font-weight: 600;
@@ -203,27 +232,4 @@ a {
   background: transparent;
   color: var(--text);
   border: 1px solid var(--ghost-line);
-}
-
-/* A player's Valorant rank, in the rank's colour made readable for the theme (rankText). */
-.rank {
-  display: inline-block;
-  box-sizing: border-box;
-  padding: 3px 10px;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  color: var(--rank-dark, var(--text));
-  font-size: 12px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .rank {
-    color: var(--rank-light, var(--text));
-  }
-}
-
-:root[data-theme="light"] .rank {
-  color: var(--rank-light, var(--text));
 }

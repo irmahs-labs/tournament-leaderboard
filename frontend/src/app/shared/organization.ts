@@ -53,3 +53,7 @@ export const initials = (name: string): string =>
     .slice(0, 2)
     .map((word) => word[0]?.toUpperCase() ?? "")
     .join("");
+
+/** The organisation with its tournament, such as "Alsace Arena · Spike Tournament". */
+export const fullName = (org: Organization): string =>
+  org.tournamentName ? `${org.name} · ${org.tournamentName}` : org.name;

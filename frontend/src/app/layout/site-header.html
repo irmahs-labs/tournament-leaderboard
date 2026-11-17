@@ -104,12 +104,12 @@
       <a
         class="account"
         routerLink="/sign-in"
-        [attr.aria-label]="t('header.account', { name: name() })"
+        [attr.aria-label]="t('header.account', { name: session.name() })"
       >
         <span class="avatar" aria-hidden="true"
-          >{{ name().slice(0, 1).toUpperCase() }}</span
+          >{{ session.name().slice(0, 1).toUpperCase() }}</span
         >
-        <span class="account-name">{{ name() }}</span>
+        <span class="account-name">{{ session.name() }}</span>
       </a>
       } @else if (session.me() === null && !here().startsWith("/sign-in")) {
       <a class="account" routerLink="/sign-in" [queryParams]="{ from: here() }"

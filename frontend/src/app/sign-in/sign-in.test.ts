@@ -4,11 +4,16 @@ import { Router } from "@angular/router";
 import { RouterTestingHarness } from "@angular/router/testing";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { SessionService } from "../core/session";
-import { ALSACE, ME, testProviders } from "../testing";
-
-const text = (element: Element | null | undefined) =>
-  element?.textContent?.replaceAll(/\s+/gu, " ").trim();
+import { SessionService } from "../shared/session";
+import {
+  ALSACE,
+  answer,
+  ME,
+  openAlsace,
+  rendered,
+  testProviders,
+  text,
+} from "../testing";
 
 describe("the sign-in page", () => {
   let http: HttpTestingController;
@@ -34,13 +39,8 @@ describe("the sign-in page", () => {
     await loading;
 
     const harness = await RouterTestingHarness.create(url);
-    const page = harness.routeNativeElement;
 
-    if (!page) {
-      throw new Error("The route rendered nothing");
-    }
-
-    return { harness, page };
+    return { harness, page: rendered(harness) };
   };
 
   it("offers Google when signed out", async () => {
@@ -98,13 +98,8 @@ describe("the sign-in page", () => {
 
     const { harness } = await open("/sign-in", ME);
 
-    await vi.waitFor(() => {
-      http.expectOne(`/api/orgs/${ALSACE.slug}`).flush(ALSACE);
-    });
-    await vi.waitFor(() => {
-      harness.detectChanges();
-      http.expectOne(`/api/orgs/${ALSACE.slug}/seasons`).flush([]);
-    });
+    await answer(harness, `/api/orgs/${ALSACE.slug}`, ALSACE);
+    await answer(harness, `/api/orgs/${ALSACE.slug}/seasons`, []);
     await harness.fixture.whenStable();
 
     expect(TestBed.inject(Router).url).toBe("/o/alsace-arena/matches");
@@ -126,7 +121,6 @@ describe("the sign-in page", () => {
   });
 
   it("puts Sign in in the header, with the page to return to", async () => {
-    const harness = await RouterTestingHarness.create();
     const loading = TestBed.inject(SessionService).load();
 
     http
@@ -134,15 +128,8 @@ describe("the sign-in page", () => {
       .flush(null, { status: 401, statusText: "Unauthorized" });
     await loading;
 
-    const navigation = harness.navigateByUrl("/o/alsace-arena/matches");
-
-    await vi.waitFor(() => {
-      http.expectOne(`/api/orgs/${ALSACE.slug}`).flush(ALSACE);
-    });
-    await navigation;
-    harness.detectChanges();
-
-    const link = harness.routeNativeElement?.querySelector("header a.account");
+    const harness = await openAlsace("/o/alsace-arena/matches");
+    const link = rendered(harness).querySelector("header a.account");
 
     // Alsace Arena's default language is French.
     expect(text(link)).toBe("Se connecter");

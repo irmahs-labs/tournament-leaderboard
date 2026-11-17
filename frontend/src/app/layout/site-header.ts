@@ -2,13 +2,13 @@ import { Component, computed, inject, input } from "@angular/core";
 import { Router, RouterLink, RouterLinkActive } from "@angular/router";
 import { TranslocoDirective } from "@jsverse/transloco";
 
-import type { Language } from "../core/language";
-import { LANGUAGES, LanguageService } from "../core/language";
-import type { Organization } from "../core/organization";
-import { initials } from "../core/organization";
-import { CurrentSeason } from "../core/seasons";
-import { displayName, SessionService } from "../core/session";
-import { ThemeService } from "../core/theme";
+import { CurrentSeason } from "../results/current-season";
+import type { Language } from "../shared/language";
+import { LANGUAGES, LanguageService } from "../shared/language";
+import type { Organization } from "../shared/organization";
+import { initials } from "../shared/organization";
+import { SessionService } from "../shared/session";
+import { ThemeService } from "../shared/theme";
 
 /**
  * The top bar: the organisation's logo and pages when there is one, the platform's name
@@ -32,12 +32,6 @@ export class SiteHeader {
 
   protected readonly session = inject(SessionService);
   protected readonly current = inject(CurrentSeason);
-
-  protected readonly name = computed(() => {
-    const me = this.session.me();
-
-    return me ? displayName(me) : "";
-  });
 
   readonly #router = inject(Router);
 

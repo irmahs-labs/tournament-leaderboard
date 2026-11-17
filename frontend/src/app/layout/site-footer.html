@@ -2,9 +2,7 @@
   <div class="inner">
     @if (organization(); as org) {
     <div class="row">
-      <span class="org">
-        {{ org.name }} @if (org.tournamentName) { · {{ org.tournamentName }} }
-      </span>
+      <span class="org">{{ fullName(org) }}</span>
     </div>
     }
     <div class="row credit" [class.ruled]="organization()">

@@ -1,16 +1,22 @@
 import { provideHttpClient } from "@angular/common/http";
-import { provideHttpClientTesting } from "@angular/common/http/testing";
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from "@angular/common/http/testing";
 import type { EnvironmentProviders, Provider } from "@angular/core";
 import { importProvidersFrom } from "@angular/core";
+import { TestBed } from "@angular/core/testing";
 import { provideRouter, withComponentInputBinding } from "@angular/router";
+import { RouterTestingHarness } from "@angular/router/testing";
 import { TranslocoTestingModule } from "@jsverse/transloco";
+import { vi } from "vitest";
 
 import en from "../../public/i18n/en.json";
 import fr from "../../public/i18n/fr.json";
 import { routes } from "./app.routes";
-import type { Organization } from "./core/organization";
-import type { Leaderboard, Rules, Season, Summary } from "./core/seasons";
-import type { Me } from "./core/session";
+import type { Leaderboard, Rules, Season, Summary } from "./results/api";
+import type { Organization } from "./shared/organization";
+import type { Me } from "./shared/session";
 
 export const ALSACE: Organization = {
   accentColor: "#2F5BFF",
@@ -146,3 +152,60 @@ export const testProviders = (): (Provider | EnvironmentProviders)[] => [
     })
   ),
 ];
+
+/** An element's text with its whitespace collapsed. */
+export const text = (element: Element | null | undefined): string | undefined =>
+  element?.textContent?.replaceAll(/\s+/gu, " ").trim();
+
+export const texts = (
+  root: ParentNode,
+  selector: string
+): (string | undefined)[] =>
+  [...root.querySelectorAll(selector)].map((element) => text(element));
+
+/** The page a harness shows; fails the test when the route rendered nothing. */
+export const rendered = (harness: RouterTestingHarness): HTMLElement => {
+  const page = harness.routeNativeElement;
+
+  if (!page) {
+    throw new Error("The route rendered nothing");
+  }
+
+  return page;
+};
+
+/** What the fake back end answers. */
+type Answer = Organization | Season[] | Leaderboard | Summary | Rules | Me;
+
+/** Answers a request once the app makes it, running change detection while it waits. */
+export const answer = async (
+  harness: RouterTestingHarness,
+  url: string,
+  body: Answer
+): Promise<void> => {
+  const http = TestBed.inject(HttpTestingController);
+
+  await vi.waitFor(() => {
+    harness.detectChanges();
+    http.expectOne(url).flush(body);
+  });
+};
+
+/**
+ * Opens an address of Alsace Arena, answering `GET /api/orgs/alsace-arena` and its seasons
+ * (none by default, so the leaderboard asks for nothing more).
+ */
+export const openAlsace = async (
+  url: string,
+  seasons: Season[] = []
+): Promise<RouterTestingHarness> => {
+  const harness = await RouterTestingHarness.create();
+  const navigation = harness.navigateByUrl(url);
+
+  await answer(harness, `/api/orgs/${ALSACE.slug}`, ALSACE);
+  await navigation;
+  await answer(harness, `/api/orgs/${ALSACE.slug}/seasons`, seasons);
+  harness.detectChanges();
+
+  return harness;
+};

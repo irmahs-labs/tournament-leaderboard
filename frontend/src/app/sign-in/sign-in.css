@@ -1,9 +1,10 @@
-.cards {
+/* On top of the page's own 40px above and 72px below. */
+:host {
   display: grid;
   grid-template-columns: minmax(0, 560px);
   justify-content: center;
-  padding-top: 72px;
-  padding-bottom: 96px;
+  padding-top: 32px;
+  padding-bottom: 24px;
 }
 
 .card {
@@ -15,26 +16,6 @@
 
 .muted-eyebrow {
   color: var(--muted);
-}
-
-.heading {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 26px;
-  line-height: 1.1;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-
-.lede {
-  margin: 0;
-  font-size: 17px;
-}
-
-.small {
-  margin: 0;
-  font-size: 14px;
 }
 
 .error {

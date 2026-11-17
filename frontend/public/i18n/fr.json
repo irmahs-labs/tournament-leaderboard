@@ -48,15 +48,6 @@
     },
     "standings": "Classement",
     "sorted": "Trié par total de points",
-    "columns": {
-      "rank": "Rang",
-      "player": "Joueur",
-      "games": "Parties",
-      "wins": "Victoires",
-      "total": "Total",
-      "avg": "Moy. {{stat}}",
-      "average": "{{stat}}, moyenne par partie"
-    },
     "how": "Comment les points sont comptés",
     "perBonus": "{{points}} par bonus",
     "perWin": "{{points}} par victoire",
@@ -129,5 +120,14 @@
       "HEADSHOT_PCT": "Pourcentage de tirs à la tête",
       "CLUTCHES": "Clutchs"
     }
+  },
+  "standings": {
+    "rank": "Rang",
+    "player": "Joueur",
+    "games": "Parties",
+    "wins": "Victoires",
+    "total": "Total",
+    "avg": "Moy. {{stat}}",
+    "average": "{{stat}}, moyenne par partie"
   }
 }

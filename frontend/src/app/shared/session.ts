@@ -1,8 +1,10 @@
 import { DOCUMENT } from "@angular/common";
 import type { HttpErrorResponse } from "@angular/common/http";
 import { HttpClient } from "@angular/common/http";
-import { Injectable, inject, signal } from "@angular/core";
+import { computed, Injectable, inject, signal } from "@angular/core";
 import { catchError, firstValueFrom, map, of } from "rxjs";
+
+import { readStored, store } from "./storage";
 
 export type MemberRole = "ADMIN" | "PLAYER";
 
@@ -38,6 +40,10 @@ export const isSafeReturn = (path: string | null | undefined): path is string =>
   !path?.startsWith("/\\") &&
   !path?.startsWith("/sign-in");
 
+/** The name to show for someone: their Google name, else the start of their email. */
+export const displayName = (me: Me): string =>
+  me.displayName?.trim() || me.email.split("@")[0] || me.email;
+
 /** Who is signed in. Signing in goes through Google and comes back to `/sign-in`. */
 @Injectable({ providedIn: "root" })
 export class SessionService {
@@ -47,6 +53,13 @@ export class SessionService {
 
   /** The signed-in person; nothing when signed out; undefined until known. */
   readonly me = this.#me.asReadonly();
+
+  /** The name to show for the signed-in person; empty when nobody is. */
+  readonly name = computed(() => {
+    const me = this.#me();
+
+    return me ? displayName(me) : "";
+  });
 
   /** Asks the server who is signed in. */
   async load(): Promise<Me | null> {
@@ -70,15 +83,9 @@ export class SessionService {
 
   /** Leaves for Google; back on `/sign-in`, the app returns to `returnTo`. */
   signIn(returnTo: string | null): void {
-    try {
-      if (isSafeReturn(returnTo)) {
-        this.#document.defaultView?.sessionStorage.setItem(
-          RETURN_KEY,
-          returnTo
-        );
-      }
-    } catch {
-      // Without storage, the person lands on the sign-in page's list of organisations.
+    // Without storage, the person lands on the sign-in page's list of organisations.
+    if (isSafeReturn(returnTo)) {
+      store(RETURN_KEY, returnTo, "sessionStorage");
     }
 
     this.#document.defaultView?.location.assign(GOOGLE_SIGN_IN);
@@ -88,22 +95,12 @@ export class SessionService {
     await firstValueFrom(this.#http.post("/api/logout", null));
     this.#me.set(null);
   }
-
-  /** The page to go back to after signing in, once: reading it forgets it. */
-  takeReturn(): string | null {
-    try {
-      const storage = this.#document.defaultView?.sessionStorage;
-      const path = storage?.getItem(RETURN_KEY);
-
-      storage?.removeItem(RETURN_KEY);
-
-      return isSafeReturn(path) ? path : null;
-    } catch {
-      return null;
-    }
-  }
 }
 
-/** The name to show for someone: their Google name, else the start of their email. */
-export const displayName = (me: Me): string =>
-  me.displayName?.trim() || me.email.split("@")[0] || me.email;
+/** The page to go back to after signing in, once: reading it forgets it. */
+export const takeReturn = (): string | null => {
+  const path = readStored(RETURN_KEY, "sessionStorage");
+  store(RETURN_KEY, null, "sessionStorage");
+
+  return isSafeReturn(path) ? path : null;
+};

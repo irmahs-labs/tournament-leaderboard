@@ -48,15 +48,6 @@
     },
     "standings": "Standings",
     "sorted": "Sorted by total points",
-    "columns": {
-      "rank": "Rank",
-      "player": "Player",
-      "games": "Games",
-      "wins": "Wins",
-      "total": "Total",
-      "avg": "Avg {{stat}}",
-      "average": "{{stat}}, average per game"
-    },
     "how": "How points are counted",
     "perBonus": "{{points}} per bonus",
     "perWin": "{{points}} per win",
@@ -129,5 +120,14 @@
       "HEADSHOT_PCT": "Headshot percentage",
       "CLUTCHES": "Clutches"
     }
+  },
+  "standings": {
+    "rank": "Rank",
+    "player": "Player",
+    "games": "Games",
+    "wins": "Wins",
+    "total": "Total",
+    "avg": "Avg {{stat}}",
+    "average": "{{stat}}, average per game"
   }
 }

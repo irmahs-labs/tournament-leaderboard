@@ -1,11 +1,12 @@
 import type { Routes } from "@angular/router";
 
-import { organizationResolver } from "./core/organization";
 import { OrgShell } from "./layout/org-shell";
-import { LeaderboardPage } from "./pages/leaderboard";
-import { MatchesPage } from "./pages/matches";
-import { NotFoundPage } from "./pages/not-found";
-import { SignInPage } from "./pages/sign-in";
+import { PlatformShell } from "./layout/platform-shell";
+import { NotFoundPage } from "./not-found/not-found";
+import { LeaderboardPage } from "./results/leaderboard/leaderboard";
+import { MatchesPage } from "./results/matches/matches";
+import { organizationResolver } from "./shared/organization";
+import { SignInPage } from "./sign-in/sign-in";
 
 export const routes: Routes = [
   // Release 1 has one organisation; the home page with the featured one comes in release 2.
@@ -20,7 +21,13 @@ export const routes: Routes = [
     resolve: { organization: organizationResolver },
     runGuardsAndResolvers: "pathParamsChange",
   },
-  { component: SignInPage, path: "sign-in" },
-  { component: NotFoundPage, path: "not-found" },
-  { component: NotFoundPage, path: "**" },
+  {
+    children: [
+      { component: SignInPage, path: "sign-in" },
+      { component: NotFoundPage, path: "not-found" },
+      { component: NotFoundPage, path: "**" },
+    ],
+    component: PlatformShell,
+    path: "",
+  },
 ];

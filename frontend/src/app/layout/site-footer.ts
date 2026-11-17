@@ -1,7 +1,8 @@
 import { Component, input } from "@angular/core";
 import { TranslocoDirective } from "@jsverse/transloco";
 
-import type { Organization } from "../core/organization";
+import type { Organization } from "../shared/organization";
+import { fullName } from "../shared/organization";
 
 /** The organisation's name, then the platform's credit, source and contact. */
 @Component({
@@ -13,5 +14,6 @@ import type { Organization } from "../core/organization";
 export class SiteFooter {
   readonly organization = input<Organization | null>(null);
 
+  protected readonly fullName = fullName;
   protected readonly contact = "tournament-leaderboard@irmahs.dev";
 }

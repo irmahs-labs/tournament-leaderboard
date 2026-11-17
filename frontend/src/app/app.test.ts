@@ -5,21 +5,11 @@ import { TranslocoService } from "@jsverse/transloco";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "./app";
-import { SessionService } from "./core/session";
-import { ALSACE, ME, testProviders } from "./testing";
+import { SessionService } from "./shared/session";
+import { ME, openAlsace, rendered, testProviders, text } from "./testing";
 
-const text = (element: Element | null | undefined) =>
-  element?.textContent?.replaceAll(/\s+/gu, " ").trim();
-
-const rendered = (harness: RouterTestingHarness): HTMLElement => {
-  const element = harness.routeNativeElement;
-
-  if (!element) {
-    throw new Error("The route rendered nothing");
-  }
-
-  return element;
-};
+const open = async (url: string): Promise<HTMLElement> =>
+  rendered(await openAlsace(url));
 
 describe("the app's pages", () => {
   let http: HttpTestingController;
@@ -34,28 +24,6 @@ describe("the app's pages", () => {
   afterEach(() => {
     http.verify();
   });
-
-  /**
-   * Opens an address of the organisation, answering its `GET /api/orgs/{slug}`, and its seasons
-   * with none, so the leaderboard asks for nothing more.
-   */
-  const open = async (url: string): Promise<HTMLElement> => {
-    const harness = await RouterTestingHarness.create();
-    const navigation = harness.navigateByUrl(url);
-
-    // The resolver asks once the navigation has started.
-    await vi.waitFor(() => {
-      http.expectOne(`/api/orgs/${ALSACE.slug}`).flush(ALSACE);
-    });
-    await navigation;
-    await vi.waitFor(() => {
-      harness.detectChanges();
-      http.expectOne(`/api/orgs/${ALSACE.slug}/seasons`).flush([]);
-    });
-    harness.detectChanges();
-
-    return rendered(harness);
-  };
 
   it("sends the home page to Alsace Arena for now", async () => {
     const page = await open("/");

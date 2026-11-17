@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-17, with the season leaderboard (Phase 3, third pull request).
+Last updated: 2026-11-18, with the frontend organised by feature.
 
 ## System
 
@@ -141,49 +141,56 @@ entities: `season_stat_rules` (a map on `Season`) and `game_stat_bonuses` (a man
 
 ## Frontend
 
-`frontend/src/app`. Solid arrows exist; dashed ones are planned.
+`frontend/src/app`, organised by feature like the backend: `shared/` for what every feature uses,
+`layout/` for the two shells, then one folder per feature. Solid arrows exist; dashed ones are
+planned.
 
 ```mermaid
 flowchart TD
     app[App<br/>starts ThemeService, LanguageService, SessionService] --> routes[app.routes.ts]
     routes -->|"/ redirects to /o/alsace-arena"| shell
-    routes -->|"/o/:slug, organizationResolver"| shell[OrgShell<br/>accent, language, title]
-    routes -->|"/not-found, **"| nf[NotFoundPage]
-    routes -->|"/sign-in"| si[SignInPage<br/>Google, your organisations, sign out]
+    routes -->|"/o/:slug, organizationResolver"| shell[OrgShell<br/>accent, language, title, season]
+    routes -->|"/sign-in, /not-found, **"| platform[PlatformShell<br/>platform name and red]
+    platform --> si[SignInPage<br/>Google, your organisations, sign out]
+    platform --> nf[NotFoundPage]
     shell --> header[SiteHeader<br/>logo, nav, season, EN/FR, theme, Sign in or account]
     shell --> footer[SiteFooter<br/>org name, credit, GitHub, contact]
+    platform --> header
+    platform --> footer
     shell -->|"organisation, ?season="| current[CurrentSeason]
     current -->|GET| seasonsApi["…/seasons"]
     header -->|season picker| current
-    nf --> header
-    nf --> footer
-    si --> header
     si -->|"leaves for"| google["/oauth2/authorization/google"]
     google -->|"back to /sign-in, then the page sign-in began on"| si
     header --> session[SessionService] -->|GET /api/me, POST /api/logout| meApi["/api/me"]
-    shell --> lb["LeaderboardPage<br/>top three, tiles, standings, how points are counted"]
+    shell --> lb["LeaderboardPage<br/>top three, tiles, how points are counted"]
+    lb --> table[StandingsTable]
     lb --> current
     lb -->|GET| lbApi["…/seasons/{n}/leaderboard, /summary, /rules"]
+    table --> pill[RankPill]
+    lb --> pill
     shell --> mt["MatchesPage (placeholder)"]
     shell -.->|"/o/:slug/matches/:season/:match"| md[Match detail]
+    md -.-> table
     shell -.->|Phase 4| adm[Enter scores, Players, Seasons, Record switches]
+    adm -.-> pill
     resolver[organizationResolver] -->|GET| orgApi["/api/orgs/{slug}"]
     shell --- resolver
 ```
 
-| Part | Holds |
+| Folder | Holds |
 |---|---|
-| `core/colour.ts` | WCAG contrast and mixing: the text colour on the accent, a readable accent text per theme, and readable rank colours (`rankText`) |
-| `core/theme.ts` | `ThemeService`: dark or light (system setting until the visitor picks; remembered), sets the accent CSS variables |
-| `core/language.ts` | `LanguageService`: EN or FR through Transloco; the visitor's pick wins over the organisation's default |
-| `core/session.ts` | `SessionService`: who is signed in (`/api/me`), sign-in through Google with a safe return address, sign-out |
-| `core/seasons.ts` | The API's season types; `CurrentSeason`: the organisation on screen, its seasons (newest first) and the one picked (`?season=`, the most recent otherwise) |
-| `core/stats.ts` | Results-table helpers: stat columns (K, D and A folded into KDA), decimals, number formatting, the points formula, Riot ID name and tag |
-| `core/organization.ts` | `OrganizationService`, `organizationResolver` (an unknown organisation shows Not found at the same address) |
-| `layout/` | `OrgShell`, `SiteHeader`, `SiteFooter`, page layout |
-| `pages/` | `LeaderboardPage`, `NotFoundPage`, `SignInPage`; a placeholder for matches |
-| `styles.css` | The template's tokens for both themes, Barlow fonts (bundled from `@fontsource`), shared classes (`.panel`, `.pill`, `.rank`, buttons) |
+| `shared/` | `ThemeService` (dark or light, the accent's CSS variables), `colour.ts` (WCAG contrast and mixing, the palettes, readable rank colours), `LanguageService` (EN or FR; numbers, dates and plurals in the language on screen), `SessionService` (who is signed in, Google sign-in with a safe return address, sign-out), `organization.ts` (`organizationResolver`, `fullName`, `initials`), `storage.ts` (local and session storage that survives being blocked), `RankPill` |
+| `layout/` | `OrgShell` (an organisation's pages), `PlatformShell` (sign-in and Not found), `SiteHeader`, `SiteFooter`, page layout |
+| `results/` | The public results: `api.ts` (the API's shapes), `CurrentSeason` (the organisation's seasons, newest first, and the one picked with `?season=`), `stats.ts` (stat columns with K, D and A folded into KDA, decimals, the points formula, Riot ID name and tag), `StandingsTable`, `leaderboard/`, `matches/` |
+| `sign-in/` | `SignInPage` |
+| `not-found/` | `NotFoundPage` |
+| `testing.ts` | Fixtures and helpers shared by the tests (`openAlsace`, `answer`, `text`) |
+| `styles.css` | The template's tokens for both themes, Barlow fonts (bundled from `@fontsource`), shared classes (`.panel`, `.pill`, `.heading`, `.lede`, `.label`, buttons) |
 | `public/i18n/` | `en.json`, `fr.json` |
+
+A component used by several features lives in `shared/` (`RankPill`); one used by several pages of a
+single feature lives in that feature (`StandingsTable` in `results/`).
 
 Not in the shell yet: the online count (no backend), social links (branding API, phase 7). Not on the
 leaderboard yet: Export CSV and Export poster (phase 11).

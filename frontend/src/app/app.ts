@@ -2,9 +2,9 @@ import type { OnInit } from "@angular/core";
 import { Component, inject } from "@angular/core";
 import { RouterOutlet } from "@angular/router";
 
-import { LanguageService } from "./core/language";
-import { SessionService } from "./core/session";
-import { ThemeService } from "./core/theme";
+import { LanguageService } from "./shared/language";
+import { SessionService } from "./shared/session";
+import { ThemeService } from "./shared/theme";
 
 @Component({
   imports: [RouterOutlet],
