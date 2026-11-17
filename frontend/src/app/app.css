@@ -1,0 +1,11 @@
+.placeholder {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 6rem 1rem;
+  font-family: system-ui, sans-serif;
+}
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.8rem;
+}

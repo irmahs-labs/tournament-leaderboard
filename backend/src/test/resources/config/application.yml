@@ -1,0 +1,14 @@
+# Tests only. Loaded on top of the main application.yml.
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test-client-id
+            client-secret: test-client-secret
+
+leaderboard:
+  access:
+    platform-admins: Platform@Example.com
+    initial-members: alsace-arena:OWNER:owner@example.com, alsace-arena:ADMIN:admin@example.com, nowhere:ADMIN:admin@example.com

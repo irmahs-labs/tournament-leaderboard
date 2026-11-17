@@ -3,3 +3,13 @@ node_modules
 out
 .env*
 .DS_Store
+target/
+.angular/
+frontend/dist/
+.flattened-pom.xml
+
+# Supabase exports for deploy/import: real player data, never committed.
+deploy/import/data/
+
+# The dev Google client, for signing in locally; see backend/local.example.yml.
+backend/local.yml

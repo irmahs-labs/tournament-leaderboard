@@ -1,0 +1,13 @@
+.git
+.github
+.claude
+.devcontainer
+.idea
+.vscode
+legacy
+deploy
+**/node_modules
+**/target
+**/.angular
+frontend/dist
+.env*

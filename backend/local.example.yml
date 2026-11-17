@@ -1,0 +1,16 @@
+# Copy to backend/local.yml (ignored by git) to sign in with Google when running locally.
+# Use the dev client from Google Cloud, never the production one. Its redirect URIs must be
+# http://localhost:8080/login/oauth2/code/google and http://localhost:4200/login/oauth2/code/google.
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: the-dev-client-id.apps.googleusercontent.com
+            client-secret: the-dev-client-secret
+
+leaderboard:
+  access:
+    platform-admins: you@example.com
+    initial-members: alsace-arena:OWNER:you@example.com
