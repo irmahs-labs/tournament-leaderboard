@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-17, after #17 (players and seasons admin API).
+Last updated: 2026-11-17, with the Angular shell (Phase 3, first pull request).
 
 ## System
 
@@ -71,7 +71,7 @@ flowchart LR
 | `matches` | `Match`, `Game` and their repositories |
 | `scoring` | `ScoringService` (the only place totals are computed), `BonusCalculator` (HIGHEST/LOWEST, ties all win) |
 | `stats` | `GameStat`, `StatLine`, `PlayerTally`, `SeasonResultsService` (public results), `ScoresService` (Enter scores) |
-| `system` | `/api/version` |
+| `system` | `/api/version`; `SpaController` forwards the Angular router's addresses (`/o/**`, `/not-found`, `/sign-in`) to `index.html` |
 
 ## API
 
@@ -140,16 +140,40 @@ entities: `season_stat_rules` (a map on `Season`) and `game_stat_bonuses` (a man
 
 ## Frontend
 
+`frontend/src/app`. Solid arrows exist; dashed ones are planned.
+
 ```mermaid
-flowchart LR
-    app[App shell<br/>app.ts, app.routes.ts] -.->|Phase 3| shell[Header, footer, theme, EN/FR]
-    shell -.-> pub[Leaderboard, Matches, Match detail]
+flowchart TD
+    app[App<br/>starts ThemeService and LanguageService] --> routes[app.routes.ts]
+    routes -->|"/ redirects to /o/alsace-arena"| shell
+    routes -->|"/o/:slug, organizationResolver"| shell[OrgShell<br/>accent, language, title]
+    routes -->|"/not-found, **"| nf[NotFoundPage]
+    shell --> header[SiteHeader<br/>logo, nav, EN/FR, theme]
+    shell --> footer[SiteFooter<br/>org name, credit, GitHub, contact]
+    nf --> header
+    nf --> footer
+    shell --> lb["LeaderboardPage (placeholder)"]
+    shell --> mt["MatchesPage (placeholder)"]
+    shell -.->|"/o/:slug/matches/:season/:match"| md[Match detail]
+    header -.-> signin[Sign in, /api/me]
     shell -.->|Phase 4| adm[Enter scores, Players, Seasons, Record switches]
-    pub -.-> publicApi[Public API]
-    adm -.-> adminApi[Admin API]
+    resolver[organizationResolver] -->|GET| orgApi["/api/orgs/{slug}"]
+    shell --- resolver
 ```
 
-Built so far: the empty Angular 22 app (`frontend/src/app`). Dashed arrows are planned.
+| Part | Holds |
+|---|---|
+| `core/colour.ts` | WCAG contrast and mixing: the text colour on the accent and a readable accent text per theme |
+| `core/theme.ts` | `ThemeService`: dark or light (system setting until the visitor picks; remembered), sets the accent CSS variables |
+| `core/language.ts` | `LanguageService`: EN or FR through Transloco; the visitor's pick wins over the organisation's default |
+| `core/organization.ts` | `OrganizationService`, `organizationResolver` (an unknown organisation shows Not found at the same address) |
+| `layout/` | `OrgShell`, `SiteHeader`, `SiteFooter`, page layout |
+| `pages/` | `NotFoundPage`; placeholders for the leaderboard and matches |
+| `styles.css` | The template's tokens for both themes, Barlow fonts (bundled from `@fontsource`), shared classes |
+| `public/i18n/` | `en.json`, `fr.json` |
+
+Not in the shell yet: the online count (no backend), social links (branding API, phase 7),
+sign-in (next pull request).
 
 ## Phases
 

@@ -1,0 +1,21 @@
+{
+  "common": { "comingSoon": "Cette page arrive bientôt." },
+  "footer": { "createdBy": "créé par" },
+  "header": {
+    "language": "Langue",
+    "toDark": "Passer au thème sombre",
+    "toLight": "Passer au thème clair"
+  },
+  "leaderboard": { "title": "Classement de la saison" },
+  "matches": { "title": "Matchs" },
+  "nav": {
+    "label": "Principal",
+    "leaderboard": "Classement",
+    "matches": "Matchs"
+  },
+  "notFound": {
+    "body": "Cette page n'existe pas, ou l'organisation à laquelle elle appartient n'est plus disponible. Vérifiez l'adresse, ou repartez de l'accueil.",
+    "home": "Aller à l'accueil",
+    "title": "Page introuvable"
+  }
+}

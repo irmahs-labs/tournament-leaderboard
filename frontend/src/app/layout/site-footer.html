@@ -1,0 +1,23 @@
+<footer class="foot" *transloco="let t">
+  <div class="inner">
+    @if (organization(); as org) {
+    <div class="row">
+      <span class="org">
+        {{ org.name }} @if (org.tournamentName) { · {{ org.tournamentName }} }
+      </span>
+    </div>
+    }
+    <div class="row credit" [class.ruled]="organization()">
+      <span
+        >Tournament Leaderboard · {{ t("footer.createdBy") }}
+        <a class="strong" href="https://irmahs.dev">Irma HS</a></span
+      >
+      <span class="links">
+        <a href="https://github.com/irmahs-labs/tournament-leaderboard"
+          >GitHub</a
+        >
+        <a [href]="'mailto:' + contact">{{ contact }}</a>
+      </span>
+    </div>
+  </div>
+</footer>

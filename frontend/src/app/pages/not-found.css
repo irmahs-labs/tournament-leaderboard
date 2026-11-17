@@ -1,0 +1,54 @@
+.lost {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 48px;
+  padding-top: 96px;
+  padding-bottom: 120px;
+}
+
+.copy {
+  flex: 999 1 560px;
+  min-width: 0;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.code {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(96px, 20vw, 160px);
+  line-height: 0.85;
+  color: var(--accent-text);
+}
+
+.lede {
+  margin: 0;
+  color: var(--muted);
+  font-size: 18px;
+}
+
+.slab {
+  flex: 1 1 240px;
+  height: 300px;
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 48px),
+    calc(100% - 48px) 100%,
+    0 100%
+  );
+}
+
+.slab span {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 38%;
+  height: 8px;
+  background: var(--accent);
+}

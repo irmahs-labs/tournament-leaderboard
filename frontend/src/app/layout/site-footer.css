@@ -1,0 +1,48 @@
+.foot {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.inner {
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: 22px var(--gutter);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.ruled {
+  padding-top: 16px;
+  border-top: 1px solid var(--row-line);
+}
+
+.org {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+a {
+  color: var(--muted);
+}
+
+.strong {
+  color: var(--text);
+  font-weight: 600;
+}
