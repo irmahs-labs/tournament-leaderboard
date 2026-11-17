@@ -60,6 +60,9 @@ typecheck in `frontend/`, Spotless and a compile in `backend/`. In cloud session
     named by date (`V2026_11_05_1__description.sql`); Hibernate runs with `ddl-auto: validate`.
   - Deployment — on the shared irmahs.dev server, like the other irmahs-labs apps; see
     [`deploy/README.md`](deploy/README.md).
+- [`docs/context-graph.md`](docs/context-graph.md) maps the rewrite: packages and their
+  dependencies, endpoints, tables, screens and phases. Read it before starting work, and update it
+  in the same pull request whenever a change adds, removes or reconnects any of those.
 - The full plan (schema, endpoints, screens, phases) is the migration plan page kept with the
   project designs; ask the user for the link when you need it.
 
