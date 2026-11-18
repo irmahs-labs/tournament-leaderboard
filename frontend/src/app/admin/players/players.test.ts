@@ -8,8 +8,8 @@ import type { Season } from "../../results/api";
 import type { Me } from "../../shared/session";
 import {
   ALSACE,
-  answer,
   ME,
+  openAs,
   rendered,
   SEASONS,
   testProviders,
@@ -54,33 +54,6 @@ const PLAYER_ONLY: Me = {
 };
 
 let http: HttpTestingController;
-
-/** Opens an address as `me` (nobody when null): the guard asks who is signed in first. */
-const openAs = async (
-  url: string,
-  me: Me | null,
-  seasons: Season[] = []
-): Promise<RouterTestingHarness> => {
-  const harness = await RouterTestingHarness.create();
-  const navigation = harness.navigateByUrl(url);
-
-  await vi.waitFor(() => {
-    harness.detectChanges();
-    const request = http.expectOne("/api/me");
-
-    if (me) {
-      request.flush(me);
-    } else {
-      request.flush(null, { status: 401, statusText: "Unauthorized" });
-    }
-  });
-  await answer(harness, `/api/orgs/${ALSACE.slug}`, ALSACE);
-  await navigation;
-  await answer(harness, `/api/orgs/${ALSACE.slug}/seasons`, seasons);
-  harness.detectChanges();
-
-  return harness;
-};
 
 /** Opens the Players page as an admin, with its players and the ranks. */
 const openPlayers = async (
@@ -140,6 +113,8 @@ describe("the admin pages", () => {
     expect(texts(page, "header nav.nav a")).toStrictEqual([
       "Scores",
       "Players",
+      "Seasons",
+      "Scoring",
     ]);
     expect(page.querySelector("header select")).toBeNull();
   });

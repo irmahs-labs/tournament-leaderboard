@@ -1,0 +1,234 @@
+<ng-container *transloco="let t">
+  <div class="intro-text">
+    <span class="eyebrow"
+      >{{ t("admin.eyebrow", { org: current.organization()?.name ?? "" })
+      }}</span
+    >
+    <h1 class="display">{{ t("adminSeasons.title") }}</h1>
+    <p class="lede muted">{{ t("adminSeasons.lede") }}</p>
+  </div>
+
+  <section class="panel block" aria-labelledby="all-title">
+    <h2 class="heading spaced" id="all-title">{{ t("adminSeasons.all") }}</h2>
+    @if (current.failed()) {
+    <p class="muted" role="alert">{{ t("adminSeasons.failed") }}</p>
+    } @else if (current.settled() && current.seasons().length === 0) {
+    <p class="muted">{{ t("leaderboard.noSeason") }}</p>
+    } @else {
+    <div class="scroll">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">{{ t("adminSeasons.season") }}</th>
+            <th scope="col">{{ t("adminSeasons.dates") }}</th>
+            <th scope="col" class="num">{{ t("adminSeasons.matches") }}</th>
+            <th scope="col" class="num">
+              {{ t("adminSeasons.gamesPerMatch") }}
+            </th>
+            <th scope="col">{{ t("adminScores.status") }}</th>
+            <th scope="col">
+              <span class="visually-hidden"
+                >{{ t("adminPlayers.actions") }}</span
+              >
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (season of current.seasons(); track season.number) { @if
+          (editing() === season.number) {
+          <tr class="editing">
+            <td>
+              <input
+                #name
+                required
+                [attr.maxlength]="limits.maxName"
+                [attr.aria-label]="t('adminSeasons.name')"
+                [value]="season.name"
+              />
+            </td>
+            <td>
+              <div class="pair">
+                <input
+                  #startsOn
+                  type="date"
+                  [attr.aria-label]="t('adminSeasons.startsOn')"
+                  [value]="season.startsOn ?? ''"
+                />
+                <input
+                  #endsOn
+                  type="date"
+                  [attr.aria-label]="t('adminSeasons.endsOn')"
+                  [value]="season.endsOn ?? ''"
+                />
+              </div>
+            </td>
+            <td class="num">
+              <input
+                #matchCount
+                class="count"
+                type="number"
+                min="1"
+                [max]="limits.maxMatches"
+                [attr.aria-label]="t('adminSeasons.matches')"
+                [value]="season.matchCount"
+              />
+            </td>
+            <td class="num">
+              <div class="pair">
+                <input
+                  #minGames
+                  class="count"
+                  type="number"
+                  min="1"
+                  [max]="limits.maxGames"
+                  [attr.aria-label]="t('adminSeasons.minGames')"
+                  [value]="season.minGames"
+                />
+                <input
+                  #maxGames
+                  class="count"
+                  type="number"
+                  min="1"
+                  [max]="limits.maxGames"
+                  [attr.aria-label]="t('adminSeasons.maxGames')"
+                  [value]="season.maxGames"
+                />
+              </div>
+            </td>
+            <td>
+              <label class="check">
+                <input #finished type="checkbox" [checked]="season.finished" />
+                {{ t("adminSeasons.finished") }}
+              </label>
+            </td>
+            <td>
+              <div class="actions">
+                <button
+                  type="button"
+                  class="button-ghost small-button"
+                  (click)="editing.set(null)"
+                >
+                  {{ t("adminPlayers.cancel") }}
+                </button>
+                <button
+                  type="button"
+                  class="button small-button"
+                  [disabled]="action.busy()"
+                  (click)="save(season, { name: name.value, startsOn: startsOn.value, endsOn: endsOn.value, matchCount: matchCount.value, minGames: minGames.value, maxGames: maxGames.value }, finished.checked)"
+                >
+                  {{ t("adminPlayers.save") }}
+                </button>
+              </div>
+            </td>
+          </tr>
+          } @else {
+          <tr>
+            <td><strong>{{ season.name }}</strong></td>
+            <td>{{ dates(season) }}</td>
+            <td class="num">{{ season.matchCount }}</td>
+            <td class="num">
+              {{ season.minGames === season.maxGames ? season.maxGames :
+              season.minGames + "–" + season.maxGames }}
+            </td>
+            <td>
+              <span class="pill" [class.live]="!season.finished"
+                >{{ t(season.finished ? "adminSeasons.isFinished" :
+                "adminSeasons.isCurrent") }}</span
+              >
+            </td>
+            <td>
+              <button
+                type="button"
+                class="button-ghost small-button"
+                (click)="editing.set(season.number)"
+              >
+                {{ t("adminPlayers.edit") }}<span class="visually-hidden">
+                  {{ season.name }}</span
+                >
+              </button>
+            </td>
+          </tr>
+          } }
+        </tbody>
+      </table>
+    </div>
+    }
+  </section>
+
+  <p
+    class="status"
+    role="status"
+    [class.failed]="action.outcome()?.ok === false"
+  >
+    {{ action.outcome()?.text }}
+  </p>
+
+  <section class="panel block" aria-labelledby="start-title">
+    <h2 class="heading spaced" id="start-title">
+      {{ t("adminSeasons.start") }}
+    </h2>
+    <form #form class="start" (submit)="start($event, form)">
+      <label class="field">
+        <span class="label">{{ t("adminSeasons.name") }}</span>
+        <input
+          name="name"
+          autocomplete="off"
+          [attr.maxlength]="limits.maxName"
+          [placeholder]="t('adminSeasons.nameHint', { number: (newest()?.number ?? 0) + 1 })"
+        />
+      </label>
+      <label class="field">
+        <span class="label">{{ t("adminSeasons.startsOn") }}</span>
+        <input name="startsOn" type="date" />
+      </label>
+      <label class="field">
+        <span class="label">{{ t("adminSeasons.endsOn") }}</span>
+        <input name="endsOn" type="date" />
+      </label>
+      <label class="field">
+        <span class="label">{{ t("adminSeasons.matches") }}</span>
+        <input
+          name="matchCount"
+          type="number"
+          min="1"
+          [max]="limits.maxMatches"
+          [value]="newest()?.matchCount ?? 8"
+        />
+      </label>
+      <label class="field">
+        <span class="label">{{ t("adminSeasons.minGames") }}</span>
+        <input
+          name="minGames"
+          type="number"
+          min="1"
+          [max]="limits.maxGames"
+          [value]="newest()?.minGames ?? 1"
+        />
+      </label>
+      <label class="field">
+        <span class="label">{{ t("adminSeasons.maxGames") }}</span>
+        <input
+          name="maxGames"
+          type="number"
+          min="1"
+          [max]="limits.maxGames"
+          [value]="newest()?.maxGames ?? 5"
+        />
+      </label>
+      <label class="field wide">
+        <span class="label">{{ t("adminSeasons.rules") }}</span>
+        <select name="copyRulesFrom">
+          @for (season of current.seasons(); track season.number) {
+          <option [value]="season.number" [selected]="$first">
+            {{ t("adminSeasons.copyFrom", { name: season.name }) }}
+          </option>
+          }
+          <option value="">{{ t("adminSeasons.defaults") }}</option>
+        </select>
+      </label>
+      <button class="button" type="submit" [disabled]="action.busy()">
+        {{ t("adminSeasons.create") }}
+      </button>
+    </form>
+  </section>
+</ng-container>

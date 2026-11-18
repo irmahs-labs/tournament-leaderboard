@@ -288,3 +288,34 @@ export const openAlsace = async (
 
   return harness;
 };
+
+/**
+ * Opens an address as `me` (nobody when null), for pages behind the admin guard, which asks who is
+ * signed in first; then answers the organisation and its seasons.
+ */
+export const openAs = async (
+  url: string,
+  me: Me | null,
+  seasons: Season[] = []
+): Promise<RouterTestingHarness> => {
+  const http = TestBed.inject(HttpTestingController);
+  const harness = await RouterTestingHarness.create();
+  const navigation = harness.navigateByUrl(url);
+
+  await vi.waitFor(() => {
+    harness.detectChanges();
+    const request = http.expectOne("/api/me");
+
+    if (me) {
+      request.flush(me);
+    } else {
+      request.flush(null, { status: 401, statusText: "Unauthorized" });
+    }
+  });
+  await answer(harness, `/api/orgs/${ALSACE.slug}`, ALSACE);
+  await navigation;
+  await answer(harness, `/api/orgs/${ALSACE.slug}/seasons`, seasons);
+  harness.detectChanges();
+
+  return harness;
+};

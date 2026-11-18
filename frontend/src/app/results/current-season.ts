@@ -57,6 +57,11 @@ export class CurrentSeason {
       : undefined;
   });
 
+  /** Asks for the seasons again, after one is started or edited. */
+  reload(): void {
+    this.#list.reload();
+  }
+
   /** Called by the organisation's shell whenever the organisation or `?season=` changes. */
   use(organization: Organization, requested: number | null): void {
     this.#organization.set(organization);
