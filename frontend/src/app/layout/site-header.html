@@ -13,12 +13,14 @@
         [routerLink]="['/o', org.slug]"
         routerLinkActive="active"
         [routerLinkActiveOptions]="{ exact: true }"
+        queryParamsHandling="preserve"
         ariaCurrentWhenActive="page"
         >{{ t("nav.leaderboard") }}</a
       >
       <a
         [routerLink]="['/o', org.slug, 'matches']"
         routerLinkActive="active"
+        queryParamsHandling="preserve"
         ariaCurrentWhenActive="page"
         >{{ t("nav.matches") }}</a
       >

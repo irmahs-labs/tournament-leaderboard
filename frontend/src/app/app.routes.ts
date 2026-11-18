@@ -6,6 +6,7 @@ import { LEGAL_PAGES } from "./legal/legal-content";
 import { LegalPage } from "./legal/legal-page";
 import { NotFoundPage } from "./not-found/not-found";
 import { LeaderboardPage } from "./results/leaderboard/leaderboard";
+import { MatchPage } from "./results/match/match";
 import { MatchesPage } from "./results/matches/matches";
 import { organizationResolver } from "./shared/organization";
 import { SignInPage } from "./sign-in/sign-in";
@@ -17,6 +18,7 @@ export const routes: Routes = [
     children: [
       { component: LeaderboardPage, path: "" },
       { component: MatchesPage, path: "matches" },
+      { component: MatchPage, path: "matches/:match" },
     ],
     component: OrgShell,
     path: "o/:slug",

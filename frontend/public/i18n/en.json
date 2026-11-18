@@ -1,7 +1,4 @@
 {
-  "common": {
-    "comingSoon": "This page is on its way."
-  },
   "footer": {
     "createdBy": "created by",
     "legalLabel": "Legal",
@@ -63,7 +60,63 @@
     "setBy": "Set by {{org}} admins for {{season}}."
   },
   "matches": {
-    "title": "Matches"
+    "title": "Matches",
+    "planned": {
+      "one": "{{count}} match this season.",
+      "other": "{{count}} matches this season."
+    },
+    "gamesEach": {
+      "one": "Each match is {{count}} game.",
+      "other": "Each match is {{count}} games."
+    },
+    "gamesBetween": "Each match is {{min}} to {{max}} games.",
+    "failed": "The matches couldn't be loaded. Try again in a moment.",
+    "loading": "Loading the matches…",
+    "none": "No match is planned for this season yet.",
+    "noDate": "Date to be set",
+    "status": {
+      "played": "Played",
+      "next": "Next up",
+      "scheduled": "Scheduled"
+    },
+    "match": "Match {{match}}",
+    "games": {
+      "one": "{{count}} game",
+      "other": "{{count}} games"
+    },
+    "mvp": "MVP",
+    "view": "View match",
+    "notPlayed": "No games recorded yet."
+  },
+  "match": {
+    "breadcrumb": "Breadcrumb",
+    "missing": "This season has no match with this number.",
+    "failed": "This match couldn't be loaded. Try again in a moment.",
+    "players": {
+      "one": "{{count}} player",
+      "other": "{{count}} players"
+    },
+    "show": "Show",
+    "overall": "Overall",
+    "game": "Game {{game}}",
+    "mvp": "Match MVP",
+    "gameMvp": "Game MVP",
+    "kdaLong": "Kills / deaths / assists",
+    "leaders": {
+      "KILLS": "Most kills",
+      "DEATHS": "Fewest deaths",
+      "ASSISTS": "Most assists",
+      "FIRST_BLOODS": "Most first bloods",
+      "PLANTS": "Most plants",
+      "DEFUSES": "Most defuses"
+    },
+    "wonBy": "Won by {{players}}",
+    "noWinner": "No winner recorded",
+    "stats": "Match stats",
+    "combined": {
+      "one": "Its only game",
+      "other": "All {{count}} games combined"
+    }
   },
   "nav": {
     "label": "Main",
@@ -136,7 +189,10 @@
     "wins": "Wins",
     "total": "Total",
     "avg": "Avg {{stat}}",
-    "average": "{{stat}}, average per game"
+    "average": "{{stat}}, average per game",
+    "won": "Won",
+    "yes": "Yes",
+    "no": "No"
   },
   "legal": {
     "updated": "Last updated:"

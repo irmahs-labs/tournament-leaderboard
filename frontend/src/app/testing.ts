@@ -14,7 +14,14 @@ import { vi } from "vitest";
 import en from "../../public/i18n/en.json";
 import fr from "../../public/i18n/fr.json";
 import { routes } from "./app.routes";
-import type { Leaderboard, Rules, Season, Summary } from "./results/api";
+import type {
+  Leaderboard,
+  MatchCard,
+  MatchView,
+  Rules,
+  Season,
+  Summary,
+} from "./results/api";
 import type { Organization } from "./shared/organization";
 import type { Me } from "./shared/session";
 
@@ -134,6 +141,71 @@ export const RULES: Rules = {
   ],
 };
 
+/** Season 3's matches: one played, then two still to play (one without a date). */
+export const MATCH_CARDS: MatchCard[] = [
+  {
+    games: 2,
+    matchDate: "2026-11-13",
+    matchNumber: 1,
+    players: 2,
+    topPlayer: { playerId: "kestrel", points: 5749, riotId: "Kestrel#EUW" },
+  },
+  {
+    games: 0,
+    matchDate: "2026-11-20",
+    matchNumber: 2,
+    players: 0,
+    topPlayer: null,
+  },
+  { games: 0, matchDate: null, matchNumber: 3, players: 0, topPlayer: null },
+];
+
+/** Match 1 of season 3: Kestrel wins game 1, Wren game 2; Kestrel is the match's MVP. */
+export const MATCH: MatchView = {
+  bonuses: BONUSES,
+  columns: LEADERBOARD.columns,
+  combined: LEADERBOARD.standings,
+  games: [
+    {
+      gameNumber: 1,
+      lines: [
+        {
+          bonuses: ["FB"],
+          playerId: "kestrel",
+          points: 3200,
+          riotId: "Kestrel#EUW",
+          stats: { ASSISTS: 5, DEATHS: 12, KILLS: 20, PERFORMANCE_SCORE: 240 },
+          win: true,
+        },
+      ],
+    },
+    {
+      gameNumber: 2,
+      lines: [
+        {
+          bonuses: ["LD"],
+          playerId: "wren",
+          points: 2900,
+          riotId: "Wren#EUW",
+          stats: { DEATHS: 9, KILLS: 12, PERFORMANCE_SCORE: 180 },
+          win: true,
+        },
+        {
+          bonuses: ["FB"],
+          playerId: "kestrel",
+          points: 2549,
+          riotId: "Kestrel#EUW",
+          stats: { ASSISTS: 3, DEATHS: 14, KILLS: 13, PERFORMANCE_SCORE: 200 },
+          win: false,
+        },
+      ],
+    },
+  ],
+  matchDate: "2026-11-13",
+  matchNumber: 1,
+  season: { name: "Season 3", number: 3 },
+};
+
 /** The app's routes, a fake back end, and both languages loaded from the real files. */
 export const testProviders = (): (Provider | EnvironmentProviders)[] => [
   provideHttpClient(),
@@ -174,7 +246,15 @@ export const rendered = (harness: RouterTestingHarness): HTMLElement => {
 };
 
 /** What the fake back end answers. */
-type Answer = Organization | Season[] | Leaderboard | Summary | Rules | Me;
+type Answer =
+  | Organization
+  | Season[]
+  | Leaderboard
+  | Summary
+  | Rules
+  | Me
+  | MatchCard[]
+  | MatchView;
 
 /** Answers a request once the app makes it, running change detection while it waits. */
 export const answer = async (

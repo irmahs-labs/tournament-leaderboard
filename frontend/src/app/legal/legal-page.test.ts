@@ -104,6 +104,10 @@ describe("the footer", () => {
     TestBed.configureTestingModule({ providers: testProviders() });
   });
 
+  afterEach(() => {
+    localStorage.clear();
+  });
+
   it("links to the legal pages on every organisation page", async () => {
     const page = rendered(await openAlsace("/o/alsace-arena"));
     const footer = page.ownerDocument.querySelector("footer nav");

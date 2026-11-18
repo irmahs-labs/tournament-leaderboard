@@ -1,0 +1,140 @@
+<ng-container *transloco="let t">
+  <nav class="crumbs muted" [attr.aria-label]="t('match.breadcrumb')">
+    <a routerLink=".." [queryParams]="{ season: current.season()?.number }"
+      >{{ t("matches.title") }}</a
+    >
+    /
+    <span aria-current="page"
+      >{{ t("matches.match", { match: match() }) }}</span
+    >
+  </nav>
+
+  @if (missing()) {
+  <h1 class="display">{{ t("matches.match", { match: match() }) }}</h1>
+  <p class="panel notice">
+    {{ t("match.missing", { season: current.season()?.name ?? "" }) }}
+  </p>
+  } @else if (current.failed() || view.error()) {
+  <h1 class="display">{{ t("matches.match", { match: match() }) }}</h1>
+  <p class="panel notice" role="alert">{{ t("match.failed") }}</p>
+  } @else if (view.hasValue()) { @let shown = view.value();
+  <div class="intro">
+    <div class="intro-text">
+      <span class="eyebrow"
+        >{{ shown.season.name }}@if (shown.matchDate; as date) { · {{
+        language.day(date) }} }</span
+      >
+      <h1 class="display">
+        {{ t("matches.match", { match: shown.matchNumber }) }}
+      </h1>
+      <p class="lede muted">
+        {{ t(language.plural("matches.games", shown.games.length), { count:
+        shown.games.length }) }} · {{ t(language.plural("match.players",
+        shown.combined.length), { count: shown.combined.length }) }}
+      </p>
+    </div>
+    @if (shown.games.length > 1) {
+    <div class="switch" role="group" [attr.aria-label]="t('match.show')">
+      <button
+        type="button"
+        [class]="game() === null ? 'button' : 'button-ghost'"
+        [attr.aria-pressed]="game() === null"
+        (click)="game.set(null)"
+      >
+        {{ t("match.overall") }}
+      </button>
+      @for (each of shown.games; track each.gameNumber) {
+      <button
+        type="button"
+        [class]="game() === each.gameNumber ? 'button' : 'button-ghost'"
+        [attr.aria-pressed]="game() === each.gameNumber"
+        (click)="game.set(each.gameNumber)"
+      >
+        {{ t("match.game", { game: each.gameNumber }) }}
+      </button>
+      }
+    </div>
+    }
+  </div>
+
+  @if (shown.games.length === 0) {
+  <p class="panel notice">{{ t("matches.notPlayed") }}</p>
+  } @else {
+  <div class="highlights">
+    @if (mvp(); as best) {
+    <section
+      class="panel mvp"
+      [attr.aria-label]="t(shownGame() ? 'match.gameMvp' : 'match.mvp')"
+    >
+      <span class="label"
+        >{{ t(shownGame() ? "match.gameMvp" : "match.mvp") }}</span
+      >
+      <strong class="mvp-name">{{ splitRiotId(best.riotId).name }}</strong>
+      <span class="mvp-stats">
+        <span
+          >{{ t("leaderboard.points", { points: language.number(best.points) })
+          }}</span
+        >
+        @if (best.totals.KILLS !== undefined) {
+        <span
+          ><abbr [attr.title]="t('match.kdaLong')"
+            >{{ language.number(best.totals.KILLS) }} / {{
+            language.number(best.totals.DEATHS) }} / {{
+            language.number(best.totals.ASSISTS) }}</abbr
+          ></span
+        >
+        }
+      </span>
+    </section>
+    } @if (leaders().length > 0) {
+    <ul class="leaders">
+      @for (leader of leaders(); track leader.stat) {
+      <li class="panel leader">
+        <span class="label">{{ t("match.leaders." + leader.stat) }}</span>
+        <strong class="leader-name">{{ names(leader.riotIds) }}</strong>
+        <span class="leader-value">{{ language.number(leader.value) }}</span>
+      </li>
+      }
+    </ul>
+    }
+  </div>
+
+  <ul class="games">
+    @for (each of games(); track each.number) {
+    <li class="panel game">
+      <div class="game-top">
+        <h2 class="game-name">{{ t("match.game", { game: each.number }) }}</h2>
+        @if (each.mvp; as best) {
+        <span class="pill"
+          >{{ t("matches.mvp") }} {{ splitRiotId(best.riotId).name }}</span
+        >
+        }
+      </div>
+      <span class="muted small"
+        >{{ each.winners ? t("match.wonBy", { players: each.winners }) :
+        t("match.noWinner") }}</span
+      >
+    </li>
+    }
+  </ul>
+
+  <section class="panel block" [attr.aria-label]="t('match.stats')">
+    <div class="block-head">
+      <h2 class="heading">{{ t("match.stats") }}</h2>
+      <span class="muted small"
+        >@if (shownGame(); as picked) { {{ t("match.game", { game:
+        picked.gameNumber }) }} } @else { {{ t(language.plural("match.combined",
+        shown.games.length), { count: shown.games.length }) }} }</span
+      >
+    </div>
+    <app-standings-table
+      [standings]="rows()"
+      [stats]="shown.columns"
+      [single]="shownGame() !== null"
+    />
+  </section>
+  } } @else {
+  <h1 class="display">{{ t("matches.match", { match: match() }) }}</h1>
+  <p class="muted" aria-live="polite">{{ t("matches.loading") }}</p>
+  }
+</ng-container>
