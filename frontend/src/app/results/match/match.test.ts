@@ -140,6 +140,56 @@ describe("a match's page", () => {
     expect(text(page.querySelector(".mvp-name"))).toBe("Kestrel");
   });
 
+  it("shows averages, or totals for the stats that add up", async () => {
+    const page = await open();
+
+    const firstRow = (): (string | undefined)[] =>
+      texts(page.querySelector("tbody tr") ?? page, "td");
+
+    const toggle = page.querySelector<HTMLInputElement>("input[role=switch]");
+
+    expect(firstRow()).toStrictEqual([
+      "1",
+      "Radiant",
+      "Kestrel#EUW",
+      "2",
+      "220",
+      "1.58",
+      "1.50",
+      "1",
+      "5,749",
+    ]);
+
+    toggle?.click();
+    harness.detectChanges();
+
+    expect(toggle?.checked).toBeTruthy();
+    expect(firstRow()).toStrictEqual([
+      "1",
+      "Radiant",
+      "Kestrel#EUW",
+      "2",
+      "440",
+      "1.58",
+      "3",
+      "1",
+      "5,749",
+    ]);
+    expect(texts(page, "thead abbr")).toStrictEqual([
+      "Perf.",
+      "Avg KDA",
+      "Plants",
+    ]);
+  });
+
+  it("offers totals only over the whole match", async () => {
+    const page = await open();
+
+    pick(page, "Game 1");
+
+    expect(page.querySelector("input[role=switch]")).toBeNull();
+  });
+
   it("says when the season has no such match", async () => {
     harness = await openAlsace("/o/alsace-arena/matches/9?season=3", SEASONS);
     await vi.waitFor(() => {

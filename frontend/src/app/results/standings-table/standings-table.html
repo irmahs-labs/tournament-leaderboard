@@ -13,6 +13,11 @@
           <abbr [attr.title]="t('stats.long.' + column)"
             >{{ t("stats.short." + column) }}</abbr
           >
+          } @else if (total(column)) {
+          <abbr
+            [attr.title]="t('standings.totalOf', { stat: t('stats.long.' + column) })"
+            >{{ t("stats.short." + column) }}</abbr
+          >
           } @else {
           <abbr
             [attr.title]="t('standings.average', { stat: t('stats.long.' + column) })"
@@ -46,7 +51,8 @@
         <td class="num">{{ standing.games }}</td>
         } @for (column of columns(); track column) {
         <td class="num">
-          {{ language.number(valueOf(standing, column), decimalsOf(column)) }}
+          {{ language.number(valueOf(standing, column, total(column)),
+          decimalsOf(column, total(column))) }}
         </td>
         }
         <td class="num">

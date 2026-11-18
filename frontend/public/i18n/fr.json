@@ -116,7 +116,8 @@
     "combined": {
       "one": "Sa seule partie",
       "other": "Les {{count}} parties réunies"
-    }
+    },
+    "showTotals": "Afficher les totaux"
   },
   "nav": {
     "label": "Principal",
@@ -192,7 +193,8 @@
     "average": "{{stat}}, moyenne par partie",
     "won": "Gagnée",
     "yes": "Oui",
-    "no": "Non"
+    "no": "Non",
+    "totalOf": "{{stat}}, total sur les parties"
   },
   "legal": {
     "updated": "Dernière mise à jour :"
