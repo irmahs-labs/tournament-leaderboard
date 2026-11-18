@@ -10,7 +10,9 @@ permissions:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # A new push replaces a pull request's run, but never cuts off a branch's run: on migration
+  # that run ends with a deploy, which must finish.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
@@ -45,3 +47,11 @@ jobs:
         run: >-
           ./mvnw -B -ntp sonar:sonar
           -Dsonar.qualitygate.wait=${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/main' }}
+
+  # Every merge into migration that passed the build and tests goes live; see deploy.yml.
+  deploy:
+    name: Deploy
+    needs: build
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/migration' }}
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
