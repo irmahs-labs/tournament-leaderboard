@@ -72,6 +72,12 @@ the GitHub secret **and** run `ALTER ROLE … PASSWORD '…'` in the database.
 
    Merge it after the DNS records exist; Caddy gets the certificate on the first visit.
 
+## Until the switch-over
+
+Decided on 2026-11-18: every merge into `migration` that passes CI deploys production, as above,
+until the rewrite replaces the legacy site. Version tags deploying production, `main` deploying a
+staging copy, and release-please come with the switch-over (phase 6), not before.
+
 ## Dumps before each deploy
 
 Before starting the new version, the deploy dumps the database with `pg_dump --format=custom`

@@ -234,7 +234,8 @@ flowchart LR
     p10 --> p11[11 Exports and poster] --> p12[12 Moderation] --> p13[13 Merge tool and scan]
 ```
 
-✓ done · ▶ next. The full plan, with each phase's exit criterion, is the migration plan page
+✓ done · ▶ next. Until the switch-over (6), every merge into `migration` that passes CI deploys
+production; version tags, a staging copy from `main` and release-please come with it. The full plan, with each phase's exit criterion, is the migration plan page
 kept with the project designs.
 
 Not built yet: social links, branding, members and invites (7); the scoring-rules editor,
