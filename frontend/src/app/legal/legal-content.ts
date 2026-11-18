@@ -206,7 +206,7 @@ const EN: Record<LegalPageId, LegalDocument> = {
             ],
             [
               "Every visitor",
-              "Technical data needed to deliver the pages, such as your IP address, handled by the network provider Cloudflare. The server itself keeps no log of visits.",
+              "Technical data needed to deliver the pages, such as your IP address, handled by the network provider Cloudflare. The server itself keeps no log of visits. The header's online count is the number of pages open right now, counted from their open connections and kept only in memory: it identifies no one and nothing is stored.",
               "Delivering the site and protecting it from attacks. Legitimate interest (article 6(1)(f)).",
               "Under Cloudflare's retention rules.",
             ],
@@ -467,7 +467,7 @@ const FR: Record<LegalPageId, LegalDocument> = {
             ],
             [
               "Tout visiteur",
-              "Données techniques nécessaires pour afficher les pages, comme votre adresse IP, traitées par le fournisseur réseau Cloudflare. Le serveur lui-même ne garde aucun journal des visites.",
+              "Données techniques nécessaires pour afficher les pages, comme votre adresse IP, traitées par le fournisseur réseau Cloudflare. Le serveur lui-même ne garde aucun journal des visites. Le nombre de personnes en ligne, dans l'en-tête, compte les pages ouvertes à cet instant d'après leurs connexions ouvertes, en mémoire seulement : il n'identifie personne et rien n'est enregistré.",
               "Délivrer le site et le protéger des attaques. Intérêt légitime (article 6(1)(f)).",
               "Selon les règles de conservation de Cloudflare.",
             ],

@@ -33,7 +33,13 @@
     <span class="nav"></span>
     }
     <div class="tools">
-      @if (organization() && current.seasons().length > 0) {
+      @if (online.count(); as count) {
+      <span class="online" [attr.title]="t('header.onlineTitle')">
+        <span class="dot" aria-hidden="true"></span>
+        <strong>{{ language.number(count) }}</strong>
+        {{ t("header.online") }}
+      </span>
+      } @if (organization() && current.seasons().length > 0) {
       <select
         #picker
         class="tool season"
