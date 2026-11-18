@@ -5,6 +5,7 @@
 }
 
 .main {
+  outline: none;
   flex-grow: 1;
   width: 100%;
   max-width: var(--page-width);

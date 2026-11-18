@@ -29,7 +29,6 @@ export const ALSACE: Organization = {
 };
 
 export const ME: Me = {
-  avatarUrl: null,
   displayName: "Camille Martin",
   email: "camille@example.com",
   memberships: [

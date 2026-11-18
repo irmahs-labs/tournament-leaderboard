@@ -20,7 +20,6 @@ export interface Membership {
 export interface Me {
   email: string;
   displayName: string | null;
-  avatarUrl: string | null;
   platformAdmin: boolean;
   memberships: Membership[];
 }

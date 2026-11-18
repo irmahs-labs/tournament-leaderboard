@@ -64,19 +64,18 @@ class SignInIT {
     }
 
     private static GoogleProfile profile(String sub, String email) {
-        return new GoogleProfile(sub, email, "Name of " + sub, "https://example.com/" + sub + ".png");
+        return new GoogleProfile(sub, email, "Name of " + sub);
     }
 
     @Test
     void theFirstSignInCreatesTheAccountAndTheNextOnesUpdateIt() {
         AppUser first = accounts.signIn(profile("google-1", "kes@example.com"));
-        AppUser second = accounts.signIn(new GoogleProfile("google-1", "kestrel@example.com", "Kestrel", null));
+        AppUser second = accounts.signIn(new GoogleProfile("google-1", "kestrel@example.com", "Kestrel"));
 
         assertThat(second.getId()).isEqualTo(first.getId());
         assertThat(second.getGoogleSub()).isEqualTo("google-1");
         assertThat(second.getEmail()).isEqualTo("kestrel@example.com");
         assertThat(second.getDisplayName()).isEqualTo("Kestrel");
-        assertThat(second.getAvatarUrl()).isNull();
         assertThat(second.getCreatedAt()).isNotNull();
         assertThat(second.isPlatformAdmin()).isFalse();
         assertThat(count("app_users")).isEqualTo(1);
@@ -149,8 +148,7 @@ class SignInIT {
                 .hasStatusOk()
                 .bodyJson()
                 .isStrictlyEqualTo("""
-                        {"email": "owner@example.com", "displayName": "Name of google-1",
-                         "avatarUrl": "https://example.com/google-1.png", "platformAdmin": false,
+                        {"email": "owner@example.com", "displayName": "Name of google-1", "platformAdmin": false,
                          "memberships": [{"slug": "alsace-arena", "name": "Alsace Arena", "role": "ADMIN", "owner": true}]}""");
     }
 

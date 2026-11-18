@@ -94,7 +94,6 @@ public class AccountService {
                 .map(user -> new Me(
                         user.getEmail(),
                         user.getDisplayName(),
-                        user.getAvatarUrl(),
                         user.isPlatformAdmin(),
                         members.findMemberships(user.getId())));
     }
@@ -102,6 +101,5 @@ public class AccountService {
     /**
      * @param memberships the active organisations they belong to
      */
-    public record Me(
-            String email, String displayName, String avatarUrl, boolean platformAdmin, List<Membership> memberships) {}
+    public record Me(String email, String displayName, boolean platformAdmin, List<Membership> memberships) {}
 }
