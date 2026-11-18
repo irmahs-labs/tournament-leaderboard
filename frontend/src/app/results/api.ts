@@ -1,4 +1,4 @@
-/** The shapes of the public results API: seasons, leaderboard, summary and rules. */
+/** The shapes of the public results API: seasons, leaderboard, summary, rules and matches. */
 
 /** A stat a game can record for a player, in the order the pages show them. */
 export type Stat =
@@ -89,4 +89,52 @@ export interface Rules {
   pointsPerWin: number;
   stats: StatRule[];
   bonuses: Bonus[];
+}
+
+/** The match's best player: the most points over its games. */
+export interface TopPlayer {
+  playerId: string;
+  riotId: string;
+  points: number;
+}
+
+/** One entry of `GET …/seasons/{n}/matches`: a match, played or only planned. */
+export interface MatchCard {
+  matchNumber: number;
+  /** YYYY-MM-DD, or nothing while it isn't set. */
+  matchDate: string | null;
+  /** How many games have scores; 0 before the match is played. */
+  games: number;
+  players: number;
+  topPlayer: TopPlayer | null;
+}
+
+/** One player's line of a game. */
+export interface GameLine {
+  playerId: string;
+  riotId: string;
+  stats: Partial<Record<Stat, number>>;
+  win: boolean;
+  /** The codes of the bonuses the player won in the game. */
+  bonuses: string[];
+  points: number;
+}
+
+/** A game's lines, best first. */
+export interface GameView {
+  gameNumber: number;
+  lines: GameLine[];
+}
+
+/** `GET …/seasons/{n}/matches/{m}`. */
+export interface MatchView {
+  season: { number: number; name: string };
+  matchNumber: number;
+  matchDate: string | null;
+  /** The stats with a value in at least one of the match's games. */
+  columns: Stat[];
+  bonuses: Bonus[];
+  games: GameView[];
+  /** The players' totals over the whole match. */
+  combined: Standing[];
 }

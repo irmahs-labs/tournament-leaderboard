@@ -1,4 +1,10 @@
-import { Component, computed, inject, input } from "@angular/core";
+import {
+  booleanAttribute,
+  Component,
+  computed,
+  inject,
+  input,
+} from "@angular/core";
 import { TranslocoDirective } from "@jsverse/transloco";
 
 import { LanguageService } from "../../shared/language";
@@ -8,7 +14,8 @@ import { columnsFor, decimalsOf, splitRiotId, valueOf } from "../stats";
 
 /**
  * Players' standings: position, rank, player, games, one average per recorded stat, wins and
- * total. Used by the season leaderboard, and by a match's combined table.
+ * total. Used by the season leaderboard, and by a match's tables: its combined one, and one per
+ * game (`single`), where each stat is the game's own and Wins says whether the player won.
  */
 @Component({
   imports: [RankPill, TranslocoDirective],
@@ -21,6 +28,9 @@ export class StandingsTable {
 
   /** The stats recorded in these games, as the API lists them. */
   readonly stats = input.required<Stat[]>();
+
+  /** One game's lines rather than totals over several games. */
+  readonly single = input(false, { transform: booleanAttribute });
 
   protected readonly columns = computed(() => columnsFor(this.stats()));
   protected readonly language = inject(LanguageService);

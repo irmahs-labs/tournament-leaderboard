@@ -19,6 +19,8 @@ describe("the sign-in page", () => {
   let http: HttpTestingController;
 
   beforeEach(() => {
+    // No language picked, so the organisation's own applies.
+    localStorage.clear();
     sessionStorage.clear();
     TestBed.configureTestingModule({ providers: testProviders() });
     http = TestBed.inject(HttpTestingController);

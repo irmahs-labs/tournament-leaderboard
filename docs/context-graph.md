@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-18, with the legal pages, the contrast fixes and the Google picture no longer kept.
+Last updated: 2026-11-18, with the Matches page and a match's page.
 
 ## System
 
@@ -155,7 +155,7 @@ flowchart TD
     platform --> si[SignInPage<br/>Google, your organisations, sign out]
     platform --> legal[LegalPage<br/>legal notice, privacy, cookies, terms]
     platform --> nf[NotFoundPage]
-    shell --> header[SiteHeader<br/>skip link, logo, nav, season, EN/FR, theme, Sign in or account]
+    shell --> header[SiteHeader<br/>skip link, logo, nav keeping ?season=, season, EN/FR, theme, Sign in or account]
     shell --> footer[SiteFooter<br/>org name, credit, legal pages, GitHub, contact]
     platform --> header
     platform --> footer
@@ -171,9 +171,13 @@ flowchart TD
     lb -->|GET| lbApi["…/seasons/{n}/leaderboard, /summary, /rules"]
     table --> pill[RankPill]
     lb --> pill
-    shell --> mt["MatchesPage (placeholder)"]
-    shell -.->|"/o/:slug/matches/:season/:match"| md[Match detail]
-    md -.-> table
+    shell -->|"/o/:slug/matches"| mt["MatchesPage<br/>a card per match, its MVP"]
+    mt --> current
+    mt -->|GET| mtApi["…/seasons/{n}/matches"]
+    shell -->|"/o/:slug/matches/:match?season="| md["MatchPage<br/>MVP, stat leaders, games, overall or one game"]
+    md --> current
+    md --> table
+    md -->|GET| mdApi["…/seasons/{n}/matches/{m}"]
     shell -.->|Phase 4| adm[Enter scores, Players, Seasons, Record switches]
     adm -.-> pill
     resolver[organizationResolver] -->|GET| orgApi["/api/orgs/{slug}"]
@@ -184,7 +188,7 @@ flowchart TD
 |---|---|
 | `shared/` | `ThemeService` (dark or light, the accent's CSS variables), `colour.ts` (WCAG contrast and mixing, the palettes, readable rank colours), `LanguageService` (EN or FR; numbers, dates and plurals in the language on screen), `SessionService` (who is signed in, Google sign-in with a safe return address, sign-out), `organization.ts` (`organizationResolver`, `fullName`, `initials`), `storage.ts` (local and session storage that survives being blocked), `RankPill` |
 | `layout/` | `OrgShell` (an organisation's pages), `PlatformShell` (sign-in and Not found), `SiteHeader`, `SiteFooter`, page layout |
-| `results/` | The public results: `api.ts` (the API's shapes), `CurrentSeason` (the organisation's seasons, newest first, and the one picked with `?season=`), `stats.ts` (stat columns with K, D and A folded into KDA, decimals, the points formula, Riot ID name and tag), `StandingsTable`, `leaderboard/`, `matches/` |
+| `results/` | The public results: `api.ts` (the API's shapes), `CurrentSeason` (the organisation's seasons, newest first, and the one picked with `?season=`), `stats.ts` (stat columns with K, D and A folded into KDA, decimals, the points formula, Riot ID name and tag), `StandingsTable` (a season's or a match's totals, or one game's lines), `leaderboard/`, `matches/` (`MatchesPage`), `match/` (`MatchPage`, `match-stats.ts`: a game's lines as standings, the stat leaders) |
 | `sign-in/` | `SignInPage` |
 | `legal/` | `LegalPage` and `legal-content.ts`: the legal notice, privacy policy, cookie policy and terms, in English and French, one route each |
 | `not-found/` | `NotFoundPage` |

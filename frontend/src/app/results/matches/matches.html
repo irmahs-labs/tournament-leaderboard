@@ -1,0 +1,76 @@
+<ng-container *transloco="let t">
+  <div class="intro-text">
+    @if (current.season(); as season) {
+    <span class="eyebrow"
+      >{{ season.name }}@if (current.organization()?.tournamentName; as
+      tournament) { · {{ tournament }} }</span
+    >
+    }
+    <h1 class="display">{{ t("matches.title") }}</h1>
+    @if (current.season(); as season) {
+    <p class="lede muted">
+      {{ t(language.plural("matches.planned", season.matchCount), { count:
+      season.matchCount }) }} @if (season.minGames === season.maxGames) { {{
+      t(language.plural("matches.gamesEach", season.maxGames), { count:
+      season.maxGames }) }} } @else { {{ t("matches.gamesBetween", { min:
+      season.minGames, max: season.maxGames }) }} }
+    </p>
+    }
+  </div>
+
+  @if (current.failed() || cards.error()) {
+  <p class="panel notice" role="alert">{{ t("matches.failed") }}</p>
+  } @else if (current.settled() && !current.season()) {
+  <p class="panel notice">{{ t("leaderboard.noSeason") }}</p>
+  } @else if (cards.hasValue()) { @if (cards.value().length === 0) {
+  <p class="panel notice">{{ t("matches.none") }}</p>
+  } @else {
+  <ul class="grid">
+    @for (card of cards.value(); track card.matchNumber; let i = $index) { @let
+    status = statuses()[i];
+    <li class="panel card">
+      <div class="card-top">
+        <span class="label"
+          >@if (card.matchDate; as date) { {{ language.day(date) }} } @else { {{
+          t("matches.noDate") }} }</span
+        >
+        <span class="pill status" [class.next]="status === 'next'"
+          >{{ t("matches.status." + status) }}</span
+        >
+      </div>
+      <h2 class="match-name">
+        {{ t("matches.match", { match: card.matchNumber }) }}
+      </h2>
+      @if (status === "played") {
+      <p class="facts muted">
+        <span
+          >{{ t(language.plural("matches.games", card.games), { count:
+          card.games }) }}</span
+        >
+        @if (card.topPlayer; as top) {
+        <span
+          >{{ t("matches.mvp") }}
+          <strong class="name">{{ splitRiotId(top.riotId).name }}</strong> · {{
+          t("leaderboard.points", { points: language.number(top.points) })
+          }}</span
+        >
+        }
+      </p>
+      <a
+        class="button-ghost view"
+        [routerLink]="['./', card.matchNumber]"
+        [queryParams]="{ season: current.season()?.number }"
+        >{{ t("matches.view") }}<span class="visually-hidden">
+          {{ card.matchNumber }}</span
+        ></a
+      >
+      } @else {
+      <p class="facts muted">{{ t("matches.notPlayed") }}</p>
+      }
+    </li>
+    }
+  </ul>
+  } } @else {
+  <p class="muted" aria-live="polite">{{ t("matches.loading") }}</p>
+  }
+</ng-container>

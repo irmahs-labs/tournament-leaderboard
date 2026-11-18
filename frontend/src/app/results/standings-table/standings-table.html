@@ -5,17 +5,26 @@
         <th scope="col">#</th>
         <th scope="col">{{ t("standings.rank") }}</th>
         <th scope="col">{{ t("standings.player") }}</th>
+        @if (!single()) {
         <th scope="col" class="num">{{ t("standings.games") }}</th>
-        @for (column of columns(); track column) {
+        } @for (column of columns(); track column) {
         <th scope="col" class="num">
+          @if (single()) {
+          <abbr [attr.title]="t('stats.long.' + column)"
+            >{{ t("stats.short." + column) }}</abbr
+          >
+          } @else {
           <abbr
             [attr.title]="t('standings.average', { stat: t('stats.long.' + column) })"
             >{{ t("standings.avg", { stat: t("stats.short." + column) })
             }}</abbr
           >
+          }
         </th>
         }
-        <th scope="col" class="num">{{ t("standings.wins") }}</th>
+        <th scope="col" class="num">
+          {{ t(single() ? "standings.won" : "standings.wins") }}
+        </th>
         <th scope="col" class="num">{{ t("standings.total") }}</th>
       </tr>
     </thead>
@@ -33,13 +42,17 @@
           <strong class="player">{{ id.name }}</strong
           ><span class="tag">{{ id.tag }}</span>
         </td>
+        @if (!single()) {
         <td class="num">{{ standing.games }}</td>
-        @for (column of columns(); track column) {
+        } @for (column of columns(); track column) {
         <td class="num">
           {{ language.number(valueOf(standing, column), decimalsOf(column)) }}
         </td>
         }
-        <td class="num">{{ standing.wins }}</td>
+        <td class="num">
+          {{ single() ? t(standing.wins > 0 ? "standings.yes" : "standings.no")
+          : standing.wins }}
+        </td>
         <td class="num total">{{ language.number(standing.points) }}</td>
       </tr>
       }

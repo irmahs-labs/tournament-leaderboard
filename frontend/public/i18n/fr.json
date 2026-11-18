@@ -1,7 +1,4 @@
 {
-  "common": {
-    "comingSoon": "Cette page arrive bientôt."
-  },
   "footer": {
     "createdBy": "créé par",
     "legalLabel": "Informations légales",
@@ -63,7 +60,63 @@
     "setBy": "Règles de {{season}}, fixées par les admins de l'organisation {{org}}."
   },
   "matches": {
-    "title": "Matchs"
+    "title": "Matchs",
+    "planned": {
+      "one": "{{count}} match cette saison.",
+      "other": "{{count}} matchs cette saison."
+    },
+    "gamesEach": {
+      "one": "Chaque match se joue en {{count}} partie.",
+      "other": "Chaque match se joue en {{count}} parties."
+    },
+    "gamesBetween": "Chaque match se joue en {{min}} à {{max}} parties.",
+    "failed": "Les matchs n'ont pas pu être chargés. Réessayez dans un instant.",
+    "loading": "Chargement des matchs…",
+    "none": "Aucun match n'est encore prévu cette saison.",
+    "noDate": "Date à définir",
+    "status": {
+      "played": "Joué",
+      "next": "Prochain",
+      "scheduled": "Prévu"
+    },
+    "match": "Match {{match}}",
+    "games": {
+      "one": "{{count}} partie",
+      "other": "{{count}} parties"
+    },
+    "mvp": "MVP",
+    "view": "Voir le match",
+    "notPlayed": "Aucune partie enregistrée pour l'instant."
+  },
+  "match": {
+    "breadcrumb": "Fil d'Ariane",
+    "missing": "Cette saison n'a pas de match avec ce numéro.",
+    "failed": "Ce match n'a pas pu être chargé. Réessayez dans un instant.",
+    "players": {
+      "one": "{{count}} participant",
+      "other": "{{count}} participants"
+    },
+    "show": "Afficher",
+    "overall": "Ensemble",
+    "game": "Partie {{game}}",
+    "mvp": "MVP du match",
+    "gameMvp": "MVP de la partie",
+    "kdaLong": "Éliminations / morts / assistances",
+    "leaders": {
+      "KILLS": "Le plus d'éliminations",
+      "DEATHS": "Le moins de morts",
+      "ASSISTS": "Le plus d'assistances",
+      "FIRST_BLOODS": "Le plus de premiers sangs",
+      "PLANTS": "Le plus de spikes posés",
+      "DEFUSES": "Le plus de désamorçages"
+    },
+    "wonBy": "Gagnée par {{players}}",
+    "noWinner": "Aucune victoire enregistrée",
+    "stats": "Stats du match",
+    "combined": {
+      "one": "Sa seule partie",
+      "other": "Les {{count}} parties réunies"
+    }
   },
   "nav": {
     "label": "Principal",
@@ -136,7 +189,10 @@
     "wins": "Victoires",
     "total": "Total",
     "avg": "Moy. {{stat}}",
-    "average": "{{stat}}, moyenne par partie"
+    "average": "{{stat}}, moyenne par partie",
+    "won": "Gagnée",
+    "yes": "Oui",
+    "no": "Non"
   },
   "legal": {
     "updated": "Dernière mise à jour :"
