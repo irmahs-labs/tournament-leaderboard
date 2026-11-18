@@ -27,8 +27,6 @@ public class AppUser {
 
     private String displayName;
 
-    private String avatarUrl;
-
     @Column(name = "is_platform_admin", nullable = false)
     private boolean platformAdmin;
 
@@ -47,7 +45,6 @@ public class AppUser {
     void update(GoogleProfile profile, boolean platformAdmin) {
         this.email = profile.email();
         this.displayName = profile.name();
-        this.avatarUrl = profile.picture();
         this.platformAdmin = platformAdmin;
     }
 
@@ -65,10 +62,6 @@ public class AppUser {
 
     public String getDisplayName() {
         return displayName;
-    }
-
-    public String getAvatarUrl() {
-        return avatarUrl;
     }
 
     public boolean isPlatformAdmin() {

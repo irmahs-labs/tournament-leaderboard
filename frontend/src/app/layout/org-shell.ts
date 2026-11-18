@@ -22,7 +22,7 @@ import { SiteHeader } from "./site-header";
   template: `
     <div class="page">
       <app-site-header [organization]="organization()" />
-      <main class="main"><router-outlet /></main>
+      <main class="main" id="main" tabindex="-1"><router-outlet /></main>
       <app-site-footer [organization]="organization()" />
     </div>
   `,

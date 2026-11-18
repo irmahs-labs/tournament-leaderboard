@@ -51,9 +51,7 @@ class GoogleUserServiceTest {
         when(google.loadUser(request)).thenReturn(user);
 
         assertThat(service.loadUser(request)).isSameAs(user);
-        verify(accounts)
-                .signIn(new GoogleProfile(
-                        "google-123", "kes@example.com", "Kestrel Martin", "https://example.com/kes.png"));
+        verify(accounts).signIn(new GoogleProfile("google-123", "kes@example.com", "Kestrel Martin"));
     }
 
     @Test

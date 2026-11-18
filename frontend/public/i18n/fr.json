@@ -3,7 +3,14 @@
     "comingSoon": "Cette page arrive bientôt."
   },
   "footer": {
-    "createdBy": "créé par"
+    "createdBy": "créé par",
+    "legalLabel": "Informations légales",
+    "legal": {
+      "legal": "Mentions légales",
+      "privacy": "Confidentialité",
+      "cookies": "Cookies",
+      "terms": "Conditions d'utilisation"
+    }
   },
   "header": {
     "language": "Langue",
@@ -11,7 +18,8 @@
     "toLight": "Passer au thème clair",
     "signIn": "Se connecter",
     "account": "Votre compte : {{name}}",
-    "season": "Saison"
+    "season": "Saison",
+    "skip": "Aller au contenu"
   },
   "leaderboard": {
     "title": "Classement de la saison",
@@ -129,5 +137,8 @@
     "total": "Total",
     "avg": "Moy. {{stat}}",
     "average": "{{stat}}, moyenne par partie"
+  },
+  "legal": {
+    "updated": "Dernière mise à jour :"
   }
 }

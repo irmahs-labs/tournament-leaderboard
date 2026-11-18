@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-18, with the frontend organised by feature.
+Last updated: 2026-11-18, with the legal pages, the contrast fixes and the Google picture no longer kept.
 
 ## System
 
@@ -72,7 +72,7 @@ flowchart LR
 | `matches` | `Match`, `Game` and their repositories |
 | `scoring` | `ScoringService` (the only place totals are computed), `BonusCalculator` (HIGHEST/LOWEST, ties all win) |
 | `stats` | `GameStat`, `StatLine`, `PlayerTally`, `SeasonResultsService` (public results; each standing carries the player's current rank), `ScoresService` (Enter scores) |
-| `system` | `/api/version`; `SpaController` forwards the Angular router's addresses (`/o/**`, `/not-found`, `/sign-in`) to `index.html` |
+| `system` | `/api/version`; `SpaController` forwards the Angular router's addresses (`/o/**`, `/not-found`, `/sign-in`, `/legal`, `/privacy`, `/cookies`, `/terms`) to `index.html` |
 
 ## API
 
@@ -112,7 +112,8 @@ flowchart LR
 
 Flyway: `V2026_11_10_1__schema.sql` (all tables), `V2026_11_13_1__row_level_security.sql`
 (policy `organization_isolation` on players, seasons, matches, organization_members,
-organization_invites and organization_logos).
+organization_invites and organization_logos), `V2026_11_18_1__drop_avatar_url.sql` (the Google
+picture isn't kept: data minimisation).
 
 ```mermaid
 erDiagram
@@ -150,11 +151,12 @@ flowchart TD
     app[App<br/>starts ThemeService, LanguageService, SessionService] --> routes[app.routes.ts]
     routes -->|"/ redirects to /o/alsace-arena"| shell
     routes -->|"/o/:slug, organizationResolver"| shell[OrgShell<br/>accent, language, title, season]
-    routes -->|"/sign-in, /not-found, **"| platform[PlatformShell<br/>platform name and red]
+    routes -->|"/sign-in, /legal, /privacy, /cookies, /terms, /not-found, **"| platform[PlatformShell<br/>platform name and red]
     platform --> si[SignInPage<br/>Google, your organisations, sign out]
+    platform --> legal[LegalPage<br/>legal notice, privacy, cookies, terms]
     platform --> nf[NotFoundPage]
-    shell --> header[SiteHeader<br/>logo, nav, season, EN/FR, theme, Sign in or account]
-    shell --> footer[SiteFooter<br/>org name, credit, GitHub, contact]
+    shell --> header[SiteHeader<br/>skip link, logo, nav, season, EN/FR, theme, Sign in or account]
+    shell --> footer[SiteFooter<br/>org name, credit, legal pages, GitHub, contact]
     platform --> header
     platform --> footer
     shell -->|"organisation, ?season="| current[CurrentSeason]
@@ -184,10 +186,12 @@ flowchart TD
 | `layout/` | `OrgShell` (an organisation's pages), `PlatformShell` (sign-in and Not found), `SiteHeader`, `SiteFooter`, page layout |
 | `results/` | The public results: `api.ts` (the API's shapes), `CurrentSeason` (the organisation's seasons, newest first, and the one picked with `?season=`), `stats.ts` (stat columns with K, D and A folded into KDA, decimals, the points formula, Riot ID name and tag), `StandingsTable`, `leaderboard/`, `matches/` |
 | `sign-in/` | `SignInPage` |
+| `legal/` | `LegalPage` and `legal-content.ts`: the legal notice, privacy policy, cookie policy and terms, in English and French, one route each |
 | `not-found/` | `NotFoundPage` |
 | `testing.ts` | Fixtures and helpers shared by the tests (`openAlsace`, `answer`, `text`) |
 | `styles.css` | The template's tokens for both themes, Barlow fonts (bundled from `@fontsource`), shared classes (`.panel`, `.pill`, `.heading`, `.lede`, `.label`, buttons) |
 | `public/i18n/` | `en.json`, `fr.json` |
+| `public/` | `robots.txt`, and `llms.txt` describing the public API for AI agents |
 
 A component used by several features lives in `shared/` (`RankPill`); one used by several pages of a
 single feature lives in that feature (`StandingsTable` in `results/`).

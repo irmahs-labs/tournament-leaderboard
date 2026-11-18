@@ -60,7 +60,11 @@ class ApplicationIT {
                 "/o/alsace-arena/matches",
                 "/o/alsace-arena/matches/3/4",
                 "/not-found",
-                "/sign-in"
+                "/sign-in",
+                "/legal",
+                "/privacy",
+                "/cookies",
+                "/terms"
             })
     void servesTheAngularAppForItsOwnAddresses(String address) {
         assertThat(mvc.get().uri(address)).hasStatusOk().hasForwardedUrl("/index.html");

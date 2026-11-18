@@ -2,6 +2,8 @@ import type { Routes } from "@angular/router";
 
 import { OrgShell } from "./layout/org-shell";
 import { PlatformShell } from "./layout/platform-shell";
+import { LEGAL_PAGES } from "./legal/legal-content";
+import { LegalPage } from "./legal/legal-page";
 import { NotFoundPage } from "./not-found/not-found";
 import { LeaderboardPage } from "./results/leaderboard/leaderboard";
 import { MatchesPage } from "./results/matches/matches";
@@ -24,6 +26,11 @@ export const routes: Routes = [
   {
     children: [
       { component: SignInPage, path: "sign-in" },
+      ...LEGAL_PAGES.map((page) => ({
+        component: LegalPage,
+        data: { page },
+        path: page,
+      })),
       { component: NotFoundPage, path: "not-found" },
       { component: NotFoundPage, path: "**" },
     ],

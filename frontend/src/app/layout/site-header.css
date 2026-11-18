@@ -171,3 +171,20 @@
   background: var(--nav-bg);
   color: var(--nav-text);
 }
+
+/* Hidden until focused with the keyboard: the first stop on every page. */
+.skip {
+  position: absolute;
+  left: 16px;
+  top: -100px;
+  z-index: 10;
+  padding: 10px 16px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.skip:focus {
+  top: 12px;
+}

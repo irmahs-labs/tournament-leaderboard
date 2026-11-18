@@ -67,10 +67,11 @@ export class ThemeService {
     style.setProperty("--on-accent", onAccent(accent));
 
     for (const theme of ["dark", "light"] as const) {
-      const { surface, text } = PALETTES[theme];
+      const { surface, surface2, text } = PALETTES[theme];
+      // Measured on the pills' surface, the panels' least contrasting one, so that it reads on all.
       style.setProperty(
         `--accent-text-${theme}`,
-        readableAccent(accent, surface, text)
+        readableAccent(accent, surface2, text)
       );
       style.setProperty(`--accent-soft-${theme}`, mix(accent, surface, 0.86));
     }

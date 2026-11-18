@@ -1,3 +1,4 @@
+import { DOCUMENT } from "@angular/common";
 import { Component, computed, inject, input } from "@angular/core";
 import { Router, RouterLink, RouterLinkActive } from "@angular/router";
 import { TranslocoDirective } from "@jsverse/transloco";
@@ -34,6 +35,13 @@ export class SiteHeader {
   protected readonly current = inject(CurrentSeason);
 
   readonly #router = inject(Router);
+  readonly #document = inject(DOCUMENT);
+
+  /** Moves the focus past the header to the page's content, for keyboard and screen reader users. */
+  protected skipToContent(event: Event): void {
+    event.preventDefault();
+    this.#document.querySelector<HTMLElement>("#main")?.focus();
+  }
 
   /** The page to come back to after signing in. */
   protected here(): string {

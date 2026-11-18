@@ -36,15 +36,15 @@ final class AdminTestSupport {
     /** Signs the four people in and gives them their memberships. */
     static void signInEveryone(
             AccountService accounts, EntityManager em, JdbcClient jdbc, Organization alsace, Organization lyon) {
-        accounts.signIn(new GoogleProfile("google-admin", "admin@example.com", "Admin", null));
-        AppUser player = accounts.signIn(new GoogleProfile("google-player", "player@example.com", "Player", null));
+        accounts.signIn(new GoogleProfile("google-admin", "admin@example.com", "Admin"));
+        AppUser player = accounts.signIn(new GoogleProfile("google-player", "player@example.com", "Player"));
         jdbc.sql("INSERT INTO organization_members (user_id, organization_id, role) VALUES (:user, :org, 'PLAYER')")
                 .param("user", player.getId())
                 .param("org", alsace.getId())
                 .update();
-        AppUser lyonAdmin = accounts.signIn(new GoogleProfile("google-lyon", "lyon@example.com", "Lyon", null));
+        AppUser lyonAdmin = accounts.signIn(new GoogleProfile("google-lyon", "lyon@example.com", "Lyon"));
         em.persist(OrganizationMember.admin(lyonAdmin.getId(), lyon.getId()));
-        accounts.signIn(new GoogleProfile("google-nobody", "nobody@example.com", "Nobody", null));
+        accounts.signIn(new GoogleProfile("google-nobody", "nobody@example.com", "Nobody"));
         em.flush();
     }
 

@@ -1,4 +1,7 @@
 <header class="bar" *transloco="let t">
+  <a class="skip" href="#main" (click)="skipToContent($event)"
+    >{{ t("header.skip") }}</a
+  >
   <div class="inner">
     @if (organization(); as org) {
     <a class="brand" [routerLink]="['/o', org.slug]">

@@ -10,6 +10,11 @@
         >Tournament Leaderboard · {{ t("footer.createdBy") }}
         <a class="strong" href="https://irmahs.dev">Irma HS</a></span
       >
+      <nav class="links" [attr.aria-label]="t('footer.legalLabel')">
+        @for (page of legalPages; track page) {
+        <a [routerLink]="['/', page]">{{ t("footer.legal." + page) }}</a>
+        }
+      </nav>
       <span class="links">
         <a href="https://github.com/irmahs-labs/tournament-leaderboard"
           >GitHub</a

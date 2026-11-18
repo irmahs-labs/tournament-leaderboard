@@ -123,16 +123,15 @@ class ScoresIT {
         em.persist(season);
         em.flush();
 
-        accounts.signIn(new GoogleProfile("google-admin", "admin@example.com", "Admin", null));
-        AppUser playerAccount =
-                accounts.signIn(new GoogleProfile("google-player", "player@example.com", "Player", null));
+        accounts.signIn(new GoogleProfile("google-admin", "admin@example.com", "Admin"));
+        AppUser playerAccount = accounts.signIn(new GoogleProfile("google-player", "player@example.com", "Player"));
         jdbc.sql("INSERT INTO organization_members (user_id, organization_id, role) VALUES (:user, :org, 'PLAYER')")
                 .param("user", playerAccount.getId())
                 .param("org", alsace)
                 .update();
-        AppUser lyonAdmin = accounts.signIn(new GoogleProfile("google-lyon", "lyon@example.com", "Lyon", null));
+        AppUser lyonAdmin = accounts.signIn(new GoogleProfile("google-lyon", "lyon@example.com", "Lyon"));
         em.persist(OrganizationMember.admin(lyonAdmin.getId(), lyon.getId()));
-        accounts.signIn(new GoogleProfile("google-nobody", "nobody@example.com", "Nobody", null));
+        accounts.signIn(new GoogleProfile("google-nobody", "nobody@example.com", "Nobody"));
         em.flush();
     }
 

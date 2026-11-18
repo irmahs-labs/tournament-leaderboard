@@ -1,0 +1,7 @@
+# Results are public: people, search engines and AI agents are welcome to read them.
+# Admin pages and the API's admin routes need an organiser's sign-in.
+User-agent: *
+Allow: /
+Disallow: /api/orgs/*/admin/
+Disallow: /oauth2/
+Disallow: /login/
