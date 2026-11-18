@@ -200,5 +200,40 @@
   },
   "legal": {
     "updated": "Last updated:"
+  },
+  "admin": {
+    "open": "Admin",
+    "navLabel": "Admin",
+    "players": "Players",
+    "viewSite": "View site",
+    "eyebrow": "Admin · {{org}}"
+  },
+  "adminPlayers": {
+    "title": "Players",
+    "lede": "Players can be added and edited but never deleted, so past results stay intact. Changing a Riot ID keeps the old one as an alias.",
+    "add": "Add a player",
+    "riotId": "Riot ID",
+    "riotIdHint": "Name#TAG",
+    "discord": "Discord username",
+    "discordHint": "name or name#0000",
+    "aliases": "Aliases",
+    "aliasesHint": "Separated by commas",
+    "rank": "Rank",
+    "unranked": "Unranked",
+    "addButton": "Add player",
+    "all": "All players · {{count}}",
+    "search": "Search players",
+    "actions": "Actions",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "added": "{{name}} was added.",
+    "saved": "{{name}} was saved.",
+    "taken": "Another player already has this Riot ID.",
+    "invalid": "Check the details: a player needs a Riot ID, and names have at most 100 characters.",
+    "failed": "That didn't work. Try again in a moment.",
+    "none": "No player yet.",
+    "noMatch": "No player matches “{{query}}”.",
+    "loading": "Loading the players…"
   }
 }

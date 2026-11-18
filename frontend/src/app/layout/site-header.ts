@@ -9,7 +9,7 @@ import { LANGUAGES, LanguageService } from "../shared/language";
 import { OnlineService } from "../shared/online";
 import type { Organization } from "../shared/organization";
 import { initials } from "../shared/organization";
-import { SessionService } from "../shared/session";
+import { canAdmin, SessionService } from "../shared/session";
 import { ThemeService } from "../shared/theme";
 
 /**
@@ -43,6 +43,23 @@ export class SiteHeader {
   protected skipToContent(event: Event): void {
     event.preventDefault();
     this.#document.querySelector<HTMLElement>("#main")?.focus();
+  }
+
+  /** Whether the signed-in person runs this organisation, so the header offers its admin pages. */
+  protected readonly admin = computed(() => {
+    const org = this.organization();
+
+    return org !== null && canAdmin(this.session.me(), org.slug);
+  });
+
+  /** Whether the page is one of the organisation's admin pages. */
+  protected inAdmin(): boolean {
+    const org = this.organization();
+
+    return (
+      org !== null &&
+      this.#router.url.startsWith(`/o/${encodeURIComponent(org.slug)}/admin`)
+    );
   }
 
   /** The page to come back to after signing in. */

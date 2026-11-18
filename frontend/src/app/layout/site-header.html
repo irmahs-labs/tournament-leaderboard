@@ -8,6 +8,19 @@
       <span class="logo" aria-hidden="true">{{ initials() }}</span>
       <span class="name">{{ org.name }}</span>
     </a>
+    @if (inAdmin()) {
+    <nav class="nav" [attr.aria-label]="t('admin.navLabel')">
+      <a
+        [routerLink]="['/o', org.slug, 'admin', 'players']"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        >{{ t("admin.players") }}</a
+      >
+      <a class="leave" [routerLink]="['/o', org.slug]"
+        >{{ t("admin.viewSite") }}</a
+      >
+    </nav>
+    } @else {
     <nav class="nav" [attr.aria-label]="t('nav.label')">
       <a
         [routerLink]="['/o', org.slug]"
@@ -24,8 +37,13 @@
         ariaCurrentWhenActive="page"
         >{{ t("nav.matches") }}</a
       >
+      @if (admin()) {
+      <a class="leave" [routerLink]="['/o', org.slug, 'admin']"
+        >{{ t("admin.open") }}</a
+      >
+      }
     </nav>
-    } @else {
+    } } @else {
     <a class="brand" routerLink="/">
       <span class="mark" aria-hidden="true"></span>
       <span class="name">Tournament Leaderboard</span>
@@ -39,7 +57,7 @@
         <strong>{{ language.number(count) }}</strong>
         {{ t("header.online") }}
       </span>
-      } @if (organization() && current.seasons().length > 0) {
+      } @if (organization() && !inAdmin() && current.seasons().length > 0) {
       <select
         #picker
         class="tool season"
