@@ -86,7 +86,7 @@ const openAs = async (
 const openPlayers = async (
   seasons: Season[] = []
 ): Promise<RouterTestingHarness> => {
-  const harness = await openAs("/o/alsace-arena/admin", ME, seasons);
+  const harness = await openAs("/o/alsace-arena/admin/players", ME, seasons);
   await vi.waitFor(() => {
     harness.detectChanges();
     http.expectOne((request) => request.url === API).flush(PLAYERS);
@@ -126,19 +126,62 @@ describe("the admin pages", () => {
   });
 
   it("send a player who isn't an admin to the public pages", async () => {
-    await openAs("/o/alsace-arena/admin", PLAYER_ONLY);
+    const harness = await openAs("/o/alsace-arena/admin", PLAYER_ONLY);
 
     expect(TestBed.inject(Router).url).toBe("/o/alsace-arena");
+    expect(rendered(harness).querySelector("header .mode")).toBeNull();
   });
 
-  it("open on Players, with the admin links in the header", async () => {
+  it("show the admin links in the header, without the season picker", async () => {
     const harness = await openPlayers(SEASONS);
     const page = rendered(harness);
 
-    expect(TestBed.inject(Router).url).toBe("/o/alsace-arena/admin/players");
     expect(text(page.querySelector("h1"))).toBe("Players");
-    expect(texts(page, "header nav a")).toStrictEqual(["Players", "View site"]);
+    expect(texts(page, "header nav.nav a")).toStrictEqual([
+      "Scores",
+      "Players",
+    ]);
     expect(page.querySelector("header select")).toBeNull();
+  });
+});
+
+describe("the Site | Admin switch", () => {
+  beforeEach(() => {
+    localStorage.setItem("lang", "en");
+    TestBed.configureTestingModule({ providers: testProviders() });
+    http = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    http.verify();
+    localStorage.clear();
+  });
+
+  it("shows admins which side of the organisation is on screen", async () => {
+    const harness = await openAs("/o/alsace-arena/admin/players", ME);
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      http.expectOne((request) => request.url === API).flush(PLAYERS);
+      http.expectOne("/api/ranks").flush(RANKS);
+    });
+    harness.detectChanges();
+    const page = rendered(harness);
+
+    expect(texts(page, "header .mode a")).toStrictEqual(["Site", "Admin"]);
+    expect(text(page.querySelector("header .mode [aria-current]"))).toBe(
+      "Admin"
+    );
+
+    await harness.navigateByUrl("/o/alsace-arena");
+    harness.detectChanges();
+
+    expect(text(page.querySelector("header .mode [aria-current]"))).toBe(
+      "Site"
+    );
+    expect(texts(page, "header nav.nav a")).toStrictEqual([
+      "Leaderboard",
+      "Matches",
+    ]);
   });
 });
 

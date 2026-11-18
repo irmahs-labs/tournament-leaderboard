@@ -11,13 +11,17 @@
     @if (inAdmin()) {
     <nav class="nav" [attr.aria-label]="t('admin.navLabel')">
       <a
+        [routerLink]="['/o', org.slug, 'admin', 'scores']"
+        routerLinkActive="active"
+        queryParamsHandling="preserve"
+        ariaCurrentWhenActive="page"
+        >{{ t("admin.scores") }}</a
+      >
+      <a
         [routerLink]="['/o', org.slug, 'admin', 'players']"
         routerLinkActive="active"
         ariaCurrentWhenActive="page"
         >{{ t("admin.players") }}</a
-      >
-      <a class="leave" [routerLink]="['/o', org.slug]"
-        >{{ t("admin.viewSite") }}</a
       >
     </nav>
     } @else {
@@ -37,11 +41,6 @@
         ariaCurrentWhenActive="page"
         >{{ t("nav.matches") }}</a
       >
-      @if (admin()) {
-      <a class="leave" [routerLink]="['/o', org.slug, 'admin']"
-        >{{ t("admin.open") }}</a
-      >
-      }
     </nav>
     } } @else {
     <a class="brand" routerLink="/">
@@ -51,7 +50,22 @@
     <span class="nav"></span>
     }
     <div class="tools">
-      @if (online.count(); as count) {
+      @if (admin() && organization(); as org) {
+      <nav class="mode" [attr.aria-label]="t('admin.mode')">
+        <a
+          class="tool"
+          [routerLink]="['/o', org.slug]"
+          [attr.aria-current]="inAdmin() ? null : 'true'"
+          >{{ t("admin.site") }}</a
+        >
+        <a
+          class="tool"
+          [routerLink]="['/o', org.slug, 'admin']"
+          [attr.aria-current]="inAdmin() ? 'true' : null"
+          >{{ t("admin.open") }}</a
+        >
+      </nav>
+      } @if (online.count(); as count) {
       <span class="online" [attr.title]="t('header.onlineTitle')">
         <span class="dot" aria-hidden="true"></span>
         <strong>{{ language.number(count) }}</strong>

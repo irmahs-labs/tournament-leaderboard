@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-18, with the admin guard and the Players screen (phase 4).
+Last updated: 2026-11-18, with the Enter scores screen (phase 4), the Site | Admin switch and the three-line footer.
 
 ## System
 
@@ -159,8 +159,8 @@ flowchart TD
     platform --> si[SignInPage<br/>Google, your organisations, sign out]
     platform --> legal[LegalPage<br/>legal notice, privacy, cookies, terms]
     platform --> nf[NotFoundPage]
-    shell --> header[SiteHeader<br/>skip link, logo, nav keeping ?season= (admin nav and View site on admin pages; Admin link for admins), online count, season, EN/FR, theme, Sign in or account]
-    shell --> footer[SiteFooter<br/>org name, credit, legal pages, GitHub, contact]
+    shell --> header[SiteHeader<br/>skip link, logo, nav keeping ?season= (Scores and Players on admin pages; a Site | Admin switch for admins), online count, season, EN/FR, theme, Sign in or account]
+    shell --> footer[SiteFooter<br/>org name; credit, legal pages, GitHub and Contact on three centred lines]
     platform --> header
     platform --> footer
     shell -->|"organisation, ?season="| current[CurrentSeason]
@@ -184,11 +184,15 @@ flowchart TD
     md --> table
     md -->|GET| mdApi["…/seasons/{n}/matches/{m}"]
     shell -->|"/o/:slug/admin, adminGuard"| guard[adminGuard<br/>admins and platform admins; others to sign-in or the public pages]
+    guard --> sadm["ScoresAdminPage /admin/scores?season=&match=&game=<br/>one game at a time, previous game's players, check bonuses"]
+    sadm -->|"GET, PUT, DELETE, /previous-roster, POST bonus-check"| scoresApi["…/admin/seasons/{n}/matches/{m}/games/{g}"]
+    sadm -->|GET| sadmApi["…/seasons/{n}/rules, /matches; …/admin/players"]
+    sadm --> current
     guard --> padm["PlayersAdminPage /admin/players<br/>add, search, edit inline"]
     padm -->|GET ?q, POST, PUT| playersApi["…/admin/players"]
     padm -->|GET| ranksApi["/api/ranks"]
     padm --> pill
-    guard -.->|Phase 4| adm[Enter scores, Seasons, Record switches]
+    guard -.->|Phase 4| adm[Seasons, Record switches]
     resolver[organizationResolver] -->|GET| orgApi["/api/orgs/{slug}"]
     shell --- resolver
 ```
@@ -198,7 +202,7 @@ flowchart TD
 | `shared/` | `ThemeService` (dark or light, the accent's CSS variables), `colour.ts` (WCAG contrast and mixing, the palettes, readable rank colours), `LanguageService` (EN or FR; numbers, dates and plurals in the language on screen), `OnlineService` (the header's count of open pages), `SessionService` (who is signed in, `canAdmin`, one `/api/me` request at a time, Google sign-in with a safe return address, sign-out), `organization.ts` (`organizationResolver`, `fullName`, `initials`), `storage.ts` (local and session storage that survives being blocked), `RankPill` |
 | `layout/` | `OrgShell` (an organisation's pages), `PlatformShell` (sign-in and Not found), `SiteHeader`, `SiteFooter`, page layout |
 | `results/` | The public results: `api.ts` (the API's shapes), `CurrentSeason` (the organisation's seasons, newest first, and the one picked with `?season=`), `stats.ts` (stat columns with K, D and A folded into KDA, decimals, the points formula, Riot ID name and tag), `StandingsTable` (a season's or a match's averages or totals, or one game's lines), `leaderboard/`, `matches/` (`MatchesPage`), `match/` (`MatchPage`, `match-stats.ts`: a game's lines as standings, the stat leaders) |
-| `admin/` | `adminGuard`, `api.ts` (the admin API's shapes), `players/` (`PlayersAdminPage`: aliases typed as one line, a previous Riot ID keeps its kind) |
+| `admin/` | `adminGuard`, `api.ts` (the admin API's shapes), `players/` (`PlayersAdminPage`: aliases typed as one line, a previous Riot ID keeps its kind), `scores/` (`ScoresAdminPage`; `scores-form.ts`: lines as typed, stat boxes parsed with a decimal comma, the request) |
 | `sign-in/` | `SignInPage` |
 | `legal/` | `LegalPage` and `legal-content.ts`: the legal notice, privacy policy, cookie policy and terms, in English and French, one route each |
 | `not-found/` | `NotFoundPage` |

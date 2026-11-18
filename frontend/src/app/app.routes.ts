@@ -2,6 +2,7 @@ import type { Routes } from "@angular/router";
 
 import { adminGuard } from "./admin/admin-guard";
 import { PlayersAdminPage } from "./admin/players/players";
+import { ScoresAdminPage } from "./admin/scores/scores";
 import { OrgShell } from "./layout/org-shell";
 import { PlatformShell } from "./layout/platform-shell";
 import { LEGAL_PAGES } from "./legal/legal-content";
@@ -24,7 +25,8 @@ export const routes: Routes = [
       {
         canActivate: [adminGuard],
         children: [
-          { path: "", pathMatch: "full", redirectTo: "players" },
+          { path: "", pathMatch: "full", redirectTo: "scores" },
+          { component: ScoresAdminPage, path: "scores" },
           { component: PlayersAdminPage, path: "players" },
         ],
         path: "admin",
