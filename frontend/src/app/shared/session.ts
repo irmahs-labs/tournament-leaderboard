@@ -39,6 +39,16 @@ export const isSafeReturn = (path: string | null | undefined): path is string =>
   !path?.startsWith("/\\") &&
   !path?.startsWith("/sign-in");
 
+/** Whether someone may run an organisation: one of its admins, or a platform admin. */
+export const canAdmin = (me: Me | null | undefined, slug: string): boolean =>
+  Boolean(
+    me &&
+    (me.platformAdmin ||
+      me.memberships.some(
+        (membership) => membership.slug === slug && membership.role === "ADMIN"
+      ))
+  );
+
 /** The name to show for someone: their Google name, else the start of their email. */
 export const displayName = (me: Me): string =>
   me.displayName?.trim() || me.email.split("@")[0] || me.email;
@@ -60,8 +70,25 @@ export class SessionService {
     return me ? displayName(me) : "";
   });
 
-  /** Asks the server who is signed in. */
-  async load(): Promise<Me | null> {
+  #pending: Promise<Me | null> | null = null;
+
+  /** Asks the server who is signed in; a question already on its way is shared. */
+  load(): Promise<Me | null> {
+    this.#pending ??= this.#fetch().finally(() => {
+      this.#pending = null;
+    });
+
+    return this.#pending;
+  }
+
+  /** Who is signed in, asking the server only if that isn't known yet. */
+  async known(): Promise<Me | null> {
+    const me = this.#me();
+
+    return me === undefined ? await this.load() : me;
+  }
+
+  async #fetch(): Promise<Me | null> {
     const me = await firstValueFrom(
       this.#http.get<Me>("/api/me").pipe(
         map((found): Me | null => found),

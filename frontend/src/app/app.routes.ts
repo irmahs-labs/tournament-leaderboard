@@ -1,5 +1,7 @@
 import type { Routes } from "@angular/router";
 
+import { adminGuard } from "./admin/admin-guard";
+import { PlayersAdminPage } from "./admin/players/players";
 import { OrgShell } from "./layout/org-shell";
 import { PlatformShell } from "./layout/platform-shell";
 import { LEGAL_PAGES } from "./legal/legal-content";
@@ -19,6 +21,14 @@ export const routes: Routes = [
       { component: LeaderboardPage, path: "" },
       { component: MatchesPage, path: "matches" },
       { component: MatchPage, path: "matches/:match" },
+      {
+        canActivate: [adminGuard],
+        children: [
+          { path: "", pathMatch: "full", redirectTo: "players" },
+          { component: PlayersAdminPage, path: "players" },
+        ],
+        path: "admin",
+      },
     ],
     component: OrgShell,
     path: "o/:slug",
