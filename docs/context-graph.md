@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-18, with the deploy run by CI after the build, a database dump before each deploy and a public health check (phase 5).
+Last updated: 2026-11-18, with the deploy run by CI after the build, a database dump before each deploy and a health check through Caddy (phase 5).
 
 ## System
 
@@ -30,7 +30,7 @@ flowchart TD
     be --> mig[db/migration<br/>Flyway scripts]
     deploy[deploy/<br/>db-init, import, README] --> prod[compose.prod.yaml]
     ci[.github/workflows/ci.yml<br/>mvnw verify + SonarQube Cloud] --> root
-    ci -->|"after build, on a push to migration"| dep[.github/workflows/deploy.yml<br/>dump, compose up --wait, public health check]
+    ci -->|"after build, on a push to migration"| dep[.github/workflows/deploy.yml<br/>dump, compose up --wait, health check through Caddy]
     dep --> prod
     legacy[legacy/<br/>frozen: never touch]
 ```
