@@ -78,6 +78,11 @@ Decided on 2026-11-18: every merge into `migration` that passes CI deploys produ
 until the rewrite replaces the legacy site. Version tags deploying production, `main` deploying a
 staging copy, and release-please come with the switch-over (phase 6), not before.
 
+The **Protect migration** ruleset makes this safe: `migration` changes only through pull requests,
+can't be force-pushed or deleted, and a pull request merges only once its **Build and test** check
+has passed. On pull requests that check includes the SonarQube Cloud quality gate, so a failing
+gate stops a change before it can reach production.
+
 ## Dumps before each deploy
 
 Before starting the new version, the deploy dumps the database with `pg_dump --format=custom`
