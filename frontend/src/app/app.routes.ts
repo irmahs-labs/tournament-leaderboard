@@ -3,6 +3,8 @@ import type { Routes } from "@angular/router";
 import { adminGuard } from "./admin/admin-guard";
 import { PlayersAdminPage } from "./admin/players/players";
 import { ScoresAdminPage } from "./admin/scores/scores";
+import { ScoringAdminPage } from "./admin/scoring/scoring";
+import { SeasonsAdminPage } from "./admin/seasons/seasons";
 import { OrgShell } from "./layout/org-shell";
 import { PlatformShell } from "./layout/platform-shell";
 import { LEGAL_PAGES } from "./legal/legal-content";
@@ -28,6 +30,8 @@ export const routes: Routes = [
           { path: "", pathMatch: "full", redirectTo: "scores" },
           { component: ScoresAdminPage, path: "scores" },
           { component: PlayersAdminPage, path: "players" },
+          { component: SeasonsAdminPage, path: "seasons" },
+          { component: ScoringAdminPage, path: "scoring" },
         ],
         path: "admin",
       },

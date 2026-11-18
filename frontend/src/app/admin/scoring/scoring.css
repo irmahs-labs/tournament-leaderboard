@@ -1,0 +1,124 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+.intro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.intro-text {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 760px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 180px;
+}
+
+select {
+  min-height: 44px;
+  padding: 0 10px;
+  background: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--input-line);
+  border-radius: 0;
+  font: 500 15px var(--font-body);
+}
+
+.notice {
+  margin: 0;
+  padding: 24px;
+}
+
+.block {
+  padding: 22px;
+  min-width: 0;
+}
+
+.note {
+  margin: 8px 0 16px;
+  max-width: 68ch;
+}
+
+.scroll {
+  position: relative;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.table thead th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: var(--label-track);
+  border-bottom: 1px solid var(--head-line);
+  white-space: nowrap;
+}
+
+.table tbody th {
+  text-align: left;
+  font-weight: 400;
+}
+
+.table tbody th,
+.table td {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--row-line);
+  white-space: nowrap;
+}
+
+.table tbody tr:nth-child(even) {
+  background: var(--zebra);
+}
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.switch input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.status {
+  margin: 0;
+  color: var(--good);
+  font-weight: 600;
+}
+
+.status.failed {
+  color: var(--danger);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}

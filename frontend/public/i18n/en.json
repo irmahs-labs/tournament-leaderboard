@@ -209,7 +209,9 @@
     "eyebrow": "Admin · {{org}}",
     "scores": "Scores",
     "mode": "Site or admin",
-    "site": "Site"
+    "site": "Site",
+    "seasons": "Seasons",
+    "scoring": "Scoring"
   },
   "adminPlayers": {
     "title": "Players",
@@ -276,5 +278,62 @@
     "refused": "The scores were refused: check every number, then save again.",
     "failed": "That didn't work. Try again in a moment.",
     "loading": "Loading the game…"
+  },
+  "adminSeasons": {
+    "title": "Seasons",
+    "lede": "Each season keeps its own scoring rules, so old results never change.",
+    "all": "All seasons",
+    "season": "Season",
+    "dates": "Dates",
+    "matches": "Matches",
+    "gamesPerMatch": "Games per match",
+    "minGames": "Fewest games per match",
+    "maxGames": "Most games per match",
+    "name": "Name",
+    "nameHint": "Season {{number}}",
+    "startsOn": "Starts on",
+    "endsOn": "Ends on",
+    "finished": "Finished",
+    "isCurrent": "Current",
+    "isFinished": "Finished",
+    "start": "Start a new season",
+    "rules": "Scoring rules",
+    "copyFrom": "Copy from {{name}}",
+    "defaults": "Platform defaults",
+    "create": "Create season",
+    "started": "{{name}} was started.",
+    "saved": "{{name}} was saved.",
+    "tooSmall": "Saved games don’t fit: the season already has a later match, or a match with more games.",
+    "invalid": "Check the details, then try again.",
+    "failed": "That didn't work. Try again in a moment.",
+    "problems": {
+      "name": "A season needs a name of at most {{maxName}} characters.",
+      "matches": "A season has 1 to {{maxMatches}} matches.",
+      "games": "A match has 1 to {{maxGames}} games, the fewest no more than the most.",
+      "dates": "A season can’t end before it starts."
+    }
+  },
+  "adminScoring": {
+    "title": "Scoring rules",
+    "lede": "Choose which stats each game records. The rest of the rules, such as what each stat and bonus is worth, can be edited soon.",
+    "record": "Stats to record",
+    "recordHelp": "A stat that’s switched off isn’t asked for in games entered from now on. Games already saved keep their values and their points.",
+    "stat": "Stat",
+    "recordIt": "Record it",
+    "effect": "Effect on total",
+    "recordLabel": "Record {{stat}}",
+    "on": "On",
+    "off": "Off",
+    "effects": {
+      "adds": "Adds",
+      "subtracts": "Subtracts",
+      "notCounted": "Not counted",
+      "shownOnly": "Shown in tables, not added to points"
+    },
+    "save": "Save the stats to record",
+    "saved": "{{season}} records these stats from now on.",
+    "invalid": "These stats were refused. Try again.",
+    "failed": "That didn't work. Try again in a moment.",
+    "loading": "Loading the rules…"
   }
 }

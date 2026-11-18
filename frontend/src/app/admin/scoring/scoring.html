@@ -1,0 +1,101 @@
+<ng-container *transloco="let t">
+  <div class="intro">
+    <div class="intro-text">
+      <span class="eyebrow"
+        >{{ t("admin.eyebrow", { org: current.organization()?.name ?? "" })
+        }}</span
+      >
+      <h1 class="display">{{ t("adminScoring.title") }}</h1>
+      <p class="lede muted">{{ t("adminScoring.lede") }}</p>
+    </div>
+    @if (current.seasons().length > 0) {
+    <label class="field">
+      <span class="label">{{ t("header.season") }}</span>
+      <select #picker (change)="pickSeason(picker.value)">
+        @for (season of current.seasons(); track season.number) {
+        <option
+          [value]="season.number"
+          [selected]="season.number === current.season()?.number"
+        >
+          {{ season.name }}
+        </option>
+        }
+      </select>
+    </label>
+    }
+  </div>
+
+  @if (current.failed() || rules.error()) {
+  <p class="panel notice" role="alert">{{ t("adminScoring.failed") }}</p>
+  } @else if (current.settled() && !current.season()) {
+  <p class="panel notice">{{ t("leaderboard.noSeason") }}</p>
+  } @else if (rules.hasValue()) {
+  <section class="panel block" aria-labelledby="record-title">
+    <h2 class="heading" id="record-title">{{ t("adminScoring.record") }}</h2>
+    <p class="muted small note">{{ t("adminScoring.recordHelp") }}</p>
+    <div class="scroll">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">{{ t("adminScoring.stat") }}</th>
+            <th scope="col">{{ t("adminScoring.recordIt") }}</th>
+            <th scope="col">{{ t("adminScoring.effect") }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (rule of rules.value().stats; track rule.stat) { @let on =
+          recorded().has(rule.stat);
+          <tr>
+            <th scope="row">
+              <strong>{{ t("stats.long." + rule.stat) }}</strong>
+            </th>
+            <td>
+              <label class="switch">
+                <input
+                  #box
+                  type="checkbox"
+                  role="switch"
+                  [checked]="on"
+                  (change)="toggle(rule.stat, box.checked)"
+                />
+                <span class="visually-hidden"
+                  >{{ t("adminScoring.recordLabel", { stat: t("stats.long." +
+                  rule.stat) }) }}</span
+                >
+                <span aria-hidden="true"
+                  >{{ t(on ? "adminScoring.on" : "adminScoring.off") }}</span
+                >
+              </label>
+            </td>
+            <td class="muted">
+              {{ t("adminScoring.effects." + effectOf(rule)) }}
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <p
+    class="status"
+    role="status"
+    [class.failed]="action.outcome()?.ok === false"
+  >
+    {{ action.outcome()?.text }}
+  </p>
+
+  <div class="actions">
+    <button
+      type="button"
+      class="button"
+      [disabled]="action.busy() || !changed()"
+      (click)="save()"
+    >
+      {{ t("adminScoring.save") }}
+    </button>
+  </div>
+  } @else {
+  <p class="muted" aria-live="polite">{{ t("adminScoring.loading") }}</p>
+  }
+</ng-container>

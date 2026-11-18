@@ -23,6 +23,19 @@
         ariaCurrentWhenActive="page"
         >{{ t("admin.players") }}</a
       >
+      <a
+        [routerLink]="['/o', org.slug, 'admin', 'seasons']"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        >{{ t("admin.seasons") }}</a
+      >
+      <a
+        [routerLink]="['/o', org.slug, 'admin', 'scoring']"
+        routerLinkActive="active"
+        queryParamsHandling="preserve"
+        ariaCurrentWhenActive="page"
+        >{{ t("admin.scoring") }}</a
+      >
     </nav>
     } @else {
     <nav class="nav" [attr.aria-label]="t('nav.label')">

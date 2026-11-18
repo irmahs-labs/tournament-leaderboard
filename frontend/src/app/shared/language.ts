@@ -83,6 +83,15 @@ export class LanguageService {
     }).format(new Date(`${date}T00:00:00Z`));
   }
 
+  /** A date as a short month and year, such as "Jan 2026" or "janv. 2026". */
+  month(date: string): string {
+    return new Intl.DateTimeFormat(this.active, {
+      month: "short",
+      timeZone: "UTC",
+      year: "numeric",
+    }).format(new Date(`${date}T00:00:00Z`));
+  }
+
   /** The key for a count in the language's plural form, such as `leaderboard.wins.one`. */
   plural(key: string, count: number): string {
     return new Intl.PluralRules(this.active).select(count) === "one"

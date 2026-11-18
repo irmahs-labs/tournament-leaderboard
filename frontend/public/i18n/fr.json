@@ -209,7 +209,9 @@
     "eyebrow": "Admin · {{org}}",
     "scores": "Scores",
     "mode": "Site ou administration",
-    "site": "Site"
+    "site": "Site",
+    "seasons": "Saisons",
+    "scoring": "Barème"
   },
   "adminPlayers": {
     "title": "Joueurs",
@@ -276,5 +278,62 @@
     "refused": "Les scores ont été refusés : vérifiez chaque nombre, puis enregistrez à nouveau.",
     "failed": "Ça n'a pas marché. Réessayez dans un instant.",
     "loading": "Chargement de la partie…"
+  },
+  "adminSeasons": {
+    "title": "Saisons",
+    "lede": "Chaque saison garde son propre barème : les anciens résultats ne changent jamais.",
+    "all": "Toutes les saisons",
+    "season": "Saison",
+    "dates": "Dates",
+    "matches": "Matchs",
+    "gamesPerMatch": "Parties par match",
+    "minGames": "Parties par match, au moins",
+    "maxGames": "Parties par match, au plus",
+    "name": "Nom",
+    "nameHint": "Saison {{number}}",
+    "startsOn": "Début",
+    "endsOn": "Fin",
+    "finished": "Terminée",
+    "isCurrent": "En cours",
+    "isFinished": "Terminée",
+    "start": "Commencer une saison",
+    "rules": "Barème",
+    "copyFrom": "Copier celui de {{name}}",
+    "defaults": "Barème par défaut de la plateforme",
+    "create": "Créer la saison",
+    "started": "{{name}} a commencé.",
+    "saved": "{{name}} : modifications enregistrées.",
+    "tooSmall": "Des parties enregistrées ne rentrent plus : la saison a déjà un match plus loin, ou un match avec plus de parties.",
+    "invalid": "Vérifiez les informations, puis réessayez.",
+    "failed": "Ça n'a pas marché. Réessayez dans un instant.",
+    "problems": {
+      "name": "Une saison a besoin d’un nom de {{maxName}} caractères au plus.",
+      "matches": "Une saison compte de 1 à {{maxMatches}} matchs.",
+      "games": "Un match compte de 1 à {{maxGames}} parties, le minimum ne dépassant pas le maximum.",
+      "dates": "Une saison ne peut pas finir avant de commencer."
+    }
+  },
+  "adminScoring": {
+    "title": "Barème",
+    "lede": "Choisissez les statistiques relevées à chaque partie. Le reste du barème, comme la valeur de chaque statistique et de chaque bonus, sera bientôt modifiable.",
+    "record": "Statistiques relevées",
+    "recordHelp": "Une statistique désactivée n’est plus demandée dans les parties saisies à partir de maintenant. Les parties déjà enregistrées gardent leurs valeurs et leurs points.",
+    "stat": "Statistique",
+    "recordIt": "La relever",
+    "effect": "Effet sur le total",
+    "recordLabel": "Relever : {{stat}}",
+    "on": "Oui",
+    "off": "Non",
+    "effects": {
+      "adds": "Ajoute",
+      "subtracts": "Retire",
+      "notCounted": "Non comptée",
+      "shownOnly": "Affichée dans les tableaux, sans compter dans les points"
+    },
+    "save": "Enregistrer les statistiques relevées",
+    "saved": "{{season}} relève ces statistiques à partir de maintenant.",
+    "invalid": "Ces statistiques ont été refusées. Réessayez.",
+    "failed": "Ça n'a pas marché. Réessayez dans un instant.",
+    "loading": "Chargement du barème…"
   }
 }
