@@ -16,7 +16,7 @@ visitor ──HTTPS──▶ Cloudflare ──▶ Caddy (irmahs-labs/proxy) ─�
 | `Dockerfile` (repo root) | Builds the Spring Boot jar, Angular included, into one image on port 8080 |
 | `compose.prod.yaml` (repo root) | Postgres on `internal` only; the app on `internal` and `proxy`, publishing no port |
 | `deploy/db-init/01-app-role.sh` | First start only: creates `leaderboard_app`, the role the app connects with |
-| `.github/workflows/deploy.yml` | Called by CI after the build and tests pass on a merge into `migration`: SSH in as `deploy`, check out the run's commit, write `.env`, dump the database, `docker compose up --build --wait`, then check the public address |
+| `.github/workflows/deploy.yml` | Called by CI after the build and tests pass on a merge into `migration`: SSH in as `deploy`, check out the run's commit, write `.env`, dump the database, `docker compose up --build --wait`, then check the address through Caddy |
 
 ## Database roles
 
@@ -56,8 +56,8 @@ the GitHub secret **and** run `ALTER ROLE … PASSWORD '…'` in the database.
    `sudo mkdir /srv/tournament-leaderboard && sudo chown deploy:deploy /srv/tournament-leaderboard`
 4. **Deploy**: every merge into `migration` that passes CI deploys that commit (Actions → CI, its
    Deploy job). It waits until the app's health check passes, so a broken start fails the run,
-   then checks `https://tournament-leaderboard.irmahs.dev/actuator/health` through Cloudflare and
-   Caddy.
+   then checks `https://tournament-leaderboard.irmahs.dev/actuator/health` through Caddy, from the
+   server: Cloudflare answers 403 to GitHub's runners.
 5. **Route the name**: a pull request in irmahs-labs/proxy adding to `caddy/Caddyfile`:
 
    ```

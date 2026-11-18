@@ -2,8 +2,8 @@ name: Deploy
 
 # Run by CI (ci.yml) after the build and tests pass on a push to migration, the rewrite's branch
 # for now, so nothing that failed them goes live. Once the rewrite replaces the legacy site, it
-# deploys version tags. Before each deploy it dumps the database; after it, it checks the public
-# address.
+# deploys version tags. Before each deploy it dumps the database; after it, it checks the address
+# through Caddy.
 on:
   workflow_call:
   # Also by hand (Actions → Deploy → Run workflow), once this file is on the default branch.
@@ -68,15 +68,19 @@ jobs:
             docker image prune -f
             docker builder prune -f --filter until=168h'
 
-      # The app is healthy inside the server; this checks it through Cloudflare and Caddy too.
-      - name: Check the public address
+      # The app is healthy inside the server; this checks that Caddy reaches it too, with its
+      # certificate, as visitors do. From the server rather than this runner: Cloudflare turns
+      # away requests from data centres such as GitHub's with a 403.
+      - name: Check the address through Caddy
         run: |
-          for _ in $(seq 1 12); do
-            if curl -fsS --max-time 10 https://tournament-leaderboard.irmahs.dev/actuator/health | grep -q '"status":"UP"'; then
-              echo "Healthy at https://tournament-leaderboard.irmahs.dev"
-              exit 0
-            fi
-            sleep 5
-          done
-          echo "https://tournament-leaderboard.irmahs.dev/actuator/health isn't UP"
-          exit 1
+          ssh deploy@${{ secrets.DEPLOY_HOST }} 'for _ in $(seq 1 12); do
+              if docker run --rm --network host curlimages/curl:8.11.1 -fsS --max-time 10 \
+                  --resolve tournament-leaderboard.irmahs.dev:443:127.0.0.1 \
+                  https://tournament-leaderboard.irmahs.dev/actuator/health | grep -q "\"status\":\"UP\""; then
+                echo "Healthy through Caddy at https://tournament-leaderboard.irmahs.dev"
+                exit 0
+              fi
+              sleep 5
+            done
+            echo "Caddy does not reach a healthy app"
+            exit 1'
