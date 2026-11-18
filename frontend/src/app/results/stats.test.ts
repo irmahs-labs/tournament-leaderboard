@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { RULES } from "../testing";
-import { columnsFor, formulaOf, splitRiotId } from "./stats";
+import { LEADERBOARD, RULES } from "../testing";
+import {
+  columnsFor,
+  decimalsOf,
+  formulaOf,
+  splitRiotId,
+  valueOf,
+} from "./stats";
 
 /** A stand-in for Transloco: the key's last part, then the points. */
 const t = (key: string, params?: Record<string, string>) =>
@@ -54,5 +60,29 @@ describe("stats", () => {
       tag: "#EUW",
     });
     expect(splitRiotId("nyxx")).toStrictEqual({ name: "nyxx", tag: "" });
+  });
+});
+
+describe("a standing's value", () => {
+  const [kestrel] = LEADERBOARD.standings;
+
+  it("is the average, or the total when asked and the stat adds up", () => {
+    expect(
+      kestrel
+        ? [
+            valueOf(kestrel, "KILLS"),
+            valueOf(kestrel, "KILLS", true),
+            valueOf(kestrel, "KDA", true),
+          ]
+        : []
+    ).toStrictEqual([16.5, 33, 1.58]);
+  });
+
+  it("keeps per-round stats as averages, and totals whole", () => {
+    expect([
+      decimalsOf("PLANTS"),
+      decimalsOf("PLANTS", true),
+      decimalsOf("ADR", true),
+    ]).toStrictEqual([2, 0, 0]);
   });
 });

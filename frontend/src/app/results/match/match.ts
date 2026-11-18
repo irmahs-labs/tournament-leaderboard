@@ -69,6 +69,12 @@ export class MatchPage {
     source: this.match,
   });
 
+  /** Whether the match's table shows totals rather than averages. Off for each new match. */
+  protected readonly totals = linkedSignal<string, boolean>({
+    computation: () => false,
+    source: this.match,
+  });
+
   protected readonly shownGame = computed(() => {
     const picked = this.game();
 

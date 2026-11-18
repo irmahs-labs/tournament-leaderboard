@@ -126,11 +126,24 @@
         picked.gameNumber }) }} } @else { {{ t(language.plural("match.combined",
         shown.games.length), { count: shown.games.length }) }} }</span
       >
+      @if (!shownGame()) {
+      <label class="toggle">
+        <input
+          #box
+          type="checkbox"
+          role="switch"
+          [checked]="totals()"
+          (change)="totals.set(box.checked)"
+        />
+        {{ t("match.showTotals") }}
+      </label>
+      }
     </div>
     <app-standings-table
       [standings]="rows()"
       [stats]="shown.columns"
       [single]="shownGame() !== null"
+      [totals]="totals()"
     />
   </section>
   } } @else {

@@ -34,15 +34,42 @@ export const columnsFor = (stats: readonly Stat[]): Column[] => {
   return columns;
 };
 
-export const decimalsOf = (column: Column): number =>
-  WHOLE.has(column) ? 0 : 2;
+/**
+ * Per-round averages, percentages and the KDA ratio: adding them up over games means nothing, so
+ * they stay averages when a table shows totals.
+ */
+const NOT_ADDED: ReadonlySet<Column> = new Set([
+  "ADR",
+  "DAMAGE_DELTA",
+  "KAST_PCT",
+  "HEADSHOT_PCT",
+  "KDA",
+]);
 
-/** A standing's value for a column; nothing when the player has no game recording it. */
+/** Whether a column can show a total over several games. */
+export const addsUp = (column: Column): boolean => !NOT_ADDED.has(column);
+
+/** How many decimals a column shows: none for totals and large numbers, two otherwise. */
+export const decimalsOf = (column: Column, total = false): number =>
+  total || WHOLE.has(column) ? 0 : 2;
+
+/**
+ * A standing's value for a column, its total over the games when `total` and the column adds up;
+ * nothing when the player has no game recording it.
+ */
 export const valueOf = (
   standing: Standing,
-  column: Column
-): number | undefined =>
-  column === "KDA" ? standing.kda : standing.averages[column];
+  column: Column,
+  total = false
+): number | undefined => {
+  if (column === "KDA") {
+    return standing.kda;
+  }
+
+  return total && addsUp(column)
+    ? standing.totals[column]
+    : standing.averages[column];
+};
 
 /** One pill of "How points are counted", such as "+ Kills", "− Deaths" or "+ 50 per win". */
 export interface FormulaTerm {

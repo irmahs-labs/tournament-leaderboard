@@ -116,7 +116,8 @@
     "combined": {
       "one": "Its only game",
       "other": "All {{count}} games combined"
-    }
+    },
+    "showTotals": "Show totals"
   },
   "nav": {
     "label": "Main",
@@ -192,7 +193,8 @@
     "average": "{{stat}}, average per game",
     "won": "Won",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "totalOf": "{{stat}}, total over the games"
   },
   "legal": {
     "updated": "Last updated:"
