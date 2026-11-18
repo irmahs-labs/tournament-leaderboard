@@ -21,6 +21,17 @@
   gap: 12px;
 }
 
+/* Three lines: the credit, the legal pages, then GitHub and contact. */
+.credit {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.line {
+  margin: 0;
+}
+
 .ruled {
   padding-top: 16px;
   border-top: 1px solid var(--row-line);
@@ -35,7 +46,8 @@
 .links {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: 8px 14px;
+  margin: 0;
 }
 
 a {

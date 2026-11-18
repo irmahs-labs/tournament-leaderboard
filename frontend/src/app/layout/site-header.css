@@ -81,6 +81,28 @@
 }
 
 .tools,
+/* Site | Admin, for admins: which side of the organisation is on screen. */
+.mode {
+  display: flex;
+  gap: 4px;
+}
+
+.mode a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  box-sizing: border-box;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: var(--button-track);
+}
+
+.mode a[aria-current] {
+  background: var(--nav-text);
+  color: var(--nav-bg);
+}
+
 .languages {
   display: flex;
   flex-wrap: wrap;

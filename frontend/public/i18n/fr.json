@@ -7,7 +7,8 @@
       "privacy": "Confidentialité",
       "cookies": "Cookies",
       "terms": "Conditions d'utilisation"
-    }
+    },
+    "contact": "Contact"
   },
   "header": {
     "language": "Langue",
@@ -205,9 +206,10 @@
     "open": "Admin",
     "navLabel": "Administration",
     "players": "Joueurs",
-    "viewSite": "Voir le site",
     "eyebrow": "Admin · {{org}}",
-    "scores": "Scores"
+    "scores": "Scores",
+    "mode": "Site ou administration",
+    "site": "Site"
   },
   "adminPlayers": {
     "title": "Joueurs",

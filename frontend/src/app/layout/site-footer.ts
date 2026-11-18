@@ -6,7 +6,7 @@ import { CONTACT, LEGAL_PAGES } from "../legal/legal-content";
 import type { Organization } from "../shared/organization";
 import { fullName } from "../shared/organization";
 
-/** The organisation's name, then the platform's credit, legal pages, source and contact. */
+/** The organisation's name, then three lines: the credit, the legal pages, then GitHub and contact. */
 @Component({
   imports: [RouterLink, TranslocoDirective],
   selector: "app-site-footer",

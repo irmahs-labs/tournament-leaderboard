@@ -5,22 +5,26 @@
       <span class="org">{{ fullName(org) }}</span>
     </div>
     }
-    <div class="row credit" [class.ruled]="organization()">
-      <span
-        >Tournament Leaderboard · {{ t("footer.createdBy") }}
-        <a class="strong" href="https://irmahs.dev">Irma HS</a></span
-      >
+    <div class="credit" [class.ruled]="organization()">
+      <p class="line">
+        Tournament Leaderboard · {{ t("footer.createdBy") }}
+        <a class="strong" href="https://irmahs.dev">Irma HS</a>
+      </p>
       <nav class="links" [attr.aria-label]="t('footer.legalLabel')">
         @for (page of legalPages; track page) {
         <a [routerLink]="['/', page]">{{ t("footer.legal." + page) }}</a>
         }
       </nav>
-      <span class="links">
+      <p class="links">
         <a href="https://github.com/irmahs-labs/tournament-leaderboard"
           >GitHub</a
         >
-        <a [href]="'mailto:' + contact">{{ contact }}</a>
-      </span>
+        <a [href]="'mailto:' + contact" [attr.title]="contact"
+          >{{ t("footer.contact") }}<span class="visually-hidden">
+            {{ contact }}</span
+          ></a
+        >
+      </p>
     </div>
   </div>
 </footer>

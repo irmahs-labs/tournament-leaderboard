@@ -108,6 +108,26 @@ describe("the footer", () => {
     localStorage.clear();
   });
 
+  it("puts the credit, the legal pages, then GitHub and contact on three lines", async () => {
+    const page = rendered(await openAlsace("/o/alsace-arena"));
+    const credit = page.ownerDocument.querySelector("footer .credit");
+    const contact = credit?.querySelector<HTMLAnchorElement>("a[href^=mailto]");
+
+    expect(
+      [...(credit?.children ?? [])].map((line) => line.tagName)
+    ).toStrictEqual(["P", "NAV", "P"]);
+    expect(text(credit?.firstElementChild)).toBe(
+      "Tournament Leaderboard · created by Irma HS"
+    );
+    expect(texts(credit?.lastElementChild ?? page, "a")).toStrictEqual([
+      "GitHub",
+      "Contact tournament-leaderboard@irmahs.dev",
+    ]);
+    expect(contact?.getAttribute("href")).toBe(
+      "mailto:tournament-leaderboard@irmahs.dev"
+    );
+  });
+
   it("links to the legal pages on every organisation page", async () => {
     const page = rendered(await openAlsace("/o/alsace-arena"));
     const footer = page.ownerDocument.querySelector("footer nav");

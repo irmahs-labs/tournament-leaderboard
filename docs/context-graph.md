@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-18, with the Enter scores screen (phase 4).
+Last updated: 2026-11-18, with the Enter scores screen (phase 4), the Site | Admin switch and the three-line footer.
 
 ## System
 
@@ -159,8 +159,8 @@ flowchart TD
     platform --> si[SignInPage<br/>Google, your organisations, sign out]
     platform --> legal[LegalPage<br/>legal notice, privacy, cookies, terms]
     platform --> nf[NotFoundPage]
-    shell --> header[SiteHeader<br/>skip link, logo, nav keeping ?season= (Scores, Players and View site on admin pages; Admin link for admins), online count, season, EN/FR, theme, Sign in or account]
-    shell --> footer[SiteFooter<br/>org name, credit, legal pages, GitHub, contact]
+    shell --> header[SiteHeader<br/>skip link, logo, nav keeping ?season= (Scores and Players on admin pages; a Site | Admin switch for admins), online count, season, EN/FR, theme, Sign in or account]
+    shell --> footer[SiteFooter<br/>org name; credit, legal pages, GitHub and Contact on three lines]
     platform --> header
     platform --> footer
     shell -->|"organisation, ?season="| current[CurrentSeason]
