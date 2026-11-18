@@ -160,7 +160,7 @@ flowchart TD
     platform --> legal[LegalPage<br/>legal notice, privacy, cookies, terms]
     platform --> nf[NotFoundPage]
     shell --> header[SiteHeader<br/>skip link, logo, nav keeping ?season= (Scores and Players on admin pages; a Site | Admin switch for admins), online count, season, EN/FR, theme, Sign in or account]
-    shell --> footer[SiteFooter<br/>org name; credit, legal pages, GitHub and Contact on three lines]
+    shell --> footer[SiteFooter<br/>org name; credit, legal pages, GitHub and Contact on three centred lines]
     platform --> header
     platform --> footer
     shell -->|"organisation, ?season="| current[CurrentSeason]

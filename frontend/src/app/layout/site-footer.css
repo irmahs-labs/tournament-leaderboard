@@ -11,12 +11,14 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
+  /* Everything in the footer sits in the middle of the page. */
+  text-align: center;
 }
 
 .row {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   gap: 12px;
 }
@@ -25,6 +27,7 @@
 .credit {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 10px;
 }
 
@@ -46,6 +49,7 @@
 .links {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 8px 14px;
   margin: 0;
 }
