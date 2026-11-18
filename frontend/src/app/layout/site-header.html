@@ -11,6 +11,13 @@
     @if (inAdmin()) {
     <nav class="nav" [attr.aria-label]="t('admin.navLabel')">
       <a
+        [routerLink]="['/o', org.slug, 'admin', 'scores']"
+        routerLinkActive="active"
+        queryParamsHandling="preserve"
+        ariaCurrentWhenActive="page"
+        >{{ t("admin.scores") }}</a
+      >
+      <a
         [routerLink]="['/o', org.slug, 'admin', 'players']"
         routerLinkActive="active"
         ariaCurrentWhenActive="page"

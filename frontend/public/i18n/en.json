@@ -206,7 +206,8 @@
     "navLabel": "Admin",
     "players": "Players",
     "viewSite": "View site",
-    "eyebrow": "Admin · {{org}}"
+    "eyebrow": "Admin · {{org}}",
+    "scores": "Scores"
   },
   "adminPlayers": {
     "title": "Players",
@@ -235,5 +236,43 @@
     "none": "No player yet.",
     "noMatch": "No player matches “{{query}}”.",
     "loading": "Loading the players…"
+  },
+  "adminScores": {
+    "title": "Enter scores",
+    "lede": "One game at a time. The leaderboard updates when you save.",
+    "picks": "Season, match and game",
+    "match": "Match",
+    "game": "Game",
+    "date": "Match date",
+    "status": "Status",
+    "states": {
+      "saved": "Saved",
+      "unsaved": "Unsaved changes",
+      "notEntered": "Not entered yet"
+    },
+    "check": "Check bonuses",
+    "newPlayer": "New player",
+    "newPlayerLabel": "New player’s Riot ID, line {{line}}",
+    "playerLabel": "Player, line {{line}}",
+    "line": "line {{line}}",
+    "wonLabel": "{{name}} won this game",
+    "automaticLabel": "{{bonus}}, {{name}}: worked out when you check or save",
+    "points": "Points",
+    "notRecorded": "Not recorded this season: {{stats}}.",
+    "carried": "Players carried over from match {{match}}, game {{game}}: only the numbers need entering.",
+    "bonusHelp": "Automatic bonuses are worked out when you check them or save; manual ones are ticked by hand.",
+    "clear": "Clear game",
+    "save": "Save game {{game}}",
+    "clearAsk": "Remove this game’s scores? The match stays, with its date.",
+    "discard": "Leave this game? Its unsaved changes will be lost.",
+    "saved": "Game {{game}} of match {{match}} saved. The leaderboard is up to date.",
+    "cleared": "The game’s scores were removed.",
+    "checked": "Bonuses checked. They are kept when you save.",
+    "empty": "Pick at least one player before saving.",
+    "twice": "Line {{row}}: this player is already on another line.",
+    "invalid": "Line {{row}}: {{stat}} isn’t a valid number.",
+    "refused": "The scores were refused: check every number, then save again.",
+    "failed": "That didn't work. Try again in a moment.",
+    "loading": "Loading the game…"
   }
 }

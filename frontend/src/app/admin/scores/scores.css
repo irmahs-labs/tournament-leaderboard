@@ -1,0 +1,200 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+.intro-text {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 760px;
+}
+
+.notice {
+  margin: 0;
+  padding: 24px;
+}
+
+.picks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
+  align-items: end;
+  gap: 16px;
+  padding: 20px 22px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+input:not([type="checkbox"]),
+select {
+  min-height: 44px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  width: 100%;
+  background: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--input-line);
+  border-radius: 0;
+  font: 500 15px var(--font-body);
+}
+
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+input[type="checkbox"]:disabled {
+  cursor: default;
+}
+
+input::placeholder {
+  color: var(--muted);
+}
+
+input[aria-invalid="true"] {
+  border-color: var(--danger);
+  outline: 2px solid var(--danger);
+  outline-offset: -2px;
+}
+
+.state {
+  align-self: flex-start;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.state.saved {
+  color: var(--good);
+}
+
+.state.unsaved {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent);
+}
+
+.block {
+  padding: 22px;
+  min-width: 0;
+}
+
+.block-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  margin-bottom: 14px;
+}
+
+.tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.small-button {
+  min-height: 44px;
+  padding: 0 14px;
+  font-size: 13px;
+}
+
+.note {
+  margin: 0 0 14px;
+}
+
+.note:last-child {
+  margin: 14px 0 0;
+}
+
+.scroll {
+  /* Positioned, so nothing inside the table widens the page on phones. */
+  position: relative;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.table th {
+  padding: 10px 6px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: var(--label-track);
+  border-bottom: 1px solid var(--head-line);
+  white-space: nowrap;
+}
+
+.table abbr {
+  text-decoration: none;
+}
+
+.table td {
+  padding: 6px;
+  border-bottom: 1px solid var(--row-line);
+}
+
+.table tbody tr:nth-child(even) {
+  background: var(--zebra);
+}
+
+.table .num {
+  text-align: center;
+}
+
+.line {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  text-align: center;
+}
+
+.who {
+  min-width: 170px;
+}
+
+.stat {
+  width: 64px;
+  min-width: 64px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.points {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--accent-text);
+}
+
+.status {
+  margin: 0;
+  color: var(--good);
+  font-weight: 600;
+}
+
+.status.failed {
+  color: var(--danger);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+}

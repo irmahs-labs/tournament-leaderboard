@@ -206,7 +206,8 @@
     "navLabel": "Administration",
     "players": "Joueurs",
     "viewSite": "Voir le site",
-    "eyebrow": "Admin · {{org}}"
+    "eyebrow": "Admin · {{org}}",
+    "scores": "Scores"
   },
   "adminPlayers": {
     "title": "Joueurs",
@@ -235,5 +236,43 @@
     "none": "Aucun joueur pour l’instant.",
     "noMatch": "Aucun joueur ne correspond à « {{query}} ».",
     "loading": "Chargement des joueurs…"
+  },
+  "adminScores": {
+    "title": "Saisir les scores",
+    "lede": "Une partie à la fois. Le classement se met à jour à l’enregistrement.",
+    "picks": "Saison, match et partie",
+    "match": "Match",
+    "game": "Partie",
+    "date": "Date du match",
+    "status": "État",
+    "states": {
+      "saved": "Enregistrée",
+      "unsaved": "Modifications non enregistrées",
+      "notEntered": "Pas encore saisie"
+    },
+    "check": "Vérifier les bonus",
+    "newPlayer": "Nouveau joueur",
+    "newPlayerLabel": "Riot ID du nouveau joueur, ligne {{line}}",
+    "playerLabel": "Joueur, ligne {{line}}",
+    "line": "ligne {{line}}",
+    "wonLabel": "Victoire de {{name}} dans cette partie",
+    "automaticLabel": "{{bonus}}, {{name}} : calculé à la vérification ou à l’enregistrement",
+    "points": "Points",
+    "notRecorded": "Non relevé cette saison : {{stats}}.",
+    "carried": "Joueurs repris du match {{match}}, partie {{game}} : il ne reste qu’à saisir les chiffres.",
+    "bonusHelp": "Les bonus automatiques sont calculés quand vous les vérifiez ou enregistrez ; les bonus manuels se cochent à la main.",
+    "clear": "Effacer la partie",
+    "save": "Enregistrer la partie {{game}}",
+    "clearAsk": "Supprimer les scores de cette partie ? Le match reste, avec sa date.",
+    "discard": "Quitter cette partie ? Ses modifications non enregistrées seront perdues.",
+    "saved": "Partie {{game}} du match {{match}} enregistrée. Le classement est à jour.",
+    "cleared": "Les scores de la partie ont été supprimés.",
+    "checked": "Bonus vérifiés. Ils sont conservés à l’enregistrement.",
+    "empty": "Choisissez au moins un joueur avant d’enregistrer.",
+    "twice": "Ligne {{row}} : ce joueur est déjà sur une autre ligne.",
+    "invalid": "Ligne {{row}} : {{stat}} n’est pas un nombre valide.",
+    "refused": "Les scores ont été refusés : vérifiez chaque nombre, puis enregistrez à nouveau.",
+    "failed": "Ça n'a pas marché. Réessayez dans un instant.",
+    "loading": "Chargement de la partie…"
   }
 }

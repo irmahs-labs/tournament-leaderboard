@@ -86,7 +86,7 @@ const openAs = async (
 const openPlayers = async (
   seasons: Season[] = []
 ): Promise<RouterTestingHarness> => {
-  const harness = await openAs("/o/alsace-arena/admin", ME, seasons);
+  const harness = await openAs("/o/alsace-arena/admin/players", ME, seasons);
   await vi.waitFor(() => {
     harness.detectChanges();
     http.expectOne((request) => request.url === API).flush(PLAYERS);
@@ -131,13 +131,16 @@ describe("the admin pages", () => {
     expect(TestBed.inject(Router).url).toBe("/o/alsace-arena");
   });
 
-  it("open on Players, with the admin links in the header", async () => {
+  it("show the admin links in the header, without the season picker", async () => {
     const harness = await openPlayers(SEASONS);
     const page = rendered(harness);
 
-    expect(TestBed.inject(Router).url).toBe("/o/alsace-arena/admin/players");
     expect(text(page.querySelector("h1"))).toBe("Players");
-    expect(texts(page, "header nav a")).toStrictEqual(["Players", "View site"]);
+    expect(texts(page, "header nav a")).toStrictEqual([
+      "Scores",
+      "Players",
+      "View site",
+    ]);
     expect(page.querySelector("header select")).toBeNull();
   });
 });
