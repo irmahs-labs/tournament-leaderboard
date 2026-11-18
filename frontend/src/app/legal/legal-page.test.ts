@@ -1,8 +1,9 @@
 import { HttpTestingController } from "@angular/common/http/testing";
 import { TestBed } from "@angular/core/testing";
+import { Router } from "@angular/router";
 import { RouterTestingHarness } from "@angular/router/testing";
 import { TranslocoService } from "@jsverse/transloco";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { openAlsace, rendered, testProviders, text, texts } from "../testing";
 import { LEGAL, LEGAL_PAGES } from "./legal-content";
@@ -91,6 +92,9 @@ describe("the legal pages", () => {
     );
 
     expect(link?.getAttribute("href")).toBe("/cookies");
+
+    link?.click();
+    await vi.waitFor(() => expect(TestBed.inject(Router).url).toBe("/cookies"));
   });
 });
 

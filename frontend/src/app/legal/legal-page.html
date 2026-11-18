@@ -12,12 +12,7 @@
   <section class="panel block">
     <h2 class="heading">{{ section.heading }}</h2>
     @if (section.table; as table) {
-    <div
-      class="scroll"
-      role="region"
-      [attr.aria-label]="table.caption"
-      tabindex="0"
-    >
+    <div class="scroll" role="region" [attr.aria-label]="table.caption">
       <table>
         <caption class="visually-hidden">
           {{ table.caption }}
@@ -54,11 +49,9 @@
     <ul class="links">
       @for (link of links; track link.href) {
       <li>
-        @if (link.href.startsWith("/")) {
-        <a [routerLink]="link.href">{{ link.text }}</a>
-        } @else {
-        <a [href]="link.href">{{ link.text }}</a>
-        }
+        <a [href]="link.href" (click)="follow($event, link.href)"
+          >{{ link.text }}</a
+        >
       </li>
       }
     </ul>
