@@ -102,6 +102,30 @@
   cursor: pointer;
 }
 
+.online {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  border: 1px solid var(--nav-ghost);
+  color: var(--nav-muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.online strong {
+  color: var(--nav-text);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--nav-good);
+}
+
 .tool[aria-pressed="true"] {
   background: var(--nav-text);
   color: var(--nav-bg);

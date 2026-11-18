@@ -6,6 +6,7 @@ import { TranslocoDirective } from "@jsverse/transloco";
 import { CurrentSeason } from "../results/current-season";
 import type { Language } from "../shared/language";
 import { LANGUAGES, LanguageService } from "../shared/language";
+import { OnlineService } from "../shared/online";
 import type { Organization } from "../shared/organization";
 import { initials } from "../shared/organization";
 import { SessionService } from "../shared/session";
@@ -13,7 +14,7 @@ import { ThemeService } from "../shared/theme";
 
 /**
  * The top bar: the organisation's logo and pages when there is one, the platform's name
- * otherwise; then the season picker, the language and theme switches, and sign-in.
+ * otherwise; then how many pages are open, the season picker, the language and theme switches, and sign-in.
  */
 @Component({
   imports: [RouterLink, RouterLinkActive, TranslocoDirective],
@@ -31,6 +32,7 @@ export class SiteHeader {
     initials(this.organization()?.name ?? "")
   );
 
+  protected readonly online = inject(OnlineService);
   protected readonly session = inject(SessionService);
   protected readonly current = inject(CurrentSeason);
 

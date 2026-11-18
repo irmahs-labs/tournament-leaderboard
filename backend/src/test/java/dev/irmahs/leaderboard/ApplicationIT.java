@@ -1,6 +1,8 @@
 package dev.irmahs.leaderboard;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -9,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -30,6 +34,9 @@ class ApplicationIT {
     @Autowired
     MockMvcTester mvc;
 
+    @Autowired
+    MockMvc mockMvc;
+
     @Test
     void startsAndReportsHealthy() {
         assertThat(mvc.get().uri("/actuator/health"))
@@ -46,6 +53,18 @@ class ApplicationIT {
                 .bodyJson()
                 .extractingPath("$.version")
                 .isNotNull();
+    }
+
+    @Test
+    void streamsTheOnlineCountToAnyone() throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/online"))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        assertThat(result.getResponse().getContentType()).startsWith("text/event-stream");
+        assertThat(result.getResponse().getContentAsString())
+                .contains("event:online")
+                .containsPattern("data:\\d+");
     }
 
     @Test

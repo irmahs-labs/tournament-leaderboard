@@ -16,7 +16,9 @@
     "signIn": "Se connecter",
     "account": "Votre compte : {{name}}",
     "season": "Saison",
-    "skip": "Aller au contenu"
+    "skip": "Aller au contenu",
+    "online": "en ligne",
+    "onlineTitle": "Pages ouvertes sur Tournament Leaderboard en ce moment"
   },
   "leaderboard": {
     "title": "Classement de la saison",

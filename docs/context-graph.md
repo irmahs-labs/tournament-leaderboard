@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-18, with a match's table switching between averages and totals.
+Last updated: 2026-11-18, with the online count, which completes phase 3.
 
 ## System
 
@@ -56,6 +56,7 @@ flowchart LR
     stats --> ranks
     stats --> scoring
     stats --> seasons
+    presence
     system
 ```
 
@@ -72,6 +73,7 @@ flowchart LR
 | `matches` | `Match`, `Game` and their repositories |
 | `scoring` | `ScoringService` (the only place totals are computed), `BonusCalculator` (HIGHEST/LOWEST, ties all win) |
 | `stats` | `GameStat`, `StatLine`, `PlayerTally`, `SeasonResultsService` (public results; each standing carries the player's current rank), `ScoresService` (Enter scores) |
+| `presence` | `OnlineCount` (open pages, in memory only; changes sent at most once a second, a heartbeat every 25 s), `GET /api/online` as server-sent events |
 | `system` | `/api/version`; `SpaController` forwards the Angular router's addresses (`/o/**`, `/not-found`, `/sign-in`, `/legal`, `/privacy`, `/cookies`, `/terms`) to `index.html` |
 
 ## API
@@ -82,6 +84,7 @@ Admin routes need `@orgAccess.isAdmin(#slug, authentication)` and a CSRF token o
 flowchart LR
     subgraph public[Public GET]
         v["/api/version"]
+        on["/api/online (event stream)"]
         r["/api/ranks"]
         o["/api/orgs/{slug}"]
         sl["…/seasons"]
@@ -99,6 +102,7 @@ flowchart LR
         bc["seasons/{n}/bonus-check: POST"]
     end
     r --> ranks
+    on --> presence
     o --> organizations
     sl & sr --> SeasonService
     lb & ml --> SeasonResultsService
@@ -155,7 +159,7 @@ flowchart TD
     platform --> si[SignInPage<br/>Google, your organisations, sign out]
     platform --> legal[LegalPage<br/>legal notice, privacy, cookies, terms]
     platform --> nf[NotFoundPage]
-    shell --> header[SiteHeader<br/>skip link, logo, nav keeping ?season=, season, EN/FR, theme, Sign in or account]
+    shell --> header[SiteHeader<br/>skip link, logo, nav keeping ?season=, online count, season, EN/FR, theme, Sign in or account]
     shell --> footer[SiteFooter<br/>org name, credit, legal pages, GitHub, contact]
     platform --> header
     platform --> footer
@@ -164,6 +168,7 @@ flowchart TD
     header -->|season picker| current
     si -->|"leaves for"| google["/oauth2/authorization/google"]
     google -->|"back to /sign-in, then the page sign-in began on"| si
+    header -->|event stream| online[OnlineService] -->|GET| onlineApi["/api/online"]
     header --> session[SessionService] -->|GET /api/me, POST /api/logout| meApi["/api/me"]
     shell --> lb["LeaderboardPage<br/>top three, tiles, how points are counted"]
     lb --> table[StandingsTable]
@@ -186,7 +191,7 @@ flowchart TD
 
 | Folder | Holds |
 |---|---|
-| `shared/` | `ThemeService` (dark or light, the accent's CSS variables), `colour.ts` (WCAG contrast and mixing, the palettes, readable rank colours), `LanguageService` (EN or FR; numbers, dates and plurals in the language on screen), `SessionService` (who is signed in, Google sign-in with a safe return address, sign-out), `organization.ts` (`organizationResolver`, `fullName`, `initials`), `storage.ts` (local and session storage that survives being blocked), `RankPill` |
+| `shared/` | `ThemeService` (dark or light, the accent's CSS variables), `colour.ts` (WCAG contrast and mixing, the palettes, readable rank colours), `LanguageService` (EN or FR; numbers, dates and plurals in the language on screen), `OnlineService` (the header's count of open pages), `SessionService` (who is signed in, Google sign-in with a safe return address, sign-out), `organization.ts` (`organizationResolver`, `fullName`, `initials`), `storage.ts` (local and session storage that survives being blocked), `RankPill` |
 | `layout/` | `OrgShell` (an organisation's pages), `PlatformShell` (sign-in and Not found), `SiteHeader`, `SiteFooter`, page layout |
 | `results/` | The public results: `api.ts` (the API's shapes), `CurrentSeason` (the organisation's seasons, newest first, and the one picked with `?season=`), `stats.ts` (stat columns with K, D and A folded into KDA, decimals, the points formula, Riot ID name and tag), `StandingsTable` (a season's or a match's averages or totals, or one game's lines), `leaderboard/`, `matches/` (`MatchesPage`), `match/` (`MatchPage`, `match-stats.ts`: a game's lines as standings, the stat leaders) |
 | `sign-in/` | `SignInPage` |
@@ -200,7 +205,7 @@ flowchart TD
 A component used by several features lives in `shared/` (`RankPill`); one used by several pages of a
 single feature lives in that feature (`StandingsTable` in `results/`).
 
-Not in the shell yet: the online count (no backend), social links (branding API, phase 7). Not on the
+Not in the shell yet: social links (branding API, phase 7). Not on the
 leaderboard yet: Export CSV and Export poster (phase 11).
 
 ## Phases
@@ -208,7 +213,7 @@ leaderboard yet: Export CSV and Export poster (phase 11).
 ```mermaid
 flowchart LR
     p0[0 Setup ✓] --> p1[1 Schema, import, public API ✓] --> p2[2 Sign-in and admin API ✓]
-    p2 --> p3[3 Angular shell and public pages ▶] --> p4[4 Angular admin] --> p5[5 Deploy pipelines] --> p6[6 Cutover]
+    p2 --> p3[3 Angular shell and public pages ✓] --> p4[4 Angular admin ▶] --> p5[5 Deploy pipelines] --> p6[6 Cutover]
     p6 --> p7[7 Open the platform<br/>release 2]
     p7 --> p8[8 Scoring rules editor] --> p9[9 Players and claims] --> p10[10 Seasons, matches<br/>and waiting lists]
     p10 --> p11[11 Exports and poster] --> p12[12 Moderation] --> p13[13 Merge tool and scan]
@@ -217,7 +222,6 @@ flowchart LR
 ✓ done · ▶ next. The full plan, with each phase's exit criterion, is the migration plan page
 kept with the project designs.
 
-Not built yet: the online count (no phase yet; needs a backend before the header shows it);
-social links, branding, members and invites (7); the scoring-rules editor,
+Not built yet: social links, branding, members and invites (7); the scoring-rules editor,
 `PUT …/rules?apply=current|next` (8); claims and expected emails (9); schedule and sign-ups (10);
 exports (11); moderation (12); merging duplicate players (13).

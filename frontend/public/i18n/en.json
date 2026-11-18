@@ -16,7 +16,9 @@
     "signIn": "Sign in",
     "account": "Your account: {{name}}",
     "season": "Season",
-    "skip": "Skip to content"
+    "skip": "Skip to content",
+    "online": "online",
+    "onlineTitle": "Pages open on Tournament Leaderboard right now"
   },
   "leaderboard": {
     "title": "Season leaderboard",
