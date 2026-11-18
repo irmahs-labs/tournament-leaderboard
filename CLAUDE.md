@@ -89,8 +89,9 @@ CI (`.github/workflows/ci.yml`) runs `./mvnw verify` on pull requests and on pus
 ## Rules
 
 - Don't touch `legacy/`: no edits, no dependency updates, no builds.
-- `main` is protected by a ruleset: changes land through pull requests only. Until the rewrite is
-  ready, work stays in `migration`; it reaches `dev` and `main` only when Irma decides.
+- `main` is protected by a ruleset: changes land through pull requests only. So is `migration`,
+  whose ruleset also requires the **Build and test** check (with the quality gate) before merging,
+  since every merge into it deploys production. Until the rewrite is ready, work stays in `migration`; it reaches `dev` and `main` only when Irma decides.
 - Commit messages and pull request titles follow Conventional Commits (`feat:`, `fix:`, `chore:`,
   `docs:`, `refactor:`, `test:`, `ci:`), since release versions will be derived from them.
 - Repository: `irmahs-labs/tournament-leaderboard` (moved from `irmahs/alsace-arena-spike-tournament`;

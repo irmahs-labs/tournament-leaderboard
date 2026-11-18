@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-18, with the deploy run by CI after the build, a database dump before each deploy and a health check through Caddy (phase 5).
+Last updated: 2026-11-19, with the Protect migration ruleset: merges into `migration` need the Build and test check, quality gate included (phase 5).
 
 ## System
 
@@ -228,14 +228,16 @@ leaderboard yet: Export CSV and Export poster (phase 11).
 ```mermaid
 flowchart LR
     p0[0 Setup ✓] --> p1[1 Schema, import, public API ✓] --> p2[2 Sign-in and admin API ✓]
-    p2 --> p3[3 Angular shell and public pages ✓] --> p4[4 Angular admin ✓] --> p5[5 Deploy pipelines ▶] --> p6[6 Cutover]
+    p2 --> p3[3 Angular shell and public pages ✓] --> p4[4 Angular admin ✓] --> p5[5 Deploy pipelines ✓] --> p6[6 Cutover ▶]
     p6 --> p7[7 Open the platform<br/>release 2]
     p7 --> p8[8 Scoring rules editor] --> p9[9 Players and claims] --> p10[10 Seasons, matches<br/>and waiting lists]
     p10 --> p11[11 Exports and poster] --> p12[12 Moderation] --> p13[13 Merge tool and scan]
 ```
 
 ✓ done · ▶ next. Until the switch-over (6), every merge into `migration` that passes CI deploys
-production; version tags, a staging copy from `main` and release-please come with it. The full plan, with each phase's exit criterion, is the migration plan page
+production, and the Protect migration ruleset lets a pull request merge only once Build and test
+(quality gate included) has passed; version tags, a staging copy from `main` and release-please
+come with it. The full plan, with each phase's exit criterion, is the migration plan page
 kept with the project designs.
 
 Not built yet: social links, branding, members and invites (7); the scoring-rules editor,
