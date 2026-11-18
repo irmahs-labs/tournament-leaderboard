@@ -16,7 +16,7 @@ visitor ──HTTPS──▶ Cloudflare ──▶ Caddy (irmahs-labs/proxy) ─�
 | `Dockerfile` (repo root) | Builds the Spring Boot jar, Angular included, into one image on port 8080 |
 | `compose.prod.yaml` (repo root) | Postgres on `internal` only; the app on `internal` and `proxy`, publishing no port |
 | `deploy/db-init/01-app-role.sh` | First start only: creates `leaderboard_app`, the role the app connects with |
-| `.github/workflows/deploy.yml` | On each merge into `migration`: SSH in as `deploy`, check out the run's commit, write `.env`, `docker compose up --build --wait` |
+| `.github/workflows/deploy.yml` | Called by CI after the build and tests pass on a merge into `migration`: SSH in as `deploy`, check out the run's commit, write `.env`, dump the database, `docker compose up --build --wait`, then check the public address |
 
 ## Database roles
 
@@ -54,8 +54,10 @@ the GitHub secret **and** run `ALTER ROLE … PASSWORD '…'` in the database.
    the other apps.
 3. **Folder**, as admin on the server, if the deploy can't create it:
    `sudo mkdir /srv/tournament-leaderboard && sudo chown deploy:deploy /srv/tournament-leaderboard`
-4. **Deploy**: every merge into `migration` deploys that commit (Actions → Deploy shows the
-   runs). It waits until the app's health check passes, so a broken start fails the run.
+4. **Deploy**: every merge into `migration` that passes CI deploys that commit (Actions → CI, its
+   Deploy job). It waits until the app's health check passes, so a broken start fails the run,
+   then checks `https://tournament-leaderboard.irmahs.dev/actuator/health` through Cloudflare and
+   Caddy.
 5. **Route the name**: a pull request in irmahs-labs/proxy adding to `caddy/Caddyfile`:
 
    ```
@@ -69,3 +71,26 @@ the GitHub secret **and** run `ALTER ROLE … PASSWORD '…'` in the database.
    ```
 
    Merge it after the DNS records exist; Caddy gets the certificate on the first visit.
+
+## Until the switch-over
+
+Decided on 2026-11-18: every merge into `migration` that passes CI deploys production, as above,
+until the rewrite replaces the legacy site. Version tags deploying production, `main` deploying a
+staging copy, and release-please come with the switch-over (phase 6), not before.
+
+## Dumps before each deploy
+
+Before starting the new version, the deploy dumps the database with `pg_dump --format=custom`
+into `/srv/tournament-leaderboard/backups/` (readable by `deploy` only, ignored by git), named by
+date and commit. It keeps the last 14. An empty or failed dump stops the deploy before anything
+changes. They're on the same server as the database: they undo a bad migration, not a lost
+server; off-server backups are separate.
+
+To restore one, as `deploy` in `/srv/tournament-leaderboard`:
+
+```
+export COMPOSE_FILE=compose.prod.yaml
+docker compose stop app
+docker compose exec -T db pg_restore -U leaderboard_owner -d leaderboard --clean --if-exists < backups/<the dump>
+git reset --hard <the dump's commit> && docker compose up -d --build --wait
+```
