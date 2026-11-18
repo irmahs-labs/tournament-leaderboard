@@ -12,16 +12,11 @@
   gap: 20px;
 }
 
-.heading {
+.intro-text {
   display: flex;
   flex-direction: column;
   gap: 10px;
   max-width: 760px;
-}
-
-.lede {
-  margin: 0;
-  font-size: 17px;
 }
 
 .played {
@@ -32,14 +27,6 @@
 .notice {
   margin: 0;
   padding: 24px;
-}
-
-.label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: var(--label-track);
 }
 
 .podium {
@@ -146,98 +133,8 @@
   margin-bottom: 18px;
 }
 
-.heading-2 {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 26px;
-  line-height: 1.1;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-
 .spaced {
   margin-bottom: 18px;
-}
-
-.small {
-  font-size: 14px;
-}
-
-.scroll {
-  overflow-x: auto;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 15px;
-}
-
-.table th {
-  padding: 12px 14px;
-  text-align: left;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: var(--label-track);
-  border-bottom: 1px solid var(--head-line);
-  white-space: nowrap;
-}
-
-.table abbr {
-  text-decoration: none;
-}
-
-.table td {
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--row-line);
-  white-space: nowrap;
-}
-
-.table tbody tr:nth-child(even) {
-  background: var(--zebra);
-}
-
-.table tbody tr.leader {
-  background: var(--accent-soft);
-}
-
-.table .num {
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-
-.position,
-.total {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 20px;
-}
-
-.position {
-  width: 40px;
-}
-
-.total {
-  color: var(--accent-text);
-}
-
-.fixed {
-  width: 116px;
-  text-align: center;
-  padding: 3px 6px;
-}
-
-.player {
-  font-size: 16px;
-}
-
-.tag {
-  margin-left: 2px;
-  color: var(--muted);
-  font-size: 13px;
 }
 
 .formula {

@@ -5,8 +5,8 @@ import { provideRouter, withComponentInputBinding } from "@angular/router";
 import { provideTransloco } from "@jsverse/transloco";
 
 import { routes } from "./app.routes";
-import { LANGUAGES, startingLanguage } from "./core/language";
-import { TranslocoHttpLoader } from "./core/transloco-loader";
+import { LANGUAGES, startingLanguage } from "./shared/language";
+import { TranslocoHttpLoader } from "./shared/transloco-loader";
 
 export const appConfig: ApplicationConfig = {
   providers: [

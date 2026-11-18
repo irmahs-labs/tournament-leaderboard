@@ -1,0 +1,48 @@
+<div class="scroll" *transloco="let t">
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">{{ t("standings.rank") }}</th>
+        <th scope="col">{{ t("standings.player") }}</th>
+        <th scope="col" class="num">{{ t("standings.games") }}</th>
+        @for (column of columns(); track column) {
+        <th scope="col" class="num">
+          <abbr
+            [attr.title]="t('standings.average', { stat: t('stats.long.' + column) })"
+            >{{ t("standings.avg", { stat: t("stats.short." + column) })
+            }}</abbr
+          >
+        </th>
+        }
+        <th scope="col" class="num">{{ t("standings.wins") }}</th>
+        <th scope="col" class="num">{{ t("standings.total") }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (standing of standings(); track standing.playerId; let first =
+      $first) { @let id = splitRiotId(standing.riotId);
+      <tr [class.leader]="first">
+        <td class="position">{{ standing.rank }}</td>
+        <td>
+          @if (standing.currentRank; as rank) {
+          <app-rank-pill [name]="rank.name" [color]="rank.color" fixed />
+          }
+        </td>
+        <td>
+          <strong class="player">{{ id.name }}</strong
+          ><span class="tag">{{ id.tag }}</span>
+        </td>
+        <td class="num">{{ standing.games }}</td>
+        @for (column of columns(); track column) {
+        <td class="num">
+          {{ language.number(valueOf(standing, column), decimalsOf(column)) }}
+        </td>
+        }
+        <td class="num">{{ standing.wins }}</td>
+        <td class="num total">{{ language.number(standing.points) }}</td>
+      </tr>
+      }
+    </tbody>
+  </table>
+</div>

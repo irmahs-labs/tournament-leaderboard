@@ -50,7 +50,10 @@ typecheck in `frontend/`, Spotless and a compile in `backend/`. In cloud session
   Directory `legacy`**. It is **frozen**: don't change, install or build anything in it. Its last
   Vercel deployment stays live until the rewrite replaces it. Its own guide is [`legacy/CLAUDE.md`](legacy/CLAUDE.md).
 - The rewrite, built with Maven from the root `pom.xml` (parent: Spring Boot 4.1, Java 21):
-  - `frontend/` — Angular 22 (standalone components, Vitest, tests named `*.test.ts`).
+  - `frontend/` — Angular 22 (standalone components, Vitest, tests named `*.test.ts`). Organised
+    by feature like the backend: `src/app/shared/` for what every feature uses, `layout/` for the
+    shells, then one folder per feature (`results/`, `sign-in/`, …). A component shared by several
+    features goes in `shared/`; one shared by pages of a single feature stays in that feature.
     `frontend/pom.xml` runs `npm ci`, `npm run check`, `npm run typecheck:test`, `npm run build` and
     `npm run test:ci` through frontend-maven-plugin and packages `dist/browser` under `static/` in
     a jar.

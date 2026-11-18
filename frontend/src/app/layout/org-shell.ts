@@ -3,10 +3,11 @@ import { toSignal } from "@angular/core/rxjs-interop";
 import { Title } from "@angular/platform-browser";
 import { ActivatedRoute, RouterOutlet } from "@angular/router";
 
-import { LanguageService } from "../core/language";
-import type { Organization } from "../core/organization";
-import { CurrentSeason } from "../core/seasons";
-import { ThemeService } from "../core/theme";
+import { CurrentSeason } from "../results/current-season";
+import { LanguageService } from "../shared/language";
+import type { Organization } from "../shared/organization";
+import { fullName } from "../shared/organization";
+import { ThemeService } from "../shared/theme";
 import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./site-header";
 
@@ -48,9 +49,7 @@ export class OrgShell {
       const org = this.organization();
       theme.setAccent(org.accentColor);
       language.useDefault(org.defaultLocale);
-      title.setTitle(
-        org.tournamentName ? `${org.name} · ${org.tournamentName}` : org.name
-      );
+      title.setTitle(fullName(org));
     });
   }
 }

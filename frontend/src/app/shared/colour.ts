@@ -2,6 +2,20 @@
 
 const HEX = /^#[0-9a-f]{6}$/iu;
 
+export type Theme = "dark" | "light";
+
+/**
+ * The colours of styles.css that derived colours are measured against: the panels' surface, the
+ * pills' surface (`--surface-2`) and the text.
+ */
+export const PALETTES: Record<
+  Theme,
+  { surface: string; surface2: string; text: string }
+> = {
+  dark: { surface: "#161D27", surface2: "#1E2733", text: "#ECE8E1" },
+  light: { surface: "#F7F5F0", surface2: "#E2DDD3", text: "#0F141B" },
+};
+
 /** The template's red, used when an organisation has no accent colour of its own. */
 export const DEFAULT_ACCENT = "#F0484E";
 
@@ -71,16 +85,21 @@ export const readableAccent = (
   return colour;
 };
 
-/**
- * A rank's colour made readable as text on the pills' surface, in each theme: the same mixing as
- * the accent, against `--surface-2`.
- */
+/** A rank's colour made readable as text on the pills, in each theme; nothing when it has none. */
 export const rankText = (
   colour: string | null | undefined
-): { dark: string; light: string } | null =>
-  colour && /^#[\da-f]{6}$/iu.test(colour)
+): Record<Theme, string> | null =>
+  colour && HEX.test(colour)
     ? {
-        dark: readableAccent(colour, "#1e2733", "#ece8e1"),
-        light: readableAccent(colour, "#e2ddd3", "#0f141b"),
+        dark: readableAccent(
+          colour,
+          PALETTES.dark.surface2,
+          PALETTES.dark.text
+        ),
+        light: readableAccent(
+          colour,
+          PALETTES.light.surface2,
+          PALETTES.light.text
+        ),
       }
     : null;

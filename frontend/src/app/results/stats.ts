@@ -1,4 +1,4 @@
-import type { Bonus, Rules, Stat, Standing } from "./seasons";
+import type { Rules, Stat, Standing } from "./api";
 
 /** A column of a results table: an average stat, or the KDA ratio standing in for K, D and A. */
 export type Column = Stat | "KDA";
@@ -44,51 +44,68 @@ export const valueOf = (
 ): number | undefined =>
   column === "KDA" ? standing.kda : standing.averages[column];
 
-export const formatNumber = (
-  value: number | null | undefined,
-  lang: string,
-  decimals = 0
-): string =>
-  value === null || value === undefined
-    ? "–"
-    : new Intl.NumberFormat(lang, {
-        maximumFractionDigits: decimals,
-        minimumFractionDigits: decimals,
-      }).format(value);
-
-/** One pill of "How points are counted". */
+/** One pill of "How points are counted", such as "+ Kills", "− Deaths" or "+ 50 per win". */
 export interface FormulaTerm {
-  kind: "stat" | "bonus" | "bonuses" | "win";
-  /** Negative when the term subtracts. */
-  points: number;
-  stat?: Stat;
-  bonus?: Bonus;
+  text: string;
+  win: boolean;
 }
 
+/** Translates a key of public/i18n, as Transloco's `translate` does. */
+type Translate = (key: string, params?: Record<string, string>) => string;
+
 /**
- * The season's points formula, term by term: each recorded stat that counts, then the bonuses
- * (one term when they're all worth the same), then the points per win.
+ * The season's points formula, pill by pill: each recorded stat that counts, then the bonuses
+ * (one pill when they're all worth the same), then the points per win.
  */
-export const formulaOf = (rules: Rules): FormulaTerm[] => {
-  const terms: FormulaTerm[] = rules.stats
-    .filter((rule) => rule.recorded && rule.countable && rule.effect !== 0)
-    .map((rule) => ({ kind: "stat", points: rule.effect, stat: rule.stat }));
+export const formulaOf = (
+  rules: Rules,
+  t: Translate,
+  format: (value: number) => string
+): FormulaTerm[] => {
+  const terms: { points: number; text: string; win?: boolean }[] = [];
+
+  for (const rule of rules.stats) {
+    if (rule.recorded && rule.countable && rule.effect !== 0) {
+      const name = t(`stats.long.${rule.stat}`);
+      const size = Math.abs(rule.effect);
+      terms.push({
+        points: rule.effect,
+        text: size === 1 ? name : `${format(size)} × ${name}`,
+      });
+    }
+  }
 
   const [first] = rules.bonuses;
 
   if (first && rules.bonuses.every((bonus) => bonus.points === first.points)) {
-    terms.push({ kind: "bonuses", points: first.points });
+    terms.push({
+      points: first.points,
+      text: t("leaderboard.perBonus", { points: format(first.points) }),
+    });
   } else {
     for (const bonus of rules.bonuses) {
-      terms.push({ bonus, kind: "bonus", points: bonus.points });
+      terms.push({
+        points: bonus.points,
+        text: `${format(bonus.points)} ${bonus.label}`,
+      });
     }
   }
 
   if (rules.pointsPerWin !== 0) {
-    terms.push({ kind: "win", points: rules.pointsPerWin });
+    terms.push({
+      points: rules.pointsPerWin,
+      text: t("leaderboard.perWin", { points: format(rules.pointsPerWin) }),
+      win: true,
+    });
   }
 
-  return terms;
+  return terms.map((term, index) => ({
+    text:
+      index === 0 && term.points > 0
+        ? term.text
+        : `${term.points < 0 ? "−" : "+"} ${term.text}`,
+    win: term.win ?? false,
+  }));
 };
 
 /** The player's name without the #tag, and the tag. */

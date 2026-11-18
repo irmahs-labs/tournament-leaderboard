@@ -1,28 +1,23 @@
 import { HttpTestingController } from "@angular/common/http/testing";
 import { TestBed } from "@angular/core/testing";
 import { Router } from "@angular/router";
-import { RouterTestingHarness } from "@angular/router/testing";
+import type { RouterTestingHarness } from "@angular/router/testing";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { Organization } from "../core/organization";
-import type { Leaderboard, Rules, Season, Summary } from "../core/seasons";
 import {
   ALSACE,
+  answer,
   LEADERBOARD,
+  openAlsace,
+  rendered,
   RULES,
   SEASONS,
   SUMMARY,
   testProviders,
-} from "../testing";
-
-const text = (element: Element | null | undefined) =>
-  element?.textContent?.replaceAll(/\s+/gu, " ").trim();
-
-const texts = (page: HTMLElement, selector: string): (string | undefined)[] =>
-  [...page.querySelectorAll(selector)].map((element) => text(element));
-
-/** What the fake back end answers. */
-type Answer = Organization | Season[] | Leaderboard | Summary | Rules;
+  text,
+  texts,
+} from "../../testing";
+import type { Season } from "../api";
 
 const API = `/api/orgs/${ALSACE.slug}`;
 
@@ -42,11 +37,10 @@ describe("the season leaderboard", () => {
     localStorage.clear();
   });
 
-  const answer = async (url: string, body: Answer): Promise<void> => {
-    await vi.waitFor(() => {
-      harness.detectChanges();
-      http.expectOne(url).flush(body);
-    });
+  const answerSeason = async (season: number): Promise<void> => {
+    await answer(harness, `${API}/seasons/${season}/leaderboard`, LEADERBOARD);
+    await answer(harness, `${API}/seasons/${season}/summary`, SUMMARY);
+    await answer(harness, `${API}/seasons/${season}/rules`, RULES);
   };
 
   /** Opens the page and answers the season's three requests. */
@@ -55,27 +49,15 @@ describe("the season leaderboard", () => {
     seasons: Season[] = SEASONS,
     season = 3
   ): Promise<HTMLElement> => {
-    harness = await RouterTestingHarness.create();
-    const navigation = harness.navigateByUrl(url);
-    await answer(API, ALSACE);
-    await navigation;
-    await answer(`${API}/seasons`, seasons);
+    harness = await openAlsace(url, seasons);
 
     if (seasons.length > 0) {
-      await answer(`${API}/seasons/${season}/leaderboard`, LEADERBOARD);
-      await answer(`${API}/seasons/${season}/summary`, SUMMARY);
-      await answer(`${API}/seasons/${season}/rules`, RULES);
+      await answerSeason(season);
     }
 
     harness.detectChanges();
 
-    const page = harness.routeNativeElement;
-
-    if (!page) {
-      throw new Error("The route rendered nothing");
-    }
-
-    return page;
+    return rendered(harness);
   };
 
   it("shows the most recent season by default", async () => {
@@ -100,7 +82,7 @@ describe("the season leaderboard", () => {
       "33 kills",
       "1 win",
     ]);
-    expect(text(page.querySelector(".mvp .rank"))).toBe("Radiant");
+    expect(text(page.querySelector(".mvp app-rank-pill"))).toBe("Radiant");
   });
 
   it("shows the season's numbers", async () => {
@@ -184,9 +166,7 @@ describe("the season leaderboard", () => {
     await vi.waitFor(() => {
       expect(TestBed.inject(Router).url).toBe("/o/alsace-arena?season=1");
     });
-    await answer(`${API}/seasons/1/leaderboard`, LEADERBOARD);
-    await answer(`${API}/seasons/1/summary`, SUMMARY);
-    await answer(`${API}/seasons/1/rules`, RULES);
+    await answerSeason(1);
   });
 
   it("says when there's no season yet", async () => {
