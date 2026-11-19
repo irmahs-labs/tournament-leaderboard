@@ -8,7 +8,16 @@
       "cookies": "Cookies",
       "terms": "Terms of use"
     },
-    "contact": "Contact"
+    "contact": "Contact",
+    "socialLabel": "{{org}} elsewhere",
+    "social": {
+      "discord": "Discord",
+      "instagram": "Instagram",
+      "twitch": "Twitch",
+      "youtube": "YouTube",
+      "tiktok": "TikTok",
+      "website": "Website"
+    }
   },
   "header": {
     "language": "Language",
@@ -216,7 +225,8 @@
     "site": "Site",
     "seasons": "Seasons",
     "scoring": "Scoring",
-    "members": "Members"
+    "members": "Members",
+    "branding": "Branding"
   },
   "adminPlayers": {
     "title": "Players",
@@ -457,5 +467,77 @@
     "revokedBody": "An admin of {{org}} stopped it. Ask them for a new one.",
     "separate": "Each organisation keeps its own players, scores and admins. Being an admin here gives you no access to any other organisation.",
     "loading": "Loading the invitation…"
+  },
+  "adminBranding": {
+    "title": "Branding and organisation",
+    "lede": "How {{org}} looks to players: its names, language, logo, colour and links.",
+    "organisation": "Organisation",
+    "name": "Name",
+    "tournamentName": "Tournament name",
+    "description": "Description",
+    "descriptionHelp": "One line, shown on the home page when your organisation is featured.",
+    "address": "Public address",
+    "addressHelp": "It can't be changed yet, so links already shared keep working.",
+    "language": "Default language",
+    "locale": {
+      "en": "English",
+      "fr": "Français"
+    },
+    "logo": "Logo",
+    "upload": "Upload a logo",
+    "removeLogo": "Remove",
+    "logoHelp": "A square PNG, WebP or SVG image of 256 KB at most. Shown in the header of every page.",
+    "accent": "Accent colour",
+    "useColour": "Use {{hex}}",
+    "hex": "Hex code",
+    "buttonText": "Button text on your colour",
+    "pass": "readable",
+    "low": "hard to read",
+    "asText": "Your colour as text on cards",
+    "shownAt": "{{raw}} : 1, shown at {{shown}} : 1",
+    "accentHelp": "When your colour is too light or too dark for small text, the site adjusts its shade for text only. Buttons and highlights keep your exact colour.",
+    "previewButton": "Primary button",
+    "matches": "Matches",
+    "matchesHelp": "Every new match starts with this many places.",
+    "playersPerMatch": "Players per match",
+    "social": "Social links",
+    "socialHelp": "Shown in the footer of every {{org}} page. Leave a field empty to hide it.",
+    "site": {
+      "discord": "Discord",
+      "instagram": "Instagram",
+      "twitch": "Twitch",
+      "youtube": "YouTube",
+      "tiktok": "TikTok",
+      "website": "Website"
+    },
+    "placeholder": {
+      "discord": "https://discord.gg/…",
+      "instagram": "https://instagram.com/…",
+      "twitch": "https://twitch.tv/…",
+      "youtube": "https://youtube.com/@…",
+      "tiktok": "https://tiktok.com/@…",
+      "website": "https://…"
+    },
+    "save": "Save branding",
+    "saved": "Branding saved.",
+    "logoSaved": "Logo saved.",
+    "logoRemoved": "Logo removed.",
+    "logoTooLarge": "That image is larger than 256 KB.",
+    "logoType": "A logo is a PNG, WebP or SVG image, without scripts.",
+    "invalid": "Something in the form isn't allowed. Check each field and try again.",
+    "failed": "That didn't work. Try again.",
+    "problem": {
+      "name": "Give the organisation a name of 60 characters at most.",
+      "accent": "The accent colour is a code such as #2F5BFF, or empty for the red.",
+      "players": "A match has 2 to 40 places.",
+      "link": {
+        "discord": "The Discord link must be an https:// address on Discord.",
+        "instagram": "The Instagram link must be an https:// address on Instagram.",
+        "twitch": "The Twitch link must be an https:// address on Twitch.",
+        "youtube": "The YouTube link must be an https:// address on YouTube.",
+        "tiktok": "The TikTok link must be an https:// address on TikTok.",
+        "website": "The Website link must be an https:// address."
+      }
+    }
   }
 }

@@ -1,6 +1,7 @@
 import type { Routes } from "@angular/router";
 
 import { adminGuard } from "./admin/admin-guard";
+import { BrandingAdminPage } from "./admin/branding/branding";
 import { MembersAdminPage } from "./admin/members/members";
 import { PlayersAdminPage } from "./admin/players/players";
 import { ScoresAdminPage } from "./admin/scores/scores";
@@ -35,6 +36,7 @@ export const routes: Routes = [
           { component: SeasonsAdminPage, path: "seasons" },
           { component: ScoringAdminPage, path: "scoring" },
           { component: MembersAdminPage, path: "members" },
+          { component: BrandingAdminPage, path: "branding" },
         ],
         path: "admin",
       },

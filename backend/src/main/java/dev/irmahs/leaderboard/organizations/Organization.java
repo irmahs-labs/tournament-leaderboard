@@ -1,6 +1,7 @@
 package dev.irmahs.leaderboard.organizations;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -45,6 +46,9 @@ public class Organization {
     @Column(nullable = false)
     private int playersPerMatch = 10;
 
+    @Embedded
+    private SocialLinks socialLinks;
+
     /** Set when a game is saved or deleted; the home page features the most recent one. */
     private Instant lastActivityAt;
 
@@ -63,6 +67,17 @@ public class Organization {
     /** Notes that a game was just saved or cleared; the home page features the most recent. */
     void recordActivity(Instant when) {
         this.lastActivityAt = when;
+    }
+
+    /** Changes how the organisation presents itself; the values have been checked already. */
+    void rebrand(Branding branding) {
+        this.name = branding.name();
+        this.tournamentName = branding.tournamentName();
+        this.description = branding.description();
+        this.defaultLocale = branding.defaultLocale();
+        this.accentColor = branding.accentColor();
+        this.playersPerMatch = branding.playersPerMatch();
+        this.socialLinks = branding.socialLinks();
     }
 
     public UUID getId() {
@@ -95,6 +110,11 @@ public class Organization {
 
     public int getPlayersPerMatch() {
         return playersPerMatch;
+    }
+
+    /** Nothing when none is set. */
+    public SocialLinks getSocialLinks() {
+        return socialLinks;
     }
 
     public Instant getLastActivityAt() {

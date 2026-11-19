@@ -5,7 +5,11 @@
   <div class="inner">
     @if (organization(); as org) {
     <a class="brand" [routerLink]="['/o', org.slug]">
+      @if (org.logo) {
+      <img class="logo image" [src]="org.logo" alt="" width="40" height="40" />
+      } @else {
       <span class="logo" aria-hidden="true">{{ initials() }}</span>
+      }
       <span class="name">{{ org.name }}</span>
     </a>
     @if (inAdmin()) {
@@ -41,6 +45,12 @@
         routerLinkActive="active"
         ariaCurrentWhenActive="page"
         >{{ t("admin.members") }}</a
+      >
+      <a
+        [routerLink]="['/o', org.slug, 'admin', 'branding']"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        >{{ t("admin.branding") }}</a
       >
     </nav>
     } @else {
