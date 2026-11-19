@@ -109,7 +109,7 @@ describe("the footer", () => {
   });
 
   it("puts the credit, the legal pages, then GitHub and contact on three lines", async () => {
-    const page = rendered(await openAlsace("/o/alsace-arena"));
+    const page = rendered(await openAlsace("/org/alsace-arena"));
     const credit = page.ownerDocument.querySelector("footer .credit");
     const contact = credit?.querySelector<HTMLAnchorElement>("a[href^=mailto]");
 
@@ -129,7 +129,7 @@ describe("the footer", () => {
   });
 
   it("links to the legal pages on every organisation page", async () => {
-    const page = rendered(await openAlsace("/o/alsace-arena"));
+    const page = rendered(await openAlsace("/org/alsace-arena"));
     const footer = page.ownerDocument.querySelector("footer .credit nav");
 
     expect(texts(footer ?? page, "a")).toStrictEqual([
@@ -142,7 +142,7 @@ describe("the footer", () => {
   });
 
   it("links to the organisation's social pages that are set, in a new tab", async () => {
-    const page = rendered(await openAlsace("/o/alsace-arena"));
+    const page = rendered(await openAlsace("/org/alsace-arena"));
     const social = page.ownerDocument.querySelector("footer nav");
     const links = [...(social?.querySelectorAll("a") ?? [])];
 

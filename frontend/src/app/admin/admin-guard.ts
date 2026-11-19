@@ -23,5 +23,5 @@ export const adminGuard: CanActivateFn = async (route, state) => {
     });
   }
 
-  return canAdmin(me, slug) ? true : router.createUrlTree(["/o", slug]);
+  return canAdmin(me, slug) ? true : router.createUrlTree(["/org", slug]);
 };

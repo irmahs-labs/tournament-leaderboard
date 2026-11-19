@@ -137,7 +137,7 @@ const reply = async (
 
 /** Opens Enter scores as an admin and answers everything it asks for. */
 const open = async (
-  url = "/o/alsace-arena/admin",
+  url = "/org/alsace-arena/admin",
   game: GameScores = NOT_SAVED
 ): Promise<void> => {
   harness = await RouterTestingHarness.create();
@@ -280,7 +280,7 @@ describe("Enter scores", () => {
       "Game 1 of match 2 saved. The leaderboard is up to date."
     );
     expect(TestBed.inject(Router).url).toBe(
-      "/o/alsace-arena/admin/scores?game=1&match=2"
+      "/org/alsace-arena/admin/scores?game=1&match=2"
     );
   });
 
@@ -354,7 +354,7 @@ describe("Enter scores", () => {
   });
 
   it("shows a saved game, and clears it after asking", async () => {
-    await open("/o/alsace-arena/admin/scores?match=1&game=1", SAVED);
+    await open("/org/alsace-arena/admin/scores?match=1&game=1", SAVED);
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
 
     expect(text(page.querySelector(".state"))).toBe("Saved");

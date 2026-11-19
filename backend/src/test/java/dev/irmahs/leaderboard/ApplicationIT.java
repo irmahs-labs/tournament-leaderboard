@@ -75,9 +75,11 @@ class ApplicationIT {
     @ParameterizedTest
     @ValueSource(
             strings = {
+                "/org/alsace-arena",
+                "/org/alsace-arena/matches",
+                "/org/alsace-arena/matches/3/4",
                 "/o/alsace-arena",
-                "/o/alsace-arena/matches",
-                "/o/alsace-arena/matches/3/4",
+                "/o/alsace-arena/admin/scores",
                 "/not-found",
                 "/platform",
                 "/account",

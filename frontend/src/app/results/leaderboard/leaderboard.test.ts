@@ -45,7 +45,7 @@ describe("the season leaderboard", () => {
 
   /** Opens the page and answers the season's three requests. */
   const open = async (
-    url = "/o/alsace-arena",
+    url = "/org/alsace-arena",
     seasons: Season[] = SEASONS,
     season = 3
   ): Promise<HTMLElement> => {
@@ -141,7 +141,7 @@ describe("the season leaderboard", () => {
   });
 
   it("shows the season picked in the header", async () => {
-    const page = await open("/o/alsace-arena?season=1", SEASONS, 1);
+    const page = await open("/org/alsace-arena?season=1", SEASONS, 1);
 
     expect(text(page.querySelector(".eyebrow"))).toBe(
       "Season 1 · Spike Tournament"
@@ -164,13 +164,13 @@ describe("the season leaderboard", () => {
     picker.dispatchEvent(new Event("change"));
 
     await vi.waitFor(() => {
-      expect(TestBed.inject(Router).url).toBe("/o/alsace-arena?season=1");
+      expect(TestBed.inject(Router).url).toBe("/org/alsace-arena?season=1");
     });
     await answerSeason(1);
   });
 
   it("says when there's no season yet", async () => {
-    const page = await open("/o/alsace-arena", []);
+    const page = await open("/org/alsace-arena", []);
 
     expect(text(page.querySelector(".notice"))).toBe(
       "No season has started yet."

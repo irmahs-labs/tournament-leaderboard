@@ -104,8 +104,8 @@ describe("the platform page", () => {
       "Alsace Arena",
     ]);
     expect(texts(page, "tbody .slug")).toStrictEqual([
-      "/o/alsace-arena",
-      "/o/lyon-game-bar",
+      "/org/alsace-arena",
+      "/org/lyon-game-bar",
     ]);
     expect(text(page.querySelector("tbody .home"))).toBe("On the home page");
   });
@@ -121,7 +121,7 @@ describe("the platform page", () => {
 
     harness.detectChanges();
 
-    expect(texts(page, "tbody .slug")).toStrictEqual(["/o/lyon-game-bar"]);
+    expect(texts(page, "tbody .slug")).toStrictEqual(["/org/lyon-game-bar"]);
   });
 
   it("suspends after asking, then reactivates", async () => {

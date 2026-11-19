@@ -119,7 +119,7 @@ describe("the Branding screen", () => {
     localStorage.setItem("lang", "en");
     TestBed.configureTestingModule({ providers: testProviders() });
     http = TestBed.inject(HttpTestingController);
-    harness = await openAs("/o/alsace-arena/admin/branding", ME);
+    harness = await openAs("/org/alsace-arena/admin/branding", ME);
     page = rendered(harness);
   });
 
@@ -139,7 +139,7 @@ describe("the Branding screen", () => {
   it("fills the social links, and shows the address", () => {
     expect(field("discord")?.value).toBe("https://discord.gg/alsace");
     expect(field("twitch")?.value).toBe("");
-    expect(text(page.querySelector(".address"))).toContain("/o/alsace-arena");
+    expect(text(page.querySelector(".address"))).toContain("/org/alsace-arena");
   });
 
   it("saves the branding, and the footer and header follow", async () => {

@@ -56,7 +56,9 @@
           }}</span
         >
         <div class="actions">
-          <a class="button small-button" [routerLink]="['/o', membership.slug]"
+          <a
+            class="button small-button"
+            [routerLink]="['/org', membership.slug]"
             >{{ t("signIn.open") }}</a
           >
           @if (!membership.owner) {

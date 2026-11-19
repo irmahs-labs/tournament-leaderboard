@@ -1,4 +1,6 @@
-import type { Routes } from "@angular/router";
+import { inject } from "@angular/core";
+import type { RedirectFunction, Routes } from "@angular/router";
+import { Router } from "@angular/router";
 
 import { AccountPage } from "./account/account";
 import { accountGuard } from "./account/account-guard";
@@ -24,7 +26,15 @@ import { MatchesPage } from "./results/matches/matches";
 import { organizationResolver } from "./shared/organization";
 import { SignInPage } from "./sign-in/sign-in";
 
+/** The addresses before /org/: /o/alsace-arena/matches goes on to /org/alsace-arena/matches. */
+const toOrg: RedirectFunction = ({ url, queryParams, fragment }) =>
+  inject(Router).createUrlTree(
+    ["/org", ...url.map((segment) => segment.path)],
+    { fragment: fragment ?? undefined, queryParams }
+  );
+
 export const routes: Routes = [
+  { children: [{ path: "**", redirectTo: toOrg }], path: "o" },
   {
     children: [
       { component: LeaderboardPage, path: "" },
@@ -45,7 +55,7 @@ export const routes: Routes = [
       },
     ],
     component: OrgShell,
-    path: "o/:slug",
+    path: "org/:slug",
     resolve: { organization: organizationResolver },
     runGuardsAndResolvers: "pathParamsChange",
   },

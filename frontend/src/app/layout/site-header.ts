@@ -58,7 +58,7 @@ export class SiteHeader {
 
     return (
       org !== null &&
-      this.#router.url.startsWith(`/o/${encodeURIComponent(org.slug)}/admin`)
+      this.#router.url.startsWith(`/org/${encodeURIComponent(org.slug)}/admin`)
     );
   }
 

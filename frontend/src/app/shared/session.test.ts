@@ -53,16 +53,16 @@ describe(SessionService, () => {
   });
 
   it("returns to a page only once", () => {
-    sessionStorage.setItem("signInReturnTo", "/o/alsace-arena/matches");
+    sessionStorage.setItem("signInReturnTo", "/org/alsace-arena/matches");
 
-    expect(takeReturn()).toBe("/o/alsace-arena/matches");
+    expect(takeReturn()).toBe("/org/alsace-arena/matches");
     expect(takeReturn()).toBeNull();
   });
 });
 
 describe(isSafeReturn, () => {
   it("accepts the app's own pages", () => {
-    expect(isSafeReturn("/o/alsace-arena")).toBeTruthy();
+    expect(isSafeReturn("/org/alsace-arena")).toBeTruthy();
   });
 
   it("refuses other sites and the sign-in page", () => {

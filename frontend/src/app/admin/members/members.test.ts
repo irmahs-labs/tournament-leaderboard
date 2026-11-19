@@ -77,7 +77,7 @@ describe("the Members screen", () => {
     localStorage.setItem("lang", "en");
     TestBed.configureTestingModule({ providers: testProviders() });
     http = TestBed.inject(HttpTestingController);
-    harness = await openAs("/o/alsace-arena/admin/members", ME);
+    harness = await openAs("/org/alsace-arena/admin/members", ME);
     await answerTeam();
     page = rendered(harness);
   });

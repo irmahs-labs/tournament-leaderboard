@@ -14,6 +14,9 @@ public class SpaController {
     static final String APP = "forward:/index.html";
 
     @GetMapping({
+        "/org/*",
+        "/org/*/**",
+        // The addresses before /org/, which the app sends on to /org/.
         "/o/*",
         "/o/*/**",
         "/not-found",

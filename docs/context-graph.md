@@ -87,7 +87,7 @@ flowchart LR
 | `platform` | `PlatformService` (platform admins only: every organisation with its owner, members, activity and whether the home page features it; suspending and reactivating), `PlatformController` |
 | `team` | `Invite` (organization_invites; only a hash of the code), `InviteCodes` (8 characters without look-alikes, SHA-256), `TeamService` (the Members screen: roles, removal, ownership, admin invites), `JoinService` (what a code is for; using it, its row locked), `MembershipController` (leaving an organisation, never as its owner), `CodeLookupLimit` (10 lookups a minute per address, in memory) |
 | `presence` | `OnlineCount` (open pages, in memory only; changes sent at most once a second, a heartbeat every 25 s), `GET /api/online` as server-sent events |
-| `system` | `/api/version`; `SpaController` forwards the Angular router's addresses (`/o/**`, `/not-found`, `/platform`, `/account`, `/join`, `/join/*`, `/sign-in`, `/legal`, `/privacy`, `/cookies`, `/terms`) to `index.html` |
+| `system` | `/api/version`; `SpaController` forwards the Angular router's addresses (`/org/**`, and `/o/**` from before, which the app sends on to `/org/**`; `/not-found`, `/platform`, `/account`, `/join`, `/join/*`, `/sign-in`, `/legal`, `/privacy`, `/cookies`, `/terms`) to `index.html` |
 
 ## API
 
@@ -184,7 +184,8 @@ planned.
 ```mermaid
 flowchart TD
     app[App<br/>starts ThemeService, LanguageService, SessionService] --> routes[app.routes.ts]
-    routes -->|"/o/:slug, organizationResolver"| shell[OrgShell<br/>accent, language, title, season]
+    routes -->|"/o/** goes on to /org/**"| routes
+    routes -->|"/org/:slug, organizationResolver"| shell[OrgShell<br/>accent, language, title, season]
     routes -->|"/, /account, /platform, /sign-in, /join, /join/:code, /legal, /privacy, /cookies, /terms, /not-found, **"| platform[PlatformShell<br/>platform name and red]
     platform --> home[HomePage /<br/>what it does, create an organisation, the featured one]
     home -->|"GET /api/featured, POST /api/orgs"| foundApi["/api/featured, /api/orgs"]
@@ -213,14 +214,14 @@ flowchart TD
     lb -->|GET| lbApi["…/seasons/{n}/leaderboard, /summary, /rules"]
     table --> pill[RankPill]
     lb --> pill
-    shell -->|"/o/:slug/matches"| mt["MatchesPage<br/>a card per match, its MVP"]
+    shell -->|"/org/:slug/matches"| mt["MatchesPage<br/>a card per match, its MVP"]
     mt --> current
     mt -->|GET| mtApi["…/seasons/{n}/matches"]
-    shell -->|"/o/:slug/matches/:match?season="| md["MatchPage<br/>MVP, stat leaders, games, overall or one game, averages or totals"]
+    shell -->|"/org/:slug/matches/:match?season="| md["MatchPage<br/>MVP, stat leaders, games, overall or one game, averages or totals"]
     md --> current
     md --> table
     md -->|GET| mdApi["…/seasons/{n}/matches/{m}"]
-    shell -->|"/o/:slug/admin, adminGuard"| guard[adminGuard<br/>admins and platform admins; others to sign-in or the public pages]
+    shell -->|"/org/:slug/admin, adminGuard"| guard[adminGuard<br/>admins and platform admins; others to sign-in or the public pages]
     guard --> sadm["ScoresAdminPage /admin/scores?season=&match=&game=<br/>one game at a time, previous game's players, check bonuses"]
     sadm -->|"GET, PUT, DELETE, /previous-roster, POST bonus-check"| scoresApi["…/admin/seasons/{n}/matches/{m}/games/{g}"]
     sadm -->|GET| sadmApi["…/seasons/{n}/rules, /matches; …/admin/players"]

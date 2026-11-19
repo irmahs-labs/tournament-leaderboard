@@ -1,5 +1,6 @@
 import { HttpTestingController } from "@angular/common/http/testing";
 import { TestBed } from "@angular/core/testing";
+import { Router } from "@angular/router";
 import { RouterTestingHarness } from "@angular/router/testing";
 import { TranslocoService } from "@jsverse/transloco";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -45,8 +46,16 @@ describe("the app's pages", () => {
     expect(page.querySelector(".featured")).toBeNull();
   });
 
+  it("sends the addresses from before /org/ on to /org/, with the season", async () => {
+    await open("/o/alsace-arena/matches?season=1");
+
+    expect(TestBed.inject(Router).url).toBe(
+      "/org/alsace-arena/matches?season=1"
+    );
+  });
+
   it("shows the organisation in the header and the footer", async () => {
-    const page = await open("/o/alsace-arena");
+    const page = await open("/org/alsace-arena");
 
     expect(text(page.querySelector("header .logo"))).toBe("AA");
     expect(text(page.querySelector("footer .org"))).toBe(
@@ -56,7 +65,7 @@ describe("the app's pages", () => {
   });
 
   it("applies the organisation's accent and language", async () => {
-    await open("/o/alsace-arena");
+    await open("/org/alsace-arena");
 
     const { style } = document.documentElement;
 
@@ -69,13 +78,13 @@ describe("the app's pages", () => {
   it("keeps a visitor's own language over the organisation's", async () => {
     localStorage.setItem("lang", "en");
 
-    const page = await open("/o/alsace-arena/matches");
+    const page = await open("/org/alsace-arena/matches");
 
     expect(text(page.querySelector("h1"))).toBe("Matches");
   });
 
   it("switches language with the one EN / FR button and remembers it", async () => {
-    const page = await open("/o/alsace-arena");
+    const page = await open("/org/alsace-arena");
     const button = page.querySelector<HTMLButtonElement>("header .language");
 
     // Alsace Arena's own language is French.
@@ -94,7 +103,7 @@ describe("the app's pages", () => {
 
   it("switches back from English to French with the same button", async () => {
     localStorage.setItem("lang", "en");
-    const page = await open("/o/alsace-arena");
+    const page = await open("/org/alsace-arena");
     const button = page.querySelector<HTMLButtonElement>("header .language");
 
     expect(text(button?.querySelector(".on"))).toBe("EN");
@@ -108,7 +117,7 @@ describe("the app's pages", () => {
   });
 
   it("switches theme with the pill and remembers it", async () => {
-    const page = await open("/o/alsace-arena");
+    const page = await open("/org/alsace-arena");
 
     const pill = page.querySelector<HTMLButtonElement>(
       'header [role="switch"]'
@@ -129,7 +138,7 @@ describe("the app's pages", () => {
   });
 
   it("marks the current page in the navigation", async () => {
-    const page = await open("/o/alsace-arena/matches");
+    const page = await open("/org/alsace-arena/matches");
 
     expect(text(page.querySelector('nav a[aria-current="page"]'))).toBe(
       "Matchs"
@@ -138,7 +147,7 @@ describe("the app's pages", () => {
 
   it("shows Not found for an organisation that doesn't exist, keeping the address", async () => {
     const harness = await RouterTestingHarness.create();
-    const navigation = harness.navigateByUrl("/o/nowhere");
+    const navigation = harness.navigateByUrl("/org/nowhere");
 
     await vi.waitFor(() => {
       http

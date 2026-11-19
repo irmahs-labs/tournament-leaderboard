@@ -4,7 +4,7 @@
   >
   <div class="inner">
     @if (organization(); as org) {
-    <a class="brand" [routerLink]="['/o', org.slug]">
+    <a class="brand" [routerLink]="['/org', org.slug]">
       @if (org.logo) {
       <img class="logo image" [src]="org.logo" alt="" width="40" height="40" />
       } @else {
@@ -15,39 +15,39 @@
     @if (inAdmin()) {
     <nav class="nav" [attr.aria-label]="t('admin.navLabel')">
       <a
-        [routerLink]="['/o', org.slug, 'admin', 'scores']"
+        [routerLink]="['/org', org.slug, 'admin', 'scores']"
         routerLinkActive="active"
         queryParamsHandling="preserve"
         ariaCurrentWhenActive="page"
         >{{ t("admin.scores") }}</a
       >
       <a
-        [routerLink]="['/o', org.slug, 'admin', 'players']"
+        [routerLink]="['/org', org.slug, 'admin', 'players']"
         routerLinkActive="active"
         ariaCurrentWhenActive="page"
         >{{ t("admin.players") }}</a
       >
       <a
-        [routerLink]="['/o', org.slug, 'admin', 'seasons']"
+        [routerLink]="['/org', org.slug, 'admin', 'seasons']"
         routerLinkActive="active"
         ariaCurrentWhenActive="page"
         >{{ t("admin.seasons") }}</a
       >
       <a
-        [routerLink]="['/o', org.slug, 'admin', 'scoring']"
+        [routerLink]="['/org', org.slug, 'admin', 'scoring']"
         routerLinkActive="active"
         queryParamsHandling="preserve"
         ariaCurrentWhenActive="page"
         >{{ t("admin.scoring") }}</a
       >
       <a
-        [routerLink]="['/o', org.slug, 'admin', 'members']"
+        [routerLink]="['/org', org.slug, 'admin', 'members']"
         routerLinkActive="active"
         ariaCurrentWhenActive="page"
         >{{ t("admin.members") }}</a
       >
       <a
-        [routerLink]="['/o', org.slug, 'admin', 'branding']"
+        [routerLink]="['/org', org.slug, 'admin', 'branding']"
         routerLinkActive="active"
         ariaCurrentWhenActive="page"
         >{{ t("admin.branding") }}</a
@@ -56,7 +56,7 @@
     } @else {
     <nav class="nav" [attr.aria-label]="t('nav.label')">
       <a
-        [routerLink]="['/o', org.slug]"
+        [routerLink]="['/org', org.slug]"
         routerLinkActive="active"
         [routerLinkActiveOptions]="{ exact: true }"
         queryParamsHandling="preserve"
@@ -64,7 +64,7 @@
         >{{ t("nav.leaderboard") }}</a
       >
       <a
-        [routerLink]="['/o', org.slug, 'matches']"
+        [routerLink]="['/org', org.slug, 'matches']"
         routerLinkActive="active"
         queryParamsHandling="preserve"
         ariaCurrentWhenActive="page"
@@ -92,13 +92,13 @@
       <nav class="mode" [attr.aria-label]="t('admin.mode')">
         <a
           class="tool"
-          [routerLink]="['/o', org.slug]"
+          [routerLink]="['/org', org.slug]"
           [attr.aria-current]="inAdmin() ? null : 'true'"
           >{{ t("admin.site") }}</a
         >
         <a
           class="tool"
-          [routerLink]="['/o', org.slug, 'admin']"
+          [routerLink]="['/org', org.slug, 'admin']"
           [attr.aria-current]="inAdmin() ? 'true' : null"
           >{{ t("admin.open") }}</a
         >

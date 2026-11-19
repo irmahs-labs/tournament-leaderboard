@@ -81,13 +81,13 @@
                 >
                 <div>
                   @if (org.status === "ACTIVE") {
-                  <a class="strong" [routerLink]="['/o', org.slug]"
+                  <a class="strong" [routerLink]="['/org', org.slug]"
                     >{{ org.name }}</a
                   >
                   } @else {
                   <strong>{{ org.name }}</strong>
                   }
-                  <span class="muted slug">/o/{{ org.slug }}</span>
+                  <span class="muted slug">/org/{{ org.slug }}</span>
                 </div>
               </div>
             </td>
