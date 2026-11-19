@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-19, with the Protect migration ruleset: merges into `migration` need the Build and test check, quality gate included (phase 5).
+Last updated: 2026-11-19, with `deploy/import/on-server.sh`, which runs the Supabase import on the production server after a dump (phase 6).
 
 ## System
 
@@ -17,7 +17,7 @@ flowchart LR
     app -->|OAuth 2 / OIDC| google[Google sign-in]
     flyway[Flyway, as leaderboard_owner] --> db
     legacy[legacy/ Next.js on Vercel<br/>frozen, live until cutover] -.-> supabase[(Supabase)]
-    supabase -.->|deploy/import, once at cutover| db
+    supabase -.->|deploy/import, on-server.sh at cutover| db
 ```
 
 ## Repository
