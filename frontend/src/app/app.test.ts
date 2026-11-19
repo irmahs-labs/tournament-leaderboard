@@ -74,31 +74,57 @@ describe("the app's pages", () => {
     expect(text(page.querySelector("h1"))).toBe("Matches");
   });
 
-  it("switches language from the header and remembers it", async () => {
+  it("switches language with the one EN / FR button and remembers it", async () => {
     const page = await open("/o/alsace-arena");
+    const button = page.querySelector<HTMLButtonElement>("header .language");
 
-    const english = page.querySelector<HTMLButtonElement>(
-      'header button[lang="en"]'
+    // Alsace Arena's own language is French.
+    expect(text(button?.querySelector(".on"))).toBe("FR");
+    expect(button?.getAttribute("aria-label")).toBe(
+      "EN / FR : passer en anglais"
     );
 
-    english?.click();
+    button?.click();
     TestBed.tick();
 
     expect(text(page.querySelector("main h1"))).toBe("Season leaderboard");
-    expect(english?.getAttribute("aria-pressed")).toBe("true");
+    expect(text(button?.querySelector(".on"))).toBe("EN");
     expect(localStorage.getItem("lang")).toBe("en");
   });
 
-  it("switches theme from the header and remembers it", async () => {
+  it("switches back from English to French with the same button", async () => {
+    localStorage.setItem("lang", "en");
     const page = await open("/o/alsace-arena");
+    const button = page.querySelector<HTMLButtonElement>("header .language");
+
+    expect(text(button?.querySelector(".on"))).toBe("EN");
+
+    button?.click();
+    TestBed.tick();
+
+    expect(text(page.querySelector("main h1"))).toBe("Classement de la saison");
+    expect(text(button?.querySelector(".on"))).toBe("FR");
+    expect(localStorage.getItem("lang")).toBe("fr");
+  });
+
+  it("switches theme with the pill and remembers it", async () => {
+    const page = await open("/o/alsace-arena");
+
+    const pill = page.querySelector<HTMLButtonElement>(
+      'header [role="switch"]'
+    );
+
     const before = document.documentElement.dataset["theme"];
 
-    page.querySelector<HTMLButtonElement>("header .icon")?.click();
+    expect(pill?.getAttribute("aria-checked")).toBe(String(before === "dark"));
+
+    pill?.click();
     TestBed.tick();
 
     const after = document.documentElement.dataset["theme"];
 
     expect(after).not.toBe(before);
+    expect(pill?.getAttribute("aria-checked")).toBe(String(after === "dark"));
     expect(localStorage.getItem("theme")).toBe(after);
   });
 

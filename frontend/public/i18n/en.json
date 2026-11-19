@@ -21,14 +21,14 @@
   },
   "header": {
     "language": "Language",
-    "toDark": "Switch to dark theme",
-    "toLight": "Switch to light theme",
     "signIn": "Sign in",
     "account": "Your account: {{name}}",
     "season": "Season",
     "skip": "Skip to content",
     "online": "online",
-    "onlineTitle": "Pages open on Tournament Leaderboard right now"
+    "onlineTitle": "Pages open on Tournament Leaderboard right now",
+    "switchLanguage": "EN / FR: switch to French",
+    "darkTheme": "Dark theme"
   },
   "leaderboard": {
     "title": "Season leaderboard",
