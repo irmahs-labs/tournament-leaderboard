@@ -1,0 +1,124 @@
+<ng-container *transloco="let t">
+  <section class="panel card">
+    @if (!code()) {
+    <span class="eyebrow muted-eyebrow">{{ t("join.eyebrow") }}</span>
+    <h1 class="heading">{{ t("join.typeTitle") }}</h1>
+    <p class="muted">{{ t("join.typeHelp") }}</p>
+    <form class="type" (submit)="open($event, typed.value)">
+      <label class="field">
+        <span class="label">{{ t("join.code") }}</span>
+        <input
+          #typed
+          class="code-box"
+          autocomplete="off"
+          autocapitalize="characters"
+          spellcheck="false"
+          maxlength="12"
+          placeholder="K7QM-4FXP"
+        />
+      </label>
+      <button class="button" type="submit">{{ t("join.open") }}</button>
+    </form>
+    } @else if (invite.error()) {
+    <span class="eyebrow muted-eyebrow">{{ t("join.eyebrow") }}</span>
+    <h1 class="heading">{{ t("join." + lookupError() + "Title") }}</h1>
+    <p class="muted">{{ t("join." + lookupError() + "Body") }}</p>
+    <a class="button-ghost" routerLink="/join">{{ t("join.tryAnother") }}</a>
+    } @else if (invite.hasValue()) { @let found = invite.value(); @let org =
+    found.organization;
+    <div class="org">
+      <span class="logo" aria-hidden="true">{{ initials(org.name) }}</span>
+      <div>
+        <strong>{{ org.name }}</strong>
+        @if (org.tournamentName) {
+        <span class="muted small block">{{ org.tournamentName }}</span>
+        }
+      </div>
+    </div>
+
+    @switch (step()) { @case ("accepted") {
+    <span class="eyebrow">{{ t("join.acceptedEyebrow") }}</span>
+    <h1 class="heading">{{ t("join.acceptedTitle", { org: org.name }) }}</h1>
+    <p class="muted">{{ t("join.acceptedBody") }}</p>
+    <div class="buttons">
+      <a class="button" [routerLink]="['/o', org.slug, 'admin']"
+        >{{ t("join.openAdmin") }}</a
+      >
+      <a class="button-ghost" [routerLink]="['/o', org.slug]"
+        >{{ t("join.viewLeaderboard") }}</a
+      >
+    </div>
+    } @case ("expired") {
+    <h1 class="heading">{{ t("join.expiredTitle") }}</h1>
+    <p class="muted">{{ t("join.expiredBody", { org: org.name }) }}</p>
+    } @case ("used") {
+    <h1 class="heading">{{ t("join.usedTitle") }}</h1>
+    <p class="muted">{{ t("join.usedBody", { org: org.name }) }}</p>
+    } @case ("revoked") {
+    <h1 class="heading">{{ t("join.revokedTitle") }}</h1>
+    <p class="muted">{{ t("join.revokedBody", { org: org.name }) }}</p>
+    } @default {
+    <span class="eyebrow"
+      >{{ t("join.validUntil", { date: language.moment(found.expiresAt) })
+      }}</span
+    >
+    <h1 class="heading">
+      {{ t("join.title." + found.role, { org: org.name }) }}
+    </h1>
+    @if (step() === "wrongAccount") {
+    <p class="muted">
+      {{ t("join.wrongAccount", { email: found.email ?? "", me:
+      session.me()?.email ?? "" }) }}
+    </p>
+    <div class="buttons">
+      <button type="button" class="button" (click)="switchAccount()">
+        {{ t("join.otherAccount") }}
+      </button>
+    </div>
+    } @else {
+    <p class="muted">
+      {{ t("join.invited", { inviter: found.invitedBy ?? t("join.anAdmin"),
+      email: found.email ?? "", org: org.name }) }}
+    </p>
+    @if (step() === "signIn") {
+    <button type="button" class="google" (click)="signIn()">
+      <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
+        <path
+          fill="#EA4335"
+          d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.1C12.5 13.7 17.8 9.5 24 9.5z"
+        ></path>
+        <path
+          fill="#4285F4"
+          d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.8c4.3-4 6.9-9.9 6.9-17.2z"
+        ></path>
+        <path
+          fill="#FBBC05"
+          d="M10.6 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C1 16.6 0 20.2 0 24s1 7.4 2.7 10.7l7.9-6.1z"
+        ></path>
+        <path
+          fill="#34A853"
+          d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.8c-2.1 1.4-4.8 2.3-8.5 2.3-6.2 0-11.5-4.2-13.4-9.9l-7.9 6.1C6.6 42.6 14.6 48 24 48z"
+        ></path>
+      </svg>
+      {{ t("signIn.google") }}
+    </button>
+    } @else {
+    <div class="buttons">
+      <button
+        type="button"
+        class="button"
+        [disabled]="busy()"
+        (click)="accept()"
+      >
+        {{ t("join.accept") }}
+      </button>
+    </div>
+    @if (failed()) {
+    <p class="error" role="alert">{{ t("join.failed") }}</p>
+    } } } } }
+    <p class="muted small separate">{{ t("join.separate") }}</p>
+    } @else {
+    <p class="muted" aria-live="polite">{{ t("join.loading") }}</p>
+    }
+  </section>
+</ng-container>

@@ -1,10 +1,12 @@
 import type { Routes } from "@angular/router";
 
 import { adminGuard } from "./admin/admin-guard";
+import { MembersAdminPage } from "./admin/members/members";
 import { PlayersAdminPage } from "./admin/players/players";
 import { ScoresAdminPage } from "./admin/scores/scores";
 import { ScoringAdminPage } from "./admin/scoring/scoring";
 import { SeasonsAdminPage } from "./admin/seasons/seasons";
+import { JoinPage } from "./join/join";
 import { OrgShell } from "./layout/org-shell";
 import { PlatformShell } from "./layout/platform-shell";
 import { LEGAL_PAGES } from "./legal/legal-content";
@@ -32,6 +34,7 @@ export const routes: Routes = [
           { component: PlayersAdminPage, path: "players" },
           { component: SeasonsAdminPage, path: "seasons" },
           { component: ScoringAdminPage, path: "scoring" },
+          { component: MembersAdminPage, path: "members" },
         ],
         path: "admin",
       },
@@ -44,6 +47,8 @@ export const routes: Routes = [
   {
     children: [
       { component: SignInPage, path: "sign-in" },
+      { component: JoinPage, path: "join" },
+      { component: JoinPage, path: "join/:code" },
       ...LEGAL_PAGES.map((page) => ({
         component: LegalPage,
         data: { page },

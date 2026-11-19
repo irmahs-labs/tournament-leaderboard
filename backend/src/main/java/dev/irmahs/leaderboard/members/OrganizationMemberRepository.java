@@ -9,6 +9,9 @@ public interface OrganizationMemberRepository extends JpaRepository<Organization
 
     boolean existsByOrganizationIdAndOwnerTrue(UUID organizationId);
 
+    /** The organisation's members, the earliest first. */
+    List<OrganizationMember> findByOrganizationIdOrderByJoinedAt(UUID organizationId);
+
     /** An account's memberships of active organisations, by organisation name. */
     @Query("""
             select new dev.irmahs.leaderboard.members.Membership(o.slug, o.name, m.role, m.owner)

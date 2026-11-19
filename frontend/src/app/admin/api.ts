@@ -1,5 +1,7 @@
 /** The shapes of the admin API: `/api/orgs/{slug}/admin/…`. */
 
+import type { MemberRole } from "../shared/session";
+
 /** One of the Valorant ranks, from `GET /api/ranks`. */
 export interface RankOption {
   id: number;
@@ -58,3 +60,41 @@ export interface SeasonInput {
 
 /** The limits the API checks: a season's name, matches and games per match. */
 export const SEASON_LIMITS = { maxGames: 9, maxMatches: 20, maxName: 40 };
+
+/** Someone who belongs to the organisation, from `GET …/admin/members`. */
+export interface TeamMember {
+  userId: string;
+  /** Their name from Google; nothing when Google gave none. */
+  name: string | null;
+  email: string;
+  role: MemberRole;
+  owner: boolean;
+  joinedAt: string;
+}
+
+/** An admin invite that can still be used. */
+export interface WaitingInvite {
+  id: string;
+  email: string;
+  /** The admin who made it; nothing when they're gone. */
+  invitedBy: string | null;
+  createdAt: string;
+  expiresAt: string;
+}
+
+/** `GET …/admin/members`. */
+export interface Team {
+  members: TeamMember[];
+  invites: WaitingInvite[];
+}
+
+/** The answer to `POST …/admin/invites`: the code, shown only this once. */
+export interface NewInvite {
+  id: string;
+  code: string;
+  email: string;
+  expiresAt: string;
+}
+
+/** How long an invite lasts, in minutes: 30 minutes, 1, 12, 24 or 48 hours. */
+export const INVITE_MINUTES = [30, 60, 720, 1440, 2880] as const;

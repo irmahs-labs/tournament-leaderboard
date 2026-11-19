@@ -1,0 +1,106 @@
+/* On top of the page's own 40px above and 72px below. */
+:host {
+  display: grid;
+  grid-template-columns: minmax(0, 560px);
+  justify-content: center;
+  padding-top: 32px;
+  padding-bottom: 24px;
+}
+
+.card {
+  padding: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.muted-eyebrow {
+  color: var(--muted);
+}
+
+.error {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--danger);
+  color: var(--text);
+}
+
+.google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 20px;
+  background: #ffffff;
+  color: #1f1f1f;
+  border: 1px solid #747775;
+  font: 600 16px var(--font-body);
+  cursor: pointer;
+}
+
+.org {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.logo {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: var(--on-accent);
+  font: 700 22px var(--font-display);
+}
+
+.block {
+  display: block;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.type {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.code-box {
+  min-height: 48px;
+  width: 200px;
+  padding: 0 12px;
+  background: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--input-line);
+  border-radius: 0;
+  font:
+    600 20px ui-monospace,
+    monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.separate {
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--row-line);
+}
+
+h1,
+p {
+  margin: 0;
+}
