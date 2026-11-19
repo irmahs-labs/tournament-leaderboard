@@ -22,15 +22,7 @@ class CodeLookupLimit {
     private static final int MAX_ADDRESSES = 10_000;
 
     private final Map<String, Deque<Instant>> lookups = new HashMap<>();
-    private final Clock clock;
-
-    CodeLookupLimit() {
-        this(Clock.systemUTC());
-    }
-
-    CodeLookupLimit(Clock clock) {
-        this.clock = clock;
-    }
+    private final Clock clock = Clock.systemUTC();
 
     /** Counts one lookup from this address; false when it's over the limit. */
     synchronized boolean allow(String address) {

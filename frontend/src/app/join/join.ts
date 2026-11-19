@@ -3,6 +3,7 @@ import {
   HttpErrorResponse,
   httpResource,
 } from "@angular/common/http";
+import type { OnInit } from "@angular/core";
 import { Component, computed, inject, input, signal } from "@angular/core";
 import { Router, RouterLink } from "@angular/router";
 import { TranslocoDirective } from "@jsverse/transloco";
@@ -85,7 +86,7 @@ export const tidyCode = (typed: string): string => {
   styleUrl: "./join.css",
   templateUrl: "./join.html",
 })
-export class JoinPage {
+export class JoinPage implements OnInit {
   /** The code, from the address; none on /join, where it's typed. */
   readonly code = input<string>();
 
@@ -125,7 +126,7 @@ export class JoinPage {
   readonly #http = inject(HttpClient);
   readonly #router = inject(Router);
 
-  constructor() {
+  ngOnInit(): void {
     void this.session.known();
   }
 

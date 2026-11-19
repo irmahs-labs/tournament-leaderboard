@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.regex.Pattern;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +33,6 @@ public class TeamService {
     static final Set<Integer> EXPIRY_MINUTES = Set.of(30, 60, 12 * 60, 24 * 60, 48 * 60);
 
     static final int MAX_EMAIL = 254;
-    private static final Pattern EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
 
     private final OrganizationService organizations;
     private final OrganizationMemberRepository members;
@@ -94,7 +92,7 @@ public class TeamService {
     public NewInvite invite(String slug, String inviterSub, InviteInput input) {
         Organization organization = organizations.requireActive(slug);
         String email = input.email() == null ? "" : input.email().strip();
-        if (email.length() > MAX_EMAIL || !EMAIL.matcher(email).matches()) {
+        if (email.length() > MAX_EMAIL || !looksLikeEmail(email)) {
             throw badRequest("That isn't an email address");
         }
         if (input.expiresInMinutes() == null || !EXPIRY_MINUTES.contains(input.expiresInMinutes())) {
@@ -179,6 +177,21 @@ public class TeamService {
         owner.giveUpOwnership();
         members.flush();
         next.takeOwnership();
+    }
+
+    /**
+     * Whether a text looks like an email address: one @, something before it, and a domain with a
+     * dot inside, without spaces. Google checks the rest when the person signs in.
+     */
+    static boolean looksLikeEmail(String text) {
+        int at = text.indexOf('@');
+        String domain = text.substring(at + 1);
+        int dot = domain.lastIndexOf('.');
+        return at > 0
+                && text.indexOf('@', at + 1) < 0
+                && dot > 0
+                && dot < domain.length() - 1
+                && text.chars().noneMatch(Character::isWhitespace);
     }
 
     private OrganizationMember requireMember(String slug, UUID userId) {
