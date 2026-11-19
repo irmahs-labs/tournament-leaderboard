@@ -1,5 +1,7 @@
 import type { Routes } from "@angular/router";
 
+import { AccountPage } from "./account/account";
+import { accountGuard } from "./account/account-guard";
 import { adminGuard } from "./admin/admin-guard";
 import { BrandingAdminPage } from "./admin/branding/branding";
 import { MembersAdminPage } from "./admin/members/members";
@@ -56,6 +58,7 @@ export const routes: Routes = [
         component: PlatformPage,
         path: "platform",
       },
+      { canActivate: [accountGuard], component: AccountPage, path: "account" },
       { component: JoinPage, path: "join" },
       { component: JoinPage, path: "join/:code" },
       ...LEGAL_PAGES.map((page) => ({

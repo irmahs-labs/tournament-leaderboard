@@ -632,5 +632,25 @@
     "loadFailed": "Les organisations n'ont pas pu être chargées. Réessayez dans un instant.",
     "loading": "Chargement des organisations…",
     "help": "Suspendre masque les pages d'une organisation et son espace admin, et la retire de la page d'accueil. Rien n'est supprimé ; la réactiver rétablit tout."
+  },
+  "account": {
+    "eyebrow": "Connecté avec Google",
+    "title": "Mon compte",
+    "lede": "Votre connexion et les organisations dont vous faites partie.",
+    "profile": "Profil",
+    "google": "Connecté avec Google. Nous recevons seulement votre nom, votre adresse e-mail et votre photo de profil ; modifiez-les dans votre compte Google.",
+    "signOut": "Se déconnecter",
+    "organisations": "Organisations",
+    "ownerNote": "Vous êtes propriétaire de cette organisation. Transmettez-la à un autre admin avant de la quitter.",
+    "leave": "Quitter",
+    "leaveConfirm": "Quitter {{name}} ? Vous n'y aurez plus accès. Vos résultats y restent.",
+    "left": "Vous avez quitté {{name}}.",
+    "delete": "Supprimer mon compte",
+    "deleteHelp": "Supprime votre connexion et vos adhésions. Les fiches joueur et les résultats restent dans leurs organisations, sans lien. C'est définitif.",
+    "ownerConflict": "Vous ne pouvez pas supprimer votre compte tant que vous possédez une organisation. Transmettez-la d'abord à un autre admin, depuis sa page Membres.",
+    "typeToConfirm": "Tapez {{word}} pour confirmer",
+    "deleteButton": "Supprimer le compte",
+    "deleted": "Votre compte est supprimé.",
+    "failed": "Ça n'a pas marché. Réessayez."
   }
 }
