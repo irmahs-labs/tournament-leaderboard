@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-19, with the home page and creating an organisation: the `founding` package, `GET /api/featured`, `POST /api/orgs` and the Angular `HomePage` at `/`.
+Last updated: 2026-11-19, with the platform admin's Organisations screen: the `platform` package (`GET /api/platform/organizations`, `PUT …/{slug}/status`) and the Angular `PlatformPage` at `/platform`.
 
 ## System
 
@@ -63,6 +63,9 @@ flowchart LR
     founding --> accounts
     founding --> members
     founding --> organizations
+    platform --> accounts
+    platform --> members
+    platform --> organizations
     presence
     system
 ```
@@ -81,6 +84,7 @@ flowchart LR
 | `scoring` | `ScoringService` (the only place points are computed: per game, a match or season adding up its games; a stat not recorded doesn't count), `BonusCalculator` (HIGHEST/LOWEST, MVP/SVP from the place, AT_LEAST; ties all win; nothing from a stat not recorded) |
 | `stats` | `GameStat`, `StatLine`, `PlayerTally`, `SeasonResultsService` (public results; each standing carries the player's current rank), `ScoresService` (Enter scores), `RulesAdminService` (the Scoring screen: changes a season's rules and works out every saved game's automatic bonuses again; a finished season's rules can't change) |
 | `founding` | `FoundingService` (anyone signed in creates an organisation and owns it: address checked and not reserved, 3 owned at most except for platform admins, 409 when taken), `FoundingController` |
+| `platform` | `PlatformService` (platform admins only: every organisation with its owner, members, activity and whether the home page features it; suspending and reactivating), `PlatformController` |
 | `team` | `Invite` (organization_invites; only a hash of the code), `InviteCodes` (8 characters without look-alikes, SHA-256), `TeamService` (the Members screen: roles, removal, ownership, admin invites), `JoinService` (what a code is for; using it, its row locked), `CodeLookupLimit` (10 lookups a minute per address, in memory) |
 | `presence` | `OnlineCount` (open pages, in memory only; changes sent at most once a second, a heartbeat every 25 s), `GET /api/online` as server-sent events |
 | `system` | `/api/version`; `SpaController` forwards the Angular router's addresses (`/o/**`, `/not-found`, `/join`, `/join/*`, `/sign-in`, `/legal`, `/privacy`, `/cookies`, `/terms`) to `index.html` |
@@ -107,6 +111,7 @@ flowchart LR
         me["/api/me"]
         acc["/api/invites/{code}/accept: POST"]
         fo["/api/orgs: POST, create an organisation"]
+        pl["/api/platform/organizations: GET; /{slug}/status: PUT (platform admins)"]
     end
     jv["/api/invites/{code}: GET, public, 10 a minute"]
     subgraph admin["Admin: /api/orgs/{slug}/admin"]
@@ -126,6 +131,7 @@ flowchart LR
     me --> AccountService
     fe --> BrandingService
     fo --> FoundingService
+    pl --> PlatformService
     tm --> TeamService
     jv & acc --> JoinService
     ap --> PlayerAdminService
@@ -177,9 +183,11 @@ planned.
 flowchart TD
     app[App<br/>starts ThemeService, LanguageService, SessionService] --> routes[app.routes.ts]
     routes -->|"/o/:slug, organizationResolver"| shell[OrgShell<br/>accent, language, title, season]
-    routes -->|"/, /sign-in, /join, /join/:code, /legal, /privacy, /cookies, /terms, /not-found, **"| platform[PlatformShell<br/>platform name and red]
+    routes -->|"/, /platform, /sign-in, /join, /join/:code, /legal, /privacy, /cookies, /terms, /not-found, **"| platform[PlatformShell<br/>platform name and red]
     platform --> home[HomePage /<br/>what it does, create an organisation, the featured one]
     home -->|"GET /api/featured, POST /api/orgs"| foundApi["/api/featured, /api/orgs"]
+    platform --> padmin[PlatformPage /platform, platformGuard<br/>counts, search, every organisation, suspend or reactivate]
+    padmin -->|"GET, PUT …/status"| platformApi["/api/platform/organizations"]
     platform --> si[SignInPage<br/>Google, your organisations, sign out, create one]
     platform --> legal[LegalPage<br/>legal notice, privacy, cookies, terms]
     platform --> nf[NotFoundPage]
@@ -238,6 +246,7 @@ flowchart TD
 | `results/` | The public results: `api.ts` (the API's shapes), `CurrentSeason` (the organisation's seasons, newest first, the one picked with `?season=`, `reload()` after an admin change, `show()` for the organisation after Branding saves it; its seasons are fetched by slug only), `stats.ts` (stat columns with K, D and A folded into KDA, decimals, the points formula, Riot ID name and tag), `StandingsTable` (a season's or a match's averages or totals, or one game's lines), `leaderboard/`, `matches/` (`MatchesPage`), `match/` (`MatchPage`, `match-stats.ts`: a game's lines as standings, the stat leaders) |
 | `admin/` | `adminGuard`, `api.ts` (the admin API's shapes), `players/` (`PlayersAdminPage`: aliases typed as one line, a previous Riot ID keeps its kind), `action.ts` (`AdminAction`: one change at a time, then a status line), `seasons/` (`SeasonsAdminPage`, `problemOf` checking details as the API does), `scoring/` (`ScoringAdminPage`: the rules as typed, `problemOf` and `inputOf`; locked for a finished season), `members/` (`MembersAdminPage`, the invite message to copy), `branding/` (`BrandingAdminPage`, `problemOf` and `linkAllowed` checking as the API does), `scores/` (`ScoresAdminPage`; `scores-form.ts`: lines as typed, stat boxes parsed with a decimal comma, an empty place taken from the line's number, the request) |
 | `home/` | `HomePage` (the form kept in session storage across Google sign-in), `slugFrom`, `foundingProblem` |
+| `platform/` | `PlatformPage`, `platformGuard` (platform admins only; others see Not found), `matching` (search by name, address or owner's email) |
 | `sign-in/` | `SignInPage` |
 | `join/` | `JoinPage`, `stepOf` (sign in, accept, wrong account, expired, used, revoked, accepted), `tidyCode` |
 | `legal/` | `LegalPage` and `legal-content.ts`: the legal notice, privacy policy, cookie policy and terms, in English and French, one route each |
@@ -269,6 +278,6 @@ production, and the Protect migration ruleset lets a pull request merge only onc
 come with it. The full plan, with each phase's exit criterion, is the migration plan page
 kept with the project designs.
 
-Not built yet: suspension and account deletion (7); custom bonuses and
+Not built yet: account deletion (7); custom bonuses and
 `PUT …/rules?apply=current|next` (8); claims and expected emails (9); schedule and sign-ups (10);
 exports (11); moderation (12); merging duplicate players (13).
