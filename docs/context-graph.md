@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-19, with the public Players page and player profiles: `GET /api/orgs/{slug}/players`, `GET …/seasons/{n}/players/{id}`, and the Angular `PlayersPage` and `PlayerPage`.
+Last updated: 2026-11-20, with player claims: the `claims` package, the `player_claims` table, the Claim page and the admin Claims queue.
 
 ## System
 
@@ -66,6 +66,10 @@ flowchart LR
     platform --> accounts
     platform --> members
     platform --> organizations
+    claims --> accounts
+    claims --> members
+    claims --> organizations
+    claims --> players
     presence
     system
 ```
@@ -85,9 +89,10 @@ flowchart LR
 | `stats` | `GameStat`, `StatLine`, `PlayerTally`, `SeasonResultsService` (public results; each standing carries the player's current rank), `ScoresService` (Enter scores), `RulesAdminService` (the Scoring screen: changes a season's rules and works out every saved game's automatic bonuses again; adds the admins' own bonuses, coded from their name, and removes bonuses with their awards; a finished season's rules can't change) |
 | `founding` | `FoundingService` (anyone signed in creates an organisation and owns it: address checked and not reserved, 3 owned at most except for platform admins, 409 when taken), `FoundingController` |
 | `platform` | `PlatformService` (platform admins only: every organisation with its owner, members, activity and whether the home page features it; suspending and reactivating), `PlatformController` |
+| `claims` | `PlayerClaim` (player_claims), `ClaimService` (join as a player; claim an unclaimed player with a note; cancel; the admins' queue; accepting links the member and declines the other claims for that player; nobody accepts their own while another admin exists, the only admin's is marked self-approved), `ClaimController` |
 | `team` | `Invite` (organization_invites; only a hash of the code), `InviteCodes` (8 characters without look-alikes, SHA-256), `TeamService` (the Members screen: roles, removal, ownership, admin invites), `JoinService` (what a code is for; using it, its row locked), `MembershipController` (leaving an organisation, never as its owner), `CodeLookupLimit` (10 lookups a minute per address, in memory) |
 | `presence` | `OnlineCount` (open pages, in memory only; changes sent at most once a second, a heartbeat every 25 s), `GET /api/online` as server-sent events |
-| `system` | `/api/version`; `SpaController` forwards the Angular router's addresses (`/org/**`, `/not-found`, `/platform`, `/account`, `/join`, `/join/*`, `/sign-in`, `/legal`, `/privacy`, `/cookies`, `/terms`) to `index.html` |
+| `system` | `/api/version`; `SpaController` forwards the Angular router's addresses (`/org/**` (the claim page included), `/not-found`, `/platform`, `/account`, `/join`, `/join/*`, `/sign-in`, `/legal`, `/privacy`, `/cookies`, `/terms`) to `index.html` |
 
 ## API
 
@@ -114,12 +119,14 @@ flowchart LR
         lv["/api/orgs/{slug}/membership: DELETE (leave)"]
         acc["/api/invites/{code}/accept: POST"]
         fo["/api/orgs: POST, create an organisation"]
+        cl["/api/orgs/{slug}/membership: POST (join); /claim: GET, POST, DELETE; /claim/players: GET"]
         pl["/api/platform/organizations: GET; /{slug}/status: PUT (platform admins)"]
     end
     jv["/api/invites/{code}: GET, public, 10 a minute"]
     subgraph admin["Admin: /api/orgs/{slug}/admin"]
         ap["players: GET ?q, POST, PUT /{id}"]
         br["branding: PUT; logo: PUT (the image as the body), DELETE"]
+        cq["claims: GET ?status=, POST /{id}/accept, POST /{id}/decline"]
         tm["members: GET, PUT /{user}/role, DELETE /{user}, POST /{user}/ownership; invites: POST, DELETE /{id}"]
         as["seasons: POST, PUT /{n}"]
         ru["seasons/{n}/rules: PUT ?apply=current|next, POST /platform-defaults, POST /bonuses, DELETE /bonuses/{code}"]
@@ -137,6 +144,7 @@ flowchart LR
     lv --> TeamService
     fe --> BrandingService
     fo --> FoundingService
+    cl & cq --> ClaimService
     pl --> PlatformService
     tm --> TeamService
     jv & acc --> JoinService
@@ -153,7 +161,8 @@ Flyway: `V2026_11_10_1__schema.sql` (all tables), `V2026_11_13_1__row_level_secu
 (policy `organization_isolation` on players, seasons, matches, organization_members,
 organization_invites and organization_logos), `V2026_11_18_1__drop_avatar_url.sql` (the Google
 picture isn't kept: data minimisation), `V2026_11_19_1__weighted_scoring.sql`,
-`V2026_11_19_2__social_links.sql` (six `*_url` columns on organizations, https only).
+`V2026_11_19_2__social_links.sql` (six `*_url` columns on organizations, https only),
+`V2026_11_20_1__player_claims.sql` (player_claims, one waiting per member, with the same policy).
 
 ```mermaid
 erDiagram
@@ -165,6 +174,8 @@ erDiagram
     ranks ||--o{ players : "current rank"
     players ||--o{ player_aliases : "also known as"
     players |o--o| organization_members : "linked to"
+    players ||--o{ player_claims : "claimed in"
+    app_users ||--o{ player_claims : sends
     organizations ||--o{ seasons : runs
     seasons ||--o{ season_stat_rules : records
     seasons ||--o{ season_bonuses : awards
@@ -176,7 +187,7 @@ erDiagram
     season_bonuses ||--o{ game_stat_bonuses : "won as"
 ```
 
-No entity yet: `organization_logos`. Mapped as collections rather than
+Mapped as collections rather than
 entities: `season_stat_rules` (a map on `Season`) and `game_stat_bonuses` (a many-to-many on
 `GameStat`).
 
@@ -219,6 +230,7 @@ flowchart TD
     table --> pill[RankPill]
     lb --> pill
     shell -->|"/org/:slug/players"| plp["PlayersPage<br/>a card per player, search, sort, rank filter"]
+    shell -->|"/org/:slug/claim, accountGuard"| clp["ClaimPage<br/>join, pick your profile, note, wait or cancel"]
     shell -->|"/org/:slug/players/:player?season="| pp["PlayerPage<br/>standing, the player ahead, averages, points per match, matches"]
     shell -->|"/org/:slug/matches"| mt["MatchesPage<br/>a card per match, its MVP"]
     mt --> current
@@ -242,6 +254,7 @@ flowchart TD
     scadm -->|"GET …/rules, PUT, POST /platform-defaults, POST and DELETE /bonuses"| recordApi["…/admin/seasons/{n}/rules"]
     guard --> madm["MembersAdminPage /admin/members<br/>invite an admin, waiting invites, roles, remove, ownership"]
     madm -->|"GET, PUT, POST, DELETE"| teamApi["…/admin/members, …/admin/invites"]
+    guard --> cadm["ClaimsAdminPage /admin/claims<br/>Waiting, Accepted, Declined; accept, decline with a reason"]
     guard --> badm["BrandingAdminPage /admin/branding<br/>names, language, logo, accent with its contrast, places per match, social links"]
     badm -->|"PUT, DELETE; then CurrentSeason.show"| brandApi["…/admin/branding, …/admin/logo"]
     seadm --> current
@@ -255,10 +268,11 @@ flowchart TD
 | `shared/` | `ThemeService` (dark or light, the accent's CSS variables), `colour.ts` (WCAG contrast and mixing, the palettes, readable rank colours), `LanguageService` (EN or FR; numbers, dates and plurals in the language on screen), `OnlineService` (the header's count of open pages), `SessionService` (who is signed in, `canAdmin`, `meOrSignIn` for the guards, one `/api/me` request at a time, Google sign-in with a safe return address, sign-out), `organization.ts` (`organizationResolver`, `fullName`, `initials`), `storage.ts` (local and session storage that survives being blocked), `RankPill` |
 | `layout/` | `OrgShell` (an organisation's pages), `PlatformShell` (sign-in and Not found), `SiteHeader`, `SiteFooter`, page layout |
 | `results/` | The public results: `api.ts` (the API's shapes), `CurrentSeason` (the organisation's seasons, newest first, the one picked with `?season=`, `reload()` after an admin change, `adminApi` (the admin pages' API address), `show()` for the organisation after Branding saves it; its seasons are fetched by slug only), `stats.ts` (stat columns with K, D and A folded into KDA, decimals, the points formula, Riot ID name and tag), `StandingsTable` (a season's or a match's averages or totals, or one game's lines), `leaderboard/`, `matches/` (`MatchesPage`), `players/` (`PlayersPage`; `players-list.ts`: cards, search, sorts, tiers), `player/` (`PlayerPage`, `barsOf`, `kdaOf`), `match/` (`MatchPage`, `match-stats.ts`: a game's lines as standings, the stat leaders) |
-| `admin/` | `adminGuard`, `api.ts` (the admin API's shapes), `players/` (`PlayersAdminPage`: aliases typed as one line, a previous Riot ID keeps its kind), `action.ts` (`AdminAction`: one change at a time, then a status line), `seasons/` (`SeasonsAdminPage`, `problemOf` checking details as the API does), `scoring/` (`ScoringAdminPage`: the rules as typed, `problemOf` and `inputOf`, `previewOf` for the formula, `newBonusProblem` and `newBonusInput`; locked for a finished season), `members/` (`MembersAdminPage`, the invite message to copy), `branding/` (`BrandingAdminPage`, `problemOf` and `linkAllowed` checking as the API does), `scores/` (`ScoresAdminPage`; `scores-form.ts`: lines as typed, stat boxes parsed with a decimal comma, an empty place taken from the line's number, the request) |
+| `admin/` | `adminGuard`, `api.ts` (the admin API's shapes), `players/` (`PlayersAdminPage`: aliases typed as one line, a previous Riot ID keeps its kind), `action.ts` (`AdminAction`: one change at a time, then a status line), `seasons/` (`SeasonsAdminPage`, `problemOf` checking details as the API does), `scoring/` (`ScoringAdminPage`: the rules as typed, `problemOf` and `inputOf`, `previewOf` for the formula, `newBonusProblem` and `newBonusInput`; locked for a finished season), `members/` (`MembersAdminPage`, the invite message to copy), `claims/` (`ClaimsAdminPage`), `branding/` (`BrandingAdminPage`, `problemOf` and `linkAllowed` checking as the API does), `scores/` (`ScoresAdminPage`; `scores-form.ts`: lines as typed, stat boxes parsed with a decimal comma, an empty place taken from the line's number, the request) |
 | `home/` | `HomePage` (the form kept in session storage across Google sign-in), `slugFrom`, `foundingProblem` |
 | `platform/` | `PlatformPage`, `platformGuard` (platform admins only; others see Not found), `matching` (search by name, address or owner's email) |
 | `account/` | `AccountPage` (typing DELETE to delete), `accountGuard` (signed in only) |
+| `claim/` | `ClaimPage`, `api.ts` (claims' shapes, `matchingPlayers`) |
 | `sign-in/` | `SignInPage` |
 | `join/` | `JoinPage`, `stepOf` (sign in, accept, wrong account, expired, used, revoked, accepted), `tidyCode` |
 | `legal/` | `LegalPage` and `legal-content.ts`: the legal notice, privacy policy, cookie policy and terms, in English and French, one route each |
@@ -290,5 +304,5 @@ production, and the Protect migration ruleset lets a pull request merge only onc
 come with it. The full plan, with each phase's exit criterion, is the migration plan page
 kept with the project designs.
 
-Phases 7 and 8 are built; not built yet: claims and expected emails (9); schedule and sign-ups (10);
+Phases 7 and 8 are built; not built yet: expected emails and My profile (9); schedule and sign-ups (10);
 exports (11); moderation (12); merging duplicate players (13).

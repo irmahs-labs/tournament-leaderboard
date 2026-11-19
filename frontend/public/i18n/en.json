@@ -228,7 +228,8 @@
     "seasons": "Seasons",
     "scoring": "Scoring",
     "members": "Members",
-    "branding": "Branding"
+    "branding": "Branding",
+    "claims": "Claims"
   },
   "adminPlayers": {
     "title": "Players",
@@ -717,7 +718,8 @@
     "none": "Nobody has played this season yet.",
     "noMatch": "No player matches.",
     "failed": "The players couldn't be loaded. Try again in a moment.",
-    "loading": "Loading the players…"
+    "loading": "Loading the players…",
+    "claimLink": "Is one of them you? Claim your profile"
   },
   "player": {
     "allPlayers": "All players",
@@ -740,5 +742,76 @@
     "points": "Points",
     "failed": "This player couldn't be loaded. Try again in a moment.",
     "loading": "Loading the player…"
+  },
+  "claim": {
+    "title": "Claim your profile",
+    "lede": "Link your account to the player record the admins already enter scores for. Your stats stay exactly where they are.",
+    "joinTitle": "Play at {{org}}?",
+    "joinHelp": "Join as a player first. Joining on its own gives access to nothing; your profile link does, once an admin accepts it.",
+    "join": "Join as a player",
+    "joined": "You joined as a player. Now pick your profile.",
+    "linkedTitle": "Your profile is {{name}}",
+    "linkedHelp": "An admin accepted your claim: your account is linked to this player.",
+    "linkedSelf": "You're the only admin, so you approved your own claim: the link is marked self-approved.",
+    "viewProfile": "View my profile",
+    "waitingTitle": "Your claim for {{name}} was sent",
+    "waitingHelp": "An admin of {{org}} will accept or decline it. You'll see the answer here. Your stats don't move either way.",
+    "sent": "Sent",
+    "note": "Note",
+    "cancel": "Cancel the claim",
+    "cancelled": "Your claim is cancelled.",
+    "declined": "Your claim for {{name}} was declined.",
+    "because": "Reason: {{reason}}",
+    "pickTitle": "Pick your profile",
+    "search": "Search the players nobody has claimed",
+    "thisIsMe": "This is me",
+    "noneLeft": "No player is left to claim.",
+    "notListed": "Not in the list? Your profile appears after an admin enters your first game. If someone else linked your profile, ask an admin.",
+    "claiming": "You're claiming {{name}}",
+    "adminsSee": "An admin of {{org}} will see your Google name and email next to this profile, and decide.",
+    "noteLabel": "Note for the admins (optional)",
+    "noteHint": "For example: I play Jett in the Friday group",
+    "noteTooLong": "Keep the note to {{max}} characters.",
+    "send": "Send the claim",
+    "pickAnother": "Pick another player",
+    "sentDone": "Your claim is sent.",
+    "conflict": "That profile or claim changed in the meantime. Reload the page and try again.",
+    "failed": "That didn't work. Try again in a moment.",
+    "loading": "Loading…"
+  },
+  "adminClaims": {
+    "title": "Claims",
+    "lede": "Players asking to be linked to a profile. Accepting links their account; their stats stay where they are.",
+    "tab": {
+      "PENDING": "Waiting",
+      "ACCEPTED": "Accepted",
+      "DECLINED": "Declined"
+    },
+    "ownRule": "Nobody approves their own claim while another admin exists. An organisation's only admin, its owner, can approve their own, and the link is marked self-approved.",
+    "you": "(you)",
+    "memberSince": "Member since {{date}}",
+    "wantsToBe": "Wants to be",
+    "competing": "{{count}} claims for this player",
+    "noteSent": "Note · sent {{date}}",
+    "accept": "Accept",
+    "decline": "Decline",
+    "declineClaim": "Decline the claim",
+    "reasonLabel": "Reason, shown to the player (optional)",
+    "reasonHint": "For example: Kestrel is someone else's profile",
+    "yourOwn": "Your own claim",
+    "accepted": "{{name}} is now linked to {{player}}.",
+    "declined": "{{name}}'s claim for {{player}} is declined.",
+    "wasAccepted": "Accepted {{date}}",
+    "selfApproved": "Accepted {{date}} · self-approved",
+    "wasDeclined": "Declined {{date}}",
+    "none": {
+      "PENDING": "No claim is waiting.",
+      "ACCEPTED": "No claim accepted yet.",
+      "DECLINED": "No claim declined."
+    },
+    "ownClaim": "Another admin accepts your own claim.",
+    "conflict": "This claim was already answered, or the player is already linked. The list is up to date now.",
+    "failed": "That didn't work. Try again in a moment.",
+    "loading": "Loading the claims…"
   }
 }

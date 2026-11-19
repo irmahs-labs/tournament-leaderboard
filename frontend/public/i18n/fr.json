@@ -228,7 +228,8 @@
     "seasons": "Saisons",
     "scoring": "Barème",
     "members": "Membres",
-    "branding": "Image"
+    "branding": "Image",
+    "claims": "Demandes"
   },
   "adminPlayers": {
     "title": "Joueurs",
@@ -717,7 +718,8 @@
     "none": "Personne n'a encore joué cette saison.",
     "noMatch": "Aucun joueur ne correspond.",
     "failed": "Les joueurs n'ont pas pu être chargés. Réessayez dans un instant.",
-    "loading": "Chargement des joueurs…"
+    "loading": "Chargement des joueurs…",
+    "claimLink": "L'un d'eux, c'est vous ? Revendiquez votre profil"
   },
   "player": {
     "allPlayers": "Tous les joueurs",
@@ -740,5 +742,76 @@
     "points": "Points",
     "failed": "Ce joueur n'a pas pu être chargé. Réessayez dans un instant.",
     "loading": "Chargement du joueur…"
+  },
+  "claim": {
+    "title": "Revendiquer votre profil",
+    "lede": "Liez votre compte à la fiche joueur sur laquelle les admins saisissent déjà vos scores. Vos stats restent exactement où elles sont.",
+    "joinTitle": "Vous jouez à {{org}} ?",
+    "joinHelp": "Rejoignez d'abord en tant que joueur. Rejoindre seul ne donne accès à rien ; le lien vers votre profil, une fois accepté par un admin, si.",
+    "join": "Rejoindre en tant que joueur",
+    "joined": "Vous avez rejoint en tant que joueur. Choisissez maintenant votre profil.",
+    "linkedTitle": "Votre profil est {{name}}",
+    "linkedHelp": "Un admin a accepté votre demande : votre compte est lié à ce joueur.",
+    "linkedSelf": "Vous êtes le seul admin, vous avez donc approuvé votre propre demande : le lien est marqué auto-approuvé.",
+    "viewProfile": "Voir mon profil",
+    "waitingTitle": "Votre demande pour {{name}} est envoyée",
+    "waitingHelp": "Un admin de {{org}} l'acceptera ou la refusera. Vous verrez la réponse ici. Vos stats ne bougent pas dans les deux cas.",
+    "sent": "Envoyée",
+    "note": "Note",
+    "cancel": "Annuler la demande",
+    "cancelled": "Votre demande est annulée.",
+    "declined": "Votre demande pour {{name}} a été refusée.",
+    "because": "Raison : {{reason}}",
+    "pickTitle": "Choisissez votre profil",
+    "search": "Rechercher parmi les joueurs non revendiqués",
+    "thisIsMe": "C'est moi",
+    "noneLeft": "Il ne reste aucun joueur à revendiquer.",
+    "notListed": "Pas dans la liste ? Votre profil apparaît quand un admin saisit votre première partie. Si quelqu'un d'autre a lié votre profil, demandez à un admin.",
+    "claiming": "Vous revendiquez {{name}}",
+    "adminsSee": "Un admin de {{org}} verra votre nom Google et votre e-mail à côté de ce profil, et décidera.",
+    "noteLabel": "Note pour les admins (facultatif)",
+    "noteHint": "Par exemple : je joue Jett dans le groupe du vendredi",
+    "noteTooLong": "Limitez la note à {{max}} caractères.",
+    "send": "Envoyer la demande",
+    "pickAnother": "Choisir un autre joueur",
+    "sentDone": "Votre demande est envoyée.",
+    "conflict": "Ce profil ou cette demande a changé entre-temps. Rechargez la page et réessayez.",
+    "failed": "Ça n'a pas marché. Réessayez dans un instant.",
+    "loading": "Chargement…"
+  },
+  "adminClaims": {
+    "title": "Demandes",
+    "lede": "Les joueurs qui demandent à être liés à un profil. Accepter lie leur compte ; leurs stats restent où elles sont.",
+    "tab": {
+      "PENDING": "En attente",
+      "ACCEPTED": "Acceptées",
+      "DECLINED": "Refusées"
+    },
+    "ownRule": "Personne n'approuve sa propre demande tant qu'un autre admin existe. Le seul admin d'une organisation, son propriétaire, peut approuver la sienne, et le lien est marqué auto-approuvé.",
+    "you": "(vous)",
+    "memberSince": "Membre depuis {{date}}",
+    "wantsToBe": "Veut être",
+    "competing": "{{count}} demandes pour ce joueur",
+    "noteSent": "Note · envoyée {{date}}",
+    "accept": "Accepter",
+    "decline": "Refuser",
+    "declineClaim": "Refuser la demande",
+    "reasonLabel": "Raison, montrée au joueur (facultatif)",
+    "reasonHint": "Par exemple : Kestrel est le profil de quelqu'un d'autre",
+    "yourOwn": "Votre propre demande",
+    "accepted": "{{name}} est maintenant lié à {{player}}.",
+    "declined": "La demande de {{name}} pour {{player}} est refusée.",
+    "wasAccepted": "Acceptée {{date}}",
+    "selfApproved": "Acceptée {{date}} · auto-approuvée",
+    "wasDeclined": "Refusée {{date}}",
+    "none": {
+      "PENDING": "Aucune demande en attente.",
+      "ACCEPTED": "Aucune demande acceptée pour l'instant.",
+      "DECLINED": "Aucune demande refusée."
+    },
+    "ownClaim": "Un autre admin accepte votre propre demande.",
+    "conflict": "Cette demande a déjà reçu une réponse, ou le joueur est déjà lié. La liste est à jour maintenant.",
+    "failed": "Ça n'a pas marché. Réessayez dans un instant.",
+    "loading": "Chargement des demandes…"
   }
 }

@@ -12,6 +12,10 @@
   max-width: 760px;
 }
 
+.claim-link {
+  align-self: flex-start;
+}
+
 .filters {
   display: flex;
   flex-wrap: wrap;
