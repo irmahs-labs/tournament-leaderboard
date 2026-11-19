@@ -122,11 +122,9 @@ export class PlayersAdminPage {
   readonly #transloco = inject(TranslocoService);
 
   readonly #api = computed(() => {
-    const org = this.current.organization();
+    const admin = this.current.adminApi();
 
-    return org
-      ? `/api/orgs/${encodeURIComponent(org.slug)}/admin/players`
-      : undefined;
+    return admin ? `${admin}/players` : undefined;
   });
 
   protected search(value: string): void {

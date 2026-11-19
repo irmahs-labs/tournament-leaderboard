@@ -218,6 +218,7 @@ export class BrandingAdminPage {
   readonly #transloco = inject(TranslocoService);
   readonly #theme = inject(ThemeService);
   readonly #document = inject(DOCUMENT);
+  readonly #api = this.current.adminApi;
 
   /** The address of the organisation's pages, as players see it. */
   protected address(org: Organization): string {
@@ -325,11 +326,5 @@ export class BrandingAdminPage {
       socialLinks: perSite(text),
       tournamentName: text("tournamentName"),
     };
-  }
-
-  #api(): string | undefined {
-    const org = this.current.organization();
-
-    return org ? `/api/orgs/${encodeURIComponent(org.slug)}/admin` : undefined;
   }
 }

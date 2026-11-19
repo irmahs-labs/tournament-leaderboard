@@ -22,6 +22,13 @@ export class CurrentSeason {
 
   readonly organization = this.#organization.asReadonly();
 
+  /** The address of the organisation's admin API, such as `/api/orgs/alsace-arena/admin`. */
+  readonly adminApi = computed(() => {
+    const slug = this.#slug();
+
+    return slug ? `/api/orgs/${encodeURIComponent(slug)}/admin` : undefined;
+  });
+
   /** Newest first, as the header's picker lists them; the API lists them oldest first. */
   readonly seasons = computed<Season[]>(() => {
     const newestFirst: Season[] = [];

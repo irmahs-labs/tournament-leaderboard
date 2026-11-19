@@ -1,8 +1,8 @@
 import { inject } from "@angular/core";
 import type { CanActivateFn } from "@angular/router";
-import { Router } from "@angular/router";
+import { Router, UrlTree } from "@angular/router";
 
-import { canAdmin, SessionService } from "../shared/session";
+import { canAdmin, meOrSignIn } from "../shared/session";
 
 /**
  * Lets an organisation's admins, and platform admins, into its admin pages. Anyone signed out is
@@ -13,14 +13,10 @@ export const adminGuard: CanActivateFn = async (route, state) => {
   const router = inject(Router);
   const slug = route.parent?.paramMap.get("slug") ?? "";
 
-  const me = await inject(SessionService)
-    .known()
-    .catch(() => null);
+  const me = await meOrSignIn(state.url);
 
-  if (!me) {
-    return router.createUrlTree(["/sign-in"], {
-      queryParams: { from: state.url },
-    });
+  if (me instanceof UrlTree) {
+    return me;
   }
 
   return canAdmin(me, slug) ? true : router.createUrlTree(["/o", slug]);
