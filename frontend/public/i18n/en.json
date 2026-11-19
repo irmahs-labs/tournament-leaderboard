@@ -378,7 +378,34 @@
     "invalid": "These rules were refused. Check the numbers and try again.",
     "finished": "This season is finished: reopen it to change its rules.",
     "failed": "That didn’t work. Try again in a moment.",
-    "loading": "Loading the rules…"
+    "loading": "Loading the rules…",
+    "remove": "Remove",
+    "removeConfirm": "Remove {{code}} from {{season}}? It's taken off every game of the season, and the points follow.",
+    "bonusRemoved": "{{code}} is removed, and the season's points follow.",
+    "newBonus": "New bonus",
+    "bonusName": "Name",
+    "bonusNameHint": "Clutch king",
+    "awardedTo": "Awarded to",
+    "awards": {
+      "HIGHEST": "The highest value",
+      "LOWEST": "The lowest value",
+      "AT_LEAST": "Anyone reaching a value",
+      "MANUAL": "Whoever an admin ticks"
+    },
+    "ofStat": "Of the stat",
+    "chooseStat": "Choose a stat",
+    "atLeast": "At least",
+    "addBonus": "Add the bonus",
+    "saveFirst": "Save or undo your changes above first.",
+    "bonusAdded": "{{label}} is added, and the season's saved games are worked out again.",
+    "newBonusProblems": {
+      "label": "Give the bonus a name of {{max}} characters at most.",
+      "stat": "Choose the stat the bonus compares.",
+      "threshold": "The value to reach goes from 0 to {{maxThreshold}}.",
+      "points": "A bonus's points are a whole number from 0 to {{maxPoints}}."
+    },
+    "formula": "Formula preview",
+    "formulaHelp": "How a game's points add up with the rules as typed above, before you save them."
   },
   "adminMembers": {
     "title": "Members",

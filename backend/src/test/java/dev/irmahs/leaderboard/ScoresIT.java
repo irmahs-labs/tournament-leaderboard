@@ -169,7 +169,12 @@ class ScoresIT {
                 Arguments.of(HttpMethod.GET, GAME + "/previous-roster", null),
                 Arguments.of(HttpMethod.POST, SEASON + "/bonus-check", "[{\"stats\": {\"KILLS\": 3}}]"),
                 Arguments.of(HttpMethod.PUT, SEASON + "/rules", "{}"),
-                Arguments.of(HttpMethod.POST, SEASON + "/rules/platform-defaults", null));
+                Arguments.of(HttpMethod.POST, SEASON + "/rules/platform-defaults", null),
+                Arguments.of(
+                        HttpMethod.POST,
+                        SEASON + "/rules/bonuses",
+                        "{\"label\": \"Kill leader\", \"award\": \"HIGHEST\", \"stat\": \"KILLS\", \"points\": 5}"),
+                Arguments.of(HttpMethod.DELETE, SEASON + "/rules/bonuses/MD", null));
     }
 
     private MvcTestResult call(HttpMethod method, String uri, String body, OidcLoginRequestPostProcessor who) {
@@ -428,5 +433,80 @@ class ScoresIT {
                                 .query(Long.class)
                                 .single()))
                 .containsEntry("games", 2L);
+    }
+
+    private MvcTestResult addBonus(String body) {
+        return call(HttpMethod.POST, SEASON + "/rules/bonuses", body, ADMIN);
+    }
+
+    @Test
+    void anAdminsOwnBonusIsWonInTheSavedGamesStraightAway() {
+        saveTwoLines();
+
+        assertThat(addBonus("""
+                        {"label": " Kill leader ", "award": "HIGHEST", "stat": "KILLS", "points": 15}""")).hasStatus(201).bodyJson().isLenientlyEqualTo("""
+                        {"bonuses": [{"code": "FB"}, {"code": "LD"}, {"code": "MA"}, {"code": "MP"}, {"code": "MD"},
+                          {"code": "MVP"},
+                          {"code": "KL", "label": "Kill leader", "award": "HIGHEST", "stat": "KILLS", "points": 15}]}""");
+        // Kestrel has the most kills: 422 + 15.
+        assertThat(mvc.get().uri(GAME).with(ADMIN)).bodyJson().isLenientlyEqualTo("""
+                {"lines": [{"riotId": "Kestrel#EUW", "bonuses": ["FB", "KL", "MD", "MP", "MVP"], "points": 437},
+                           {"riotId": "Newbie#EUW", "bonuses": ["LD", "MA", "MD"], "points": 263}]}""");
+    }
+
+    @Test
+    void codesAreMadeFromTheNameAndNumberedWhenTaken() {
+        assertThat(addBonus("""
+                        {"label": "Été à fond", "award": "MANUAL", "points": 5}""")).bodyJson().extractingPath("$.bonuses[6].code").isEqualTo("EAF");
+        assertThat(addBonus("""
+                        {"label": "Most valuable player bis", "award": "AT_LEAST", "stat": "ASSISTS",
+                         "points": 5, "threshold": 10}""")).bodyJson().extractingPath("$.bonuses[7].code").isEqualTo("MVPB");
+        assertThat(addBonus("""
+                        {"label": "Most valuable", "award": "LOWEST", "stat": "DEATHS", "points": 5}""")).bodyJson().extractingPath("$.bonuses[8].code").isEqualTo("MV");
+        assertThat(addBonus("""
+                        {"label": "Most votes", "award": "MANUAL", "points": 5}""")).bodyJson().extractingPath("$.bonuses[9].code").isEqualTo("MV2");
+    }
+
+    @Test
+    void removingABonusTakesItOffEveryGame() {
+        saveTwoLines();
+
+        assertThat(call(HttpMethod.DELETE, SEASON + "/rules/bonuses/md", null, ADMIN))
+                .hasStatusOk()
+                .bodyJson()
+                .extractingPath("$.bonuses[*].code")
+                .isEqualTo(List.of("FB", "LD", "MA", "MP", "MVP"));
+        assertThat(call(HttpMethod.DELETE, SEASON + "/rules/bonuses/MVP", null, ADMIN))
+                .hasStatusOk();
+        // Both lose MD (10), and Kestrel the manual MVP (25).
+        assertThat(mvc.get().uri(GAME).with(ADMIN)).bodyJson().isLenientlyEqualTo("""
+                {"lines": [{"riotId": "Kestrel#EUW", "bonuses": ["FB", "MP"], "points": 387},
+                           {"riotId": "Newbie#EUW", "bonuses": ["LD", "MA"], "points": 253}]}""");
+        assertThat(call(HttpMethod.DELETE, SEASON + "/rules/bonuses/MD", null, ADMIN))
+                .hasStatus(404);
+    }
+
+    static Stream<String> refusedBonuses() {
+        return Stream.of(
+                "{\"label\": \" \", \"award\": \"MANUAL\", \"points\": 5}",
+                "{\"label\": \"%s\", \"award\": \"MANUAL\", \"points\": 5}".formatted("x".repeat(41)),
+                "{\"label\": \"Top\", \"award\": \"TOP_WINNER\", \"stat\": \"PLACE\", \"points\": 5}",
+                "{\"label\": \"HS\", \"award\": \"HIGHEST\", \"stat\": \"HEADSHOT_PCT\", \"points\": 5}",
+                "{\"label\": \"Kills\", \"award\": \"HIGHEST\", \"points\": 5}",
+                "{\"label\": \"Ticked\", \"award\": \"MANUAL\", \"stat\": \"KILLS\", \"points\": 5}",
+                "{\"label\": \"Ten\", \"award\": \"AT_LEAST\", \"stat\": \"KILLS\", \"points\": 5}",
+                "{\"label\": \"Most\", \"award\": \"HIGHEST\", \"stat\": \"KILLS\", \"points\": 5,"
+                        + " \"threshold\": 3}",
+                "{\"label\": \"Big\", \"award\": \"MANUAL\", \"points\": 1001}");
+    }
+
+    @ParameterizedTest
+    @MethodSource("refusedBonuses")
+    void aBonusThatIsntAllowedIsRefused(String body) {
+        assertThat(addBonus(body)).hasStatus(400);
+        assertThat(mvc.get().uri("/api/orgs/alsace-arena/seasons/3/rules"))
+                .bodyJson()
+                .extractingPath("$.bonuses.length()")
+                .isEqualTo(6);
     }
 }

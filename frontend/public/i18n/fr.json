@@ -378,7 +378,34 @@
     "invalid": "Ce barème a été refusé. Vérifiez les nombres et réessayez.",
     "finished": "Cette saison est terminée : rouvrez-la pour changer son barème.",
     "failed": "Ça n’a pas marché. Réessayez dans un instant.",
-    "loading": "Chargement du barème…"
+    "loading": "Chargement du barème…",
+    "remove": "Retirer",
+    "removeConfirm": "Retirer {{code}} de {{season}} ? Il est retiré de toutes les parties de la saison, et les points suivent.",
+    "bonusRemoved": "{{code}} est retiré, et les points de la saison suivent.",
+    "newBonus": "Nouveau bonus",
+    "bonusName": "Nom",
+    "bonusNameHint": "Roi du clutch",
+    "awardedTo": "Attribué à",
+    "awards": {
+      "HIGHEST": "La valeur la plus haute",
+      "LOWEST": "La valeur la plus basse",
+      "AT_LEAST": "Quiconque atteint une valeur",
+      "MANUAL": "Celui qu'un admin coche"
+    },
+    "ofStat": "De la stat",
+    "chooseStat": "Choisir une stat",
+    "atLeast": "Au moins",
+    "addBonus": "Ajouter le bonus",
+    "saveFirst": "Enregistrez ou annulez d'abord vos changements ci-dessus.",
+    "bonusAdded": "{{label}} est ajouté, et les parties enregistrées de la saison sont recalculées.",
+    "newBonusProblems": {
+      "label": "Donnez au bonus un nom de {{max}} caractères au plus.",
+      "stat": "Choisissez la stat que le bonus compare.",
+      "threshold": "La valeur à atteindre va de 0 à {{maxThreshold}}.",
+      "points": "Les points d'un bonus sont un nombre entier de 0 à {{maxPoints}}."
+    },
+    "formula": "Aperçu de la formule",
+    "formulaHelp": "Comment les points d'une partie s'additionnent avec les règles saisies ci-dessus, avant de les enregistrer."
   },
   "adminMembers": {
     "title": "Membres",

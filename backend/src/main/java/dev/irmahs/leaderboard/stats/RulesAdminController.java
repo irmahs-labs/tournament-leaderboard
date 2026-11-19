@@ -1,13 +1,17 @@
 package dev.irmahs.leaderboard.stats;
 
 import dev.irmahs.leaderboard.seasons.SeasonService.RulesView;
+import dev.irmahs.leaderboard.stats.RulesAdminService.NewBonusInput;
 import dev.irmahs.leaderboard.stats.RulesAdminService.RulesInput;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /** The admin Scoring screen: a season's rules. Admins of the organisation only. */
@@ -25,6 +29,17 @@ public class RulesAdminController {
     @PutMapping
     public RulesView save(@PathVariable String slug, @PathVariable int number, @RequestBody RulesInput input) {
         return rules.save(slug, number, input);
+    }
+
+    @PostMapping("/bonuses")
+    @ResponseStatus(HttpStatus.CREATED)
+    public RulesView addBonus(@PathVariable String slug, @PathVariable int number, @RequestBody NewBonusInput input) {
+        return rules.addBonus(slug, number, input);
+    }
+
+    @DeleteMapping("/bonuses/{code}")
+    public RulesView removeBonus(@PathVariable String slug, @PathVariable int number, @PathVariable String code) {
+        return rules.removeBonus(slug, number, code);
     }
 
     @PostMapping("/platform-defaults")

@@ -91,6 +91,11 @@ public class SeasonBonus {
         change(points, threshold);
     }
 
+    /** Its place in the season's list, after a bonus above it was removed. */
+    void moveTo(int position) {
+        this.position = position;
+    }
+
     public Integer getId() {
         return id;
     }

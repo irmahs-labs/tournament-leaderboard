@@ -10,6 +10,7 @@ import dev.irmahs.leaderboard.seasons.SeasonService.RulesView;
 import dev.irmahs.leaderboard.seasons.Stat;
 import dev.irmahs.leaderboard.seasons.StatRule;
 import java.math.BigDecimal;
+import java.text.Normalizer;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,12 @@ public class RulesAdminService {
     static final int MAX_BONUS_POINTS = 1000;
     static final BigDecimal MAX_THRESHOLD = BigDecimal.valueOf(40);
     private static final int DECIMALS = 2;
+    static final int MAX_LABEL = 40;
+    private static final int MAX_CODE = 4;
+
+    /** The ways an admin's own bonus can be won; MVP and SVP are the platform's. */
+    private static final Set<BonusAward> CUSTOM_AWARDS =
+            Set.of(BonusAward.HIGHEST, BonusAward.LOWEST, BonusAward.AT_LEAST, BonusAward.MANUAL);
 
     private final SeasonService seasons;
     private final GameStatRepository lines;
@@ -119,12 +126,7 @@ public class RulesAdminService {
                         .intValueExact();
         BigDecimal threshold = bonus.getThreshold();
         if (bonus.getAward() == BonusAward.AT_LEAST && change.threshold() != null) {
-            threshold = change.threshold();
-            if (threshold.stripTrailingZeros().scale() > DECIMALS
-                    || threshold.signum() < 0
-                    || threshold.compareTo(MAX_THRESHOLD) > 0) {
-                throw badRequest(bonus.getCode() + "'s threshold must be between 0 and " + MAX_THRESHOLD);
-            }
+            threshold = checkThreshold(bonus.getCode(), change.threshold());
         } else if (change.threshold() != null) {
             throw badRequest(bonus.getCode() + " has no threshold");
         }
@@ -142,6 +144,92 @@ public class RulesAdminService {
             Map<GameStat, Set<SeasonBonus>> awarded = bonuses.award(season, entries);
             awarded.forEach(GameStat::reaward);
         }
+    }
+
+    /**
+     * Adds a bonus of the admins' own at the end of the season's list, under a code made from its
+     * name, and works out who won it in every saved game.
+     *
+     * @throws ResponseStatusException 400 when a value is wrong, 409 when the season is finished
+     */
+    public RulesView addBonus(String slug, int number, NewBonusInput input) {
+        Season season = requireOpen(slug, number);
+        String label = input.label() == null ? "" : input.label().strip();
+        if (label.isEmpty() || label.length() > MAX_LABEL) {
+            throw badRequest("A bonus's name is 1 to " + MAX_LABEL + " characters");
+        }
+        BonusAward award = input.award();
+        if (award == null || !CUSTOM_AWARDS.contains(award)) {
+            throw badRequest("A bonus goes to the highest or lowest value of a stat, to whoever reaches a value,"
+                    + " or to whoever an admin ticks");
+        }
+        Stat stat = award == BonusAward.MANUAL ? null : input.stat();
+        StatRule rule = stat == null ? null : season.getStatRules().get(stat);
+        if (award != BonusAward.MANUAL && (rule == null || !rule.recorded())) {
+            throw badRequest("Choose a stat the season records");
+        }
+        if (award == BonusAward.MANUAL && input.stat() != null) {
+            throw badRequest("A ticked bonus compares no stat");
+        }
+        int points = checkPoints("A bonus's points", BigDecimal.valueOf(input.points()), BigDecimal.ZERO)
+                .intValueExact();
+        BigDecimal threshold = null;
+        if (award == BonusAward.AT_LEAST) {
+            threshold = checkThreshold(label, input.threshold());
+        } else if (input.threshold() != null) {
+            throw badRequest("Only an \"at least\" bonus has a threshold");
+        }
+        season.addBonus(codeFor(season, label), label, award, stat, points, threshold);
+        reaward(season);
+        return seasons.rules(slug, number);
+    }
+
+    /**
+     * Removes a bonus, and with it every award of it in the season's games.
+     *
+     * @throws ResponseStatusException 404 for a code the season doesn't have, 409 when the season
+     *     is finished
+     */
+    public RulesView removeBonus(String slug, int number, String code) {
+        Season season = requireOpen(slug, number);
+        SeasonBonus bonus = season.bonus(code)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND, season.getName() + " has no bonus " + code));
+        lines.findBySeason(season).forEach(line -> line.withdraw(bonus));
+        lines.flush();
+        season.removeBonus(bonus);
+        reaward(season);
+        return seasons.rules(slug, number);
+    }
+
+    /**
+     * A short code from a bonus's name, as the tables show it: the first letters of its words, such
+     * as CK for "Clutch king", numbered when the season already has it.
+     */
+    static String codeFor(Season season, String label) {
+        StringBuilder initials = new StringBuilder();
+        for (String word : label.strip().split("\\s+")) {
+            String plain = Normalizer.normalize(word, Normalizer.Form.NFD).replaceAll("[^A-Za-z0-9]", "");
+            if (!plain.isEmpty() && initials.length() < MAX_CODE) {
+                initials.append(Character.toUpperCase(plain.charAt(0)));
+            }
+        }
+        String base = initials.isEmpty() ? "B" : initials.toString();
+        String code = base;
+        for (int n = 2; season.bonus(code).isPresent(); n++) {
+            code = base + n;
+        }
+        return code;
+    }
+
+    private static BigDecimal checkThreshold(String what, BigDecimal threshold) {
+        if (threshold == null
+                || threshold.stripTrailingZeros().scale() > DECIMALS
+                || threshold.signum() < 0
+                || threshold.compareTo(MAX_THRESHOLD) > 0) {
+            throw badRequest(what + "'s threshold must be between 0 and " + MAX_THRESHOLD);
+        }
+        return threshold;
     }
 
     private static BigDecimal checkPoints(String what, BigDecimal value, BigDecimal min) {
@@ -176,6 +264,15 @@ public class RulesAdminService {
      * @param kdaPoints what each game's KDA ratio is worth
      * @param bonuses the bonuses to change, by code; the others stay as they are
      */
+    /**
+     * A bonus of the admins' own.
+     *
+     * @param award HIGHEST, LOWEST, AT_LEAST or MANUAL
+     * @param stat the stat compared; nothing for a MANUAL bonus
+     * @param threshold for an AT_LEAST bonus, the value to reach; nothing otherwise
+     */
+    public record NewBonusInput(String label, BonusAward award, Stat stat, int points, BigDecimal threshold) {}
+
     public record RulesInput(
             List<StatRuleInput> stats, Integer pointsPerWin, BigDecimal kdaPoints, List<BonusInput> bonuses) {}
 }

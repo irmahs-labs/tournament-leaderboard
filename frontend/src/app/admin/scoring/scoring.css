@@ -165,3 +165,72 @@ select {
   align-items: center;
   gap: 8px;
 }
+
+/* The new bonus's name, styled like the selects beside it. */
+.new-bonus input:not(.number) {
+  min-height: 44px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  width: 100%;
+  background: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--input-line);
+  border-radius: 0;
+  font: 500 15px var(--font-body);
+}
+
+.new-bonus .number {
+  min-height: 44px;
+}
+
+.new-bonus .fields {
+  margin-top: 0;
+  align-items: flex-end;
+}
+
+.new-bonus {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--row-line);
+}
+
+.subheading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+  text-transform: uppercase;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+
+.small-button {
+  min-height: 40px;
+  padding: 0 14px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.formula {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.term {
+  font-size: 14px;
+}
+
+.term.win {
+  background: var(--accent-soft);
+}
