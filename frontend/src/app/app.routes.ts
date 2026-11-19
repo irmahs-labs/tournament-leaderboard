@@ -14,6 +14,8 @@ import { PlatformShell } from "./layout/platform-shell";
 import { LEGAL_PAGES } from "./legal/legal-content";
 import { LegalPage } from "./legal/legal-page";
 import { NotFoundPage } from "./not-found/not-found";
+import { PlatformPage } from "./platform/platform";
+import { platformGuard } from "./platform/platform-guard";
 import { LeaderboardPage } from "./results/leaderboard/leaderboard";
 import { MatchPage } from "./results/match/match";
 import { MatchesPage } from "./results/matches/matches";
@@ -49,6 +51,11 @@ export const routes: Routes = [
     children: [
       { component: HomePage, path: "", pathMatch: "full" },
       { component: SignInPage, path: "sign-in" },
+      {
+        canActivate: [platformGuard],
+        component: PlatformPage,
+        path: "platform",
+      },
       { component: JoinPage, path: "join" },
       { component: JoinPage, path: "join/:code" },
       ...LEGAL_PAGES.map((page) => ({

@@ -595,5 +595,42 @@
       "limit": "One account can own 3 organisations at most.",
       "failed": "That didn't work. Try again."
     }
+  },
+  "platform": {
+    "navLabel": "Platform",
+    "eyebrow": "Platform admin",
+    "title": "Organisations",
+    "lede": "Every organisation on Tournament Leaderboard. Only the one with the most recent saved game appears on the home page.",
+    "total": "Organisations",
+    "active": "Active",
+    "suspendedCount": "Suspended",
+    "suspendedHelp": "Their pages answer Not found",
+    "homePage": "Home page",
+    "savedOn": "Latest game saved {{date}}",
+    "all": "All organisations",
+    "search": "Search",
+    "searchHint": "Name, address or owner's email",
+    "organisation": "Organisation",
+    "owner": "Owner",
+    "created": "Created",
+    "lastActivity": "Last game saved",
+    "members": "Members",
+    "status": "Status",
+    "noGames": "No games yet",
+    "state": {
+      "ACTIVE": "Active",
+      "SUSPENDED": "Suspended"
+    },
+    "onHomePage": "On the home page",
+    "suspend": "Suspend",
+    "reactivate": "Reactivate",
+    "suspendConfirm": "Suspend {{name}}? Its pages and admin area will answer Not found until you reactivate it. Nothing is deleted.",
+    "suspended": "{{name}} is suspended.",
+    "reactivated": "{{name}} is active again.",
+    "none": "No organisation matches.",
+    "failed": "That didn't work. Try again.",
+    "loadFailed": "The organisations couldn't be loaded. Try again in a moment.",
+    "loading": "Loading the organisations…",
+    "help": "Suspending hides an organisation's pages and its admin area, and takes it off the home page. Nothing is deleted; reactivating brings everything back."
   }
 }

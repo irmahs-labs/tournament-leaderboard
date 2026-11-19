@@ -9,6 +9,15 @@ public interface OrganizationMemberRepository extends JpaRepository<Organization
 
     boolean existsByOrganizationIdAndOwnerTrue(UUID organizationId);
 
+    /** Every organisation's owner. */
+    List<OrganizationMember> findByOwnerTrue();
+
+    /** How many members each organisation has; one with none isn't listed. */
+    @Query("""
+            select new dev.irmahs.leaderboard.members.MemberCount(m.organizationId, count(m))
+            from OrganizationMember m group by m.organizationId""")
+    List<MemberCount> countByOrganization();
+
     /** How many organisations someone owns. */
     long countByUserIdAndOwnerTrue(UUID userId);
 

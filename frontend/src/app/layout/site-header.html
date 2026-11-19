@@ -76,7 +76,16 @@
       <span class="mark" aria-hidden="true"></span>
       <span class="name">Tournament Leaderboard</span>
     </a>
-    <span class="nav"></span>
+    <nav class="nav" [attr.aria-label]="t('platform.navLabel')">
+      @if (session.me()?.platformAdmin) {
+      <a
+        routerLink="/platform"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        >{{ t("platform.eyebrow") }}</a
+      >
+      }
+    </nav>
     }
     <div class="tools">
       @if (admin() && organization(); as org) {

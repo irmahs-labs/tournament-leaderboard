@@ -595,5 +595,42 @@
       "limit": "Un compte peut posséder 3 organisations au plus.",
       "failed": "Ça n'a pas marché. Réessayez."
     }
+  },
+  "platform": {
+    "navLabel": "Plateforme",
+    "eyebrow": "Admin de la plateforme",
+    "title": "Organisations",
+    "lede": "Toutes les organisations de Tournament Leaderboard. Seule celle dont la dernière partie enregistrée est la plus récente apparaît sur la page d'accueil.",
+    "total": "Organisations",
+    "active": "Actives",
+    "suspendedCount": "Suspendues",
+    "suspendedHelp": "Leurs pages répondent Introuvable",
+    "homePage": "Page d'accueil",
+    "savedOn": "Dernière partie enregistrée {{date}}",
+    "all": "Toutes les organisations",
+    "search": "Rechercher",
+    "searchHint": "Nom, adresse ou e-mail du propriétaire",
+    "organisation": "Organisation",
+    "owner": "Propriétaire",
+    "created": "Créée",
+    "lastActivity": "Dernière partie enregistrée",
+    "members": "Membres",
+    "status": "Statut",
+    "noGames": "Aucune partie",
+    "state": {
+      "ACTIVE": "Active",
+      "SUSPENDED": "Suspendue"
+    },
+    "onHomePage": "Sur la page d'accueil",
+    "suspend": "Suspendre",
+    "reactivate": "Réactiver",
+    "suspendConfirm": "Suspendre {{name}} ? Ses pages et son espace admin répondront Introuvable jusqu'à sa réactivation. Rien n'est supprimé.",
+    "suspended": "{{name}} est suspendue.",
+    "reactivated": "{{name}} est de nouveau active.",
+    "none": "Aucune organisation ne correspond.",
+    "failed": "Ça n'a pas marché. Réessayez.",
+    "loadFailed": "Les organisations n'ont pas pu être chargées. Réessayez dans un instant.",
+    "loading": "Chargement des organisations…",
+    "help": "Suspendre masque les pages d'une organisation et son espace admin, et la retire de la page d'accueil. Rien n'est supprimé ; la réactiver rétablit tout."
   }
 }
