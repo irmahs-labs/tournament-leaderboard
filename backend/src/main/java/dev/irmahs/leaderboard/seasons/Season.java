@@ -156,18 +156,19 @@ public class Season {
 
     /** Takes another season's stat rules and bonuses, for a new season with no games yet. */
     public void copyRulesFrom(Season other) {
+        useRules(RulesSnapshot.of(other));
+    }
+
+    /** Takes these rules in place of its own, for a new season or a draft that's never saved. */
+    public void useRules(RulesSnapshot rules) {
         statRules.clear();
-        statRules.putAll(other.statRules);
-        pointsPerWin = other.pointsPerWin;
-        kdaPoints = other.kdaPoints;
+        statRules.putAll(rules.stats());
+        pointsPerWin = rules.pointsPerWin();
+        kdaPoints = rules.kdaPoints();
         bonuses.clear();
-        other.bonuses.forEach(bonus -> addBonus(
-                bonus.getCode(),
-                bonus.getLabel(),
-                bonus.getAward(),
-                bonus.getStat(),
-                bonus.getPoints(),
-                bonus.getThreshold()));
+        rules.bonuses()
+                .forEach(bonus -> addBonus(
+                        bonus.code(), bonus.label(), bonus.award(), bonus.stat(), bonus.points(), bonus.threshold()));
     }
 
     /** Adds a bonus at the end of the season's list. */

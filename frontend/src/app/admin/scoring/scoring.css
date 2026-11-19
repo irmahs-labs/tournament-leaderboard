@@ -234,3 +234,42 @@ select {
 .term.win {
   background: var(--accent-soft);
 }
+
+.next {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 18px;
+}
+
+.next p {
+  margin: 0;
+}
+
+.apply {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.apply legend {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.choice input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}

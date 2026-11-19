@@ -218,8 +218,15 @@
       <label class="field wide">
         <span class="label">{{ t("adminSeasons.rules") }}</span>
         <select name="copyRulesFrom">
-          @for (season of current.seasons(); track season.number) {
-          <option [value]="season.number" [selected]="$first">
+          @if (hasNextRules()) {
+          <option value="next" selected>
+            {{ t("adminSeasons.savedForNext") }}
+          </option>
+          } @for (season of current.seasons(); track season.number) {
+          <option
+            [value]="season.number"
+            [selected]="$first && !hasNextRules()"
+          >
             {{ t("adminSeasons.copyFrom", { name: season.name }) }}
           </option>
           }

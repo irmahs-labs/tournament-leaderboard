@@ -327,7 +327,8 @@
       "matches": "A season has 1 to {{maxMatches}} matches.",
       "games": "A match has 1 to {{maxGames}} games, the fewest no more than the most.",
       "dates": "A season can’t end before it starts."
-    }
+    },
+    "savedForNext": "The rules saved for the next season"
   },
   "adminScoring": {
     "title": "Scoring rules",
@@ -405,7 +406,14 @@
       "points": "A bonus's points are a whole number from 0 to {{maxPoints}}."
     },
     "formula": "Formula preview",
-    "formulaHelp": "How a game's points add up with the rules as typed above, before you save them."
+    "formulaHelp": "How a game's points add up with the rules as typed above, before you save them.",
+    "applyTo": "Apply the changes to",
+    "applyCurrent": "{{season}}, working out its points again",
+    "applyNext": "The next season only",
+    "savedForNext": "The rules are kept for the next season; {{season}} doesn’t change.",
+    "nextSaved": "Rules are saved for the next season. They’re offered first when you start it on the Seasons screen.",
+    "discardNext": "Discard them",
+    "nextDiscarded": "The rules saved for the next season are discarded."
   },
   "adminMembers": {
     "title": "Members",

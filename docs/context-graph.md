@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-19, with custom bonuses and the formula preview: `POST …/rules/bonuses`, `DELETE …/rules/bonuses/{code}`, and the Scoring screen's New bonus form and preview.
+Last updated: 2026-11-19, with rules for the next season only: `RulesSnapshot`, `NextSeasonRules` (in `organizations.next_season_rules`), `PUT …/rules?apply=next`, `/admin/next-season-rules`, and the Scoring and Seasons screens' choices.
 
 ## System
 
@@ -79,7 +79,7 @@ flowchart LR
 | `tenancy` | `OrganizationScopeFilter` + `OrganizationScopedTransactionManager`: sets `app.organization_id` per transaction for row-level security |
 | `players` | `Player`, `PlayerAlias`, `AliasKind`, `PlayerAdminService` (search, add, edit; rename keeps the old Riot ID as an alias) |
 | `ranks` | `Rank`, public rank list |
-| `seasons` | `Season` (rules, bonuses, shape, KDA points), `Stat` (`isCountable`; `PLACE` and `HONOURS` among them), `StatRule` (recorded, points per unit), `SeasonBonus`, `BonusAward` (HIGHEST, LOWEST, MANUAL, TOP_WINNER, TOP_LOSER, AT_LEAST), `PlatformDefaults`, `Points` (points as the API writes them), `SeasonService` (public), `SeasonAdminService` |
+| `seasons` | `Season` (rules, bonuses, shape, KDA points), `Stat` (`isCountable`; `PLACE` and `HONOURS` among them), `StatRule` (recorded, points per unit), `SeasonBonus`, `BonusAward` (HIGHEST, LOWEST, MANUAL, TOP_WINNER, TOP_LOSER, AT_LEAST), `PlatformDefaults`, `Points` (points as the API writes them), `RulesSnapshot` (a season's rules on their own), `NextSeasonRules` (rules kept for the next season, as JSON) and `NextSeasonRulesController`, `SeasonService` (public), `SeasonAdminService` |
 | `matches` | `Match`, `Game` and their repositories |
 | `scoring` | `ScoringService` (the only place points are computed: per game, a match or season adding up its games; a stat not recorded doesn't count), `BonusCalculator` (HIGHEST/LOWEST, MVP/SVP from the place, AT_LEAST; ties all win; nothing from a stat not recorded) |
 | `stats` | `GameStat`, `StatLine`, `PlayerTally`, `SeasonResultsService` (public results; each standing carries the player's current rank), `ScoresService` (Enter scores), `RulesAdminService` (the Scoring screen: changes a season's rules and works out every saved game's automatic bonuses again; adds the admins' own bonuses, coded from their name, and removes bonuses with their awards; a finished season's rules can't change) |
@@ -120,7 +120,8 @@ flowchart LR
         br["branding: PUT; logo: PUT (the image as the body), DELETE"]
         tm["members: GET, PUT /{user}/role, DELETE /{user}, POST /{user}/ownership; invites: POST, DELETE /{id}"]
         as["seasons: POST, PUT /{n}"]
-        ru["seasons/{n}/rules: PUT, POST /platform-defaults, POST /bonuses, DELETE /bonuses/{code}"]
+        ru["seasons/{n}/rules: PUT ?apply=current|next, POST /platform-defaults, POST /bonuses, DELETE /bonuses/{code}"]
+        nx["next-season-rules: GET, DELETE"]
         sc["seasons/{n}/matches/{m}/games/{g}: GET, PUT, DELETE, /previous-roster"]
         bc["seasons/{n}/bonus-check: POST"]
     end
@@ -140,6 +141,7 @@ flowchart LR
     as --> SeasonAdminService
     sc & bc --> ScoresService
     ru --> RulesAdminService
+    nx --> NextSeasonRules
 ```
 
 ## Data model
@@ -231,7 +233,7 @@ flowchart TD
     padm --> pill
     guard --> seadm["SeasonsAdminPage /admin/seasons<br/>list, edit inline (close, reopen), start the next season"]
     seadm -->|POST, PUT /n| seasonsAdminApi["…/admin/seasons"]
-    guard --> scadm["ScoringAdminPage /admin/scoring?season=<br/>Record switches, points per stat, KDA, win, bonuses (add, remove), formula preview"]
+    guard --> scadm["ScoringAdminPage /admin/scoring?season=<br/>Record switches, points per stat, KDA, win, bonuses (add, remove), formula preview, apply to this season or the next only"]
     scadm -->|"GET …/rules, PUT, POST /platform-defaults, POST and DELETE /bonuses"| recordApi["…/admin/seasons/{n}/rules"]
     guard --> madm["MembersAdminPage /admin/members<br/>invite an admin, waiting invites, roles, remove, ownership"]
     madm -->|"GET, PUT, POST, DELETE"| teamApi["…/admin/members, …/admin/invites"]
@@ -273,7 +275,7 @@ flowchart LR
     p0[0 Setup ✓] --> p1[1 Schema, import, public API ✓] --> p2[2 Sign-in and admin API ✓]
     p2 --> p3[3 Angular shell and public pages ✓] --> p4[4 Angular admin ✓] --> p5[5 Deploy pipelines ✓] --> p6[6 Cutover ▶]
     p6 --> p7[7 Open the platform<br/>release 2 ✓]
-    p7 --> p8[8 Scoring rules editor] --> p9[9 Players and claims] --> p10[10 Seasons, matches<br/>and waiting lists]
+    p7 --> p8[8 Scoring rules editor ✓] --> p9[9 Players and claims] --> p10[10 Seasons, matches<br/>and waiting lists]
     p10 --> p11[11 Exports and poster] --> p12[12 Moderation] --> p13[13 Merge tool and scan]
 ```
 
@@ -283,6 +285,5 @@ production, and the Protect migration ruleset lets a pull request merge only onc
 come with it. The full plan, with each phase's exit criterion, is the migration plan page
 kept with the project designs.
 
-Phase 7 is built; not built yet: rules for the next season only,
-`PUT …/rules?apply=current|next` (8); claims and expected emails (9); schedule and sign-ups (10);
+Phases 7 and 8 are built; not built yet: claims and expected emails (9); schedule and sign-ups (10);
 exports (11); moderation (12); merging duplicate players (13).

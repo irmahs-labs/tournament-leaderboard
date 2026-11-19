@@ -46,8 +46,12 @@ public class SeasonService {
 
     /** How the season counts points: each stat's rule, the bonuses, and the points for a win. */
     public RulesView rules(String slug, int number) {
-        Season season = require(slug, number);
-        List<StatRuleView> stats = season.getStatRules().entrySet().stream()
+        return rulesOf(RulesSnapshot.of(require(slug, number)));
+    }
+
+    /** Rules as the API shows them. */
+    public static RulesView rulesOf(RulesSnapshot rules) {
+        List<StatRuleView> stats = rules.stats().entrySet().stream()
                 .sorted(java.util.Map.Entry.comparingByKey())
                 .map(rule -> new StatRuleView(
                         rule.getKey(),
@@ -55,9 +59,7 @@ public class SeasonService {
                         Points.plain(rule.getValue().points()),
                         rule.getKey().isCountable()))
                 .toList();
-        List<BonusView> bonuses =
-                season.getBonuses().stream().map(BonusView::of).toList();
-        return new RulesView(season.getPointsPerWin(), Points.plain(season.getKdaPoints()), stats, bonuses);
+        return new RulesView(rules.pointsPerWin(), Points.plain(rules.kdaPoints()), stats, rules.bonuses());
     }
 
     /**

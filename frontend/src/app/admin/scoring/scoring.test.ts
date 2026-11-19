@@ -28,6 +28,7 @@ import {
 } from "./scoring";
 
 const RULES_API = `/api/orgs/${ALSACE.slug}/admin/seasons/3/rules`;
+const NEXT_API = `/api/orgs/${ALSACE.slug}/admin/next-season-rules`;
 
 /** Season 3's rules with an "at least" bonus, as the platform defaults have. */
 const WITH_HONOURS: Rules = {
@@ -57,6 +58,12 @@ describe("the Scoring screen", () => {
       `/api/orgs/${ALSACE.slug}/seasons/${season}/rules`,
       WITH_HONOURS
     );
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      http
+        .expectOne(NEXT_API)
+        .flush(null, { status: 204, statusText: "No Content" });
+    });
     harness.detectChanges();
     page = rendered(harness);
   };
@@ -159,6 +166,69 @@ describe("the Scoring screen", () => {
       expect(text(page.querySelector("[role=status]"))).toBe(
         "Season 3’s rules are saved, and its points follow them."
       );
+    });
+  });
+
+  it("keeps the rules for the next season only, leaving this one as it is", async () => {
+    await open("/org/alsace-arena/admin/scoring", 3);
+    type("Points per win", "80");
+    page.querySelector<HTMLInputElement>("input[value=next]")?.click();
+    harness.detectChanges();
+    button("Save the rules")?.click();
+
+    const request = await vi.waitFor(() =>
+      http.expectOne((each) => each.method === "PUT")
+    );
+
+    expect(request.request.urlWithParams).toBe(`${RULES_API}?apply=next`);
+    expect(request.request.body).toMatchObject({ pointsPerWin: 80 });
+    request.flush({ ...WITH_HONOURS, pointsPerWin: 80 });
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      http.expectOne(NEXT_API).flush({ ...WITH_HONOURS, pointsPerWin: 80 });
+    });
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      expect(text(page.querySelector("[role=status]"))).toBe(
+        "The rules are kept for the next season; Season 3 doesn’t change."
+      );
+    });
+    expect(inputNamed("Points per win")?.value).toBe("50");
+    expect(text(page.querySelector(".next p"))).toContain(
+      "Rules are saved for the next season."
+    );
+  });
+
+  it("discards the rules saved for the next season", async () => {
+    harness = await openAs("/org/alsace-arena/admin/scoring", ME, SEASONS);
+    await answer(
+      harness,
+      `/api/orgs/${ALSACE.slug}/seasons/3/rules`,
+      WITH_HONOURS
+    );
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      http.expectOne(NEXT_API).flush(WITH_HONOURS);
+    });
+    harness.detectChanges();
+    page = rendered(harness);
+    button("Discard them")?.click();
+
+    const discard = await vi.waitFor(() =>
+      http.expectOne((each) => each.method === "DELETE")
+    );
+
+    expect(discard.request.url).toBe(NEXT_API);
+    discard.flush(null);
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      http
+        .expectOne(NEXT_API)
+        .flush(null, { status: 204, statusText: "No Content" });
+    });
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      expect(page.querySelector(".next")).toBeNull();
     });
   });
 

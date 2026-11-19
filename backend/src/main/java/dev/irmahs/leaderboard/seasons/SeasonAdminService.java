@@ -23,23 +23,41 @@ public class SeasonAdminService {
     private final OrganizationService organizations;
     private final SeasonRepository seasons;
     private final SeasonService reader;
+    private final NextSeasonRules nextSeason;
 
-    SeasonAdminService(OrganizationService organizations, SeasonRepository seasons, SeasonService reader) {
+    SeasonAdminService(
+            OrganizationService organizations,
+            SeasonRepository seasons,
+            SeasonService reader,
+            NextSeasonRules nextSeason) {
         this.organizations = organizations;
         this.seasons = seasons;
         this.reader = reader;
+        this.nextSeason = nextSeason;
     }
 
     /**
-     * Starts the organisation's next season, numbered after its latest. It takes the rules of the
-     * season it copies, or the platform defaults; what the request leaves out comes from the same
-     * place.
+     * Starts the organisation's next season, numbered after its latest. It takes the rules saved
+     * for the next season (which are then used up), the rules of the season it copies, or the
+     * platform defaults; its shape comes from the season it copies, or the platform defaults.
      *
-     * @throws ResponseStatusException 400 when the details are wrong, 404 when the season to copy
-     *     doesn't exist
+     * @throws ResponseStatusException 400 when the details are wrong or both kinds of rules are
+     *     asked for, 404 when the season to copy doesn't exist, 409 when no rules are saved for the
+     *     next season
      */
     public SeasonView start(String slug, NewSeason input) {
         UUID organizationId = organizations.requireActive(slug).getId();
+        boolean useSaved = Boolean.TRUE.equals(input.useNextSeasonRules());
+        if (useSaved && input.copyRulesFrom() != null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Use either the rules saved for the next season or another season's");
+        }
+        RulesSnapshot saved = useSaved
+                ? nextSeason
+                        .load(organizationId)
+                        .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.CONFLICT, "No rules are saved for the next season"))
+                : null;
         Season source = input.copyRulesFrom() == null ? null : reader.require(slug, input.copyRulesFrom());
         int number = seasons.findFirstByOrganizationIdOrderByNumberDesc(organizationId)
                         .map(Season::getNumber)
@@ -56,7 +74,10 @@ public class SeasonAdminService {
 
         Season season = new Season(organizationId, number, name, matchCount, games, pointsPerWin);
         season.setDates(input.startsOn(), input.endsOn());
-        if (source == null) {
+        if (saved != null) {
+            season.useRules(saved);
+            nextSeason.clear(organizationId);
+        } else if (source == null) {
             PlatformDefaults.apply(season);
         } else {
             season.copyRulesFrom(source);
@@ -145,7 +166,8 @@ public class SeasonAdminService {
             Integer matchCount,
             Integer minGames,
             Integer maxGames,
-            Integer copyRulesFrom) {}
+            Integer copyRulesFrom,
+            Boolean useNextSeasonRules) {}
 
     /**
      * @param finished true closes the season, false reopens it, empty leaves it as it is

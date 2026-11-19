@@ -1,9 +1,9 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, httpResource } from "@angular/common/http";
 import { Component, computed, inject, signal } from "@angular/core";
 import { TranslocoDirective, TranslocoService } from "@jsverse/transloco";
 import { firstValueFrom } from "rxjs";
 
-import type { Season } from "../../results/api";
+import type { Rules, Season } from "../../results/api";
 import { CurrentSeason } from "../../results/current-season";
 import { LanguageService } from "../../shared/language";
 import { AdminAction } from "../action";
@@ -108,6 +108,18 @@ export class SeasonsAdminPage {
     return admin ? `${admin}/seasons` : undefined;
   });
 
+  /** The rules saved for the next season; nothing (204) when none are. */
+  readonly #nextRules = httpResource<Rules | null>(() => {
+    const admin = this.current.adminApi();
+
+    return admin ? `${admin}/next-season-rules` : undefined;
+  });
+
+  /** Whether rules are saved for the next season, offered first when one starts. */
+  protected readonly hasNextRules = computed(
+    () => this.#nextRules.hasValue() && this.#nextRules.value() !== null
+  );
+
   /** "Jan 2026 – Aug 2026", or a dash for dates not set. */
   protected dates(season: Season): string {
     const from = season.startsOn ? this.language.month(season.startsOn) : "";
@@ -137,6 +149,7 @@ export class SeasonsAdminPage {
       return;
     }
 
+    const useNextSeasonRules = field("copyRulesFrom") === "next";
     const copy = whole(field("copyRulesFrom"));
     const details = detailsOf(fields);
 
@@ -144,11 +157,13 @@ export class SeasonsAdminPage {
       ...details,
       copyRulesFrom: Number.isNaN(copy) ? null : copy,
       name: details.name || null,
+      useNextSeasonRules,
     };
 
     const done = await this.action.run(async () => {
       const season = await firstValueFrom(this.#http.post<Season>(api, input));
       this.current.reload();
+      this.#nextRules.reload();
 
       return this.#transloco.translate("adminSeasons.started", {
         name: season.name,

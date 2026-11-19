@@ -3,6 +3,8 @@ package dev.irmahs.leaderboard.stats;
 import dev.irmahs.leaderboard.scoring.BonusCalculator;
 import dev.irmahs.leaderboard.scoring.BonusCalculator.Entry;
 import dev.irmahs.leaderboard.seasons.BonusAward;
+import dev.irmahs.leaderboard.seasons.NextSeasonRules;
+import dev.irmahs.leaderboard.seasons.RulesSnapshot;
 import dev.irmahs.leaderboard.seasons.Season;
 import dev.irmahs.leaderboard.seasons.SeasonBonus;
 import dev.irmahs.leaderboard.seasons.SeasonService;
@@ -46,11 +48,14 @@ public class RulesAdminService {
     private final SeasonService seasons;
     private final GameStatRepository lines;
     private final BonusCalculator bonuses;
+    private final NextSeasonRules nextSeason;
 
-    RulesAdminService(SeasonService seasons, GameStatRepository lines, BonusCalculator bonuses) {
+    RulesAdminService(
+            SeasonService seasons, GameStatRepository lines, BonusCalculator bonuses, NextSeasonRules nextSeason) {
         this.seasons = seasons;
         this.lines = lines;
         this.bonuses = bonuses;
+        this.nextSeason = nextSeason;
     }
 
     /**
@@ -61,6 +66,35 @@ public class RulesAdminService {
      */
     public RulesView save(String slug, int number, RulesInput input) {
         Season season = requireOpen(slug, number);
+        change(season, input);
+        reaward(season);
+        return seasons.rules(slug, number);
+    }
+
+    /**
+     * Keeps the season's rules, with these changes, for the organisation's next season; the season
+     * itself doesn't change, so a finished one can be the starting point too.
+     *
+     * @throws ResponseStatusException 400 when a value is wrong
+     */
+    public RulesView saveForNextSeason(String slug, int number, RulesInput input) {
+        Season season = seasons.require(slug, number);
+        Season draft = new Season(
+                season.getOrganizationId(),
+                season.getNumber(),
+                season.getName(),
+                season.getMatchCount(),
+                season.getGames(),
+                season.getPointsPerWin());
+        draft.useRules(RulesSnapshot.of(season));
+        change(draft, input);
+        RulesSnapshot rules = RulesSnapshot.of(draft);
+        nextSeason.save(season.getOrganizationId(), rules);
+        return SeasonService.rulesOf(rules);
+    }
+
+    /** Applies the changes to the season; what the input leaves out stays as it is. */
+    private static void change(Season season, RulesInput input) {
         if (input.stats() != null) {
             for (StatRuleInput rule : input.stats()) {
                 if (rule == null || rule.stat() == null) {
@@ -89,8 +123,6 @@ public class RulesAdminService {
                 changeBonus(season, change);
             }
         }
-        reaward(season);
-        return seasons.rules(slug, number);
     }
 
     /**

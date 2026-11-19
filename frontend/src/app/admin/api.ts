@@ -44,6 +44,8 @@ export interface NewSeason {
   maxGames: number;
   /** The season whose rules to copy; the platform defaults when nothing. */
   copyRulesFrom: number | null;
+  /** Whether to use the rules saved for the next season, which are then used up. */
+  useNextSeasonRules: boolean;
 }
 
 /** What `PUT …/admin/seasons/{n}` takes. */

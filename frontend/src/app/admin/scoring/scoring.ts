@@ -352,6 +352,16 @@ export class ScoringAdminPage {
   protected readonly customAwards = CUSTOM_AWARDS;
   protected readonly maxBonusLabel = MAX_BONUS_LABEL;
 
+  /** Where a save goes: this season, worked out again, or the next season only. */
+  protected readonly applyTo = signal<"current" | "next">("current");
+
+  /** The rules saved for the next season; nothing (204) when none are. */
+  protected readonly nextRules = httpResource<Rules | null>(() => {
+    const admin = this.current.adminApi();
+
+    return admin ? `${admin}/next-season-rules` : undefined;
+  });
+
   /** The bonus being added, as typed. */
   protected readonly newBonus = signal<NewBonusDraft>(EMPTY_BONUS);
 
@@ -438,6 +448,22 @@ export class ScoringAdminPage {
     if (done) {
       this.newBonus.set(EMPTY_BONUS);
     }
+  }
+
+  /** Forgets the rules saved for the next season. */
+  protected async discardNext(): Promise<void> {
+    const admin = this.current.adminApi();
+
+    if (!admin) {
+      return;
+    }
+
+    await this.action.run(async () => {
+      await firstValueFrom(this.#http.delete(`${admin}/next-season-rules`));
+      this.nextRules.reload();
+
+      return this.#transloco.translate("adminScoring.nextDiscarded");
+    });
   }
 
   /** Removes a bonus after asking: every award of it goes too. */
@@ -533,6 +559,24 @@ export class ScoringAdminPage {
 
     if (problem) {
       this.action.refuse(this.#explain(problem));
+
+      return;
+    }
+
+    if (this.applyTo() === "next") {
+      await this.action.run(async () => {
+        await firstValueFrom(
+          this.#http.put<Rules>(api, inputOf(draft, rules), {
+            params: { apply: "next" },
+          })
+        );
+        this.draft.set(draftOf(rules));
+        this.nextRules.reload();
+
+        return this.#transloco.translate("adminScoring.savedForNext", {
+          season: season.name,
+        });
+      });
 
       return;
     }

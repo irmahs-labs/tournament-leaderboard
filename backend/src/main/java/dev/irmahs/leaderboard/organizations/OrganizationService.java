@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -15,9 +16,29 @@ import org.springframework.web.server.ResponseStatusException;
 public class OrganizationService {
 
     private final OrganizationRepository organizations;
+    private final JdbcClient jdbc;
 
-    OrganizationService(OrganizationRepository organizations) {
+    OrganizationService(OrganizationRepository organizations, JdbcClient jdbc) {
         this.organizations = organizations;
+        this.jdbc = jdbc;
+    }
+
+    /** The rules saved for the organisation's next season, as JSON; nothing when none are. */
+    public Optional<String> nextSeasonRules(UUID organizationId) {
+        return jdbc.sql(
+                        "SELECT next_season_rules::text FROM organizations WHERE id = :id AND next_season_rules IS NOT NULL")
+                .param("id", organizationId)
+                .query(String.class)
+                .optional();
+    }
+
+    /** Keeps rules, as JSON, for the organisation's next season; nothing forgets them. */
+    @Transactional
+    public void keepNextSeasonRules(UUID organizationId, String rules) {
+        jdbc.sql("UPDATE organizations SET next_season_rules = CAST(:rules AS jsonb) WHERE id = :id")
+                .param("rules", rules)
+                .param("id", organizationId)
+                .update();
     }
 
     /** Notes that one of the organisation's games was just saved or cleared. */
