@@ -1,4 +1,6 @@
 .bar {
+  --tool-size: 44px;
+
   background: var(--nav-bg);
   color: var(--nav-text);
   border-bottom: 1px solid var(--nav-border);
@@ -131,7 +133,9 @@
 
 .tool {
   min-width: 44px;
-  min-height: 44px;
+  /* Every box of the header is exactly this tall, whatever the browser draws inside. */
+  height: var(--tool-size);
+  box-sizing: border-box;
   background: transparent;
   color: var(--nav-text);
   border: 1px solid var(--nav-ghost);
@@ -143,7 +147,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 44px;
+  height: var(--tool-size);
   padding: 0 12px;
   box-sizing: border-box;
   border: 1px solid var(--nav-ghost);
@@ -177,7 +181,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 44px;
+  height: var(--tool-size);
   padding: 0 14px;
   box-sizing: border-box;
   color: var(--nav-text);
@@ -225,10 +229,8 @@
     gap: 6px;
   }
 
-  .tool,
-  .online,
-  .account {
-    min-height: 40px;
+  .bar {
+    --tool-size: 40px;
   }
 
   .tool {
@@ -251,10 +253,21 @@
 }
 
 .season {
-  padding: 0 10px;
+  /* Without the browser's own look, which on iPhone ignores the height the other boxes share. */
+  appearance: none;
+  padding: 0 30px 0 12px;
   font-weight: 600;
   font-size: 14px;
   border-radius: 0;
+  /* The arrow, drawn in the text colour as two half-squares. */
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - 17px) 50%,
+    calc(100% - 12px) 50%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
 }
 
 .season option {
