@@ -27,6 +27,14 @@ public class OrganizationController {
         return branding.view(slug);
     }
 
+    /** The home page's example: the most recently active organisation; 204 before any game. */
+    @GetMapping("/api/featured")
+    public ResponseEntity<OrganizationView> featured() {
+        return branding.featured()
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
     /** Its address changes with the logo, so browsers can keep it for a year. */
     @GetMapping("/api/orgs/{slug}/logo")
     public ResponseEntity<byte[]> logo(@PathVariable String slug) {

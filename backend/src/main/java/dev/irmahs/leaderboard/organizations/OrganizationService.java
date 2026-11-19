@@ -25,6 +25,23 @@ public class OrganizationService {
         organizations.findById(organizationId).ifPresent(organization -> organization.recordActivity(Instant.now()));
     }
 
+    /** Whether an organisation, active or not, already has this address. */
+    public boolean slugTaken(String slug) {
+        return organizations.existsBySlug(slug);
+    }
+
+    /** A new organisation; the slug and name have been checked, and the slug is free. */
+    @Transactional
+    public Organization found(String slug, String name, UUID createdBy) {
+        return organizations.saveAndFlush(Organization.founded(slug, name, createdBy));
+    }
+
+    /** The active organisation with the latest game, for the home page; none before any game. */
+    public Optional<Organization> mostRecentlyActive() {
+        return organizations.findFirstByStatusAndLastActivityAtNotNullOrderByLastActivityAtDesc(
+                OrganizationStatus.ACTIVE);
+    }
+
     /** The organisation with this slug, unless there's none or it's suspended. */
     public Optional<Organization> findActive(String slug) {
         return organizations.findBySlugAndStatus(slug, OrganizationStatus.ACTIVE);

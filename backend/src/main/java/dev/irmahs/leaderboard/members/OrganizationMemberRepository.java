@@ -9,6 +9,9 @@ public interface OrganizationMemberRepository extends JpaRepository<Organization
 
     boolean existsByOrganizationIdAndOwnerTrue(UUID organizationId);
 
+    /** How many organisations someone owns. */
+    long countByUserIdAndOwnerTrue(UUID userId);
+
     /** The organisation's members, the earliest first. */
     List<OrganizationMember> findByOrganizationIdOrderByJoinedAt(UUID organizationId);
 

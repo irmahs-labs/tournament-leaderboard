@@ -157,7 +157,8 @@
     "notYou": "Not you? Sign out",
     "open": "Open",
     "noOrganisations": "You don't belong to any organisation yet.",
-    "separate": "Each organisation keeps its own players, scores and admins. Being an admin in one gives you no access to another."
+    "separate": "Each organisation keeps its own players, scores and admins. Being an admin in one gives you no access to another.",
+    "newOrganiser": "New organiser?"
   },
   "stats": {
     "short": {
@@ -538,6 +539,61 @@
         "tiktok": "The TikTok link must be an https:// address on TikTok.",
         "website": "The Website link must be an https:// address."
       }
+    }
+  },
+  "home": {
+    "introLabel": "Introduction",
+    "eyebrow": "For Valorant community organisers",
+    "title": "Run your seasons. Your colours, your rules.",
+    "lede": "Leaderboards, match stats and scoring for seasonal Valorant tournaments. Pick the stats you track, set what every bonus is worth, and put your logo on it.",
+    "create": "Create your organisation",
+    "seeLive": "See a live season",
+    "name": "Organisation name",
+    "slug": "Public address",
+    "liveAt": "Your site will live at",
+    "googleHelp": "You'll sign in with Google to create it. We only receive your name, email address and profile picture, and no password is stored here.",
+    "already": "Already set up?",
+    "createButton": "Create organisation",
+    "owner": "You'll be its owner and first admin. You can invite more admins from its Members page.",
+    "latest": "Latest results",
+    "visit": "Visit their leaderboard",
+    "featuresLabel": "Features",
+    "features": {
+      "brand": {
+        "title": "Your brand",
+        "text": "Upload your logo and pick your accent colour. Buttons, highlights and the podium follow it, and text stays readable whatever you choose."
+      },
+      "scoring": {
+        "title": "Your scoring",
+        "text": "Choose which stats to record and how many points each one is worth, the bonuses and the points per win."
+      },
+      "data": {
+        "title": "Your data only",
+        "text": "Players, admins and results belong to one organisation. Nobody from another organisation can see or edit them."
+      }
+    },
+    "how": "How it works",
+    "steps": {
+      "create": {
+        "title": "Create your organisation",
+        "text": "Name it, choose its address and invite the admins who will enter scores."
+      },
+      "scoring": {
+        "title": "Set your scoring",
+        "text": "Pick the stats, the bonuses and the points per win. Change them before each season."
+      },
+      "scores": {
+        "title": "Enter scores after each game",
+        "text": "Type them in after each game. The leaderboard updates straight away."
+      }
+    },
+    "problem": {
+      "name": "Give your organisation a name of 60 characters at most.",
+      "slug": "The address is 3 to 40 lowercase letters, digits and single hyphens, without a hyphen at either end.",
+      "reserved": "That address is kept for the platform. Choose another one.",
+      "taken": "That address is already taken. Choose another one.",
+      "limit": "One account can own 3 organisations at most.",
+      "failed": "That didn't work. Try again."
     }
   }
 }

@@ -1,0 +1,127 @@
+<ng-container *transloco="let t">
+  <section class="hero" [attr.aria-label]="t('home.introLabel')">
+    <span class="eyebrow">{{ t("home.eyebrow") }}</span>
+    <h1 class="display">{{ t("home.title") }}</h1>
+    <p class="lede muted">{{ t("home.lede") }}</p>
+    <div class="row">
+      <a class="button" href="#create">{{ t("home.create") }}</a>
+      @if (featured.hasValue() && featured.value(); as org) {
+      <a class="button-ghost" [routerLink]="['/o', org.slug]"
+        >{{ t("home.seeLive") }}</a
+      >
+      }
+    </div>
+  </section>
+
+  <div class="columns">
+    <section
+      class="panel block"
+      id="create"
+      aria-labelledby="create-title"
+      tabindex="-1"
+    >
+      <h2 class="heading" id="create-title">{{ t("home.create") }}</h2>
+      <form class="form" (submit)="found($event)">
+        <label class="field">
+          <span class="label">{{ t("home.name") }}</span>
+          <input
+            name="name"
+            required
+            autocomplete="organization"
+            [attr.maxlength]="nameLimit"
+            [value]="name()"
+            (input)="typeName(nameInput.value)"
+            #nameInput
+          />
+        </label>
+        <label class="field">
+          <span class="label">{{ t("home.slug") }}</span>
+          <input
+            name="slug"
+            required
+            spellcheck="false"
+            autocapitalize="off"
+            [attr.maxlength]="slugLimit"
+            [value]="slug()"
+            (input)="typeSlug(slugInput.value)"
+            #slugInput
+          />
+          <span class="muted small address"
+            >{{ t("home.liveAt") }}
+            <code>{{ host() }}/o/{{ slug() || "…" }}</code></span
+          >
+        </label>
+        @if (problem(); as text) {
+        <p class="problem" role="alert">{{ text }}</p>
+        } @if (session.me()) {
+        <button class="button" type="submit" [disabled]="busy()">
+          {{ t("home.createButton") }}
+        </button>
+        <p class="muted small">{{ t("home.owner") }}</p>
+        } @else {
+        <p class="muted small">{{ t("home.googleHelp") }}</p>
+        <button class="google" type="submit">{{ t("signIn.google") }}</button>
+        <p class="muted small">
+          {{ t("home.already") }}
+          <a routerLink="/sign-in">{{ t("signIn.title") }}</a>
+        </p>
+        }
+      </form>
+    </section>
+
+    @if (featured.hasValue() && featured.value(); as org) {
+    <section class="panel featured block" aria-labelledby="featured-title">
+      <span class="eyebrow muted-eyebrow" id="featured-title"
+        >{{ t("home.latest") }}</span
+      >
+      <div class="org">
+        @if (org.logo) {
+        <img class="logo" [src]="org.logo" alt="" width="56" height="56" />
+        } @else {
+        <span
+          class="logo initials"
+          aria-hidden="true"
+          [style.background]="badge(org).background"
+          [style.color]="badge(org).color"
+          >{{ initials(org.name) }}</span
+        >
+        }
+        <strong class="org-name">{{ fullName(org) }}</strong>
+      </div>
+      @if (org.description) {
+      <p class="muted">{{ org.description }}</p>
+      }
+      <a class="button-ghost" [routerLink]="['/o', org.slug]"
+        >{{ t("home.visit") }}</a
+      >
+    </section>
+    }
+  </div>
+
+  <section class="features" [attr.aria-label]="t('home.featuresLabel')">
+    @for (feature of ["brand", "scoring", "data"]; track feature) {
+    <div class="panel block">
+      <h3 class="heading small-heading">
+        {{ t("home.features." + feature + ".title") }}
+      </h3>
+      <p class="muted">{{ t("home.features." + feature + ".text") }}</p>
+    </div>
+    }
+  </section>
+
+  <section class="panel block" aria-labelledby="how-title">
+    <h2 class="heading spaced" id="how-title">{{ t("home.how") }}</h2>
+    <ol class="steps">
+      @for (step of ["create", "scoring", "scores"]; track step; let i = $index)
+      {
+      <li>
+        <span class="step-number" aria-hidden="true">0{{ i + 1 }}</span>
+        <div>
+          <strong>{{ t("home.steps." + step + ".title") }}</strong>
+          <p class="muted">{{ t("home.steps." + step + ".text") }}</p>
+        </div>
+      </li>
+      }
+    </ol>
+  </section>
+</ng-container>

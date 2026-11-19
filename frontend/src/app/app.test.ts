@@ -25,10 +25,24 @@ describe("the app's pages", () => {
     http.verify();
   });
 
-  it("sends the home page to Alsace Arena for now", async () => {
-    const page = await open("/");
+  it("shows the platform's home page at the root", async () => {
+    const harness = await RouterTestingHarness.create("/");
 
-    expect(text(page.querySelector("header .name"))).toBe("Alsace Arena");
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      http.expectOne("/api/featured").flush(null, {
+        status: 204,
+        statusText: "No Content",
+      });
+    });
+    harness.detectChanges();
+    const page = rendered(harness);
+
+    expect(text(page.querySelector("header .name"))).toBe(
+      "Tournament Leaderboard"
+    );
+    expect(page.querySelector("#create form")).not.toBeNull();
+    expect(page.querySelector(".featured")).toBeNull();
   });
 
   it("shows the organisation in the header and the footer", async () => {

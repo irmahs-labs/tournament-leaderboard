@@ -157,7 +157,8 @@
     "notYou": "Pas vous ? Se déconnecter",
     "open": "Ouvrir",
     "noOrganisations": "Vous ne faites encore partie d'aucune organisation.",
-    "separate": "Chaque organisation a ses propres joueurs, scores et admins. Être admin dans l'une ne donne aucun accès à une autre."
+    "separate": "Chaque organisation a ses propres joueurs, scores et admins. Être admin dans l'une ne donne aucun accès à une autre.",
+    "newOrganiser": "Nouvel organisateur ?"
   },
   "stats": {
     "short": {
@@ -538,6 +539,61 @@
         "tiktok": "Le lien TikTok doit être une adresse https:// sur TikTok.",
         "website": "Le lien Site web doit être une adresse https://."
       }
+    }
+  },
+  "home": {
+    "introLabel": "Présentation",
+    "eyebrow": "Pour les organisateurs de la communauté Valorant",
+    "title": "Gérez vos saisons. Vos couleurs, vos règles.",
+    "lede": "Classements, statistiques de match et barème pour les tournois Valorant en saisons. Choisissez les stats suivies, la valeur de chaque bonus, et mettez-y votre logo.",
+    "create": "Créer votre organisation",
+    "seeLive": "Voir une saison en cours",
+    "name": "Nom de l'organisation",
+    "slug": "Adresse publique",
+    "liveAt": "Votre site sera à l'adresse",
+    "googleHelp": "Vous vous connecterez avec Google pour la créer. Nous recevons seulement votre nom, votre adresse e-mail et votre photo de profil, et aucun mot de passe n'est enregistré ici.",
+    "already": "Déjà inscrit ?",
+    "createButton": "Créer l'organisation",
+    "owner": "Vous en serez le propriétaire et le premier admin. Vous pourrez inviter d'autres admins depuis sa page Membres.",
+    "latest": "Derniers résultats",
+    "visit": "Voir leur classement",
+    "featuresLabel": "Fonctionnalités",
+    "features": {
+      "brand": {
+        "title": "Votre image",
+        "text": "Envoyez votre logo et choisissez votre couleur. Les boutons, les mises en avant et le podium la suivent, et le texte reste lisible quel que soit votre choix."
+      },
+      "scoring": {
+        "title": "Votre barème",
+        "text": "Choisissez les stats enregistrées et ce que chacune rapporte, les bonus et les points par victoire."
+      },
+      "data": {
+        "title": "Vos données seulement",
+        "text": "Joueurs, admins et résultats appartiennent à une seule organisation. Personne d'une autre organisation ne peut les voir ni les modifier."
+      }
+    },
+    "how": "Comment ça marche",
+    "steps": {
+      "create": {
+        "title": "Créez votre organisation",
+        "text": "Nommez-la, choisissez son adresse et invitez les admins qui saisiront les scores."
+      },
+      "scoring": {
+        "title": "Réglez votre barème",
+        "text": "Choisissez les stats, les bonus et les points par victoire. Modifiez-les avant chaque saison."
+      },
+      "scores": {
+        "title": "Saisissez les scores après chaque partie",
+        "text": "Entrez-les après chaque partie. Le classement se met à jour aussitôt."
+      }
+    },
+    "problem": {
+      "name": "Donnez à votre organisation un nom de 60 caractères au plus.",
+      "slug": "L'adresse fait 3 à 40 lettres minuscules, chiffres et tirets simples, sans tiret au début ni à la fin.",
+      "reserved": "Cette adresse est réservée à la plateforme. Choisissez-en une autre.",
+      "taken": "Cette adresse est déjà prise. Choisissez-en une autre.",
+      "limit": "Un compte peut posséder 3 organisations au plus.",
+      "failed": "Ça n'a pas marché. Réessayez."
     }
   }
 }
