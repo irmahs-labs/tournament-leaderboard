@@ -154,6 +154,19 @@ public class TeamService {
     }
 
     /**
+     * The signed-in person leaves the organisation; their player record stays, unlinked.
+     *
+     * @throws ResponseStatusException 404 when they aren't a member, 409 for the owner, who hands
+     *     ownership on first
+     */
+    public void leave(String slug, String googleSub) {
+        UUID userId = accounts.user(googleSub)
+                .map(AppUser::getId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "You aren't a member"));
+        remove(slug, userId);
+    }
+
+    /**
      * Hands ownership to another admin; the former owner stays an admin.
      *
      * @throws ResponseStatusException 403 when the person asking isn't the owner, 404 for someone

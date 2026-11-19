@@ -632,5 +632,25 @@
     "loadFailed": "The organisations couldn't be loaded. Try again in a moment.",
     "loading": "Loading the organisations…",
     "help": "Suspending hides an organisation's pages and its admin area, and takes it off the home page. Nothing is deleted; reactivating brings everything back."
+  },
+  "account": {
+    "eyebrow": "Signed in with Google",
+    "title": "My account",
+    "lede": "Your sign-in and the organisations you belong to.",
+    "profile": "Profile",
+    "google": "Signed in with Google. We only receive your name, email address and profile picture; change them in your Google account.",
+    "signOut": "Sign out",
+    "organisations": "Organisations",
+    "ownerNote": "You own this organisation. Hand ownership to another admin before leaving it.",
+    "leave": "Leave",
+    "leaveConfirm": "Leave {{name}}? You'll lose access to it. Your results there stay.",
+    "left": "You left {{name}}.",
+    "delete": "Delete my account",
+    "deleteHelp": "Removes your sign-in and your memberships. Player records and results stay with their organisations, unlinked. This can't be undone.",
+    "ownerConflict": "You can't delete your account while you own an organisation. Hand ownership to another admin first, from its Members page.",
+    "typeToConfirm": "Type {{word}} to confirm",
+    "deleteButton": "Delete account",
+    "deleted": "Your account is deleted.",
+    "failed": "That didn't work. Try again."
   }
 }

@@ -14,8 +14,10 @@ import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 /** Accounts: created and kept up to date at each sign-in, and read for /api/me. */
 @Service
@@ -99,6 +101,24 @@ public class AccountService {
                         user.getDisplayName(),
                         user.isPlatformAdmin(),
                         members.findMemberships(user.getId())));
+    }
+
+    /**
+     * Deletes the signed-in person's account and, with it, their memberships. Player records and
+     * results stay with their organisations; organisations and invites they created keep going.
+     *
+     * @throws ResponseStatusException 409 while they own an organisation: they hand it on first
+     */
+    @Transactional
+    public void delete(String googleSub) {
+        users.findByGoogleSub(googleSub).ifPresent(user -> {
+            if (members.countByUserIdAndOwnerTrue(user.getId()) > 0) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT, "Hand ownership of your organisations on before deleting your account");
+            }
+            users.delete(user);
+            users.flush();
+        });
     }
 
     /** The account with this Google id, or nothing when it no longer exists. */
