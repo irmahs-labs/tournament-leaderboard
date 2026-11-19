@@ -2,20 +2,16 @@ package dev.irmahs.leaderboard.seasons;
 
 import dev.irmahs.leaderboard.organizations.OrganizationService;
 import dev.irmahs.leaderboard.seasons.Season.GameRange;
-import dev.irmahs.leaderboard.seasons.SeasonService.RulesView;
 import dev.irmahs.leaderboard.seasons.SeasonService.SeasonView;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-/** The admin Seasons screen: start a season, edit one, and the Record switches of Scoring. */
+/** The admin Seasons screen: start a season, and edit one. */
 @Service
 @Transactional
 public class SeasonAdminService {
@@ -99,17 +95,6 @@ public class SeasonAdminService {
         return SeasonView.of(season);
     }
 
-    /** The Record switches: exactly these stats are asked for in games entered from now on. */
-    public RulesView recordStats(String slug, int number, RecordedStats input) {
-        Season season = reader.require(slug, number);
-        Set<Stat> recorded = EnumSet.noneOf(Stat.class);
-        if (input.stats() != null) {
-            recorded.addAll(input.stats());
-        }
-        season.recordOnly(recorded);
-        return reader.rules(slug, number);
-    }
-
     private static String checkName(String value) {
         if (value == null || value.isBlank()) {
             throw badRequest("A season needs a name");
@@ -173,6 +158,4 @@ public class SeasonAdminService {
             Integer minGames,
             Integer maxGames,
             Boolean finished) {}
-
-    public record RecordedStats(List<Stat> stats) {}
 }

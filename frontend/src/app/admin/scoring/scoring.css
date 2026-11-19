@@ -122,3 +122,46 @@ select {
   display: flex;
   justify-content: flex-end;
 }
+
+.actions {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.fields {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 28px;
+}
+
+.fields .field {
+  max-width: 320px;
+}
+
+.number {
+  width: 96px;
+  min-height: 40px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  background: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--input-line);
+  border-radius: 0;
+  font: 500 15px var(--font-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.number:disabled {
+  opacity: 0.6;
+}
+
+.small-number {
+  width: 64px;
+}
+
+.threshold {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}

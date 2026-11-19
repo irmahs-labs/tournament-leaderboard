@@ -63,10 +63,13 @@ final class TodaysRules {
                 plants,
                 defuses,
                 null,
+                null,
+                null,
                 null);
     }
 
     static StatLine emptyLine() {
-        return new StatLine(null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        return new StatLine(
+                null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 }

@@ -19,7 +19,11 @@ public enum Stat {
     PLANTS(true),
     DEFUSES(true),
     HEADSHOT_PCT(false),
-    CLUTCHES(true);
+    CLUTCHES(true),
+    /** The player's place on the in-game scoreboard, 1 at the top. It picks each team's best player. */
+    PLACE(false),
+    /** Honours the player received from the other players of the game. */
+    HONOURS(true);
 
     private final boolean countable;
 
@@ -28,9 +32,9 @@ public enum Stat {
     }
 
     /**
-     * Whether the stat can add to or subtract from a player's points. Per-round averages and
-     * percentages can't: adding them up across games means nothing. They can still be shown, and
-     * a bonus can still compare them.
+     * Whether the stat can add to or subtract from a player's points. Per-round averages,
+     * percentages and the scoreboard place can't: adding them up across games means nothing. They
+     * can still be shown, and a bonus can still compare them.
      */
     public boolean isCountable() {
         return countable;

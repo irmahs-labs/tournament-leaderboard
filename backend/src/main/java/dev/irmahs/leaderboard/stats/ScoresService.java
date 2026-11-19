@@ -8,6 +8,7 @@ import dev.irmahs.leaderboard.organizations.OrganizationService;
 import dev.irmahs.leaderboard.players.Player;
 import dev.irmahs.leaderboard.players.PlayerRepository;
 import dev.irmahs.leaderboard.scoring.BonusCalculator;
+import dev.irmahs.leaderboard.scoring.BonusCalculator.Entry;
 import dev.irmahs.leaderboard.scoring.ScoringService;
 import dev.irmahs.leaderboard.seasons.BonusAward;
 import dev.irmahs.leaderboard.seasons.Season;
@@ -46,6 +47,8 @@ public class ScoresService {
     private static final BigDecimal MAX_WHOLE = BigDecimal.valueOf(Short.MAX_VALUE);
     private static final BigDecimal MAX_AVERAGE = new BigDecimal("9999.9");
     private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
+    /** The most players a game can have, as players_per_match allows. */
+    private static final BigDecimal MAX_PLAYERS = BigDecimal.valueOf(40);
 
     private final SeasonService seasons;
     private final OrganizationService organizations;
@@ -127,9 +130,13 @@ public class ScoresService {
         lines.deleteAll(lines.findByGame(game));
         lines.flush();
 
-        Map<Integer, StatLine> byIndex = new LinkedHashMap<>();
+        Map<Integer, Entry> byIndex = new LinkedHashMap<>();
         for (int i = 0; i < statLines.size(); i++) {
-            byIndex.put(i, statLines.get(i));
+            byIndex.put(
+                    i,
+                    new Entry(
+                            statLines.get(i),
+                            Boolean.TRUE.equals(requested.get(i).win())));
         }
         Map<Integer, Set<SeasonBonus>> automatic = bonuses.award(season, byIndex);
         List<GameStat> saved = new ArrayList<>();
@@ -166,15 +173,16 @@ public class ScoresService {
 
     /** The automatic bonuses these lines would win, in the same order, without saving anything. */
     @Transactional(readOnly = true)
-    public List<List<String>> checkBonuses(String slug, int seasonNumber, List<Map<Stat, BigDecimal>> statsByLine) {
+    public List<List<String>> checkBonuses(String slug, int seasonNumber, List<CheckedLine> checked) {
         Season season = seasons.require(slug, seasonNumber);
-        Map<Integer, StatLine> byIndex = new LinkedHashMap<>();
-        for (int i = 0; i < statsByLine.size(); i++) {
-            byIndex.put(i, statLine(season, statsByLine.get(i)));
+        Map<Integer, Entry> byIndex = new LinkedHashMap<>();
+        for (int i = 0; i < checked.size(); i++) {
+            CheckedLine line = checked.get(i);
+            byIndex.put(i, new Entry(statLine(season, line.stats()), Boolean.TRUE.equals(line.win())));
         }
         Map<Integer, Set<SeasonBonus>> awarded = bonuses.award(season, byIndex);
         List<List<String>> codes = new ArrayList<>();
-        for (int i = 0; i < statsByLine.size(); i++) {
+        for (int i = 0; i < checked.size(); i++) {
             codes.add(awarded.get(i).stream()
                     .sorted(Comparator.comparingInt(SeasonBonus::getPosition))
                     .map(SeasonBonus::getCode)
@@ -274,6 +282,8 @@ public class ScoresService {
             case ADR -> decimal(value, 1, BigDecimal.ZERO, MAX_AVERAGE);
             case DAMAGE_DELTA -> decimal(value, 1, MAX_AVERAGE.negate(), MAX_AVERAGE);
             case KAST_PCT, HEADSHOT_PCT -> decimal(value, 2, BigDecimal.ZERO, HUNDRED);
+            case PLACE -> decimal(value, 0, BigDecimal.ONE, MAX_PLAYERS);
+            case HONOURS -> decimal(value, 0, BigDecimal.ZERO, MAX_PLAYERS);
             default -> decimal(value, 0, BigDecimal.ZERO, MAX_WHOLE);
         };
     }
@@ -291,7 +301,7 @@ public class ScoresService {
     private GameScores view(Season season, int matchNumber, int gameNumber, LocalDate matchDate, List<GameStat> saved) {
         List<GameLine> view = saved.stream()
                 .map(line -> GameLine.of(scoring, season, line))
-                .sorted(Comparator.comparingLong(GameLine::points)
+                .sorted(Comparator.comparing(GameLine::points)
                         .reversed()
                         .thenComparing(GameLine::riotId, String.CASE_INSENSITIVE_ORDER))
                 .toList();
@@ -313,6 +323,14 @@ public class ScoresService {
      */
     public record LineInput(
             UUID playerId, String riotId, Map<Stat, BigDecimal> stats, Boolean win, Set<String> manualBonuses) {}
+
+    /**
+     * One line of the "Check bonuses" button.
+     *
+     * @param stats the line's stats, as in {@link LineInput}
+     * @param win whether the player won the game, for MVP and SVP; nothing means they didn't
+     */
+    public record CheckedLine(Map<Stat, BigDecimal> stats, Boolean win) {}
 
     /**
      * @param matchDate the match's day; nothing keeps the date it has

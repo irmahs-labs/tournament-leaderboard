@@ -55,7 +55,7 @@ export class LeaderboardPage {
     return formulaOf(
       rules,
       (key, params) => this.#transloco.translate(key, params),
-      (value) => this.language.number(value)
+      (value) => this.language.points(value, 2)
     );
   }
 

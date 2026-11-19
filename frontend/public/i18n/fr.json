@@ -166,7 +166,9 @@
       "PLANTS": "Poses",
       "DEFUSES": "Désam.",
       "HEADSHOT_PCT": "HS%",
-      "CLUTCHES": "Clutchs"
+      "CLUTCHES": "Clutchs",
+      "PLACE": "Place",
+      "HONOURS": "Hon."
     },
     "long": {
       "PERFORMANCE_SCORE": "Performance",
@@ -183,7 +185,9 @@
       "PLANTS": "Spikes posés",
       "DEFUSES": "Désamorçages",
       "HEADSHOT_PCT": "Pourcentage de tirs à la tête",
-      "CLUTCHES": "Clutchs"
+      "CLUTCHES": "Clutchs",
+      "PLACE": "Place au tableau des scores",
+      "HONOURS": "Honneurs"
     }
   },
   "standings": {
@@ -315,25 +319,53 @@
   },
   "adminScoring": {
     "title": "Barème",
-    "lede": "Choisissez les statistiques relevées à chaque partie. Le reste du barème, comme la valeur de chaque statistique et de chaque bonus, sera bientôt modifiable.",
-    "record": "Statistiques relevées",
-    "recordHelp": "Une statistique désactivée n’est plus demandée dans les parties saisies à partir de maintenant. Les parties déjà enregistrées gardent leurs valeurs et leurs points.",
+    "lede": "Ce que valent chaque statistique, le KDA de chaque partie, une victoire et chaque bonus dans cette saison. Un changement s’applique d’un coup à toutes les parties de la saison ; les autres saisons ne changent jamais.",
+    "locked": "{{season}} est terminée : son barème ne peut plus changer. Rouvrez-la dans Saisons pour le modifier.",
+    "stats": "Statistiques",
+    "statsHelp": "Une statistique désactivée n’est plus demandée dans la saisie des scores, et ne compte plus dans aucune partie de la saison, même celles déjà enregistrées. Activez Honneurs pour les saisir.",
     "stat": "Statistique",
     "recordIt": "La relever",
-    "effect": "Effet sur le total",
+    "pointsEach": "Points chacun",
     "recordLabel": "Relever : {{stat}}",
+    "pointsLabel": "Points par unité de {{stat}}",
     "on": "Oui",
     "off": "Non",
-    "effects": {
-      "adds": "Ajoute",
-      "subtracts": "Retire",
-      "notCounted": "Non comptée",
-      "shownOnly": "Affichée dans les tableaux, sans compter dans les points"
+    "shownOnly": "Affichée dans les tableaux, sans compter dans les points",
+    "placeOnly": "Désigne le MVP et le SVP, sans compter dans les points",
+    "perGame": "Chaque partie",
+    "kdaPoints": "Points pour le ratio KDA",
+    "kdaHelp": "(Éliminations + assistances) ÷ morts de chaque partie, zéro mort comptant pour une, multiplié par ce nombre.",
+    "pointsPerWin": "Points par victoire",
+    "bonuses": "Bonus",
+    "bonusesHelp": "Les bonus sont calculés à l’enregistrement d’une partie, puis de nouveau pour toute la saison quand les règles changent. Les ex æquo les gagnent tous.",
+    "bonus": "Bonus",
+    "howWon": "Comment il se gagne",
+    "points": "Points",
+    "bonusPointsLabel": "Points pour {{code}}",
+    "thresholdLabel": "Seuil pour {{code}}",
+    "won": {
+      "HIGHEST": "Le plus haut : {{stat}}",
+      "LOWEST": "Le plus bas : {{stat}}",
+      "MANUAL": "Coché par un admin",
+      "TOP_WINNER": "Meilleure place de l’équipe gagnante",
+      "TOP_LOSER": "Meilleure place de l’équipe perdante",
+      "AT_LEAST": "{{stat}} : au moins"
     },
-    "save": "Enregistrer les statistiques relevées",
-    "saved": "{{season}} relève ces statistiques à partir de maintenant.",
-    "invalid": "Ces statistiques ont été refusées. Réessayez.",
-    "failed": "Ça n'a pas marché. Réessayez dans un instant.",
+    "save": "Enregistrer le barème",
+    "saved": "Le barème de {{season}} est enregistré, et ses points le suivent.",
+    "useDefaults": "Utiliser le barème par défaut",
+    "defaultsConfirm": "Remplacer le barème de {{season}} par celui par défaut ? Ses autres bonus restent, et ses points sont recalculés.",
+    "defaultsDone": "{{season}} utilise maintenant le barème par défaut.",
+    "problems": {
+      "stat": "{{stat}} : les points vont de -{{maxPoints}} à {{maxPoints}}, avec au plus deux décimales.",
+      "kda": "Les points du KDA vont de 0 à {{maxPoints}}, avec au plus deux décimales.",
+      "win": "Les points par victoire sont un nombre entier de 0 à {{maxPoints}}.",
+      "bonus": "{{code}} : les points sont un nombre entier de 0 à {{maxPoints}}.",
+      "threshold": "{{code}} : le seuil va de 0 à {{maxThreshold}}."
+    },
+    "invalid": "Ce barème a été refusé. Vérifiez les nombres et réessayez.",
+    "finished": "Cette saison est terminée : rouvrez-la pour changer son barème.",
+    "failed": "Ça n’a pas marché. Réessayez dans un instant.",
     "loading": "Chargement du barème…"
   }
 }

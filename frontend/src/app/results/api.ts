@@ -15,7 +15,11 @@ export type Stat =
   | "PLANTS"
   | "DEFUSES"
   | "HEADSHOT_PCT"
-  | "CLUTCHES";
+  | "CLUTCHES"
+  /** The player's place on the in-game scoreboard, 1 at the top. */
+  | "PLACE"
+  /** Honours received from the other players of the game. */
+  | "HONOURS";
 
 /** One entry of `GET /api/orgs/{slug}/seasons`. */
 export interface Season {
@@ -29,12 +33,26 @@ export interface Season {
   finished: boolean;
 }
 
+/**
+ * How a bonus is won: the highest or lowest value of its stat; the best place on the winning
+ * (MVP) or losing (SVP) team; its stat reaching a threshold; or ticked by an admin.
+ */
+export type BonusAward =
+  | "HIGHEST"
+  | "LOWEST"
+  | "MANUAL"
+  | "TOP_WINNER"
+  | "TOP_LOSER"
+  | "AT_LEAST";
+
 export interface Bonus {
   code: string;
   label: string;
-  award: "HIGHEST" | "LOWEST" | "MANUAL";
+  award: BonusAward;
   stat: Stat | null;
   points: number;
+  /** The value to reach, for an AT_LEAST bonus; nothing otherwise. */
+  threshold: number | null;
 }
 
 export interface RankRef {
@@ -78,15 +96,19 @@ export interface Summary {
 
 export interface StatRule {
   stat: Stat;
+  /** Asked for on the Scores form; a stat that isn't recorded doesn't count in any game. */
   recorded: boolean;
-  /** Points per unit: 1 adds, -1 subtracts, 0 only shows the stat. */
-  effect: number;
+  /** Points per unit, negative to subtract; 0 only shows the stat. */
+  points: number;
+  /** False for averages, percentages and the place, which can never count. */
   countable: boolean;
 }
 
 /** `GET …/seasons/{n}/rules`: "How points are counted". */
 export interface Rules {
   pointsPerWin: number;
+  /** Points for each game's KDA ratio, (kills + assists) / max(deaths, 1). */
+  kdaPoints: number;
   stats: StatRule[];
   bonuses: Bonus[];
 }

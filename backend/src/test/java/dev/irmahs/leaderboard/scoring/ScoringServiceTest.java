@@ -10,7 +10,7 @@ import dev.irmahs.leaderboard.seasons.StatRule;
 import dev.irmahs.leaderboard.stats.StatLine;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -18,6 +18,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 class ScoringServiceTest {
 
     private final ScoringService scoring = new ScoringService();
+
+    /** The points of one game, for rules whose points are whole. */
+    private long points(Season season, StatLine line, List<SeasonBonus> won, boolean win) {
+        return scoring.gamePoints(season, line, won, win).longValueExact();
+    }
 
     /**
      * The live site's formula, copied from legacy/src/constants/scoring.ts. Its "performanceScore" is the
@@ -69,7 +74,7 @@ class ScoringServiceTest {
                 TodaysRules.line(performanceScore, kills, deaths, assists, econRating, firstBloods, plants, defuses);
         List<SeasonBonus> won = season.getBonuses().subList(0, bonusCount);
 
-        assertThat(scoring.gamePoints(season, line, won, win))
+        assertThat(points(season, line, won, win))
                 .isEqualTo(legacyScore(
                         performanceScore,
                         kills,
@@ -84,46 +89,74 @@ class ScoringServiceTest {
     }
 
     @Test
-    void todaysRulesGiveTheLiveSitesTotalOverSeveralGames() {
-        Map<Stat, Long> sums = Map.of(
-                Stat.PERFORMANCE_SCORE, 1890L,
-                Stat.KILLS, 132L,
-                Stat.DEATHS, 101L,
-                Stat.ASSISTS, 44L,
-                Stat.ECON_RATING, 480L,
-                Stat.FIRST_BLOODS, 19L,
-                Stat.PLANTS, 12L,
-                Stat.DEFUSES, 6L);
-
-        assertThat(scoring.points(TodaysRules.season(), sums, 7 * 10L, 5))
-                .isEqualTo(legacyScore(1890, 132, 101, 44, 480, 19, 12, 6, 7, 5));
-    }
-
-    @Test
     void aStatTheGameDidNotRecordAddsNothing() {
         Season season = TodaysRules.season();
 
-        assertThat(scoring.gamePoints(season, TodaysRules.emptyLine(), List.of(), false))
-                .isZero();
-        assertThat(scoring.points(season, Map.of(), 0, 0)).isZero();
+        assertThat(points(season, TodaysRules.emptyLine(), List.of(), false)).isZero();
     }
 
     @Test
     void aStatWithoutARuleIsNotCounted() {
         Season season = TodaysRules.season();
-        StatLine line = new StatLine(null, 300, null, null, null, 10, null, null, null, null, null, null, null, 4);
+        StatLine line =
+                new StatLine(null, 300, null, null, null, 10, null, null, null, null, null, null, null, 4, null, null);
 
-        assertThat(scoring.gamePoints(season, line, List.of(), false)).isEqualTo(10);
+        assertThat(points(season, line, List.of(), false)).isEqualTo(10);
     }
 
     @Test
-    void aSeasonThatStopsRecordingAStatKeepsCountingItsOldGames() {
+    void aStatTheSeasonStopsRecordingStopsCountingInItsOldGamesToo() {
         Season season = TodaysRules.season();
         season.setStatRule(Stat.PERFORMANCE_SCORE, new StatRule(false, 1));
         StatLine oldGame = TodaysRules.line(240, 18, 12, 5, 60, 3, 2, 1);
 
-        assertThat(scoring.gamePoints(season, oldGame, List.of(), false))
-                .isEqualTo(legacyScore(240, 18, 12, 5, 60, 3, 2, 1, 0, 0));
+        assertThat(points(season, oldGame, List.of(), false))
+                .isEqualTo(legacyScore(240, 18, 12, 5, 60, 3, 2, 1, 0, 0) - 240);
+    }
+
+    @Test
+    void eachStatCountsItsOwnPointsAndTheKdaRatioAddsItsOwn() {
+        Season season = new Season(UUID.randomUUID(), 9, "Season 9", 8, new Season.GameRange(1, 5), 50);
+        season.setStatRule(Stat.KILLS, new StatRule(true, 1));
+        season.setStatRule(Stat.DEATHS, new StatRule(true, -1));
+        season.setStatRule(Stat.ASSISTS, new StatRule(true, 1.5));
+        season.setStatRule(Stat.FIRST_BLOODS, new StatRule(true, 4));
+        season.setStatRule(Stat.PLANTS, new StatRule(true, 2));
+        season.setStatRule(Stat.DEFUSES, new StatRule(true, 2));
+        season.setPoints(50, BigDecimal.TEN);
+        // 24/10/3 with 2 first bloods: 24 - 10 + 4.5 + 8, and a KDA of 27 / 10 = 2.7, worth 27.
+        StatLine line = new StatLine(null, null, null, null, null, 24, 10, 3, null, 2, 0, 0, null, null, null, null);
+
+        assertThat(scoring.gamePoints(season, line, List.of(), false)).isEqualByComparingTo("53.5");
+        assertThat(scoring.gamePoints(season, line, List.of(), true)).isEqualByComparingTo("103.5");
+    }
+
+    @Test
+    void theKdaRatioCountsNoDeathsAsOne() {
+        Season season = new Season(UUID.randomUUID(), 9, "Season 9", 8, new Season.GameRange(1, 5), 50);
+        season.setStatRule(Stat.KILLS, new StatRule(true, 0));
+        season.setStatRule(Stat.DEATHS, new StatRule(true, 0));
+        season.setStatRule(Stat.ASSISTS, new StatRule(true, 0));
+        season.setPoints(50, BigDecimal.TEN);
+        StatLine flawless =
+                new StatLine(null, null, null, null, null, 7, 0, 2, null, null, null, null, null, null, null, null);
+        StatLine third =
+                new StatLine(null, null, null, null, null, 1, 3, 0, null, null, null, null, null, null, null, null);
+
+        assertThat(scoring.gamePoints(season, flawless, List.of(), false)).isEqualByComparingTo("90");
+        assertThat(scoring.gamePoints(season, third, List.of(), false)).isEqualByComparingTo("3.33");
+    }
+
+    @Test
+    void honoursCountOnlyWhileTheSeasonRecordsThem() {
+        Season season = new Season(UUID.randomUUID(), 9, "Season 9", 8, new Season.GameRange(1, 5), 50);
+        season.setStatRule(Stat.HONOURS, new StatRule(false, 5));
+        StatLine honoured =
+                new StatLine(null, null, null, null, null, null, null, null, null, null, null, null, null, null, 1, 3);
+
+        assertThat(scoring.gamePoints(season, honoured, List.of(), false)).isZero();
+        season.setStatRule(Stat.HONOURS, new StatRule(true, 5));
+        assertThat(scoring.gamePoints(season, honoured, List.of(), false)).isEqualByComparingTo("15");
     }
 
     @Test
@@ -135,8 +168,8 @@ class ScoringServiceTest {
         SeasonBonus mvp = cup.addBonus("MVP", "Most valuable player", BonusAward.MANUAL, null, 25);
         StatLine line = TodaysRules.line(240, 18, 12, 5, 60, 3, 2, 1);
 
-        assertThat(scoring.gamePoints(lyon, line, List.of(), true)).isEqualTo(240 + 18 + 5 + 60 + 3 + 2 + 1 + 50);
-        assertThat(scoring.gamePoints(cup, line, List.of(mvp), true)).isEqualTo(18 + 25 + 30);
+        assertThat(points(lyon, line, List.of(), true)).isEqualTo(240 + 18 + 5 + 60 + 3 + 2 + 1 + 50);
+        assertThat(points(cup, line, List.of(mvp), true)).isEqualTo(18 + 25 + 30);
     }
 
     @Test
@@ -156,8 +189,10 @@ class ScoringServiceTest {
                 null,
                 null,
                 new BigDecimal("27.50"),
+                null,
+                null,
                 null);
 
-        assertThat(scoring.gamePoints(season, line, List.of(), false)).isZero();
+        assertThat(points(season, line, List.of(), false)).isZero();
     }
 }

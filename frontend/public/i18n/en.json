@@ -166,7 +166,9 @@
       "PLANTS": "Plants",
       "DEFUSES": "Defuses",
       "HEADSHOT_PCT": "HS%",
-      "CLUTCHES": "Clutches"
+      "CLUTCHES": "Clutches",
+      "PLACE": "Place",
+      "HONOURS": "Hon."
     },
     "long": {
       "PERFORMANCE_SCORE": "Performance",
@@ -183,7 +185,9 @@
       "PLANTS": "Plants",
       "DEFUSES": "Defuses",
       "HEADSHOT_PCT": "Headshot percentage",
-      "CLUTCHES": "Clutches"
+      "CLUTCHES": "Clutches",
+      "PLACE": "Place on the scoreboard",
+      "HONOURS": "Honours"
     }
   },
   "standings": {
@@ -315,25 +319,53 @@
   },
   "adminScoring": {
     "title": "Scoring rules",
-    "lede": "Choose which stats each game records. The rest of the rules, such as what each stat and bonus is worth, can be edited soon.",
-    "record": "Stats to record",
-    "recordHelp": "A stat that’s switched off isn’t asked for in games entered from now on. Games already saved keep their values and their points.",
+    "lede": "What each stat, each game’s KDA, a win and each bonus are worth in this season. A change applies to every game of the season at once; other seasons never change.",
+    "locked": "{{season}} is finished, so its rules can’t change. Reopen it on the Seasons screen to change them.",
+    "stats": "Stats",
+    "statsHelp": "A stat that’s switched off isn’t asked for on the Scores form, and stops counting in every game of the season, even games saved before. Switch Honours on to enter them.",
     "stat": "Stat",
     "recordIt": "Record it",
-    "effect": "Effect on total",
+    "pointsEach": "Points each",
     "recordLabel": "Record {{stat}}",
+    "pointsLabel": "Points for each unit of {{stat}}",
     "on": "On",
     "off": "Off",
-    "effects": {
-      "adds": "Adds",
-      "subtracts": "Subtracts",
-      "notCounted": "Not counted",
-      "shownOnly": "Shown in tables, not added to points"
+    "shownOnly": "Shown in tables, not added to points",
+    "placeOnly": "Picks MVP and SVP, not added to points",
+    "perGame": "Each game",
+    "kdaPoints": "Points for the KDA ratio",
+    "kdaHelp": "Each game’s (kills + assists) ÷ deaths, counting no deaths as one, times this.",
+    "pointsPerWin": "Points per win",
+    "bonuses": "Bonuses",
+    "bonusesHelp": "Bonuses are worked out when a game is saved, and again for the whole season when the rules change. Players tied for the best value all win.",
+    "bonus": "Bonus",
+    "howWon": "How it’s won",
+    "points": "Points",
+    "bonusPointsLabel": "Points for {{code}}",
+    "thresholdLabel": "Threshold for {{code}}",
+    "won": {
+      "HIGHEST": "Highest: {{stat}}",
+      "LOWEST": "Lowest: {{stat}}",
+      "MANUAL": "Ticked by an admin",
+      "TOP_WINNER": "Best place on the winning team",
+      "TOP_LOSER": "Best place on the losing team",
+      "AT_LEAST": "{{stat}}: at least"
     },
-    "save": "Save the stats to record",
-    "saved": "{{season}} records these stats from now on.",
-    "invalid": "These stats were refused. Try again.",
-    "failed": "That didn't work. Try again in a moment.",
+    "save": "Save the rules",
+    "saved": "{{season}}’s rules are saved, and its points follow them.",
+    "useDefaults": "Use the platform defaults",
+    "defaultsConfirm": "Replace {{season}}’s rules with the platform defaults? Its other bonuses stay, and its points are worked out again.",
+    "defaultsDone": "{{season}} now uses the platform defaults.",
+    "problems": {
+      "stat": "{{stat}}: points go from -{{maxPoints}} to {{maxPoints}}, with up to two decimals.",
+      "kda": "The KDA points go from 0 to {{maxPoints}}, with up to two decimals.",
+      "win": "The points per win are a whole number from 0 to {{maxPoints}}.",
+      "bonus": "{{code}}: points are a whole number from 0 to {{maxPoints}}.",
+      "threshold": "{{code}}: the threshold goes from 0 to {{maxThreshold}}."
+    },
+    "invalid": "These rules were refused. Check the numbers and try again.",
+    "finished": "This season is finished: reopen it to change its rules.",
+    "failed": "That didn’t work. Try again in a moment.",
     "loading": "Loading the rules…"
   }
 }

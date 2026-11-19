@@ -83,15 +83,15 @@ FROM old_matches
 GROUP BY match_season;
 
 -- Today's rules. Every stat gets a row, so the Scoring screen shows each one explicitly.
-INSERT INTO season_stat_rules (season_id, stat, recorded, effect)
-SELECT s.id, r.stat, r.recorded, r.effect
+INSERT INTO season_stat_rules (season_id, stat, recorded, points)
+SELECT s.id, r.stat, r.recorded, r.points
 FROM seasons s
 CROSS JOIN (VALUES
   ('PERFORMANCE_SCORE', true, 1), ('ACS', false, 0), ('ADR', false, 0), ('DAMAGE_DELTA', false, 0),
   ('KAST_PCT', false, 0), ('KILLS', true, 1), ('DEATHS', true, -1), ('ASSISTS', true, 1),
   ('ECON_RATING', true, 1), ('FIRST_BLOODS', true, 1), ('PLANTS', true, 1), ('DEFUSES', true, 1),
-  ('HEADSHOT_PCT', false, 0), ('CLUTCHES', false, 0)
-) AS r(stat, recorded, effect)
+  ('HEADSHOT_PCT', false, 0), ('CLUTCHES', false, 0), ('PLACE', false, 0), ('HONOURS', false, 0)
+) AS r(stat, recorded, points)
 WHERE s.organization_id = (SELECT id FROM org);
 
 INSERT INTO season_bonuses (season_id, code, label, award, stat, points, position)

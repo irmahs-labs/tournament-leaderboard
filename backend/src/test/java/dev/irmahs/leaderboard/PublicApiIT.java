@@ -90,8 +90,8 @@ class PublicApiIT {
             save(new Match(third, 2, LocalDate.of(2099, 1, 1)));
             Game one = save(new Game(played, 1));
             Game two = save(new Game(played, 2));
-            StatLine withAdr =
-                    new StatLine(240, null, new BigDecimal("152.3"), null, null, 18, 12, 5, 60, 3, 2, 1, null, null);
+            StatLine withAdr = new StatLine(
+                    240, null, new BigDecimal("152.3"), null, null, 18, 12, 5, 60, 3, 2, 1, null, null, null, null);
             award(save(new GameStat(one, kestrel, withAdr, true)), third, "FB", "MP");
             award(save(new GameStat(one, wren, line(180, 12, 9, 8, 40, 1, 0, 1), false)), third, "LD", "MA", "MD");
             award(save(new GameStat(two, kestrel, line(200, 15, 14, 3, 55, 2, 1, 0), false)), third, "FB", "MP");
@@ -144,11 +144,11 @@ class PublicApiIT {
         assertThat(rules)
                 .bodyJson()
                 .extractingPath("$.stats[?(@.stat == 'DEATHS')]")
-                .isEqualTo(List.of(Map.of("stat", "DEATHS", "recorded", true, "effect", -1, "countable", true)));
+                .isEqualTo(List.of(Map.of("stat", "DEATHS", "recorded", true, "points", -1, "countable", true)));
         assertThat(rules)
                 .bodyJson()
                 .extractingPath("$.stats[?(@.stat == 'ADR')]")
-                .isEqualTo(List.of(Map.of("stat", "ADR", "recorded", true, "effect", 0, "countable", false)));
+                .isEqualTo(List.of(Map.of("stat", "ADR", "recorded", true, "points", 0, "countable", false)));
         assertThat(rules)
                 .bodyJson()
                 .extractingPath("$.bonuses[*].code")
@@ -156,8 +156,10 @@ class PublicApiIT {
         assertThat(rules)
                 .bodyJson()
                 .extractingPath("$.bonuses[1]")
-                .isEqualTo(Map.of(
-                        "code", "LD", "label", "Fewest deaths", "award", "LOWEST", "stat", "DEATHS", "points", 10));
+                .asMap()
+                .containsAllEntriesOf(Map.of(
+                        "code", "LD", "label", "Fewest deaths", "award", "LOWEST", "stat", "DEATHS", "points", 10))
+                .containsEntry("threshold", null);
     }
 
     @Test
@@ -359,6 +361,8 @@ class PublicApiIT {
                 firstBloods,
                 plants,
                 defuses,
+                null,
+                null,
                 null,
                 null);
     }

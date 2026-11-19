@@ -65,6 +65,7 @@ const BONUSES = [
     label: "Most first bloods",
     points: 10,
     stat: "FIRST_BLOODS",
+    threshold: null,
   },
   {
     award: "LOWEST",
@@ -72,6 +73,7 @@ const BONUSES = [
     label: "Fewest deaths",
     points: 10,
     stat: "DEATHS",
+    threshold: null,
   },
 ] satisfies Leaderboard["bonuses"];
 
@@ -131,13 +133,14 @@ export const SUMMARY: Summary = {
 
 export const RULES: Rules = {
   bonuses: BONUSES,
+  kdaPoints: 0,
   pointsPerWin: 50,
   stats: [
-    { countable: true, effect: 1, recorded: true, stat: "PERFORMANCE_SCORE" },
-    { countable: true, effect: 1, recorded: true, stat: "KILLS" },
-    { countable: true, effect: -1, recorded: true, stat: "DEATHS" },
-    { countable: false, effect: 0, recorded: true, stat: "ADR" },
-    { countable: true, effect: 1, recorded: false, stat: "CLUTCHES" },
+    { countable: true, points: 1, recorded: true, stat: "PERFORMANCE_SCORE" },
+    { countable: true, points: 1, recorded: true, stat: "KILLS" },
+    { countable: true, points: -1, recorded: true, stat: "DEATHS" },
+    { countable: false, points: 0, recorded: true, stat: "ADR" },
+    { countable: true, points: 1, recorded: false, stat: "CLUTCHES" },
   ],
 };
 
