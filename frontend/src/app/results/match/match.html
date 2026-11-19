@@ -72,7 +72,7 @@
       <strong class="mvp-name">{{ splitRiotId(best.riotId).name }}</strong>
       <span class="mvp-stats">
         <span
-          >{{ t("leaderboard.points", { points: language.number(best.points) })
+          >{{ t("leaderboard.points", { points: language.points(best.points) })
           }}</span
         >
         @if (best.totals.KILLS !== undefined) {

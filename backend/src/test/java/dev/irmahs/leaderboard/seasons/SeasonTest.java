@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.tuple;
 
 import dev.irmahs.leaderboard.seasons.Season.GameRange;
 import java.time.Instant;
-import java.util.EnumSet;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,8 +18,8 @@ class SeasonTest {
     @ParameterizedTest
     @EnumSource(
             value = Stat.class,
-            names = {"ADR", "DAMAGE_DELTA", "KAST_PCT", "HEADSHOT_PCT"})
-    void anAverageOrAPercentageCanBeRecordedButNotCounted(Stat stat) {
+            names = {"ADR", "DAMAGE_DELTA", "KAST_PCT", "HEADSHOT_PCT", "PLACE"})
+    void anAverageAPercentageOrThePlaceCanBeRecordedButNotCounted(Stat stat) {
         season.setStatRule(stat, new StatRule(true, 0));
 
         assertThat(season.getStatRules()).containsEntry(stat, new StatRule(true, 0));
@@ -33,7 +32,7 @@ class SeasonTest {
     @EnumSource(
             value = Stat.class,
             mode = EnumSource.Mode.EXCLUDE,
-            names = {"ADR", "DAMAGE_DELTA", "KAST_PCT", "HEADSHOT_PCT"})
+            names = {"ADR", "DAMAGE_DELTA", "KAST_PCT", "HEADSHOT_PCT", "PLACE"})
     void everyOtherStatCanAddOrSubtract(Stat stat) {
         season.setStatRule(stat, new StatRule(true, -1));
 
@@ -41,18 +40,27 @@ class SeasonTest {
     }
 
     @Test
-    void theRecordSwitchesKeepWhatEachStatDoes() {
-        season.setStatRule(Stat.KILLS, new StatRule(true, 1));
-        season.setStatRule(Stat.DEATHS, new StatRule(true, -1));
+    void thePlatformDefaultsKeepTheSeasonsOwnBonusesAndRedefineTheirs() {
+        season.addBonus("FB", "First bloods", BonusAward.HIGHEST, Stat.FIRST_BLOODS, 25);
+        season.addBonus("ACE", "Ace", BonusAward.MANUAL, null, 15);
 
-        season.recordOnly(EnumSet.of(Stat.DEATHS, Stat.ACS));
+        season.usePlatformDefaults();
 
-        assertThat(season.getStatRules())
-                .hasSize(Stat.values().length)
-                .containsEntry(Stat.KILLS, new StatRule(false, 1))
-                .containsEntry(Stat.DEATHS, new StatRule(true, -1))
-                .containsEntry(Stat.ACS, new StatRule(true, 0))
-                .containsEntry(Stat.CLUTCHES, new StatRule(false, 0));
+        assertThat(season.getStatRules()).hasSize(Stat.values().length);
+        assertThat(season.getStatRules().get(Stat.ASSISTS)).isEqualTo(new StatRule(true, 1.5));
+        assertThat(season.getKdaPoints()).isEqualByComparingTo("10");
+        assertThat(season.getBonuses())
+                .extracting(SeasonBonus::getCode, SeasonBonus::getPoints)
+                .containsExactly(
+                        tuple("FB", 10),
+                        tuple("ACE", 15),
+                        tuple("LD", 10),
+                        tuple("MA", 10),
+                        tuple("MP", 10),
+                        tuple("MD", 10),
+                        tuple("MVP", 20),
+                        tuple("SVP", 10),
+                        tuple("HON", 10));
     }
 
     @Test

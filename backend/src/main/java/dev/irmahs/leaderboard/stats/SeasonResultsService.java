@@ -6,10 +6,12 @@ import dev.irmahs.leaderboard.players.Player;
 import dev.irmahs.leaderboard.ranks.Rank;
 import dev.irmahs.leaderboard.scoring.ScoringService;
 import dev.irmahs.leaderboard.seasons.BonusView;
+import dev.irmahs.leaderboard.seasons.Points;
 import dev.irmahs.leaderboard.seasons.Season;
 import dev.irmahs.leaderboard.seasons.SeasonBonus;
 import dev.irmahs.leaderboard.seasons.SeasonService;
 import dev.irmahs.leaderboard.seasons.Stat;
+import dev.irmahs.leaderboard.seasons.StatRule;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -38,7 +40,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Transactional(readOnly = true)
 public class SeasonResultsService {
 
-    private static final Comparator<Standing> BEST_FIRST = Comparator.comparingLong(Standing::points)
+    private static final Comparator<Standing> BEST_FIRST = Comparator.comparing(Standing::points)
             .reversed()
             .thenComparing(Comparator.comparingInt(Standing::wins).reversed())
             .thenComparing(Standing::riotId, String.CASE_INSENSITIVE_ORDER);
@@ -60,7 +62,7 @@ public class SeasonResultsService {
         Season season = seasons.require(slug, seasonNumber);
         List<GameStat> seasonLines = lines.findBySeason(season);
         return new LeaderboardView(
-                SeasonRef.of(season), columns(seasonLines), bonuses(season), standings(season, seasonLines));
+                SeasonRef.of(season), columns(season, seasonLines), bonuses(season), standings(season, seasonLines));
     }
 
     public SummaryView summary(String slug, int seasonNumber) {
@@ -128,7 +130,7 @@ public class SeasonResultsService {
                 .map(game -> new GameView(
                         game.getKey(),
                         game.getValue().stream()
-                                .sorted(Comparator.comparingLong(GameLine::points)
+                                .sorted(Comparator.comparing(GameLine::points)
                                         .reversed()
                                         .thenComparing(GameLine::riotId, String.CASE_INSENSITIVE_ORDER))
                                 .toList()))
@@ -137,7 +139,7 @@ public class SeasonResultsService {
                 SeasonRef.of(season),
                 match.getMatchNumber(),
                 match.getMatchDate(),
-                columns(matchLines),
+                columns(season, matchLines),
                 bonuses(season),
                 games,
                 standings(season, matchLines));
@@ -153,7 +155,7 @@ public class SeasonResultsService {
         for (GameStat line : gameLines) {
             Player player = line.getPlayer();
             tallies.computeIfAbsent(player.getId(), id -> new PlayerTally(player))
-                    .add(line);
+                    .add(line, scoring.gamePoints(season, line.getLine(), line.getBonuses(), line.isWin()));
         }
         List<Standing> unranked = tallies.values().stream()
                 .map(tally -> new Standing(
@@ -163,7 +165,7 @@ public class SeasonResultsService {
                         RankRef.of(tally.player().getCurrentRank()),
                         tally.games(),
                         tally.wins(),
-                        scoring.points(season, tally.totals(), tally.bonusPoints(), tally.wins()),
+                        Points.plain(tally.points()),
                         tally.totals(),
                         tally.averages(),
                         tally.kda(),
@@ -173,17 +175,21 @@ public class SeasonResultsService {
         return unranked.stream()
                 .map(standing -> standing.ranked(1
                         + (int) unranked.stream()
-                                .filter(other -> other.points() > standing.points())
+                                .filter(other -> other.points().compareTo(standing.points()) > 0)
                                 .count()))
                 .toList();
     }
 
-    /** The stats to show as columns: those with a value in at least one of these lines. */
-    private static Set<Stat> columns(Collection<GameStat> gameLines) {
+    /**
+     * The stats to show as columns: those the season records, with a value in at least one of these
+     * lines. A stat switched off disappears from the season's tables, as it no longer counts.
+     */
+    private static Set<Stat> columns(Season season, Collection<GameStat> gameLines) {
         Set<Stat> columns = EnumSet.noneOf(Stat.class);
         for (GameStat line : gameLines) {
             for (Stat stat : Stat.values()) {
-                if (line.getLine().value(stat) != null) {
+                StatRule rule = season.getStatRules().get(stat);
+                if (rule != null && rule.recorded() && line.getLine().value(stat) != null) {
                     columns.add(stat);
                 }
             }
@@ -222,7 +228,7 @@ public class SeasonResultsService {
             RankRef currentRank,
             int games,
             int wins,
-            long points,
+            BigDecimal points,
             Map<Stat, Long> totals,
             Map<Stat, BigDecimal> averages,
             BigDecimal kda,
@@ -260,7 +266,7 @@ public class SeasonResultsService {
      */
     public record SummaryView(int matchCount, int matchesPlayed, int gamesPlayed, int players, NextMatch nextMatch) {}
 
-    public record TopPlayer(UUID playerId, String riotId, long points) {}
+    public record TopPlayer(UUID playerId, String riotId, BigDecimal points) {}
 
     /**
      * @param games how many games of the match have scores
@@ -273,7 +279,12 @@ public class SeasonResultsService {
      * @param bonuses the codes of the bonuses the player won in the game
      */
     public record GameLine(
-            UUID playerId, String riotId, Map<Stat, BigDecimal> stats, boolean win, List<String> bonuses, long points) {
+            UUID playerId,
+            String riotId,
+            Map<Stat, BigDecimal> stats,
+            boolean win,
+            List<String> bonuses,
+            BigDecimal points) {
 
         /** A saved line, with its points under the season's rules. */
         public static GameLine of(ScoringService scoring, Season season, GameStat line) {
@@ -293,7 +304,7 @@ public class SeasonResultsService {
                             .map(SeasonBonus::getCode)
                             .sorted()
                             .toList(),
-                    scoring.gamePoints(season, line.getLine(), line.getBonuses(), line.isWin()));
+                    Points.plain(scoring.gamePoints(season, line.getLine(), line.getBonuses(), line.isWin())));
         }
     }
 

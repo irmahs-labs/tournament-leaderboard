@@ -399,7 +399,10 @@ export class ScoresAdminPage {
   protected async checkBonuses(): Promise<void> {
     const admin = this.#admin();
     const season = this.current.season();
-    const used = this.rows().filter((row) => row.player.kind !== "none");
+
+    const used = this.rows().flatMap((row, index) =>
+      row.player.kind === "none" ? [] : [{ line: index + 1, row }]
+    );
 
     if (!admin || !season || used.length === 0) {
       return;
@@ -411,12 +414,15 @@ export class ScoresAdminPage {
       const won = await firstValueFrom(
         this.#http.post<string[][]>(
           `${admin}/seasons/${season.number}/bonus-check`,
-          used.map((row) => statsOf(row, stats))
+          used.map(({ line, row }) => ({
+            stats: statsOf(row, stats, line),
+            win: row.win,
+          }))
         )
       );
 
       const byKey = new Map(
-        used.map((row, index) => [row.key, won[index] ?? []])
+        used.map(({ row }, index) => [row.key, won[index] ?? []])
       );
 
       const manual = this.manualCodes();

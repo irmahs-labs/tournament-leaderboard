@@ -1,12 +1,10 @@
 package dev.irmahs.leaderboard.stats;
 
-import dev.irmahs.leaderboard.seasons.Stat;
+import dev.irmahs.leaderboard.stats.ScoresService.CheckedLine;
 import dev.irmahs.leaderboard.stats.ScoresService.GameScores;
 import dev.irmahs.leaderboard.stats.ScoresService.GameScoresInput;
 import dev.irmahs.leaderboard.stats.ScoresService.PreviousRoster;
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -65,12 +63,12 @@ public class ScoresController {
     /**
      * The "Check bonuses" button: the automatic bonuses each line would win.
      *
-     * @param lines each line's stats, in the form's order
+     * @param lines each line's stats and whether the player won, in the form's order
      * @return each line's bonus codes, in the same order
      */
     @PostMapping("/bonus-check")
     public List<List<String>> checkBonuses(
-            @PathVariable String slug, @PathVariable int season, @RequestBody List<Map<Stat, BigDecimal>> lines) {
+            @PathVariable String slug, @PathVariable int season, @RequestBody List<CheckedLine> lines) {
         return scores.checkBonuses(slug, season, lines);
     }
 }

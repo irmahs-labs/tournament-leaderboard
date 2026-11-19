@@ -44,6 +44,7 @@ const NOT_ADDED: ReadonlySet<Column> = new Set([
   "KAST_PCT",
   "HEADSHOT_PCT",
   "KDA",
+  "PLACE",
 ]);
 
 /** Whether a column can show a total over several games. */
@@ -92,14 +93,21 @@ export const formulaOf = (
   const terms: { points: number; text: string; win?: boolean }[] = [];
 
   for (const rule of rules.stats) {
-    if (rule.recorded && rule.countable && rule.effect !== 0) {
+    if (rule.recorded && rule.countable && rule.points !== 0) {
       const name = t(`stats.long.${rule.stat}`);
-      const size = Math.abs(rule.effect);
+      const size = Math.abs(rule.points);
       terms.push({
-        points: rule.effect,
+        points: rule.points,
         text: size === 1 ? name : `${format(size)} × ${name}`,
       });
     }
+  }
+
+  if (rules.kdaPoints !== 0) {
+    terms.push({
+      points: rules.kdaPoints,
+      text: `${format(rules.kdaPoints)} × ${t("stats.short.KDA")}`,
+    });
   }
 
   const [first] = rules.bonuses;

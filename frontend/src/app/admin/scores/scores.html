@@ -175,6 +175,7 @@
                 [attr.aria-label]="t('stats.long.' + stat) + ', ' + name"
                 [attr.aria-invalid]="invalid(row, stat)"
                 [value]="row.stats[stat] ?? ''"
+                [placeholder]="stat === 'PLACE' ? index + 1 : ''"
                 (input)="typeStat(row.key, stat, box.value)"
               />
             </td>
@@ -208,7 +209,7 @@
               }
             </td>
             }
-            <td class="num points">{{ language.number(row.points) }}</td>
+            <td class="num points">{{ language.points(row.points) }}</td>
           </tr>
           }
         </tbody>

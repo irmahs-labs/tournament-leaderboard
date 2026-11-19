@@ -167,7 +167,9 @@ class ScoresIT {
                 Arguments.of(HttpMethod.PUT, GAME, "{\"lines\": [{\"riotId\": \"A#1\", \"stats\": {}}]}"),
                 Arguments.of(HttpMethod.DELETE, GAME, null),
                 Arguments.of(HttpMethod.GET, GAME + "/previous-roster", null),
-                Arguments.of(HttpMethod.POST, SEASON + "/bonus-check", "[{\"KILLS\": 3}]"));
+                Arguments.of(HttpMethod.POST, SEASON + "/bonus-check", "[{\"stats\": {\"KILLS\": 3}}]"),
+                Arguments.of(HttpMethod.PUT, SEASON + "/rules", "{}"),
+                Arguments.of(HttpMethod.POST, SEASON + "/rules/platform-defaults", null));
     }
 
     private MvcTestResult call(HttpMethod method, String uri, String body, OidcLoginRequestPostProcessor who) {
@@ -299,13 +301,44 @@ class ScoresIT {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                [{"KILLS": 18, "DEATHS": 12, "ASSISTS": 5, "FIRST_BLOODS": 3},
-                                 {"KILLS": 12, "DEATHS": 9, "ASSISTS": 8, "FIRST_BLOODS": 1}]"""))
+                                [{"stats": {"KILLS": 18, "DEATHS": 12, "ASSISTS": 5, "FIRST_BLOODS": 3}},
+                                 {"stats": {"KILLS": 12, "DEATHS": 9, "ASSISTS": 8, "FIRST_BLOODS": 1}}]"""))
                 .hasStatusOk()
                 .bodyJson()
                 .isStrictlyEqualTo("[[\"FB\"], [\"LD\", \"MA\"]]");
         assertThat(flushed().sql("SELECT count(*) FROM games").query(Long.class).single())
                 .isZero();
+    }
+
+    @Test
+    void changingTheRulesReawardsTheSavedGamesAndKeepsWhatTheyNoLongerRecordOutOfThePoints() {
+        saveTwoLines();
+
+        assertThat(post(SEASON + "/rules/platform-defaults")).hasStatusOk();
+
+        // Performance score and economy no longer count, and MVP is now worked out from the place,
+        // which these lines don't have, so the manual MVP Kestrel had is gone.
+        assertThat(mvc.get().uri(GAME).with(ADMIN)).bodyJson().isLenientlyEqualTo("""
+                {"lines": [{"riotId": "Kestrel#EUW", "bonuses": ["FB", "MD", "MP"], "points": 130.67},
+                           {"riotId": "Newbie#EUW", "bonuses": ["LD", "MA", "MD"], "points": 73.22}]}""");
+    }
+
+    @Test
+    void theBestPlaceOnEachTeamIsMvpAndSvp() {
+        post(SEASON + "/rules/platform-defaults");
+
+        assertThat(put(GAME, """
+                        {"lines": [
+                          {"riotId": "Kestrel#EUW", "win": false, "stats": {"PLACE": 1, "KILLS": 20, "DEATHS": 10}},
+                          {"riotId": "Wren#EUW", "win": true, "stats": {"PLACE": 2, "KILLS": 15, "DEATHS": 12}},
+                          {"riotId": "Heron#EUW", "win": true, "stats": {"PLACE": 3, "KILLS": 9, "DEATHS": 14}}]}""")).hasStatusOk().bodyJson().isLenientlyEqualTo("""
+                        {"lines": [{"riotId": "Wren#EUW", "bonuses": ["MVP"], "points": 85.5},
+                                   {"riotId": "Heron#EUW", "bonuses": [], "points": 51.43},
+                                   {"riotId": "Kestrel#EUW", "bonuses": ["LD", "SVP"], "points": 50}]}""");
+    }
+
+    private MvcTestResult post(String uri) {
+        return mvc.post().uri(uri).with(ADMIN).with(csrf()).exchange();
     }
 
     static Stream<Arguments> refusedSaves() {

@@ -79,12 +79,20 @@ Nobody needs to be made an admin by hand. The `TOURNAMENT_LEADERBOARD_INITIAL_ME
 in GitHub lists the organisation's first owner and admins; each one becomes a member the next time
 they sign in, once `alsace-arena` exists. Sign out and back in after the import.
 
+Then give the current season the new scoring: on the Scoring screen, pick it and press **Use the
+platform defaults**. Riot's custom games no longer show the performance score or economy, so the
+defaults stop recording and counting both, for the whole season, and score kills, deaths, assists,
+first bloods, plants and defuses, each game's KDA, MVP and SVP instead. The imported seasons keep
+the old rules, so their points stay as on the live site.
+
 ## What maps where
 
 - `players.username` becomes the Riot ID. Nicknames aren't imported: players start with no
   alias and no Discord username.
 - Each `match_season` becomes a season: 8 matches, 1 to 5 games, 50 points per win, today's
   stat rules, and five bonuses at 10 (FB, LD, MA, MP, MD).
+- Each imported season's rules are today's: every stat worth 1 point, deaths -1, no points for
+  KDA, and no place or honours.
 - `acs` is Valorant's performance score, so it goes into `performance_score`. ACS (the
   tracker's), ADR, damage delta, KAST %, headshot % and clutches stay empty.
 - Each `bonus_*` flag becomes an awarded bonus, copied as recorded, so totals match the live

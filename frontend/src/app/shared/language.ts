@@ -74,6 +74,18 @@ export class LanguageService {
     return formatNumber(value, this.active, decimals);
   }
 
+  /**
+   * Points, with decimals only when they have some: "422", "85.5", "130.7". Totals show one
+   * decimal; what a stat is worth, which an admin sets to the hundredth, shows two.
+   */
+  points(value: number | null | undefined, decimals = 1): string {
+    return value === null || value === undefined
+      ? "–"
+      : new Intl.NumberFormat(this.active, {
+          maximumFractionDigits: decimals,
+        }).format(value);
+  }
+
   /** A date as a short day and month, such as "Nov 20" or "20 nov.". */
   day(date: string): string {
     return new Intl.DateTimeFormat(this.active, {

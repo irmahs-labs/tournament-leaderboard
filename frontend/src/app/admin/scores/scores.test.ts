@@ -18,6 +18,7 @@ import {
   texts,
 } from "../../testing";
 import type { AdminPlayer } from "../api";
+import { emptyRow, linesOf } from "./scores-form";
 import type { GameScores, PreviousRoster } from "./scores-form";
 
 const ORG = `/api/orgs/${ALSACE.slug}`;
@@ -31,15 +32,24 @@ const RULES: Rules = {
       label: "Most first bloods",
       points: 10,
       stat: "FIRST_BLOODS",
+      threshold: null,
     },
-    { award: "MANUAL", code: "ACE", label: "Ace", points: 20, stat: null },
+    {
+      award: "MANUAL",
+      code: "ACE",
+      label: "Ace",
+      points: 20,
+      stat: null,
+      threshold: null,
+    },
   ],
+  kdaPoints: 0,
   pointsPerWin: 50,
   stats: [
-    { countable: true, effect: 1, recorded: true, stat: "KILLS" },
-    { countable: false, effect: 0, recorded: true, stat: "ADR" },
-    { countable: true, effect: 1, recorded: true, stat: "FIRST_BLOODS" },
-    { countable: true, effect: 1, recorded: false, stat: "ECON_RATING" },
+    { countable: true, points: 1, recorded: true, stat: "KILLS" },
+    { countable: false, points: 0, recorded: true, stat: "ADR" },
+    { countable: true, points: 1, recorded: true, stat: "FIRST_BLOODS" },
+    { countable: true, points: 1, recorded: false, stat: "ECON_RATING" },
   ],
 };
 
@@ -296,7 +306,10 @@ describe("Enter scores", () => {
     button("Check bonuses")?.click();
     const request = http.expectOne((each) => each.url.endsWith("/bonus-check"));
 
-    expect(request.request.body).toStrictEqual([{ FIRST_BLOODS: 3 }, {}]);
+    expect(request.request.body).toStrictEqual([
+      { stats: { FIRST_BLOODS: 3 }, win: false },
+      { stats: {}, win: false },
+    ]);
 
     request.flush([["FB"], []]);
     await vi.waitFor(() => {
@@ -363,5 +376,26 @@ describe("Enter scores", () => {
     await reply(`${GAMES}/1/games/1/previous-roster`, ROSTER);
 
     expect(confirm).toHaveBeenCalledOnce();
+  });
+});
+
+describe("a line's place", () => {
+  it("is the line's number unless one is typed", () => {
+    const first = emptyRow({ kind: "new", riotId: "Kestrel#EUW" });
+
+    const second = {
+      ...emptyRow({ kind: "new", riotId: "Wren#EUW" }),
+      stats: { PLACE: "1" },
+    };
+
+    const third = emptyRow({ kind: "new", riotId: "Heron#EUW" });
+
+    expect(
+      linesOf(
+        [first, emptyRow(), second, third],
+        ["PLACE", "KILLS"],
+        new Set()
+      ).map((line) => line.stats)
+    ).toStrictEqual([{ PLACE: 1 }, { PLACE: 1 }, { PLACE: 4 }]);
   });
 });

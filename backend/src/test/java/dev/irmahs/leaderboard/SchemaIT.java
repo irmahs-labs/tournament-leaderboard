@@ -78,6 +78,8 @@ class SchemaIT {
                 2,
                 1,
                 new BigDecimal("27.50"),
+                null,
+                null,
                 null);
         GameStat stat = new GameStat(game, kestrel, line, true);
         stat.award(firstBloods);
@@ -144,8 +146,8 @@ class SchemaIT {
         UUID alsace = organisation("alsace-arena");
         Player kestrel = save(new Player(alsace, "Kestrel#EUW", null, null));
         Game game = save(new Game(save(new Match(save(season(alsace, 1)), 1, null)), 1));
-        StatLine empty =
-                new StatLine(null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        StatLine empty = new StatLine(
+                null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
         GameStat stat = save(new GameStat(game, kestrel, empty, false));
         em.flush();
         em.clear();
@@ -212,11 +214,11 @@ class SchemaIT {
     }
 
     @Test
-    void refusesAStatEffectOtherThanAddSubtractOrNotCounted() {
+    void refusesStatPointsBeyondAThousand() {
         Season season = season(organisation("alsace-arena"), 1);
-        season.setStatRule(Stat.KILLS, new StatRule(true, 2));
+        season.setStatRule(Stat.KILLS, new StatRule(true, 1001));
 
-        assertRefused(() -> save(season), "season_stat_rules_effect_check");
+        assertRefused(() -> save(season), "season_stat_rules_points_check");
     }
 
     @Test

@@ -134,6 +134,8 @@ export const STATS: readonly Stat[] = [
   "DEFUSES",
   "HEADSHOT_PCT",
   "CLUTCHES",
+  "PLACE",
+  "HONOURS",
 ];
 
 /** A saved line as a row, with its stats as text. */
@@ -203,10 +205,16 @@ export const problemOf = (
   return used === 0 ? { kind: "empty" } : null;
 };
 
-/** The numbers a row holds, for the request; empty boxes are left out. */
+/**
+ * The numbers a row holds, for the request; empty boxes are left out, except the place: rows are
+ * typed in scoreboard order, so an empty place is the row's number.
+ *
+ * @param line the row's number on the form, from 1
+ */
 export const statsOf = (
   row: Row,
-  stats: readonly Stat[]
+  stats: readonly Stat[],
+  line: number
 ): Partial<Record<Stat, number>> => {
   const values: Partial<Record<Stat, number>> = {};
 
@@ -215,6 +223,8 @@ export const statsOf = (
 
     if (value !== null && value !== "invalid") {
       values[stat] = value;
+    } else if (stat === "PLACE" && value === null) {
+      values[stat] = line;
     }
   }
 
@@ -227,14 +237,14 @@ export const linesOf = (
   stats: readonly Stat[],
   manualCodes: ReadonlySet<string>
 ): LineInput[] =>
-  rows.flatMap((row) =>
+  rows.flatMap((row, index) =>
     isUsed(row)
       ? [
           {
             manualBonuses: row.bonuses.filter((code) => manualCodes.has(code)),
             playerId: row.player.kind === "known" ? row.player.playerId : null,
             riotId: row.player.kind === "new" ? row.player.riotId.trim() : null,
-            stats: statsOf(row, stats),
+            stats: statsOf(row, stats, index + 1),
             win: row.win,
           },
         ]

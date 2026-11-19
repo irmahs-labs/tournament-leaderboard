@@ -22,7 +22,9 @@ public record StatLine(
         Integer plants,
         Integer defuses,
         BigDecimal headshotPct,
-        Integer clutches) {
+        Integer clutches,
+        Integer place,
+        Integer honours) {
 
     /** A line from stat values; a stat that isn't in the map is empty. Whole stats must be whole. */
     public static StatLine of(Map<Stat, BigDecimal> values) {
@@ -40,7 +42,9 @@ public record StatLine(
                 whole(values.get(Stat.PLANTS)),
                 whole(values.get(Stat.DEFUSES)),
                 values.get(Stat.HEADSHOT_PCT),
-                whole(values.get(Stat.CLUTCHES)));
+                whole(values.get(Stat.CLUTCHES)),
+                whole(values.get(Stat.PLACE)),
+                whole(values.get(Stat.HONOURS)));
     }
 
     private static Integer whole(BigDecimal value) {
@@ -64,6 +68,8 @@ public record StatLine(
             case DEFUSES -> whole(defuses);
             case HEADSHOT_PCT -> headshotPct;
             case CLUTCHES -> whole(clutches);
+            case PLACE -> whole(place);
+            case HONOURS -> whole(honours);
         };
     }
 
