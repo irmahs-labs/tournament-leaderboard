@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 /** The admin Scoring screen: a season's rules. Admins of the organisation only. */
 @RestController
@@ -26,9 +28,21 @@ public class RulesAdminController {
         this.rules = rules;
     }
 
+    /**
+     * @param apply {@code current} changes the season and works out its games again; {@code next}
+     *     keeps the rules for the organisation's next season and leaves this one as it is
+     */
     @PutMapping
-    public RulesView save(@PathVariable String slug, @PathVariable int number, @RequestBody RulesInput input) {
-        return rules.save(slug, number, input);
+    public RulesView save(
+            @PathVariable String slug,
+            @PathVariable int number,
+            @RequestParam(defaultValue = "current") String apply,
+            @RequestBody RulesInput input) {
+        return switch (apply) {
+            case "current" -> rules.save(slug, number, input);
+            case "next" -> rules.saveForNextSeason(slug, number, input);
+            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "apply is current or next");
+        };
     }
 
     @PostMapping("/bonuses")

@@ -8,6 +8,7 @@ import {
   ALSACE,
   ME,
   openAs,
+  RULES,
   rendered,
   SEASONS,
   testProviders,
@@ -34,6 +35,12 @@ describe("the Seasons page", () => {
     TestBed.configureTestingModule({ providers: testProviders() });
     http = TestBed.inject(HttpTestingController);
     harness = await openAs("/org/alsace-arena/admin/seasons", ME, DATED);
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      http
+        .expectOne(`/api/orgs/${ALSACE.slug}/admin/next-season-rules`)
+        .flush(null, { status: 204, statusText: "No Content" });
+    });
     page = rendered(harness);
   });
 
@@ -89,10 +96,14 @@ describe("the Seasons page", () => {
       minGames: 1,
       name: null,
       startsOn: null,
+      useNextSeasonRules: false,
     });
 
     request.flush({ ...SEASONS[1], name: "Season 4", number: 4 });
     await answerSeasons();
+    http
+      .expectOne(`/api/orgs/${ALSACE.slug}/admin/next-season-rules`)
+      .flush(null, { status: 204, statusText: "No Content" });
 
     expect(text(page.querySelector("[role=status]"))).toBe(
       "Season 4 was started."
@@ -139,6 +150,46 @@ describe("the Seasons page", () => {
         "Saved games don’t fit: the season already has a later match, or a match with more games."
       );
     });
+  });
+
+  it("offers the rules saved for the next season first, and uses them up", async () => {
+    // A fresh page, this time with rules saved for the next season.
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ providers: testProviders() });
+    http = TestBed.inject(HttpTestingController);
+    harness = await openAs("/org/alsace-arena/admin/seasons", ME, DATED);
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      http
+        .expectOne(`/api/orgs/${ALSACE.slug}/admin/next-season-rules`)
+        .flush(RULES);
+    });
+    harness.detectChanges();
+    page = rendered(harness);
+
+    const rules = page.querySelector<HTMLSelectElement>(
+      "select[name=copyRulesFrom]"
+    );
+
+    expect(text(rules?.selectedOptions[0])).toBe(
+      "The rules saved for the next season"
+    );
+
+    page.querySelector<HTMLFormElement>("form.start")?.requestSubmit();
+
+    const request = http.expectOne(
+      (each) => each.url === API && each.method === "POST"
+    );
+
+    expect(request.request.body).toMatchObject({
+      copyRulesFrom: null,
+      useNextSeasonRules: true,
+    });
+    request.flush({ ...SEASONS[1], name: "Season 4", number: 4 });
+    await answerSeasons();
+    http
+      .expectOne(`/api/orgs/${ALSACE.slug}/admin/next-season-rules`)
+      .flush(null, { status: 204, statusText: "No Content" });
   });
 });
 

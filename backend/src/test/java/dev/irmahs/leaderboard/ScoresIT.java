@@ -174,7 +174,10 @@ class ScoresIT {
                         HttpMethod.POST,
                         SEASON + "/rules/bonuses",
                         "{\"label\": \"Kill leader\", \"award\": \"HIGHEST\", \"stat\": \"KILLS\", \"points\": 5}"),
-                Arguments.of(HttpMethod.DELETE, SEASON + "/rules/bonuses/MD", null));
+                Arguments.of(HttpMethod.DELETE, SEASON + "/rules/bonuses/MD", null),
+                Arguments.of(HttpMethod.PUT, SEASON + "/rules?apply=next", "{}"),
+                Arguments.of(HttpMethod.GET, "/api/orgs/alsace-arena/admin/next-season-rules", null),
+                Arguments.of(HttpMethod.DELETE, "/api/orgs/alsace-arena/admin/next-season-rules", null));
     }
 
     private MvcTestResult call(HttpMethod method, String uri, String body, OidcLoginRequestPostProcessor who) {
@@ -207,7 +210,7 @@ class ScoresIT {
         }
         MvcTestResult result = request.exchange();
         if (method == HttpMethod.GET) {
-            assertThat(result).hasStatusOk();
+            assertThat(result).hasStatus2xxSuccessful();
         } else {
             assertThat(result).hasStatus(403);
         }
@@ -508,5 +511,80 @@ class ScoresIT {
                 .bodyJson()
                 .extractingPath("$.bonuses.length()")
                 .isEqualTo(6);
+    }
+
+    @Test
+    void rulesForTheNextSeasonLeaveThisSeasonAlone() {
+        saveTwoLines();
+        String rulesForNext = """
+                {"pointsPerWin": 80, "stats": [{"stat": "DEATHS", "recorded": true, "points": -2}],
+                 "bonuses": [{"code": "FB", "points": 20}]}""";
+
+        assertThat(call(HttpMethod.PUT, SEASON + "/rules?apply=next", rulesForNext, ADMIN))
+                .hasStatusOk()
+                .bodyJson()
+                .isLenientlyEqualTo("""
+                        {"pointsPerWin": 80, "bonuses": [{"code": "FB", "points": 20}, {"code": "LD"}, {"code": "MA"},
+                  {"code": "MP"}, {"code": "MD"}, {"code": "MVP"}]}""");
+        // Season 3 keeps its rules and its points.
+        assertThat(mvc.get().uri("/api/orgs/alsace-arena/seasons/3/rules"))
+                .bodyJson()
+                .extractingPath("$.bonuses[0].points")
+                .isEqualTo(10);
+        assertThat(mvc.get().uri("/api/orgs/alsace-arena/seasons/3/rules"))
+                .bodyJson()
+                .extractingPath("$.pointsPerWin")
+                .isEqualTo(50);
+        assertThat(mvc.get().uri(GAME).with(ADMIN))
+                .bodyJson()
+                .extractingPath("$.lines[*].points")
+                .isEqualTo(List.of(422, 263));
+        assertThat(call(HttpMethod.GET, "/api/orgs/alsace-arena/admin/next-season-rules", null, ADMIN))
+                .hasStatusOk()
+                .bodyJson()
+                .isLenientlyEqualTo("{\"pointsPerWin\": 80}");
+    }
+
+    @Test
+    void aNewSeasonStartsWithTheSavedRulesWhichAreThenUsedUp() {
+        call(HttpMethod.PUT, SEASON + "/rules?apply=next", "{\"pointsPerWin\": 80}", ADMIN);
+
+        assertThat(call(
+                        HttpMethod.POST,
+                        "/api/orgs/alsace-arena/admin/seasons",
+                        "{\"useNextSeasonRules\": true}",
+                        ADMIN))
+                .hasStatus(201);
+        assertThat(mvc.get().uri("/api/orgs/alsace-arena/seasons/4/rules"))
+                .bodyJson()
+                .isLenientlyEqualTo("""
+                        {"pointsPerWin": 80, "bonuses": [{"code": "FB"}, {"code": "LD"}, {"code": "MA"},
+                          {"code": "MP"}, {"code": "MD"}, {"code": "MVP"}]}""");
+        assertThat(call(HttpMethod.GET, "/api/orgs/alsace-arena/admin/next-season-rules", null, ADMIN))
+                .hasStatus(204);
+        assertThat(call(
+                        HttpMethod.POST,
+                        "/api/orgs/alsace-arena/admin/seasons",
+                        "{\"useNextSeasonRules\": true}",
+                        ADMIN))
+                .hasStatus(409);
+    }
+
+    @Test
+    void savedRulesCanBeDiscardedAndApplyIsCurrentOrNext() {
+        call(HttpMethod.PUT, SEASON + "/rules?apply=next", "{\"pointsPerWin\": 80}", ADMIN);
+
+        assertThat(call(HttpMethod.DELETE, "/api/orgs/alsace-arena/admin/next-season-rules", null, ADMIN))
+                .hasStatus(204);
+        assertThat(call(HttpMethod.GET, "/api/orgs/alsace-arena/admin/next-season-rules", null, ADMIN))
+                .hasStatus(204);
+        assertThat(call(HttpMethod.PUT, SEASON + "/rules?apply=later", "{}", ADMIN))
+                .hasStatus(400);
+        assertThat(call(
+                        HttpMethod.POST,
+                        "/api/orgs/alsace-arena/admin/seasons",
+                        "{\"useNextSeasonRules\": true, \"copyRulesFrom\": 3}",
+                        ADMIN))
+                .hasStatus(400);
     }
 }

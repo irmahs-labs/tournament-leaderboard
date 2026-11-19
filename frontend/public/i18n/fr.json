@@ -327,7 +327,8 @@
       "matches": "Une saison compte de 1 à {{maxMatches}} matchs.",
       "games": "Un match compte de 1 à {{maxGames}} parties, le minimum ne dépassant pas le maximum.",
       "dates": "Une saison ne peut pas finir avant de commencer."
-    }
+    },
+    "savedForNext": "Les règles enregistrées pour la prochaine saison"
   },
   "adminScoring": {
     "title": "Barème",
@@ -405,7 +406,14 @@
       "points": "Les points d'un bonus sont un nombre entier de 0 à {{maxPoints}}."
     },
     "formula": "Aperçu de la formule",
-    "formulaHelp": "Comment les points d'une partie s'additionnent avec les règles saisies ci-dessus, avant de les enregistrer."
+    "formulaHelp": "Comment les points d'une partie s'additionnent avec les règles saisies ci-dessus, avant de les enregistrer.",
+    "applyTo": "Appliquer les changements à",
+    "applyCurrent": "{{season}}, en recalculant ses points",
+    "applyNext": "La prochaine saison seulement",
+    "savedForNext": "Les règles sont gardées pour la prochaine saison ; {{season}} ne change pas.",
+    "nextSaved": "Des règles sont enregistrées pour la prochaine saison. Elles sont proposées en premier quand vous la commencez sur l’écran Saisons.",
+    "discardNext": "Les abandonner",
+    "nextDiscarded": "Les règles enregistrées pour la prochaine saison sont abandonnées."
   },
   "adminMembers": {
     "title": "Membres",

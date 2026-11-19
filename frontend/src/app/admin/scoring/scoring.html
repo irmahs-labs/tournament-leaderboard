@@ -33,6 +33,18 @@
   <p class="panel notice">
     {{ t("adminScoring.locked", { season: current.season()?.name ?? "" }) }}
   </p>
+  } @if (nextRules.hasValue() && nextRules.value()) {
+  <div class="panel notice next">
+    <p>{{ t("adminScoring.nextSaved") }}</p>
+    <button
+      type="button"
+      class="button-ghost small-button"
+      [disabled]="action.busy()"
+      (click)="discardNext()"
+    >
+      {{ t("adminScoring.discardNext") }}
+    </button>
+  </div>
   }
 
   <section class="panel block" aria-labelledby="stats-title">
@@ -306,6 +318,33 @@
   >
     {{ action.outcome()?.text }}
   </p>
+
+  @if (!locked()) {
+  <fieldset class="apply">
+    <legend class="label">{{ t("adminScoring.applyTo") }}</legend>
+    <label class="choice">
+      <input
+        type="radio"
+        name="applyTo"
+        value="current"
+        [checked]="applyTo() === 'current'"
+        (change)="applyTo.set('current')"
+      />
+      {{ t("adminScoring.applyCurrent", { season: current.season()?.name ?? ""
+      }) }}
+    </label>
+    <label class="choice">
+      <input
+        type="radio"
+        name="applyTo"
+        value="next"
+        [checked]="applyTo() === 'next'"
+        (change)="applyTo.set('next')"
+      />
+      {{ t("adminScoring.applyNext") }}
+    </label>
+  </fieldset>
+  }
 
   <div class="actions">
     <button
