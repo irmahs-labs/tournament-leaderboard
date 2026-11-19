@@ -5,6 +5,21 @@ import { RedirectCommand, Router } from "@angular/router";
 import type { Observable } from "rxjs";
 import { catchError, of } from "rxjs";
 
+/** The sites an organisation can link to, in the order the footer shows them. */
+export const SOCIAL_SITES = [
+  "discord",
+  "instagram",
+  "twitch",
+  "youtube",
+  "tiktok",
+  "website",
+] as const;
+
+export type SocialSite = (typeof SOCIAL_SITES)[number];
+
+/** Each one an https address, or nothing to hide it. */
+export type SocialLinks = Record<SocialSite, string | null>;
+
 /** What every page of an organisation needs first, from `GET /api/orgs/{slug}`. */
 export interface Organization {
   slug: string;
@@ -15,6 +30,9 @@ export interface Organization {
   /** #RRGGBB, or nothing for the template's red. */
   accentColor: string | null;
   playersPerMatch: number;
+  socialLinks: SocialLinks;
+  /** The logo's address, which changes with it; nothing shows the initials. */
+  logo: string | null;
 }
 
 @Injectable({ providedIn: "root" })

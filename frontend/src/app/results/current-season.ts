@@ -12,12 +12,12 @@ import type { Season } from "./api";
 export class CurrentSeason {
   readonly #organization = signal<Organization | null>(null);
   readonly #requested = signal<number | null>(null);
+  /** Only the slug, so that showing the same organisation again doesn't ask for its seasons. */
+  readonly #slug = computed(() => this.#organization()?.slug);
   readonly #list = httpResource<Season[]>(() => {
-    const org = this.#organization();
+    const slug = this.#slug();
 
-    return org
-      ? `/api/orgs/${encodeURIComponent(org.slug)}/seasons`
-      : undefined;
+    return slug ? `/api/orgs/${encodeURIComponent(slug)}/seasons` : undefined;
   });
 
   readonly organization = this.#organization.asReadonly();
@@ -64,7 +64,20 @@ export class CurrentSeason {
 
   /** Called by the organisation's shell whenever the organisation or `?season=` changes. */
   use(organization: Organization, requested: number | null): void {
+    this.show(organization);
+    this.pick(requested);
+  }
+
+  /**
+   * Shows the organisation an address names, or the same one again after its admins changed how
+   * it looks (its seasons' address doesn't change, so they aren't asked for again).
+   */
+  show(organization: Organization): void {
     this.#organization.set(organization);
+  }
+
+  /** The season asked for in the address, or nothing for the most recent one. */
+  pick(requested: number | null): void {
     this.#requested.set(requested);
   }
 }

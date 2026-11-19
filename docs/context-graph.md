@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-19, with members and admin invites: the `team` package (`TeamService`, `JoinService`, `Invite`), the Members screen and the `/join` page.
+Last updated: 2026-11-19, with branding: `BrandingService` and the logo in `organizations`, social links on `organizations`, the Branding screen, the logo in the header and the links in the footer.
 
 ## System
 
@@ -68,7 +68,7 @@ flowchart LR
 |---|---|
 | `accounts` | `AppUser`, `GoogleProfile`, `AccountService` (sign-in, initial memberships, platform admins), `AccessProperties`, `MeController` |
 | `members` | `OrganizationMember` (role ADMIN or PLAYER, one owner), `Membership` |
-| `organizations` | `Organization`, `OrganizationService` (`requireActive`, `recordActivity`), public org endpoint |
+| `organizations` | `Organization` (with its `SocialLinks`), `OrganizationService` (`requireActive`, `recordActivity`), `OrganizationView`, `BrandingService` (names, language, accent, places per match, links checked by `SocialSite`; the logo, told apart by its bytes), `OrganizationLogo`, the public org and logo endpoints, `BrandingController` |
 | `security` | `SecurityConfig` (CSRF for SPAs, 401 on `/api/**`, Google sign-in ending on the Angular `/sign-in`), `GoogleUserService` (verified email only), `OrgAccess` (`@orgAccess.isAdmin`) |
 | `tenancy` | `OrganizationScopeFilter` + `OrganizationScopedTransactionManager`: sets `app.organization_id` per transaction for row-level security |
 | `players` | `Player`, `PlayerAlias`, `AliasKind`, `PlayerAdminService` (search, add, edit; rename keeps the old Riot ID as an alias) |
@@ -92,6 +92,7 @@ flowchart LR
         on["/api/online (event stream)"]
         r["/api/ranks"]
         o["/api/orgs/{slug}"]
+        lo["/api/orgs/{slug}/logo: kept a year, its address changes with it"]
         sl["…/seasons"]
         sr["…/seasons/{n}/rules"]
         lb["…/seasons/{n}/leaderboard, /summary"]
@@ -104,6 +105,7 @@ flowchart LR
     jv["/api/invites/{code}: GET, public, 10 a minute"]
     subgraph admin["Admin: /api/orgs/{slug}/admin"]
         ap["players: GET ?q, POST, PUT /{id}"]
+        br["branding: PUT; logo: PUT (the image as the body), DELETE"]
         tm["members: GET, PUT /{user}/role, DELETE /{user}, POST /{user}/ownership; invites: POST, DELETE /{id}"]
         as["seasons: POST, PUT /{n}"]
         ru["seasons/{n}/rules: PUT, POST /platform-defaults"]
@@ -112,7 +114,7 @@ flowchart LR
     end
     r --> ranks
     on --> presence
-    o --> organizations
+    o & lo & br --> BrandingService
     sl & sr --> SeasonService
     lb & ml --> SeasonResultsService
     me --> AccountService
@@ -129,7 +131,8 @@ flowchart LR
 Flyway: `V2026_11_10_1__schema.sql` (all tables), `V2026_11_13_1__row_level_security.sql`
 (policy `organization_isolation` on players, seasons, matches, organization_members,
 organization_invites and organization_logos), `V2026_11_18_1__drop_avatar_url.sql` (the Google
-picture isn't kept: data minimisation).
+picture isn't kept: data minimisation), `V2026_11_19_1__weighted_scoring.sql`,
+`V2026_11_19_2__social_links.sql` (six `*_url` columns on organizations, https only).
 
 ```mermaid
 erDiagram
@@ -173,7 +176,7 @@ flowchart TD
     platform --> nf[NotFoundPage]
     platform --> join[JoinPage /join/:code<br/>what the code is for, sign in with the invited account, accept; or type a code]
     shell --> header[SiteHeader<br/>skip link, logo, nav keeping ?season= (Scores, Players, Seasons, Scoring and Members on admin pages; a Site | Admin switch for admins), online count, season, EN/FR, theme, Sign in or account]
-    shell --> footer[SiteFooter<br/>org name; credit, legal pages, GitHub and Contact on three centred lines]
+    shell --> footer[SiteFooter<br/>org name and its social links; credit, legal pages, GitHub and Contact on three centred lines]
     platform --> header
     platform --> footer
     shell -->|"organisation, ?season="| current[CurrentSeason]
@@ -211,6 +214,8 @@ flowchart TD
     scadm -->|"GET …/rules, PUT, POST /platform-defaults"| recordApi["…/admin/seasons/{n}/rules"]
     guard --> madm["MembersAdminPage /admin/members<br/>invite an admin, waiting invites, roles, remove, ownership"]
     madm -->|"GET, PUT, POST, DELETE"| teamApi["…/admin/members, …/admin/invites"]
+    guard --> badm["BrandingAdminPage /admin/branding<br/>names, language, logo, accent with its contrast, places per match, social links"]
+    badm -->|"PUT, DELETE; then CurrentSeason.show"| brandApi["…/admin/branding, …/admin/logo"]
     seadm --> current
     scadm --> current
     resolver[organizationResolver] -->|GET| orgApi["/api/orgs/{slug}"]
@@ -221,8 +226,8 @@ flowchart TD
 |---|---|
 | `shared/` | `ThemeService` (dark or light, the accent's CSS variables), `colour.ts` (WCAG contrast and mixing, the palettes, readable rank colours), `LanguageService` (EN or FR; numbers, dates and plurals in the language on screen), `OnlineService` (the header's count of open pages), `SessionService` (who is signed in, `canAdmin`, one `/api/me` request at a time, Google sign-in with a safe return address, sign-out), `organization.ts` (`organizationResolver`, `fullName`, `initials`), `storage.ts` (local and session storage that survives being blocked), `RankPill` |
 | `layout/` | `OrgShell` (an organisation's pages), `PlatformShell` (sign-in and Not found), `SiteHeader`, `SiteFooter`, page layout |
-| `results/` | The public results: `api.ts` (the API's shapes), `CurrentSeason` (the organisation's seasons, newest first, the one picked with `?season=`, `reload()` after an admin change), `stats.ts` (stat columns with K, D and A folded into KDA, decimals, the points formula, Riot ID name and tag), `StandingsTable` (a season's or a match's averages or totals, or one game's lines), `leaderboard/`, `matches/` (`MatchesPage`), `match/` (`MatchPage`, `match-stats.ts`: a game's lines as standings, the stat leaders) |
-| `admin/` | `adminGuard`, `api.ts` (the admin API's shapes), `players/` (`PlayersAdminPage`: aliases typed as one line, a previous Riot ID keeps its kind), `action.ts` (`AdminAction`: one change at a time, then a status line), `seasons/` (`SeasonsAdminPage`, `problemOf` checking details as the API does), `scoring/` (`ScoringAdminPage`: the rules as typed, `problemOf` and `inputOf`; locked for a finished season), `members/` (`MembersAdminPage`, the invite message to copy), `scores/` (`ScoresAdminPage`; `scores-form.ts`: lines as typed, stat boxes parsed with a decimal comma, an empty place taken from the line's number, the request) |
+| `results/` | The public results: `api.ts` (the API's shapes), `CurrentSeason` (the organisation's seasons, newest first, the one picked with `?season=`, `reload()` after an admin change, `show()` for the organisation after Branding saves it; its seasons are fetched by slug only), `stats.ts` (stat columns with K, D and A folded into KDA, decimals, the points formula, Riot ID name and tag), `StandingsTable` (a season's or a match's averages or totals, or one game's lines), `leaderboard/`, `matches/` (`MatchesPage`), `match/` (`MatchPage`, `match-stats.ts`: a game's lines as standings, the stat leaders) |
+| `admin/` | `adminGuard`, `api.ts` (the admin API's shapes), `players/` (`PlayersAdminPage`: aliases typed as one line, a previous Riot ID keeps its kind), `action.ts` (`AdminAction`: one change at a time, then a status line), `seasons/` (`SeasonsAdminPage`, `problemOf` checking details as the API does), `scoring/` (`ScoringAdminPage`: the rules as typed, `problemOf` and `inputOf`; locked for a finished season), `members/` (`MembersAdminPage`, the invite message to copy), `branding/` (`BrandingAdminPage`, `problemOf` and `linkAllowed` checking as the API does), `scores/` (`ScoresAdminPage`; `scores-form.ts`: lines as typed, stat boxes parsed with a decimal comma, an empty place taken from the line's number, the request) |
 | `sign-in/` | `SignInPage` |
 | `join/` | `JoinPage`, `stepOf` (sign in, accept, wrong account, expired, used, revoked, accepted), `tidyCode` |
 | `legal/` | `LegalPage` and `legal-content.ts`: the legal notice, privacy policy, cookie policy and terms, in English and French, one route each |
@@ -235,8 +240,7 @@ flowchart TD
 A component used by several features lives in `shared/` (`RankPill`); one used by several pages of a
 single feature lives in that feature (`StandingsTable` in `results/`).
 
-Not in the shell yet: social links (branding API, phase 7). Not on the
-leaderboard yet: Export CSV and Export poster (phase 11).
+Not on the leaderboard yet: Export CSV and Export poster (phase 11).
 
 ## Phases
 
@@ -255,6 +259,7 @@ production, and the Protect migration ruleset lets a pull request merge only onc
 come with it. The full plan, with each phase's exit criterion, is the migration plan page
 kept with the project designs.
 
-Not built yet: social links, branding, members and invites (7); the scoring-rules editor,
+Not built yet: the home page with the featured organisation, creating an organisation, creation
+limits, suspension and account deletion (7); custom bonuses and
 `PUT …/rules?apply=current|next` (8); claims and expected emails (9); schedule and sign-ups (10);
 exports (11); moderation (12); merging duplicate players (13).

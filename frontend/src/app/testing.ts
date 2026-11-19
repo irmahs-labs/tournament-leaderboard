@@ -29,9 +29,18 @@ export const ALSACE: Organization = {
   accentColor: "#2F5BFF",
   defaultLocale: "fr",
   description: null,
+  logo: null,
   name: "Alsace Arena",
   playersPerMatch: 10,
   slug: "alsace-arena",
+  socialLinks: {
+    discord: "https://discord.gg/alsace",
+    instagram: null,
+    tiktok: null,
+    twitch: null,
+    website: "https://alsace-arena.example",
+    youtube: null,
+  },
   tournamentName: "Spike Tournament",
 };
 

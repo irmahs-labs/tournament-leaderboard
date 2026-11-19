@@ -8,7 +8,16 @@
       "cookies": "Cookies",
       "terms": "Conditions d'utilisation"
     },
-    "contact": "Contact"
+    "contact": "Contact",
+    "socialLabel": "{{org}} ailleurs",
+    "social": {
+      "discord": "Discord",
+      "instagram": "Instagram",
+      "twitch": "Twitch",
+      "youtube": "YouTube",
+      "tiktok": "TikTok",
+      "website": "Site web"
+    }
   },
   "header": {
     "language": "Langue",
@@ -216,7 +225,8 @@
     "site": "Site",
     "seasons": "Saisons",
     "scoring": "Barème",
-    "members": "Membres"
+    "members": "Membres",
+    "branding": "Image"
   },
   "adminPlayers": {
     "title": "Joueurs",
@@ -457,5 +467,77 @@
     "revokedBody": "Un admin de {{org}} l’a arrêté. Demandez-lui-en un nouveau.",
     "separate": "Chaque organisation garde ses propres joueurs, scores et admins. Être admin ici ne donne accès à aucune autre organisation.",
     "loading": "Chargement de l’invitation…"
+  },
+  "adminBranding": {
+    "title": "Image et organisation",
+    "lede": "Comment {{org}} apparaît aux joueurs : ses noms, sa langue, son logo, sa couleur et ses liens.",
+    "organisation": "Organisation",
+    "name": "Nom",
+    "tournamentName": "Nom du tournoi",
+    "description": "Description",
+    "descriptionHelp": "Une ligne, affichée sur la page d'accueil quand votre organisation est mise en avant.",
+    "address": "Adresse publique",
+    "addressHelp": "Elle ne peut pas encore être changée, pour que les liens déjà partagés continuent de marcher.",
+    "language": "Langue par défaut",
+    "locale": {
+      "en": "English",
+      "fr": "Français"
+    },
+    "logo": "Logo",
+    "upload": "Envoyer un logo",
+    "removeLogo": "Retirer",
+    "logoHelp": "Une image carrée PNG, WebP ou SVG de 256 Ko au plus. Affichée en haut de chaque page.",
+    "accent": "Couleur d'accent",
+    "useColour": "Utiliser {{hex}}",
+    "hex": "Code hexadécimal",
+    "buttonText": "Texte des boutons sur votre couleur",
+    "pass": "lisible",
+    "low": "peu lisible",
+    "asText": "Votre couleur en texte sur les cartes",
+    "shownAt": "{{raw}} : 1, affichée à {{shown}} : 1",
+    "accentHelp": "Quand votre couleur est trop claire ou trop foncée pour du petit texte, le site ajuste sa teinte pour le texte seulement. Les boutons et les mises en avant gardent votre couleur exacte.",
+    "previewButton": "Bouton principal",
+    "matches": "Matchs",
+    "matchesHelp": "Chaque nouveau match commence avec ce nombre de places.",
+    "playersPerMatch": "Joueurs par match",
+    "social": "Réseaux sociaux",
+    "socialHelp": "Affichés en bas de chaque page de {{org}}. Laissez un champ vide pour le masquer.",
+    "site": {
+      "discord": "Discord",
+      "instagram": "Instagram",
+      "twitch": "Twitch",
+      "youtube": "YouTube",
+      "tiktok": "TikTok",
+      "website": "Site web"
+    },
+    "placeholder": {
+      "discord": "https://discord.gg/…",
+      "instagram": "https://instagram.com/…",
+      "twitch": "https://twitch.tv/…",
+      "youtube": "https://youtube.com/@…",
+      "tiktok": "https://tiktok.com/@…",
+      "website": "https://…"
+    },
+    "save": "Enregistrer",
+    "saved": "Image enregistrée.",
+    "logoSaved": "Logo enregistré.",
+    "logoRemoved": "Logo retiré.",
+    "logoTooLarge": "Cette image dépasse 256 Ko.",
+    "logoType": "Un logo est une image PNG, WebP ou SVG, sans script.",
+    "invalid": "Une valeur du formulaire n'est pas acceptée. Vérifiez chaque champ et réessayez.",
+    "failed": "Ça n'a pas marché. Réessayez.",
+    "problem": {
+      "name": "Donnez à l'organisation un nom de 60 caractères au plus.",
+      "accent": "La couleur d'accent est un code comme #2F5BFF, ou vide pour le rouge.",
+      "players": "Un match a de 2 à 40 places.",
+      "link": {
+        "discord": "Le lien Discord doit être une adresse https:// sur Discord.",
+        "instagram": "Le lien Instagram doit être une adresse https:// sur Instagram.",
+        "twitch": "Le lien Twitch doit être une adresse https:// sur Twitch.",
+        "youtube": "Le lien YouTube doit être une adresse https:// sur YouTube.",
+        "tiktok": "Le lien TikTok doit être une adresse https:// sur TikTok.",
+        "website": "Le lien Site web doit être une adresse https://."
+      }
+    }
   }
 }

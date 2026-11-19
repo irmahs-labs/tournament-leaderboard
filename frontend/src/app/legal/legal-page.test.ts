@@ -130,7 +130,7 @@ describe("the footer", () => {
 
   it("links to the legal pages on every organisation page", async () => {
     const page = rendered(await openAlsace("/o/alsace-arena"));
-    const footer = page.ownerDocument.querySelector("footer nav");
+    const footer = page.ownerDocument.querySelector("footer .credit nav");
 
     expect(texts(footer ?? page, "a")).toStrictEqual([
       "Legal notice",
@@ -139,5 +139,18 @@ describe("the footer", () => {
       "Terms of use",
     ]);
     expect(footer?.getAttribute("aria-label")).toBe("Legal");
+  });
+
+  it("links to the organisation's social pages that are set, in a new tab", async () => {
+    const page = rendered(await openAlsace("/o/alsace-arena"));
+    const social = page.ownerDocument.querySelector("footer nav");
+    const links = [...(social?.querySelectorAll("a") ?? [])];
+
+    expect(social?.getAttribute("aria-label")).toBe("Alsace Arena elsewhere");
+    expect(links.map((link) => [text(link), link.href])).toStrictEqual([
+      ["Discord", "https://discord.gg/alsace"],
+      ["Website", "https://alsace-arena.example/"],
+    ]);
+    expect(links.every((link) => link.target === "_blank")).toBeTruthy();
   });
 });

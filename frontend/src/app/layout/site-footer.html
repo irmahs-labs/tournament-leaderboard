@@ -4,7 +4,18 @@
     <div class="row">
       <span class="org">{{ fullName(org) }}</span>
     </div>
-    }
+    @if (links().length > 0) {
+    <nav
+      class="links"
+      [attr.aria-label]="t('footer.socialLabel', { org: org.name })"
+    >
+      @for (link of links(); track link.site) {
+      <a [href]="link.address" rel="noopener" target="_blank"
+        >{{ t("footer.social." + link.site) }}</a
+      >
+      }
+    </nav>
+    } }
     <div class="credit" [class.ruled]="organization()">
       <p class="line">
         Tournament Leaderboard · {{ t("footer.createdBy") }}

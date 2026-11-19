@@ -36,6 +36,13 @@
   font-size: 16px;
 }
 
+/* An uploaded logo keeps its own colours, whole, inside the square. */
+.logo.image {
+  display: block;
+  object-fit: contain;
+  background: transparent;
+}
+
 .mark {
   width: 14px;
   height: 28px;
