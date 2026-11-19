@@ -103,13 +103,13 @@ class TeamIT {
         return request.exchange();
     }
 
+    /** Invites this email as the admin, and writes it to the database; answers the code. */
     private String invite(String email) {
-        return JsonPath.parse(new String(
-                        send(HttpMethod.POST, ADMIN_API + "/invites", inviteBody(email, 60), ADMIN)
-                                .getResponse()
-                                .getContentAsByteArray(),
-                        StandardCharsets.UTF_8))
-                .read("$.code");
+        byte[] answer = send(HttpMethod.POST, ADMIN_API + "/invites", inviteBody(email, 60), ADMIN)
+                .getResponse()
+                .getContentAsByteArray();
+        em.flush();
+        return JsonPath.parse(new String(answer, StandardCharsets.UTF_8)).read("$.code");
     }
 
     private static String inviteBody(String email, int minutes) {
@@ -210,6 +210,7 @@ class TeamIT {
         String expired = invite("guest@example.com");
         jdbc.sql("UPDATE organization_invites SET expires_at = now() - interval '1 minute'")
                 .update();
+        em.clear(); // the update went past Hibernate: forget the invite as it was
         String revoked = invite("guest@example.com");
         UUID revokedId = jdbc.sql("SELECT id FROM organization_invites WHERE expires_at > now()")
                 .query(UUID.class)
