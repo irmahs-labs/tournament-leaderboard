@@ -113,8 +113,11 @@ input::placeholder {
   background: var(--accent-soft);
 }
 
-.table tr.editing input,
-.table tr.editing select {
+.table tr.editing td {
+  padding-inline: 8px;
+}
+
+.table tr.editing input:not([type="checkbox"]) {
   min-width: 140px;
 }
 
@@ -144,12 +147,17 @@ input::placeholder {
   gap: 6px;
 }
 
+/* The start and end dates sit one above the other, so the row fits without scrolling. */
+.dates {
+  flex-direction: column;
+}
+
 .count {
   width: 72px;
   min-width: 72px;
 }
 
-.table tr.editing .count {
+.table tr.editing input.count {
   min-width: 72px;
 }
 
