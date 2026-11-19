@@ -89,7 +89,7 @@ describe("the Scoring screen", () => {
   });
 
   it("shows each stat with its switch and its points, and each bonus", async () => {
-    await open("/o/alsace-arena/admin/scoring", 3);
+    await open("/org/alsace-arena/admin/scoring", 3);
 
     expect(
       [
@@ -115,7 +115,7 @@ describe("the Scoring screen", () => {
   });
 
   it("saves what's typed, and says so", async () => {
-    await open("/o/alsace-arena/admin/scoring", 3);
+    await open("/org/alsace-arena/admin/scoring", 3);
     type("Points for each unit of Kills", "1,5");
     type("Points for the KDA ratio", "10");
     type("Threshold for HON", "4");
@@ -152,7 +152,7 @@ describe("the Scoring screen", () => {
   });
 
   it("explains a wrong number instead of sending it", async () => {
-    await open("/o/alsace-arena/admin/scoring", 3);
+    await open("/org/alsace-arena/admin/scoring", 3);
     type("Points for each unit of Deaths", "-1.255");
     button("Save the rules")?.click();
     harness.detectChanges();
@@ -163,7 +163,7 @@ describe("the Scoring screen", () => {
   });
 
   it("uses the platform defaults once the admin agrees", async () => {
-    await open("/o/alsace-arena/admin/scoring", 3);
+    await open("/org/alsace-arena/admin/scoring", 3);
     vi.spyOn(globalThis, "confirm").mockReturnValue(true);
     button("Use the platform defaults")?.click();
     const request = http.expectOne(`${RULES_API}/platform-defaults`);
@@ -180,7 +180,7 @@ describe("the Scoring screen", () => {
   });
 
   it("locks a finished season's rules", async () => {
-    await open("/o/alsace-arena/admin/scoring?season=1", 1);
+    await open("/org/alsace-arena/admin/scoring?season=1", 1);
 
     expect(text(page.querySelector(".notice"))).toBe(
       "Season 1 is finished, so its rules can’t change. Reopen it on the Seasons screen to change them."

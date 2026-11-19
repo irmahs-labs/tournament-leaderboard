@@ -55,7 +55,7 @@
       {{ action.outcome()?.text }}
     </p>
     <div class="scroll">
-      <table class="table">
+      <table class="cards table">
         <thead>
           <tr>
             <th scope="col">{{ t("platform.organisation") }}</th>
@@ -81,35 +81,41 @@
                 >
                 <div>
                   @if (org.status === "ACTIVE") {
-                  <a class="strong" [routerLink]="['/o', org.slug]"
+                  <a class="strong" [routerLink]="['/org', org.slug]"
                     >{{ org.name }}</a
                   >
                   } @else {
                   <strong>{{ org.name }}</strong>
                   }
-                  <span class="muted slug">/o/{{ org.slug }}</span>
+                  <span class="muted slug">/org/{{ org.slug }}</span>
                 </div>
               </div>
             </td>
-            <td>{{ org.ownerEmail ?? "–" }}</td>
-            <td class="nowrap">
+            <td [attr.data-label]="t('platform.owner')">
+              {{ org.ownerEmail ?? "–" }}
+            </td>
+            <td class="nowrap" [attr.data-label]="t('platform.created')">
               {{ org.createdAt ? language.moment(org.createdAt) : "–" }}
             </td>
-            <td>
+            <td [attr.data-label]="t('platform.lastActivity')">
               {{ org.lastActivityAt ? language.moment(org.lastActivityAt) :
               t("platform.noGames") }}
             </td>
-            <td class="num">{{ org.members }}</td>
-            <td>
-              <span
-                class="pill"
-                [class.good]="org.status === 'ACTIVE'"
-                [class.warn]="org.status === 'SUSPENDED'"
-                >{{ t("platform.state." + org.status) }}</span
-              >
-              @if (org.featured) {
-              <span class="pill home">{{ t("platform.onHomePage") }}</span>
-              }
+            <td class="num" [attr.data-label]="t('platform.members')">
+              {{ org.members }}
+            </td>
+            <td [attr.data-label]="t('platform.status')">
+              <div class="pills">
+                <span
+                  class="pill"
+                  [class.good]="org.status === 'ACTIVE'"
+                  [class.warn]="org.status === 'SUSPENDED'"
+                  >{{ t("platform.state." + org.status) }}</span
+                >
+                @if (org.featured) {
+                <span class="pill home">{{ t("platform.onHomePage") }}</span>
+                }
+              </div>
             </td>
             <td class="end">
               <button

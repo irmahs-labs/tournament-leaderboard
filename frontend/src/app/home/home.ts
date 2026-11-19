@@ -201,7 +201,7 @@ export class HomePage implements AfterViewInit {
       );
 
       await this.session.load();
-      await this.#router.navigate(["/o", made.slug, "admin", "seasons"]);
+      await this.#router.navigate(["/org", made.slug, "admin", "seasons"]);
     } catch (error) {
       const status = error instanceof HttpErrorResponse ? error.status : 0;
 

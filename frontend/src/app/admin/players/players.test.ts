@@ -59,7 +59,7 @@ let http: HttpTestingController;
 const openPlayers = async (
   seasons: Season[] = []
 ): Promise<RouterTestingHarness> => {
-  const harness = await openAs("/o/alsace-arena/admin/players", ME, seasons);
+  const harness = await openAs("/org/alsace-arena/admin/players", ME, seasons);
   await vi.waitFor(() => {
     harness.detectChanges();
     http.expectOne((request) => request.url === API).flush(PLAYERS);
@@ -84,7 +84,7 @@ describe("the admin pages", () => {
 
   it("send someone signed out to sign in, and back", async () => {
     const harness = await RouterTestingHarness.create();
-    const navigation = harness.navigateByUrl("/o/alsace-arena/admin/players");
+    const navigation = harness.navigateByUrl("/org/alsace-arena/admin/players");
 
     await vi.waitFor(() => {
       http
@@ -94,14 +94,14 @@ describe("the admin pages", () => {
     await navigation;
 
     expect(TestBed.inject(Router).url).toBe(
-      "/sign-in?from=%2Fo%2Falsace-arena%2Fadmin%2Fplayers"
+      "/sign-in?from=%2Forg%2Falsace-arena%2Fadmin%2Fplayers"
     );
   });
 
   it("send a player who isn't an admin to the public pages", async () => {
-    const harness = await openAs("/o/alsace-arena/admin", PLAYER_ONLY);
+    const harness = await openAs("/org/alsace-arena/admin", PLAYER_ONLY);
 
-    expect(TestBed.inject(Router).url).toBe("/o/alsace-arena");
+    expect(TestBed.inject(Router).url).toBe("/org/alsace-arena");
     expect(rendered(harness).querySelector("header .mode")).toBeNull();
   });
 
@@ -135,7 +135,7 @@ describe("the Site | Admin switch", () => {
   });
 
   it("shows admins which side of the organisation is on screen", async () => {
-    const harness = await openAs("/o/alsace-arena/admin/players", ME);
+    const harness = await openAs("/org/alsace-arena/admin/players", ME);
     await vi.waitFor(() => {
       harness.detectChanges();
       http.expectOne((request) => request.url === API).flush(PLAYERS);
@@ -149,7 +149,7 @@ describe("the Site | Admin switch", () => {
       "Admin"
     );
 
-    await harness.navigateByUrl("/o/alsace-arena");
+    await harness.navigateByUrl("/org/alsace-arena");
     harness.detectChanges();
 
     expect(text(page.querySelector("header .mode [aria-current]"))).toBe(

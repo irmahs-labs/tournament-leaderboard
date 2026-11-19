@@ -221,7 +221,7 @@ export class BrandingAdminPage {
 
   /** The address of the organisation's pages, as players see it. */
   protected address(org: Organization): string {
-    return `${this.#document.location.host}/o/${org.slug}`;
+    return `${this.#document.location.host}/org/${org.slug}`;
   }
 
   protected ratio(value: number): string {

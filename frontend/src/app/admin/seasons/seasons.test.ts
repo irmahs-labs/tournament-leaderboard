@@ -33,7 +33,7 @@ describe("the Seasons page", () => {
     localStorage.setItem("lang", "en");
     TestBed.configureTestingModule({ providers: testProviders() });
     http = TestBed.inject(HttpTestingController);
-    harness = await openAs("/o/alsace-arena/admin/seasons", ME, DATED);
+    harness = await openAs("/org/alsace-arena/admin/seasons", ME, DATED);
     page = rendered(harness);
   });
 

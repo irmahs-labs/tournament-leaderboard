@@ -45,7 +45,7 @@ export const routes: Routes = [
       },
     ],
     component: OrgShell,
-    path: "o/:slug",
+    path: "org/:slug",
     resolve: { organization: organizationResolver },
     runGuardsAndResolvers: "pathParamsChange",
   },

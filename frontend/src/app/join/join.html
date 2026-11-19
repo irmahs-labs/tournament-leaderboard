@@ -41,10 +41,10 @@
     <h1 class="heading">{{ t("join.acceptedTitle", { org: org.name }) }}</h1>
     <p class="muted">{{ t("join.acceptedBody") }}</p>
     <div class="buttons">
-      <a class="button" [routerLink]="['/o', org.slug, 'admin']"
+      <a class="button" [routerLink]="['/org', org.slug, 'admin']"
         >{{ t("join.openAdmin") }}</a
       >
-      <a class="button-ghost" [routerLink]="['/o', org.slug]"
+      <a class="button-ghost" [routerLink]="['/org', org.slug]"
         >{{ t("join.viewLeaderboard") }}</a
       >
     </div>

@@ -18,7 +18,7 @@ import { statusesOf } from "./matches";
 
 const API = `/api/orgs/${ALSACE.slug}`;
 
-const open = async (url = "/o/alsace-arena/matches") => {
+const open = async (url = "/org/alsace-arena/matches") => {
   const harness = await openAlsace(url, SEASONS);
   await answer(harness, `${API}/seasons/3/matches`, MATCH_CARDS);
   harness.detectChanges();
@@ -82,7 +82,7 @@ describe("the matches page", () => {
 
     expect(text(link)).toBe("View match 1");
     expect(link?.getAttribute("href")).toBe(
-      "/o/alsace-arena/matches/1?season=3"
+      "/org/alsace-arena/matches/1?season=3"
     );
 
     link?.click();
@@ -91,13 +91,13 @@ describe("the matches page", () => {
       http.expectOne(`${API}/seasons/3/matches/1`);
     });
     expect(TestBed.inject(Router).url).toBe(
-      "/o/alsace-arena/matches/1?season=3"
+      "/org/alsace-arena/matches/1?season=3"
     );
   });
 
   it("shows the season picked in the header", async () => {
     const harness = await openAlsace(
-      "/o/alsace-arena/matches?season=1",
+      "/org/alsace-arena/matches?season=1",
       SEASONS
     );
 
@@ -110,7 +110,7 @@ describe("the matches page", () => {
   });
 
   it("says when the season plans no match", async () => {
-    const harness = await openAlsace("/o/alsace-arena/matches", SEASONS);
+    const harness = await openAlsace("/org/alsace-arena/matches", SEASONS);
     await answer(harness, `${API}/seasons/3/matches`, []);
     harness.detectChanges();
 

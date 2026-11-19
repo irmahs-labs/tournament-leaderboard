@@ -6,7 +6,7 @@
     <div class="row">
       <a class="button" href="#create">{{ t("home.create") }}</a>
       @if (featured.hasValue() && featured.value(); as org) {
-      <a class="button-ghost" [routerLink]="['/o', org.slug]"
+      <a class="button-ghost" [routerLink]="['/org', org.slug]"
         >{{ t("home.seeLive") }}</a
       >
       }
@@ -48,7 +48,7 @@
           />
           <span class="muted small address"
             >{{ t("home.liveAt") }}
-            <code>{{ host() }}/o/{{ slug() || "…" }}</code></span
+            <code>{{ host() }}/org/{{ slug() || "…" }}</code></span
           >
         </label>
         @if (problem(); as text) {
@@ -91,7 +91,7 @@
       @if (org.description) {
       <p class="muted">{{ org.description }}</p>
       }
-      <a class="button-ghost" [routerLink]="['/o', org.slug]"
+      <a class="button-ghost" [routerLink]="['/org', org.slug]"
         >{{ t("home.visit") }}</a
       >
     </section>

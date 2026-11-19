@@ -31,7 +31,7 @@
         <span class="pill">
           {{ t(membership.owner ? "roles.OWNER" : "roles." + membership.role) }}
         </span>
-        <a class="button small-button" [routerLink]="['/o', membership.slug]"
+        <a class="button small-button" [routerLink]="['/org', membership.slug]"
           >{{ t("signIn.open") }}</a
         >
       </li>

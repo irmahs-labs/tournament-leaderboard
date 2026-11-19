@@ -33,7 +33,7 @@ describe("a match's page", () => {
   });
 
   const open = async (): Promise<HTMLElement> => {
-    harness = await openAlsace("/o/alsace-arena/matches/1?season=3", SEASONS);
+    harness = await openAlsace("/org/alsace-arena/matches/1?season=3", SEASONS);
     await answer(harness, `${API}/matches/1`, MATCH);
     harness.detectChanges();
 
@@ -68,7 +68,7 @@ describe("a match's page", () => {
 
     expect(crumbs?.getAttribute("aria-label")).toBe("Breadcrumb");
     expect(crumbs?.querySelector("a")?.getAttribute("href")).toBe(
-      "/o/alsace-arena/matches?season=3"
+      "/org/alsace-arena/matches?season=3"
     );
     expect(text(crumbs?.querySelector("[aria-current=page]"))).toBe("Match 1");
   });
@@ -191,7 +191,7 @@ describe("a match's page", () => {
   });
 
   it("says when the season has no such match", async () => {
-    harness = await openAlsace("/o/alsace-arena/matches/9?season=3", SEASONS);
+    harness = await openAlsace("/org/alsace-arena/matches/9?season=3", SEASONS);
     await vi.waitFor(() => {
       harness.detectChanges();
       http
@@ -206,7 +206,7 @@ describe("a match's page", () => {
   });
 
   it("asks for nothing when the address names no match", async () => {
-    harness = await openAlsace("/o/alsace-arena/matches/abc", SEASONS);
+    harness = await openAlsace("/org/alsace-arena/matches/abc", SEASONS);
 
     expect(text(rendered(harness).querySelector(".notice"))).toBe(
       "This season has no match with this number."

@@ -91,7 +91,7 @@ describe("the home page", () => {
       "Alsace Arena · Spike Tournament"
     );
     expect(page.querySelector(".featured a")?.getAttribute("href")).toBe(
-      "/o/alsace-arena"
+      "/org/alsace-arena"
     );
   });
 
@@ -103,7 +103,7 @@ describe("the home page", () => {
       page.querySelector<HTMLInputElement>("input[name=slug]")?.value
     ).toBe("metz-esport");
     expect(text(page.querySelector(".address code"))).toContain(
-      "/o/metz-esport"
+      "/org/metz-esport"
     );
 
     type("slug", "metz");
@@ -149,7 +149,7 @@ describe("the home page", () => {
     await vi.waitFor(() => http.expectOne("/api/me").flush(ME));
     await vi.waitFor(() =>
       expect(navigate).toHaveBeenCalledWith([
-        "/o",
+        "/org",
         "metz-esport",
         "admin",
         "seasons",

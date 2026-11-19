@@ -65,7 +65,7 @@ describe("the sign-in page", () => {
 
   it("remembers where to come back to before leaving for Google", async () => {
     const { page } = await open(
-      "/sign-in?from=%2Fo%2Falsace-arena%2Fmatches",
+      "/sign-in?from=%2Forg%2Falsace-arena%2Fmatches",
       null
     );
 
@@ -78,7 +78,7 @@ describe("the sign-in page", () => {
     page.querySelector<HTMLButtonElement>("button.google")?.click();
 
     expect(sessionStorage.getItem("signInReturnTo")).toBe(
-      "/o/alsace-arena/matches"
+      "/org/alsace-arena/matches"
     );
     expect(assign).toHaveBeenCalledWith("/oauth2/authorization/google");
     vi.restoreAllMocks();
@@ -91,12 +91,12 @@ describe("the sign-in page", () => {
     expect(text(page.querySelector(".orgs .org-name"))).toBe("Alsace Arena");
     expect(text(page.querySelector(".orgs .pill"))).toBe("Owner");
     expect(page.querySelector(".orgs a")?.getAttribute("href")).toBe(
-      "/o/alsace-arena"
+      "/org/alsace-arena"
     );
   });
 
   it("goes back to the page sign-in started from", async () => {
-    sessionStorage.setItem("signInReturnTo", "/o/alsace-arena/matches");
+    sessionStorage.setItem("signInReturnTo", "/org/alsace-arena/matches");
 
     const { harness } = await open("/sign-in", ME);
 
@@ -104,7 +104,7 @@ describe("the sign-in page", () => {
     await answer(harness, `/api/orgs/${ALSACE.slug}/seasons`, []);
     await harness.fixture.whenStable();
 
-    expect(TestBed.inject(Router).url).toBe("/o/alsace-arena/matches");
+    expect(TestBed.inject(Router).url).toBe("/org/alsace-arena/matches");
     expect(sessionStorage.getItem("signInReturnTo")).toBeNull();
   });
 
@@ -130,13 +130,13 @@ describe("the sign-in page", () => {
       .flush(null, { status: 401, statusText: "Unauthorized" });
     await loading;
 
-    const harness = await openAlsace("/o/alsace-arena/matches");
+    const harness = await openAlsace("/org/alsace-arena/matches");
     const link = rendered(harness).querySelector("header a.account");
 
     // Alsace Arena's default language is French.
     expect(text(link)).toBe("Se connecter");
     expect(link?.getAttribute("href")).toBe(
-      "/sign-in?from=%2Fo%2Falsace-arena%2Fmatches"
+      "/sign-in?from=%2Forg%2Falsace-arena%2Fmatches"
     );
   });
 

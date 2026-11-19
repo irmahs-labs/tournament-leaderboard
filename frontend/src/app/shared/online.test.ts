@@ -75,7 +75,7 @@ describe("the online count", () => {
   });
 
   it("shows in the header", async () => {
-    const harness = await openAlsace("/o/alsace-arena");
+    const harness = await openAlsace("/org/alsace-arena");
 
     source().send("1234");
     harness.detectChanges();

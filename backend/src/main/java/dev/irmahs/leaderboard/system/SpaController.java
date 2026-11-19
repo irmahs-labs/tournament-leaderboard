@@ -14,8 +14,8 @@ public class SpaController {
     static final String APP = "forward:/index.html";
 
     @GetMapping({
-        "/o/*",
-        "/o/*/**",
+        "/org/*",
+        "/org/*/**",
         "/not-found",
         "/platform",
         "/account",
