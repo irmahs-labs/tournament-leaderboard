@@ -47,6 +47,12 @@
         >{{ t("admin.members") }}</a
       >
       <a
+        [routerLink]="['/org', org.slug, 'admin', 'claims']"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        >{{ t("admin.claims") }}</a
+      >
+      <a
         [routerLink]="['/org', org.slug, 'admin', 'branding']"
         routerLinkActive="active"
         ariaCurrentWhenActive="page"

@@ -8,6 +8,9 @@
     }
     <h1 class="display">{{ t("players.title") }}</h1>
     <p class="lede muted">{{ t("players.lede") }}</p>
+    <a class="button-ghost claim-link" routerLink="../claim"
+      >{{ t("players.claimLink") }}</a
+    >
   </div>
 
   @if (current.failed() || board.error()) {

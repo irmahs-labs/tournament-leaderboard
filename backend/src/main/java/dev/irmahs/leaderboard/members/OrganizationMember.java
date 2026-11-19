@@ -89,6 +89,11 @@ public class OrganizationMember {
         this.owner = false;
     }
 
+    /** Links the member to their player record, once an admin accepts their claim. */
+    public void linkPlayer(UUID player) {
+        this.playerId = player;
+    }
+
     public UUID getUserId() {
         return userId;
     }

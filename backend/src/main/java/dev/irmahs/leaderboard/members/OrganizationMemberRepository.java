@@ -18,6 +18,13 @@ public interface OrganizationMemberRepository extends JpaRepository<Organization
             from OrganizationMember m group by m.organizationId""")
     List<MemberCount> countByOrganization();
 
+    long countByOrganizationIdAndRole(UUID organizationId, MemberRole role);
+
+    boolean existsByOrganizationIdAndPlayerId(UUID organizationId, UUID playerId);
+
+    /** The members already linked to a player. */
+    List<OrganizationMember> findByOrganizationIdAndPlayerIdNotNull(UUID organizationId);
+
     /** How many organisations someone owns. */
     long countByUserIdAndOwnerTrue(UUID userId);
 

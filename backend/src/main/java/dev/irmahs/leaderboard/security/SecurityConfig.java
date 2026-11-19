@@ -39,7 +39,8 @@ class SecurityConfig {
 
     @Bean
     SecurityFilterChain security(HttpSecurity http, GoogleUserService googleUsers) throws Exception {
-        http.authorizeHttpRequests(requests -> requests.requestMatchers("/api/orgs/*/admin/**")
+        http.authorizeHttpRequests(requests -> requests.requestMatchers(
+                                "/api/orgs/*/admin/**", "/api/orgs/*/claim", "/api/orgs/*/claim/**")
                         .authenticated()
                         .requestMatchers(
                                 HttpMethod.GET,

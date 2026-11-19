@@ -4,11 +4,13 @@ import { AccountPage } from "./account/account";
 import { accountGuard } from "./account/account-guard";
 import { adminGuard } from "./admin/admin-guard";
 import { BrandingAdminPage } from "./admin/branding/branding";
+import { ClaimsAdminPage } from "./admin/claims/claims";
 import { MembersAdminPage } from "./admin/members/members";
 import { PlayersAdminPage } from "./admin/players/players";
 import { ScoresAdminPage } from "./admin/scores/scores";
 import { ScoringAdminPage } from "./admin/scoring/scoring";
 import { SeasonsAdminPage } from "./admin/seasons/seasons";
+import { ClaimPage } from "./claim/claim";
 import { HomePage } from "./home/home";
 import { JoinPage } from "./join/join";
 import { OrgShell } from "./layout/org-shell";
@@ -34,6 +36,7 @@ export const routes: Routes = [
       { component: MatchPage, path: "matches/:match" },
       { component: PlayersPage, path: "players" },
       { component: PlayerPage, path: "players/:player" },
+      { canActivate: [accountGuard], component: ClaimPage, path: "claim" },
       {
         canActivate: [adminGuard],
         children: [
@@ -44,6 +47,7 @@ export const routes: Routes = [
           { component: ScoringAdminPage, path: "scoring" },
           { component: MembersAdminPage, path: "members" },
           { component: BrandingAdminPage, path: "branding" },
+          { component: ClaimsAdminPage, path: "claims" },
         ],
         path: "admin",
       },
