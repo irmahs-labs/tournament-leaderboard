@@ -1,6 +1,7 @@
 package dev.irmahs.leaderboard.organizations;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -40,6 +41,26 @@ public class OrganizationService {
     public Optional<Organization> mostRecentlyActive() {
         return organizations.findFirstByStatusAndLastActivityAtNotNullOrderByLastActivityAtDesc(
                 OrganizationStatus.ACTIVE);
+    }
+
+    /** Every organisation, active or suspended, oldest first: for the platform admin. */
+    public List<Organization> all() {
+        return organizations.findAllByOrderByCreatedAtAsc();
+    }
+
+    /**
+     * Suspends or reactivates an organisation.
+     *
+     * @throws ResponseStatusException 404 when there's no organisation with this slug
+     */
+    @Transactional
+    public Organization changeStatus(String slug, OrganizationStatus status) {
+        Organization organization = organizations
+                .findBySlug(slug)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND, "There's no organisation called " + slug));
+        organization.changeStatus(status);
+        return organization;
     }
 
     /** The organisation with this slug, unless there's none or it's suspended. */

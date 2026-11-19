@@ -59,6 +59,10 @@ public class Organization {
     /** Who created it; empty for the organisations that came with the import. */
     private UUID createdBy;
 
+    /** Set by the database. */
+    @Column(insertable = false, updatable = false)
+    private Instant createdAt;
+
     protected Organization() {}
 
     public Organization(String slug, String name, String tournamentName) {
@@ -88,6 +92,15 @@ public class Organization {
         this.accentColor = branding.accentColor();
         this.playersPerMatch = branding.playersPerMatch();
         this.socialLinks = branding.socialLinks();
+    }
+
+    /** Suspended, its pages and admin area answer Not found; nothing is deleted. */
+    void changeStatus(OrganizationStatus status) {
+        this.status = status;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
     }
 
     public UUID getId() {
