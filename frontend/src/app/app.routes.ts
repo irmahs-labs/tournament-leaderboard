@@ -21,6 +21,8 @@ import { platformGuard } from "./platform/platform-guard";
 import { LeaderboardPage } from "./results/leaderboard/leaderboard";
 import { MatchPage } from "./results/match/match";
 import { MatchesPage } from "./results/matches/matches";
+import { PlayerPage } from "./results/player/player";
+import { PlayersPage } from "./results/players/players";
 import { organizationResolver } from "./shared/organization";
 import { SignInPage } from "./sign-in/sign-in";
 
@@ -30,6 +32,8 @@ export const routes: Routes = [
       { component: LeaderboardPage, path: "" },
       { component: MatchesPage, path: "matches" },
       { component: MatchPage, path: "matches/:match" },
+      { component: PlayersPage, path: "players" },
+      { component: PlayerPage, path: "players/:player" },
       {
         canActivate: [adminGuard],
         children: [

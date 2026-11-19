@@ -70,6 +70,13 @@
         ariaCurrentWhenActive="page"
         >{{ t("nav.matches") }}</a
       >
+      <a
+        [routerLink]="['/org', org.slug, 'players']"
+        routerLinkActive="active"
+        queryParamsHandling="preserve"
+        ariaCurrentWhenActive="page"
+        >{{ t("nav.players") }}</a
+      >
     </nav>
     } } @else {
     <a class="brand" routerLink="/">

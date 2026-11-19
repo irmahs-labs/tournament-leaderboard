@@ -18,6 +18,7 @@ import type {
   Leaderboard,
   MatchCard,
   MatchView,
+  PlayerSeason,
   Rules,
   Season,
   Summary,
@@ -266,7 +267,8 @@ type Answer =
   | Rules
   | Me
   | MatchCard[]
-  | MatchView;
+  | MatchView
+  | PlayerSeason;
 
 /** Answers a request once the app makes it, running change detection while it waits. */
 export const answer = async (

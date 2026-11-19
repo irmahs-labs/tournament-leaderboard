@@ -134,7 +134,8 @@
   "nav": {
     "label": "Main",
     "leaderboard": "Leaderboard",
-    "matches": "Matches"
+    "matches": "Matches",
+    "players": "Players"
   },
   "notFound": {
     "body": "This page doesn't exist, or the organisation behind it is no longer available. Check the address, or start from the home page.",
@@ -687,5 +688,57 @@
     "deleteButton": "Delete account",
     "deleted": "Your account is deleted.",
     "failed": "That didn't work. Try again."
+  },
+  "players": {
+    "title": "Players",
+    "lede": "Everyone playing this season, with their rank and season averages.",
+    "search": "Search",
+    "searchHint": "Riot ID, Discord or alias",
+    "sortBy": "Sort by",
+    "sort": {
+      "points": "Total points",
+      "performance": "Average performance",
+      "kda": "Average KDA",
+      "wins": "Wins",
+      "rank": "Rank"
+    },
+    "rank": "Rank",
+    "allRanks": "All ranks",
+    "games": {
+      "one": "{{count}} game",
+      "other": "{{count}} games"
+    },
+    "also": "also {{names}}",
+    "avgPerformance": "Avg perf.",
+    "avgKda": "Avg KDA",
+    "wins": "Wins",
+    "winRate": "Win rate",
+    "viewProfile": "View profile",
+    "none": "Nobody has played this season yet.",
+    "noMatch": "No player matches.",
+    "failed": "The players couldn't be loaded. Try again in a moment.",
+    "loading": "Loading the players…"
+  },
+  "player": {
+    "allPlayers": "All players",
+    "position": "Position",
+    "ofPlayers": "of {{count}} players",
+    "total": "Total points",
+    "behind": "{{points}} behind {{name}}",
+    "average": "Avg {{stat}}",
+    "gamesPlayed": "Games played",
+    "notPlayed": "No game in {{season}} yet.",
+    "perMatch": "Points per match",
+    "matches": "Matches",
+    "match": "Match",
+    "date": "Date",
+    "games": "Games",
+    "avgPerf": "Avg perf.",
+    "won": "Won",
+    "wonOf": "{{wins}} of {{games}}",
+    "place": "Place",
+    "points": "Points",
+    "failed": "This player couldn't be loaded. Try again in a moment.",
+    "loading": "Loading the player…"
   }
 }
