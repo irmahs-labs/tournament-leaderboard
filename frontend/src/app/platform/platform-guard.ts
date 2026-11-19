@@ -1,8 +1,8 @@
 import { inject } from "@angular/core";
 import type { CanActivateFn } from "@angular/router";
-import { Router } from "@angular/router";
+import { Router, UrlTree } from "@angular/router";
 
-import { SessionService } from "../shared/session";
+import { meOrSignIn } from "../shared/session";
 
 /**
  * Lets platform admins into the platform pages. Anyone signed out is sent to sign in and brought
@@ -10,15 +10,10 @@ import { SessionService } from "../shared/session";
  */
 export const platformGuard: CanActivateFn = async (_route, state) => {
   const router = inject(Router);
+  const me = await meOrSignIn(state.url);
 
-  const me = await inject(SessionService)
-    .known()
-    .catch(() => null);
-
-  if (!me) {
-    return router.createUrlTree(["/sign-in"], {
-      queryParams: { from: state.url },
-    });
+  if (me instanceof UrlTree) {
+    return me;
   }
 
   return me.platformAdmin ? true : router.createUrlTree(["/not-found"]);

@@ -2,6 +2,8 @@ import { DOCUMENT } from "@angular/common";
 import type { HttpErrorResponse } from "@angular/common/http";
 import { HttpClient } from "@angular/common/http";
 import { computed, Injectable, inject, signal } from "@angular/core";
+import type { UrlTree } from "@angular/router";
+import { Router } from "@angular/router";
 import { catchError, firstValueFrom, map, of } from "rxjs";
 
 import { readStored, store } from "./storage";
@@ -129,4 +131,20 @@ export const takeReturn = (): string | null => {
   store(RETURN_KEY, null, "sessionStorage");
 
   return isSafeReturn(path) ? path : null;
+};
+
+/**
+ * For a guard: who is signed in, or the way to sign in that comes back to `url`. It injects, so a
+ * guard calls it before its own first `await`.
+ */
+export const meOrSignIn = async (url: string): Promise<Me | UrlTree> => {
+  const router = inject(Router);
+
+  const me = await inject(SessionService)
+    .known()
+    .catch(() => null);
+
+  return (
+    me ?? router.createUrlTree(["/sign-in"], { queryParams: { from: url } })
+  );
 };

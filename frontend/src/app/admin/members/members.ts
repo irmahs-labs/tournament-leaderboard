@@ -45,7 +45,7 @@ export class MembersAdminPage {
   protected readonly memberName = memberName;
 
   protected readonly team = httpResource<Team>(() => {
-    const api = this.#api();
+    const api = this.current.adminApi();
 
     return api ? `${api}/members` : undefined;
   });
@@ -88,6 +88,7 @@ export class MembersAdminPage {
   readonly #http = inject(HttpClient);
   readonly #transloco = inject(TranslocoService);
   readonly #document = inject(DOCUMENT);
+  readonly #api = this.current.adminApi;
 
   /** How long an invite lasts, in words: "30 minutes", "12 hours". */
   protected expiry(minutes: number): string {
@@ -231,11 +232,5 @@ export class MembersAdminPage {
 
       return done;
     });
-  }
-
-  #api(): string | undefined {
-    const org = this.current.organization();
-
-    return org ? `/api/orgs/${encodeURIComponent(org.slug)}/admin` : undefined;
   }
 }

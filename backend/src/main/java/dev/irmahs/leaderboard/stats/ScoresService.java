@@ -111,8 +111,8 @@ public class ScoresService {
         List<StatLine> statLines = new ArrayList<>();
         for (LineInput line : requested) {
             statLines.add(statLine(season, line.stats()));
-            for (String code : line.manualBonuses() == null ? Set.<String>of() : line.manualBonuses()) {
-                if (!manual.containsKey(code.toUpperCase(Locale.ROOT))) {
+            for (String code : line.manualCodes()) {
+                if (!manual.containsKey(code)) {
                     throw badRequest(season.getName() + " has no manual bonus " + code);
                 }
             }
@@ -132,25 +132,15 @@ public class ScoresService {
 
         Map<Integer, Entry> byIndex = new LinkedHashMap<>();
         for (int i = 0; i < statLines.size(); i++) {
-            byIndex.put(
-                    i,
-                    new Entry(
-                            statLines.get(i),
-                            Boolean.TRUE.equals(requested.get(i).win())));
+            byIndex.put(i, new Entry(statLines.get(i), requested.get(i).won()));
         }
         Map<Integer, Set<SeasonBonus>> automatic = bonuses.award(season, byIndex);
         List<GameStat> saved = new ArrayList<>();
         for (int i = 0; i < requested.size(); i++) {
-            GameStat stat = new GameStat(
-                    game,
-                    roster.get(i),
-                    statLines.get(i),
-                    Boolean.TRUE.equals(requested.get(i).win()));
+            LineInput line = requested.get(i);
+            GameStat stat = new GameStat(game, roster.get(i), statLines.get(i), line.won());
             automatic.get(i).forEach(stat::award);
-            Set<String> manualCodes = requested.get(i).manualBonuses() == null
-                    ? Set.of()
-                    : requested.get(i).manualBonuses();
-            manualCodes.forEach(code -> stat.award(manual.get(code.toUpperCase(Locale.ROOT))));
+            line.manualCodes().forEach(code -> stat.award(manual.get(code)));
             saved.add(lines.save(stat));
         }
         organizations.recordActivity(season.getOrganizationId());
@@ -178,7 +168,7 @@ public class ScoresService {
         Map<Integer, Entry> byIndex = new LinkedHashMap<>();
         for (int i = 0; i < checked.size(); i++) {
             CheckedLine line = checked.get(i);
-            byIndex.put(i, new Entry(statLine(season, line.stats()), Boolean.TRUE.equals(line.win())));
+            byIndex.put(i, new Entry(statLine(season, line.stats()), line.won()));
         }
         Map<Integer, Set<SeasonBonus>> awarded = bonuses.award(season, byIndex);
         List<List<String>> codes = new ArrayList<>();
@@ -322,7 +312,21 @@ public class ScoresService {
      * @param manualBonuses the codes of the manual bonuses the admin ticked
      */
     public record LineInput(
-            UUID playerId, String riotId, Map<Stat, BigDecimal> stats, Boolean win, Set<String> manualBonuses) {}
+            UUID playerId, String riotId, Map<Stat, BigDecimal> stats, Boolean win, Set<String> manualBonuses) {
+
+        boolean won() {
+            return Boolean.TRUE.equals(win);
+        }
+
+        /** The ticked manual bonuses' codes in capitals, as the season keys them; none when left out. */
+        Set<String> manualCodes() {
+            return manualBonuses == null
+                    ? Set.of()
+                    : manualBonuses.stream()
+                            .map(code -> code.toUpperCase(Locale.ROOT))
+                            .collect(Collectors.toSet());
+        }
+    }
 
     /**
      * One line of the "Check bonuses" button.
@@ -330,7 +334,12 @@ public class ScoresService {
      * @param stats the line's stats, as in {@link LineInput}
      * @param win whether the player won the game, for MVP and SVP; nothing means they didn't
      */
-    public record CheckedLine(Map<Stat, BigDecimal> stats, Boolean win) {}
+    public record CheckedLine(Map<Stat, BigDecimal> stats, Boolean win) {
+
+        boolean won() {
+            return Boolean.TRUE.equals(win);
+        }
+    }
 
     /**
      * @param matchDate the match's day; nothing keeps the date it has

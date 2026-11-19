@@ -1,9 +1,5 @@
 import { DOCUMENT } from "@angular/common";
-import {
-  HttpClient,
-  HttpErrorResponse,
-  httpResource,
-} from "@angular/common/http";
+import { HttpClient, httpResource } from "@angular/common/http";
 import {
   afterNextRender,
   Component,
@@ -12,7 +8,6 @@ import {
   inject,
   input,
   linkedSignal,
-  signal,
 } from "@angular/core";
 import { Router } from "@angular/router";
 import { TranslocoDirective, TranslocoService } from "@jsverse/transloco";
@@ -22,6 +17,7 @@ import type { MatchCard, Rules, Stat } from "../../results/api";
 import { CurrentSeason } from "../../results/current-season";
 import { splitRiotId } from "../../results/stats";
 import { LanguageService } from "../../shared/language";
+import { AdminAction } from "../action";
 import type { AdminPlayer } from "../api";
 import type { GameScores, PreviousRoster, Problem, Row } from "./scores-form";
 import {
@@ -63,12 +59,6 @@ interface Selection {
   season?: string;
   match: string | number | null;
   game: string | null;
-}
-
-/** What happened last, for the status line. */
-interface Outcome {
-  ok: boolean;
-  text: string;
 }
 
 /**
@@ -231,8 +221,14 @@ export class ScoresAdminPage {
     return false;
   });
 
-  protected readonly busy = signal(false);
-  protected readonly outcome = signal<Outcome | null>(null);
+  protected readonly action = new AdminAction((status) =>
+    this.#transloco.translate(
+      status === 400 ? "adminScores.refused" : "adminScores.failed"
+    )
+  );
+
+  protected readonly busy = this.action.busy;
+  protected readonly outcome = this.action.outcome;
 
   /** Where the form stands, for the status pill. */
   protected readonly status = computed(() => {
@@ -280,11 +276,7 @@ export class ScoresAdminPage {
   readonly #injector = inject(Injector);
   readonly #window = inject(DOCUMENT).defaultView;
 
-  readonly #admin = computed(() => {
-    const org = this.current.organization();
-
-    return org ? `/api/orgs/${encodeURIComponent(org.slug)}/admin` : undefined;
-  });
+  readonly #admin = this.current.adminApi;
 
   /** "Performance and Eco", in the language on screen; read again when it changes. */
   protected notRecordedNames(): string {
@@ -410,7 +402,7 @@ export class ScoresAdminPage {
 
     const stats = this.stats();
 
-    await this.#run(async () => {
+    await this.action.run(async () => {
       const won = await firstValueFrom(
         this.#http.post<string[][]>(
           `${admin}/seasons/${season.number}/bonus-check`,
@@ -446,7 +438,7 @@ export class ScoresAdminPage {
     const problem = problemOf(this.rows(), this.stats());
 
     if (problem) {
-      this.outcome.set({ ok: false, text: this.#explain(problem) });
+      this.action.refuse(this.#explain(problem));
 
       return;
     }
@@ -455,7 +447,7 @@ export class ScoresAdminPage {
       return;
     }
 
-    await this.#run(async () => {
+    await this.action.run(async () => {
       const saved = await firstValueFrom(
         this.#http.put<GameScores>(api, {
           lines: linesOf(this.rows(), this.stats(), this.manualCodes()),
@@ -491,37 +483,13 @@ export class ScoresAdminPage {
       return;
     }
 
-    await this.#run(async () => {
+    await this.action.run(async () => {
       await firstValueFrom(this.#http.delete(api));
       this.loaded.reload();
       this.cards.reload();
 
       return this.#transloco.translate("adminScores.cleared");
     });
-  }
-
-  /** Runs a request, then says how it went. */
-  async #run(request: () => Promise<string>): Promise<void> {
-    if (this.busy()) {
-      return;
-    }
-
-    this.busy.set(true);
-    this.outcome.set(null);
-
-    try {
-      this.outcome.set({ ok: true, text: await request() });
-    } catch (error) {
-      const status = error instanceof HttpErrorResponse ? error.status : 0;
-      this.outcome.set({
-        ok: false,
-        text: this.#transloco.translate(
-          status === 400 ? "adminScores.refused" : "adminScores.failed"
-        ),
-      });
-    } finally {
-      this.busy.set(false);
-    }
   }
 
   #explain(problem: Problem): string {

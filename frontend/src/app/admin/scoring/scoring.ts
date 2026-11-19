@@ -4,7 +4,7 @@ import { Router } from "@angular/router";
 import { TranslocoDirective, TranslocoService } from "@jsverse/transloco";
 import { firstValueFrom } from "rxjs";
 
-import type { Bonus, Rules, Stat } from "../../results/api";
+import type { Rules, Stat } from "../../results/api";
 import { CurrentSeason } from "../../results/current-season";
 import { LanguageService } from "../../shared/language";
 import { AdminAction } from "../action";
@@ -185,9 +185,6 @@ export const inputOf = (draft: RulesDraft, rules: Rules): RulesInput => ({
   })),
 });
 
-/** How a bonus is won, as a key of `adminScoring.won`. */
-export const wonBy = (bonus: Bonus): string => bonus.award;
-
 /**
  * The Scoring screen: for one season, which stats are recorded and what each stat, each game's
  * KDA ratio, a win and each bonus are worth. A change applies to the whole season at once; a
@@ -239,8 +236,6 @@ export class ScoringAdminPage {
       }[status] ?? "adminScoring.failed"
     )
   );
-
-  protected readonly wonBy = wonBy;
 
   readonly #http = inject(HttpClient);
   readonly #router = inject(Router);
@@ -365,11 +360,11 @@ export class ScoringAdminPage {
   }
 
   #api(): string | undefined {
-    const org = this.current.organization();
+    const admin = this.current.adminApi();
     const season = this.current.season();
 
-    return org && season
-      ? `/api/orgs/${encodeURIComponent(org.slug)}/admin/seasons/${season.number}/rules`
+    return admin && season
+      ? `${admin}/seasons/${season.number}/rules`
       : undefined;
   }
 

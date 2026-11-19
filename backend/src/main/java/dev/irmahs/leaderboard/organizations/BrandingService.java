@@ -39,17 +39,13 @@ public class BrandingService {
     @Transactional(readOnly = true)
     public OrganizationView view(String slug) {
         Organization organization = organizations.requireActive(slug);
-        return OrganizationView.of(
-                organization, logos.findUpdatedAt(organization.getId()).orElse(null));
+        return view(organization);
     }
 
     /** The organisation the home page features, if any has played a game yet. */
     @Transactional(readOnly = true)
     public Optional<OrganizationView> featured() {
-        return organizations
-                .mostRecentlyActive()
-                .map(organization -> OrganizationView.of(
-                        organization, logos.findUpdatedAt(organization.getId()).orElse(null)));
+        return organizations.mostRecentlyActive().map(this::view);
     }
 
     /**
@@ -60,8 +56,7 @@ public class BrandingService {
     public OrganizationView rebrand(String slug, Branding input) {
         Organization organization = organizations.requireActive(slug);
         organization.rebrand(checked(input));
-        return OrganizationView.of(
-                organization, logos.findUpdatedAt(organization.getId()).orElse(null));
+        return view(organization);
     }
 
     /**
@@ -97,6 +92,12 @@ public class BrandingService {
         Organization organization = organizations.requireActive(slug);
         return logos.findById(organization.getId())
                 .map(logo -> new Logo(logo.getContentType(), logo.getBytes(), logo.getUpdatedAt()));
+    }
+
+    /** The organisation as its pages show it, with its logo's current address. */
+    private OrganizationView view(Organization organization) {
+        return OrganizationView.of(
+                organization, logos.findUpdatedAt(organization.getId()).orElse(null));
     }
 
     /** PNG, WebP or a scriptless SVG, from the file's content rather than its name. */
