@@ -112,13 +112,21 @@
 
 .languages {
   display: flex;
-  flex-wrap: wrap;
+  /* EN and FR always side by side: stacked, they made every control in the row twice as tall. */
+  flex-wrap: nowrap;
   align-items: center;
   gap: 4px;
 }
 
 .tools {
-  gap: 10px;
+  /* On a narrow screen the controls wrap onto a second line instead of squeezing each other. */
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+
+.tools > * {
+  flex-shrink: 0;
 }
 
 .tool {
@@ -205,6 +213,35 @@
 @media (max-width: 640px) {
   .account-name {
     display: none;
+  }
+
+  .inner {
+    padding-block: 12px;
+    gap: 10px 16px;
+  }
+
+  .tools {
+    flex-basis: 100%;
+    gap: 6px;
+  }
+
+  .tool,
+  .online,
+  .account {
+    min-height: 40px;
+  }
+
+  .tool {
+    min-width: 40px;
+  }
+
+  .online,
+  .account {
+    padding-inline: 10px;
+  }
+
+  .season {
+    max-width: 140px;
   }
 
   .nav {
