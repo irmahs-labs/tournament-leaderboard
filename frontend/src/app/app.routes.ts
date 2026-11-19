@@ -7,6 +7,7 @@ import { PlayersAdminPage } from "./admin/players/players";
 import { ScoresAdminPage } from "./admin/scores/scores";
 import { ScoringAdminPage } from "./admin/scoring/scoring";
 import { SeasonsAdminPage } from "./admin/seasons/seasons";
+import { HomePage } from "./home/home";
 import { JoinPage } from "./join/join";
 import { OrgShell } from "./layout/org-shell";
 import { PlatformShell } from "./layout/platform-shell";
@@ -20,8 +21,6 @@ import { organizationResolver } from "./shared/organization";
 import { SignInPage } from "./sign-in/sign-in";
 
 export const routes: Routes = [
-  // Release 1 has one organisation; the home page with the featured one comes in release 2.
-  { path: "", pathMatch: "full", redirectTo: "o/alsace-arena" },
   {
     children: [
       { component: LeaderboardPage, path: "" },
@@ -48,6 +47,7 @@ export const routes: Routes = [
   },
   {
     children: [
+      { component: HomePage, path: "", pathMatch: "full" },
       { component: SignInPage, path: "sign-in" },
       { component: JoinPage, path: "join" },
       { component: JoinPage, path: "join/:code" },

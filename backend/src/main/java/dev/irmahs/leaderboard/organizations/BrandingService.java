@@ -43,6 +43,15 @@ public class BrandingService {
                 organization, logos.findUpdatedAt(organization.getId()).orElse(null));
     }
 
+    /** The organisation the home page features, if any has played a game yet. */
+    @Transactional(readOnly = true)
+    public Optional<OrganizationView> featured() {
+        return organizations
+                .mostRecentlyActive()
+                .map(organization -> OrganizationView.of(
+                        organization, logos.findUpdatedAt(organization.getId()).orElse(null)));
+    }
+
     /**
      * Saves the organisation's names, language, accent, places per match and social links.
      *

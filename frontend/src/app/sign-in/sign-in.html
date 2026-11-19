@@ -40,6 +40,7 @@
     } @else {
     <p class="muted">{{ t("signIn.noOrganisations") }}</p>
     }
+    <a class="button-ghost" href="/#create">{{ t("home.create") }}</a>
     <p class="muted small">{{ t("signIn.separate") }}</p>
   </section>
   } @else if (session.me() === null) {
@@ -72,6 +73,8 @@
       {{ t("signIn.google") }}
     </button>
     <p class="muted small">{{ t("signIn.privacy") }}</p>
+    <div class="divider muted small">{{ t("signIn.newOrganiser") }}</div>
+    <a class="button-ghost" href="/#create">{{ t("home.create") }}</a>
   </section>
   }
 </ng-container>

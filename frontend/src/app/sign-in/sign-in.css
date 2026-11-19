@@ -116,3 +116,16 @@
   min-height: 40px;
   font-size: 14px;
 }
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex-grow: 1;
+  border-top: 1px solid var(--row-line);
+}

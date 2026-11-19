@@ -46,6 +46,7 @@ class SecurityConfig {
                                 "/api/version",
                                 "/api/online",
                                 "/api/ranks",
+                                "/api/featured",
                                 "/api/orgs/**",
                                 "/api/invites/*")
                         .permitAll()
