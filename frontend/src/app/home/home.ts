@@ -42,16 +42,33 @@ const RESERVED = new Set([
 export const NAME_LIMIT = 60;
 export const SLUG_LIMIT = 40;
 
+/** The text without hyphens at either end. */
+const trimHyphens = (text: string): string => {
+  let start = 0;
+  let end = text.length;
+
+  while (start < end && text[start] === "-") {
+    start += 1;
+  }
+
+  while (end > start && text[end - 1] === "-") {
+    end -= 1;
+  }
+
+  return text.slice(start, end);
+};
+
 /** An address made from a name: "Lyon Game Bar" gives "lyon-game-bar", accents dropped. */
 export const slugFrom = (name: string): string =>
-  name
-    .normalize("NFD")
-    .replaceAll(/[̀-ͯ]/gu, "")
-    .toLowerCase()
-    .replaceAll(/[^a-z0-9]+/gu, "-")
-    .replaceAll(/^-+|-+$/gu, "")
-    .slice(0, SLUG_LIMIT)
-    .replace(/-+$/u, "");
+  trimHyphens(
+    trimHyphens(
+      name
+        .normalize("NFD")
+        .replaceAll(/\p{Mn}/gu, "")
+        .toLowerCase()
+        .replaceAll(/[^a-z0-9]+/gu, "-")
+    ).slice(0, SLUG_LIMIT)
+  );
 
 export type FoundingProblem = "name" | "slug" | "reserved";
 

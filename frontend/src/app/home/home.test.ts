@@ -14,6 +14,8 @@ describe("the founding checks", () => {
     expect(slugFrom("Lyon Game Bar")).toBe("lyon-game-bar");
     expect(slugFrom("  Été à Strasbourg!! ")).toBe("ete-a-strasbourg");
     expect(slugFrom("x".repeat(50))).toHaveLength(40);
+    expect(slugFrom("--Metz--")).toBe("metz");
+    expect(slugFrom(`${"a".repeat(39)} b`)).toBe("a".repeat(39));
   });
 
   it("says what's wrong with the name or the address", () => {
