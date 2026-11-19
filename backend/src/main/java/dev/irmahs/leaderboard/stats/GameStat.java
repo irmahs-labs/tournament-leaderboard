@@ -123,6 +123,11 @@ public class GameStat {
         bonuses.add(bonus);
     }
 
+    /** Takes a bonus away, before the bonus itself is removed from its season. */
+    public void withdraw(SeasonBonus bonus) {
+        bonuses.remove(bonus);
+    }
+
     /** Replaces the automatic bonuses the line won; the manual ones an admin ticked stay. */
     public void reaward(Set<SeasonBonus> automatic) {
         bonuses.removeIf(bonus -> bonus.getAward() != BonusAward.MANUAL);

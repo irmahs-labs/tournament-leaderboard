@@ -188,6 +188,14 @@ public class Season {
         return bonus;
     }
 
+    /** Removes a bonus; the ones after it move up. Its awards go with it. */
+    public void removeBonus(SeasonBonus bonus) {
+        bonuses.remove(bonus);
+        for (int i = 0; i < bonuses.size(); i++) {
+            bonuses.get(i).moveTo(i + 1);
+        }
+    }
+
     /** The bonus with this code, or nothing. */
     public java.util.Optional<SeasonBonus> bonus(String code) {
         return bonuses.stream()

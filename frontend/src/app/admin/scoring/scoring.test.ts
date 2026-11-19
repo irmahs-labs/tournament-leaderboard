@@ -16,7 +16,16 @@ import {
   text,
   texts,
 } from "../../testing";
-import { draftOf, inputOf, parseRuleNumber, problemOf } from "./scoring";
+import {
+  draftOf,
+  EMPTY_BONUS,
+  inputOf,
+  newBonusInput,
+  newBonusProblem,
+  parseRuleNumber,
+  previewOf,
+  problemOf,
+} from "./scoring";
 
 const RULES_API = `/api/orgs/${ALSACE.slug}/admin/seasons/3/rules`;
 
@@ -106,7 +115,9 @@ describe("the Scoring screen", () => {
     expect(texts(page, "#stats-title ~ .scroll td span.muted")).toStrictEqual([
       "Shown in tables, not added to points",
     ]);
-    expect(texts(page, "#bonuses-title ~ .scroll td span")).toStrictEqual([
+    expect(
+      texts(page, "#bonuses-title ~ .scroll td:first-of-type > span")
+    ).toStrictEqual([
       "Highest: First bloods",
       "Lowest: Deaths",
       "Honours: at least",
@@ -191,6 +202,127 @@ describe("the Scoring screen", () => {
       )
     ).toBeTruthy();
     expect(button("Use the platform defaults")?.disabled).toBeTruthy();
+  });
+
+  it("previews the formula as it's typed", async () => {
+    await open("/org/alsace-arena/admin/scoring", 3);
+    type("Points per win", "75");
+
+    expect(texts(page, ".formula .term")).toContain("+ 75 per win");
+  });
+
+  it("adds a bonus of the admins' own", async () => {
+    await open("/org/alsace-arena/admin/scoring", 3);
+    type("Name", " Kill leader ");
+    const stat = page.querySelector<HTMLSelectElement>("select[name=stat]");
+
+    if (stat) {
+      stat.value = "KILLS";
+      stat.dispatchEvent(new Event("change"));
+    }
+
+    type("Points", "15");
+    button("Add the bonus")?.click();
+
+    const request = await vi.waitFor(() =>
+      http.expectOne(`${RULES_API}/bonuses`)
+    );
+
+    expect(request.request.body).toStrictEqual({
+      award: "HIGHEST",
+      label: "Kill leader",
+      points: 15,
+      stat: "KILLS",
+      threshold: null,
+    });
+    request.flush({
+      ...WITH_HONOURS,
+      bonuses: [
+        ...WITH_HONOURS.bonuses,
+        {
+          award: "HIGHEST",
+          code: "KL",
+          label: "Kill leader",
+          points: 15,
+          stat: "KILLS",
+          threshold: null,
+        },
+      ],
+    });
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      expect(texts(page, "tbody th strong")).toContain("KL");
+    });
+  });
+
+  it("removes a bonus once the admin agrees", async () => {
+    await open("/org/alsace-arena/admin/scoring", 3);
+    vi.spyOn(globalThis, "confirm").mockReturnValue(true);
+    button("Remove LD")?.click();
+
+    const request = await vi.waitFor(() =>
+      http.expectOne(`${RULES_API}/bonuses/LD`)
+    );
+
+    expect(request.request.method).toBe("DELETE");
+    request.flush({
+      ...WITH_HONOURS,
+      bonuses: WITH_HONOURS.bonuses.filter((bonus) => bonus.code !== "LD"),
+    });
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      expect(text(page.querySelector("[role=status]"))).toBe(
+        "LD is removed, and the season's points follow."
+      );
+    });
+  });
+});
+
+describe("a new bonus", () => {
+  it("needs a name, a stat unless it's ticked, a threshold for at least, and its points", () => {
+    expect(
+      newBonusProblem({ ...EMPTY_BONUS, label: "KL", stat: "KILLS" })
+    ).toBeNull();
+    expect(newBonusProblem({ ...EMPTY_BONUS, stat: "KILLS" })).toBe("label");
+    expect(newBonusProblem({ ...EMPTY_BONUS, label: "KL" })).toBe("stat");
+    expect(
+      newBonusProblem({ ...EMPTY_BONUS, award: "MANUAL", label: "Ticked" })
+    ).toBeNull();
+    expect(
+      newBonusProblem({
+        ...EMPTY_BONUS,
+        award: "AT_LEAST",
+        label: "Ten",
+        stat: "KILLS",
+      })
+    ).toBe("threshold");
+  });
+
+  it("sends no stat for a ticked bonus, and a threshold only for at least", () => {
+    expect(
+      newBonusInput({
+        ...EMPTY_BONUS,
+        award: "MANUAL",
+        label: "Ticked",
+        stat: "KILLS",
+      })
+    ).toMatchObject({ stat: null, threshold: null });
+    expect(
+      newBonusInput({
+        ...EMPTY_BONUS,
+        award: "AT_LEAST",
+        label: "Ten",
+        stat: "KILLS",
+        threshold: "2,5",
+      })
+    ).toMatchObject({ stat: "KILLS", threshold: 2.5 });
+  });
+
+  it("keeps the saved value in the preview while a number is wrong", () => {
+    const draft = { ...draftOf(RULES), pointsPerWin: "abc" };
+
+    expect(previewOf(draft, RULES).pointsPerWin).toBe(RULES.pointsPerWin);
+    expect(previewOf({ ...draft, kdaPoints: "12" }, RULES).kdaPoints).toBe(12);
   });
 });
 
