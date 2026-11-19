@@ -184,7 +184,7 @@ flowchart TD
     platform --> legal[LegalPage<br/>legal notice, privacy, cookies, terms]
     platform --> nf[NotFoundPage]
     platform --> join[JoinPage /join/:code<br/>what the code is for, sign in with the invited account, accept; or type a code]
-    shell --> header[SiteHeader<br/>skip link, logo, nav keeping ?season= (Scores, Players, Seasons, Scoring and Members on admin pages; a Site | Admin switch for admins), online count, season, EN/FR, theme, Sign in or account]
+    shell --> header[SiteHeader<br/>skip link, logo, nav keeping ?season= (Scores, Players, Seasons, Scoring, Members and Branding on admin pages; a Site | Admin switch for admins), online count, season, one EN / FR button, a light/dark pill switch, Sign in or account]
     shell --> footer[SiteFooter<br/>org name and its social links; credit, legal pages, GitHub and Contact on three centred lines]
     platform --> header
     platform --> footer

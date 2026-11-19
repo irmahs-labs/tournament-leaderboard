@@ -112,12 +112,81 @@
   color: var(--nav-bg);
 }
 
-.languages {
-  display: flex;
-  /* EN and FR always side by side: stacked, they made every control in the row twice as tall. */
-  flex-wrap: nowrap;
+/* EN / FR in one button: the language on screen stands out. */
+.language {
+  display: inline-flex;
   align-items: center;
   gap: 4px;
+  padding: 0 12px;
+  color: var(--nav-muted);
+  letter-spacing: 0.04em;
+}
+
+.language .on {
+  color: var(--nav-text);
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+
+.slash {
+  color: var(--nav-muted);
+  font-weight: 400;
+}
+
+/* Light or dark, as a pill: the knob sits on the side of the theme on screen. */
+.theme {
+  position: relative;
+  flex-shrink: 0;
+  /* The knob (30px, 5px from the edge) sits right over the sun or the moon (14px, 13px in). */
+  width: 76px;
+  height: var(--tool-size);
+  padding: 0 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  background: transparent;
+  color: var(--nav-muted);
+  border: 1px solid var(--nav-ghost);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.theme .side {
+  position: relative;
+  z-index: 1;
+  transition: color 0.2s;
+}
+
+.knob {
+  position: absolute;
+  top: 50%;
+  left: 5px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--nav-text);
+  transform: translateY(-50%);
+  transition: left 0.2s;
+}
+
+.theme[aria-checked="true"] .knob {
+  left: calc(100% - 35px);
+}
+
+/* The icon under the knob reads on it; the other stays muted. */
+.theme[aria-checked="false"] .sun,
+.theme[aria-checked="true"] .moon {
+  color: var(--nav-bg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .knob,
+  .theme .side {
+    transition: none;
+  }
 }
 
 .tools {
@@ -165,16 +234,6 @@
   height: 8px;
   border-radius: 50%;
   background: var(--nav-good);
-}
-
-.tool[aria-pressed="true"] {
-  background: var(--nav-text);
-  color: var(--nav-bg);
-}
-
-.icon {
-  display: grid;
-  place-items: center;
 }
 
 .account {

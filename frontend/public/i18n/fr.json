@@ -21,14 +21,14 @@
   },
   "header": {
     "language": "Langue",
-    "toDark": "Passer au thème sombre",
-    "toLight": "Passer au thème clair",
     "signIn": "Se connecter",
     "account": "Votre compte : {{name}}",
     "season": "Saison",
     "skip": "Aller au contenu",
     "online": "en ligne",
-    "onlineTitle": "Pages ouvertes sur Tournament Leaderboard en ce moment"
+    "onlineTitle": "Pages ouvertes sur Tournament Leaderboard en ce moment",
+    "switchLanguage": "EN / FR : passer en anglais",
+    "darkTheme": "Thème sombre"
   },
   "leaderboard": {
     "title": "Classement de la saison",

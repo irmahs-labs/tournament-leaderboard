@@ -75,7 +75,10 @@ export class SiteHeader {
     });
   }
 
-  protected choose(lang: Language): void {
-    this.language.choose(lang);
+  /** English or French: the one button switches to the other. */
+  protected toggleLanguage(): void {
+    const next: Language = this.language.active === "en" ? "fr" : "en";
+
+    this.language.choose(next);
   }
 }
