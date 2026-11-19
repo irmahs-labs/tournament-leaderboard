@@ -76,11 +76,15 @@ INSERT INTO ranks (id, rank_name, rank_value)
 SELECT id, rank_name, rank_value FROM old_ranks
 ON CONFLICT (id) DO UPDATE SET rank_name = excluded.rank_name, rank_value = excluded.rank_value;
 
-INSERT INTO seasons (organization_id, number, name, starts_on, match_count, min_games, max_games, points_per_win)
+-- Every season but the newest is over: it gets its last match's date as its end, and is finished.
+INSERT INTO seasons (organization_id, number, name, starts_on, ends_on, match_count, min_games,
+                     max_games, points_per_win, finished_at)
 SELECT (SELECT id FROM org), match_season, 'Season ' || match_season, min(match_date),
-       greatest(8, max(match_number)), 1, 5, 50
-FROM old_matches
-GROUP BY match_season;
+       CASE WHEN match_season < newest THEN max(match_date) END,
+       greatest(8, max(match_number)), 1, 5, 50,
+       CASE WHEN match_season < newest THEN now() END
+FROM old_matches, (SELECT max(match_season) AS newest FROM old_matches) AS latest
+GROUP BY match_season, newest;
 
 -- Today's rules. Every stat gets a row, so the Scoring screen shows each one explicitly.
 INSERT INTO season_stat_rules (season_id, stat, recorded, effect)
