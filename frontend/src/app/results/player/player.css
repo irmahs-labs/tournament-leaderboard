@@ -1,0 +1,184 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+.back {
+  align-self: flex-start;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.notice {
+  margin: 0;
+  padding: 24px;
+}
+
+.hero {
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.who {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 20px;
+}
+
+.who-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 240px;
+  min-width: 0;
+}
+
+.initial {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 30px;
+}
+
+.name {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+p {
+  margin: 0;
+}
+
+.small {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 170px), 1fr));
+  gap: 16px;
+  margin: 0;
+}
+
+.tiles div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--pill-line);
+}
+
+.tiles dt {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--label-track);
+}
+
+.tiles dd {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.block {
+  padding: 22px;
+  min-width: 0;
+}
+
+.spaced {
+  margin-bottom: 18px;
+}
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 200px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+}
+
+.bars li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  flex: 0 0 56px;
+  height: 100%;
+}
+
+.bar {
+  width: 100%;
+  min-height: 2px;
+  max-height: 150px;
+  background: var(--surface-2);
+  border: 1px solid var(--pill-line);
+}
+
+.bar.best {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.bar-value,
+.bar-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.scroll {
+  position: relative;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.table th,
+.table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--row-line);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table thead th {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: var(--label-track);
+}
+
+.table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

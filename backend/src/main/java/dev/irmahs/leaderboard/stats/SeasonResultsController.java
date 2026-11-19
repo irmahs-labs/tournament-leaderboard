@@ -3,8 +3,10 @@ package dev.irmahs.leaderboard.stats;
 import dev.irmahs.leaderboard.stats.SeasonResultsService.LeaderboardView;
 import dev.irmahs.leaderboard.stats.SeasonResultsService.MatchCard;
 import dev.irmahs.leaderboard.stats.SeasonResultsService.MatchView;
+import dev.irmahs.leaderboard.stats.SeasonResultsService.PlayerSeasonView;
 import dev.irmahs.leaderboard.stats.SeasonResultsService.SummaryView;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,6 +36,11 @@ public class SeasonResultsController {
     @GetMapping("/matches")
     public List<MatchCard> matches(@PathVariable String slug, @PathVariable int season) {
         return results.matches(slug, season);
+    }
+
+    @GetMapping("/players/{player}")
+    public PlayerSeasonView player(@PathVariable String slug, @PathVariable int season, @PathVariable UUID player) {
+        return results.player(slug, season, player);
     }
 
     @GetMapping("/matches/{match}")

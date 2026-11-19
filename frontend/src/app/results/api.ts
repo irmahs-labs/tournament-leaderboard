@@ -160,3 +160,33 @@ export interface MatchView {
   /** The players' totals over the whole match. */
   combined: Standing[];
 }
+
+/** A player as the public Players page lists them, from `GET /api/orgs/{slug}/players`. */
+export interface PublicPlayer {
+  id: string;
+  riotId: string;
+  discordUsername: string | null;
+  /** Their other names: previous Riot IDs and nicknames. */
+  aliases: string[];
+}
+
+/** One match of a player's season; the standing's rank is their place in it. */
+export interface PlayerMatch {
+  matchNumber: number;
+  matchDate: string | null;
+  standing: Standing;
+}
+
+/** `GET …/seasons/{n}/players/{id}`: one player's season. */
+export interface PlayerSeason {
+  season: { number: number; name: string };
+  player: PublicPlayer & { currentRank: RankRef | null };
+  /** Nothing when they haven't played this season. */
+  standing: Standing | null;
+  /** How many players have played this season. */
+  players: number;
+  /** The player just ahead, and how many points they lead by; nothing when they lead. */
+  ahead: { riotId: string; points: number } | null;
+  columns: Stat[];
+  matches: PlayerMatch[];
+}

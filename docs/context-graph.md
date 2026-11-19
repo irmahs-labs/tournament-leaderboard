@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-19, with rules for the next season only: `RulesSnapshot`, `NextSeasonRules` (in `organizations.next_season_rules`), `PUT …/rules?apply=next`, `/admin/next-season-rules`, and the Scoring and Seasons screens' choices.
+Last updated: 2026-11-19, with the public Players page and player profiles: `GET /api/orgs/{slug}/players`, `GET …/seasons/{n}/players/{id}`, and the Angular `PlayersPage` and `PlayerPage`.
 
 ## System
 
@@ -77,7 +77,7 @@ flowchart LR
 | `organizations` | `Organization` (with its `SocialLinks`), `OrganizationService` (`requireActive`, `recordActivity`), `OrganizationView`, `BrandingService` (names, language, accent, places per match, links checked by `SocialSite`; the logo, told apart by its bytes), `OrganizationLogo`, the public org and logo endpoints, `BrandingController` |
 | `security` | `SecurityConfig` (CSRF for SPAs, 401 on `/api/**`, Google sign-in ending on the Angular `/sign-in`), `GoogleUserService` (verified email only), `OrgAccess` (`@orgAccess.isAdmin`) |
 | `tenancy` | `OrganizationScopeFilter` + `OrganizationScopedTransactionManager`: sets `app.organization_id` per transaction for row-level security |
-| `players` | `Player`, `PlayerAlias`, `AliasKind`, `PlayerAdminService` (search, add, edit; rename keeps the old Riot ID as an alias) |
+| `players` | `Player`, `PlayerAlias`, `AliasKind`, `PlayerAdminService` (search, add, edit; rename keeps the old Riot ID as an alias), `PlayerController` (the public list: Riot ID, Discord, aliases) |
 | `ranks` | `Rank`, public rank list |
 | `seasons` | `Season` (rules, bonuses, shape, KDA points), `Stat` (`isCountable`; `PLACE` and `HONOURS` among them), `StatRule` (recorded, points per unit), `SeasonBonus`, `BonusAward` (HIGHEST, LOWEST, MANUAL, TOP_WINNER, TOP_LOSER, AT_LEAST), `PlatformDefaults`, `Points` (points as the API writes them), `RulesSnapshot` (a season's rules on their own), `NextSeasonRules` (rules kept for the next season, as JSON) and `NextSeasonRulesController`, `SeasonService` (public), `SeasonAdminService` |
 | `matches` | `Match`, `Game` and their repositories |
@@ -106,6 +106,8 @@ flowchart LR
         sr["…/seasons/{n}/rules"]
         lb["…/seasons/{n}/leaderboard, /summary"]
         ml["…/seasons/{n}/matches, /matches/{m}"]
+        ps["…/seasons/{n}/players/{id}: a player's season match by match"]
+        pl2["/api/orgs/{slug}/players"]
     end
     subgraph signedin[Signed in]
         me["/api/me: GET, DELETE (delete my account)"]
@@ -129,7 +131,8 @@ flowchart LR
     on --> presence
     o & lo & br --> BrandingService
     sl & sr --> SeasonService
-    lb & ml --> SeasonResultsService
+    lb & ml & ps --> SeasonResultsService
+    pl2 --> players
     me --> AccountService
     lv --> TeamService
     fe --> BrandingService
@@ -215,6 +218,8 @@ flowchart TD
     lb -->|GET| lbApi["…/seasons/{n}/leaderboard, /summary, /rules"]
     table --> pill[RankPill]
     lb --> pill
+    shell -->|"/org/:slug/players"| plp["PlayersPage<br/>a card per player, search, sort, rank filter"]
+    shell -->|"/org/:slug/players/:player?season="| pp["PlayerPage<br/>standing, the player ahead, averages, points per match, matches"]
     shell -->|"/org/:slug/matches"| mt["MatchesPage<br/>a card per match, its MVP"]
     mt --> current
     mt -->|GET| mtApi["…/seasons/{n}/matches"]
@@ -249,7 +254,7 @@ flowchart TD
 |---|---|
 | `shared/` | `ThemeService` (dark or light, the accent's CSS variables), `colour.ts` (WCAG contrast and mixing, the palettes, readable rank colours), `LanguageService` (EN or FR; numbers, dates and plurals in the language on screen), `OnlineService` (the header's count of open pages), `SessionService` (who is signed in, `canAdmin`, `meOrSignIn` for the guards, one `/api/me` request at a time, Google sign-in with a safe return address, sign-out), `organization.ts` (`organizationResolver`, `fullName`, `initials`), `storage.ts` (local and session storage that survives being blocked), `RankPill` |
 | `layout/` | `OrgShell` (an organisation's pages), `PlatformShell` (sign-in and Not found), `SiteHeader`, `SiteFooter`, page layout |
-| `results/` | The public results: `api.ts` (the API's shapes), `CurrentSeason` (the organisation's seasons, newest first, the one picked with `?season=`, `reload()` after an admin change, `adminApi` (the admin pages' API address), `show()` for the organisation after Branding saves it; its seasons are fetched by slug only), `stats.ts` (stat columns with K, D and A folded into KDA, decimals, the points formula, Riot ID name and tag), `StandingsTable` (a season's or a match's averages or totals, or one game's lines), `leaderboard/`, `matches/` (`MatchesPage`), `match/` (`MatchPage`, `match-stats.ts`: a game's lines as standings, the stat leaders) |
+| `results/` | The public results: `api.ts` (the API's shapes), `CurrentSeason` (the organisation's seasons, newest first, the one picked with `?season=`, `reload()` after an admin change, `adminApi` (the admin pages' API address), `show()` for the organisation after Branding saves it; its seasons are fetched by slug only), `stats.ts` (stat columns with K, D and A folded into KDA, decimals, the points formula, Riot ID name and tag), `StandingsTable` (a season's or a match's averages or totals, or one game's lines), `leaderboard/`, `matches/` (`MatchesPage`), `players/` (`PlayersPage`; `players-list.ts`: cards, search, sorts, tiers), `player/` (`PlayerPage`, `barsOf`, `kdaOf`), `match/` (`MatchPage`, `match-stats.ts`: a game's lines as standings, the stat leaders) |
 | `admin/` | `adminGuard`, `api.ts` (the admin API's shapes), `players/` (`PlayersAdminPage`: aliases typed as one line, a previous Riot ID keeps its kind), `action.ts` (`AdminAction`: one change at a time, then a status line), `seasons/` (`SeasonsAdminPage`, `problemOf` checking details as the API does), `scoring/` (`ScoringAdminPage`: the rules as typed, `problemOf` and `inputOf`, `previewOf` for the formula, `newBonusProblem` and `newBonusInput`; locked for a finished season), `members/` (`MembersAdminPage`, the invite message to copy), `branding/` (`BrandingAdminPage`, `problemOf` and `linkAllowed` checking as the API does), `scores/` (`ScoresAdminPage`; `scores-form.ts`: lines as typed, stat boxes parsed with a decimal comma, an empty place taken from the line's number, the request) |
 | `home/` | `HomePage` (the form kept in session storage across Google sign-in), `slugFrom`, `foundingProblem` |
 | `platform/` | `PlatformPage`, `platformGuard` (platform admins only; others see Not found), `matching` (search by name, address or owner's email) |

@@ -68,6 +68,9 @@ class PublicApiIT {
     TransactionTemplate tx;
 
     UUID kestrelId;
+    UUID wrenId;
+    UUID heronId;
+    UUID ospreyId;
 
     @BeforeAll
     void seed() {
@@ -79,6 +82,8 @@ class PublicApiIT {
             Player wren = save(new Player(alsace, "Wren#EUW", null, null));
             Player heron = save(new Player(alsace, "Heron#EUW", null, null));
             kestrelId = kestrel.getId();
+            wrenId = wren.getId();
+            heronId = heron.getId();
 
             Season first = save(todaysRules(alsace, 1));
             Game oldGame = save(new Game(save(new Match(first, 1, LocalDate.of(2025, 3, 6))), 1));
@@ -100,6 +105,7 @@ class PublicApiIT {
             UUID lyon = save(new Organization("lyon-game-bar", "Lyon Game Bar", "Friday Clash"))
                     .getId();
             Player osprey = save(new Player(lyon, "Osprey#EUW", null, null));
+            ospreyId = osprey.getId();
             Season lyonThird = save(todaysRules(lyon, 3));
             Game lyonGame = save(new Game(save(new Match(lyonThird, 1, LocalDate.of(2026, 10, 9))), 1));
             save(new GameStat(lyonGame, osprey, line(999, 40, 1, 20, 99, 9, 9, 9), true));
@@ -216,6 +222,50 @@ class PublicApiIT {
                 .bodyJson()
                 .extractingPath("$.standings[*].riotId")
                 .isEqualTo(List.of("Wren#EUW"));
+    }
+
+    @Test
+    void listsTheOrganisationsOwnPlayers() {
+        assertThat(get("/api/orgs/alsace-arena/players"))
+                .hasStatusOk()
+                .bodyJson()
+                .extractingPath("$[*].riotId")
+                .isEqualTo(List.of("Heron#EUW", "Kestrel#EUW", "Wren#EUW"));
+    }
+
+    @Test
+    void showsAPlayersSeasonMatchByMatch() {
+        assertThat(get("/api/orgs/alsace-arena/seasons/3/players/" + kestrelId))
+                .hasStatusOk()
+                .bodyJson()
+                .isLenientlyEqualTo("""
+                        {"season": {"number": 3}, "players": 3, "ahead": null,
+                         "player": {"riotId": "Kestrel#EUW", "aliases": [],
+                                    "currentRank": {"name": "Radiant"}},
+                         "standing": {"rank": 1, "points": 669, "games": 2, "wins": 1},
+                         "matches": [{"matchNumber": 1, "matchDate": "2026-10-02",
+                                      "standing": {"rank": 1, "points": 669, "games": 2}}]}""");
+    }
+
+    @Test
+    void showsWhoIsJustAheadAndBy() {
+        assertThat(get("/api/orgs/alsace-arena/seasons/3/players/" + heronId))
+                .bodyJson()
+                .isLenientlyEqualTo(
+                        "{\"standing\": {\"rank\": 3}, \"ahead\": {\"riotId\": \"Wren#EUW\", \"points\": 2}}");
+    }
+
+    @Test
+    void aPlayerWhoDidntPlayTheSeasonHasNoStanding() {
+        assertThat(get("/api/orgs/alsace-arena/seasons/1/players/" + heronId))
+                .hasStatusOk()
+                .bodyJson()
+                .isLenientlyEqualTo("{\"standing\": null, \"ahead\": null, \"matches\": [], \"players\": 1}");
+    }
+
+    @Test
+    void anotherOrganisationsPlayerIsNotFound() {
+        assertThat(get("/api/orgs/alsace-arena/seasons/3/players/" + ospreyId)).hasStatus(404);
     }
 
     @Test

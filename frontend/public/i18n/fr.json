@@ -134,7 +134,8 @@
   "nav": {
     "label": "Principal",
     "leaderboard": "Classement",
-    "matches": "Matchs"
+    "matches": "Matchs",
+    "players": "Joueurs"
   },
   "notFound": {
     "body": "Cette page n'existe pas, ou l'organisation à laquelle elle appartient n'est plus disponible. Vérifiez l'adresse, ou repartez de l'accueil.",
@@ -687,5 +688,57 @@
     "deleteButton": "Supprimer le compte",
     "deleted": "Votre compte est supprimé.",
     "failed": "Ça n'a pas marché. Réessayez."
+  },
+  "players": {
+    "title": "Joueurs",
+    "lede": "Tous les joueurs de la saison, avec leur rang et leurs moyennes.",
+    "search": "Rechercher",
+    "searchHint": "Riot ID, Discord ou alias",
+    "sortBy": "Trier par",
+    "sort": {
+      "points": "Points au total",
+      "performance": "Performance moyenne",
+      "kda": "KDA moyen",
+      "wins": "Victoires",
+      "rank": "Rang"
+    },
+    "rank": "Rang",
+    "allRanks": "Tous les rangs",
+    "games": {
+      "one": "{{count}} partie",
+      "other": "{{count}} parties"
+    },
+    "also": "aussi {{names}}",
+    "avgPerformance": "Perf. moy.",
+    "avgKda": "KDA moy.",
+    "wins": "Victoires",
+    "winRate": "Taux de victoire",
+    "viewProfile": "Voir le profil",
+    "none": "Personne n'a encore joué cette saison.",
+    "noMatch": "Aucun joueur ne correspond.",
+    "failed": "Les joueurs n'ont pas pu être chargés. Réessayez dans un instant.",
+    "loading": "Chargement des joueurs…"
+  },
+  "player": {
+    "allPlayers": "Tous les joueurs",
+    "position": "Position",
+    "ofPlayers": "sur {{count}} joueurs",
+    "total": "Points au total",
+    "behind": "{{points}} derrière {{name}}",
+    "average": "{{stat}} moy.",
+    "gamesPlayed": "Parties jouées",
+    "notPlayed": "Aucune partie en {{season}} pour l'instant.",
+    "perMatch": "Points par match",
+    "matches": "Matchs",
+    "match": "Match",
+    "date": "Date",
+    "games": "Parties",
+    "avgPerf": "Perf. moy.",
+    "won": "Gagnées",
+    "wonOf": "{{wins}} sur {{games}}",
+    "place": "Place",
+    "points": "Points",
+    "failed": "Ce joueur n'a pas pu être chargé. Réessayez dans un instant.",
+    "loading": "Chargement du joueur…"
   }
 }

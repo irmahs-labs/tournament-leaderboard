@@ -158,6 +158,7 @@ describe("the Site | Admin switch", () => {
     expect(texts(page, "header nav.nav a")).toStrictEqual([
       "Leaderboard",
       "Matches",
+      "Players",
     ]);
   });
 });
