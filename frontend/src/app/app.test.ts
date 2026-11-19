@@ -92,6 +92,21 @@ describe("the app's pages", () => {
     expect(localStorage.getItem("lang")).toBe("en");
   });
 
+  it("switches back from English to French with the same button", async () => {
+    localStorage.setItem("lang", "en");
+    const page = await open("/o/alsace-arena");
+    const button = page.querySelector<HTMLButtonElement>("header .language");
+
+    expect(text(button?.querySelector(".on"))).toBe("EN");
+
+    button?.click();
+    TestBed.tick();
+
+    expect(text(page.querySelector("main h1"))).toBe("Classement de la saison");
+    expect(text(button?.querySelector(".on"))).toBe("FR");
+    expect(localStorage.getItem("lang")).toBe("fr");
+  });
+
   it("switches theme with the pill and remembers it", async () => {
     const page = await open("/o/alsace-arena");
 
