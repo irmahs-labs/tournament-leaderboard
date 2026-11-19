@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-19, with weighted scoring: points per stat, KDA, MVP/SVP from the scoreboard place, honours (off by default), and the Scoring screen's rules editor (`RulesAdminService`, `PUT …/rules`).
+Last updated: 2026-11-19, with members and admin invites: the `team` package (`TeamService`, `JoinService`, `Invite`), the Members screen and the `/join` page.
 
 ## System
 
@@ -57,6 +57,9 @@ flowchart LR
     stats --> ranks
     stats --> scoring
     stats --> seasons
+    team --> accounts
+    team --> members
+    team --> organizations
     presence
     system
 ```
@@ -74,8 +77,9 @@ flowchart LR
 | `matches` | `Match`, `Game` and their repositories |
 | `scoring` | `ScoringService` (the only place points are computed: per game, a match or season adding up its games; a stat not recorded doesn't count), `BonusCalculator` (HIGHEST/LOWEST, MVP/SVP from the place, AT_LEAST; ties all win; nothing from a stat not recorded) |
 | `stats` | `GameStat`, `StatLine`, `PlayerTally`, `SeasonResultsService` (public results; each standing carries the player's current rank), `ScoresService` (Enter scores), `RulesAdminService` (the Scoring screen: changes a season's rules and works out every saved game's automatic bonuses again; a finished season's rules can't change) |
+| `team` | `Invite` (organization_invites; only a hash of the code), `InviteCodes` (8 characters without look-alikes, SHA-256), `TeamService` (the Members screen: roles, removal, ownership, admin invites), `JoinService` (what a code is for; using it, its row locked), `CodeLookupLimit` (10 lookups a minute per address, in memory) |
 | `presence` | `OnlineCount` (open pages, in memory only; changes sent at most once a second, a heartbeat every 25 s), `GET /api/online` as server-sent events |
-| `system` | `/api/version`; `SpaController` forwards the Angular router's addresses (`/o/**`, `/not-found`, `/sign-in`, `/legal`, `/privacy`, `/cookies`, `/terms`) to `index.html` |
+| `system` | `/api/version`; `SpaController` forwards the Angular router's addresses (`/o/**`, `/not-found`, `/join`, `/join/*`, `/sign-in`, `/legal`, `/privacy`, `/cookies`, `/terms`) to `index.html` |
 
 ## API
 
@@ -95,9 +99,12 @@ flowchart LR
     end
     subgraph signedin[Signed in]
         me["/api/me"]
+        acc["/api/invites/{code}/accept: POST"]
     end
+    jv["/api/invites/{code}: GET, public, 10 a minute"]
     subgraph admin["Admin: /api/orgs/{slug}/admin"]
         ap["players: GET ?q, POST, PUT /{id}"]
+        tm["members: GET, PUT /{user}/role, DELETE /{user}, POST /{user}/ownership; invites: POST, DELETE /{id}"]
         as["seasons: POST, PUT /{n}"]
         ru["seasons/{n}/rules: PUT, POST /platform-defaults"]
         sc["seasons/{n}/matches/{m}/games/{g}: GET, PUT, DELETE, /previous-roster"]
@@ -109,6 +116,8 @@ flowchart LR
     sl & sr --> SeasonService
     lb & ml --> SeasonResultsService
     me --> AccountService
+    tm --> TeamService
+    jv & acc --> JoinService
     ap --> PlayerAdminService
     as --> SeasonAdminService
     sc & bc --> ScoresService
@@ -143,7 +152,7 @@ erDiagram
     season_bonuses ||--o{ game_stat_bonuses : "won as"
 ```
 
-No entity yet: `organization_invites`, `organization_logos`. Mapped as collections rather than
+No entity yet: `organization_logos`. Mapped as collections rather than
 entities: `season_stat_rules` (a map on `Season`) and `game_stat_bonuses` (a many-to-many on
 `GameStat`).
 
@@ -158,11 +167,12 @@ flowchart TD
     app[App<br/>starts ThemeService, LanguageService, SessionService] --> routes[app.routes.ts]
     routes -->|"/ redirects to /o/alsace-arena"| shell
     routes -->|"/o/:slug, organizationResolver"| shell[OrgShell<br/>accent, language, title, season]
-    routes -->|"/sign-in, /legal, /privacy, /cookies, /terms, /not-found, **"| platform[PlatformShell<br/>platform name and red]
+    routes -->|"/sign-in, /join, /join/:code, /legal, /privacy, /cookies, /terms, /not-found, **"| platform[PlatformShell<br/>platform name and red]
     platform --> si[SignInPage<br/>Google, your organisations, sign out]
     platform --> legal[LegalPage<br/>legal notice, privacy, cookies, terms]
     platform --> nf[NotFoundPage]
-    shell --> header[SiteHeader<br/>skip link, logo, nav keeping ?season= (Scores, Players, Seasons and Scoring on admin pages; a Site | Admin switch for admins), online count, season, EN/FR, theme, Sign in or account]
+    platform --> join[JoinPage /join/:code<br/>what the code is for, sign in with the invited account, accept; or type a code]
+    shell --> header[SiteHeader<br/>skip link, logo, nav keeping ?season= (Scores, Players, Seasons, Scoring and Members on admin pages; a Site | Admin switch for admins), online count, season, EN/FR, theme, Sign in or account]
     shell --> footer[SiteFooter<br/>org name; credit, legal pages, GitHub and Contact on three centred lines]
     platform --> header
     platform --> footer
@@ -199,6 +209,8 @@ flowchart TD
     seadm -->|POST, PUT /n| seasonsAdminApi["…/admin/seasons"]
     guard --> scadm["ScoringAdminPage /admin/scoring?season=<br/>Record switches, points per stat, KDA, win, bonuses"]
     scadm -->|"GET …/rules, PUT, POST /platform-defaults"| recordApi["…/admin/seasons/{n}/rules"]
+    guard --> madm["MembersAdminPage /admin/members<br/>invite an admin, waiting invites, roles, remove, ownership"]
+    madm -->|"GET, PUT, POST, DELETE"| teamApi["…/admin/members, …/admin/invites"]
     seadm --> current
     scadm --> current
     resolver[organizationResolver] -->|GET| orgApi["/api/orgs/{slug}"]
@@ -210,8 +222,9 @@ flowchart TD
 | `shared/` | `ThemeService` (dark or light, the accent's CSS variables), `colour.ts` (WCAG contrast and mixing, the palettes, readable rank colours), `LanguageService` (EN or FR; numbers, dates and plurals in the language on screen), `OnlineService` (the header's count of open pages), `SessionService` (who is signed in, `canAdmin`, one `/api/me` request at a time, Google sign-in with a safe return address, sign-out), `organization.ts` (`organizationResolver`, `fullName`, `initials`), `storage.ts` (local and session storage that survives being blocked), `RankPill` |
 | `layout/` | `OrgShell` (an organisation's pages), `PlatformShell` (sign-in and Not found), `SiteHeader`, `SiteFooter`, page layout |
 | `results/` | The public results: `api.ts` (the API's shapes), `CurrentSeason` (the organisation's seasons, newest first, the one picked with `?season=`, `reload()` after an admin change), `stats.ts` (stat columns with K, D and A folded into KDA, decimals, the points formula, Riot ID name and tag), `StandingsTable` (a season's or a match's averages or totals, or one game's lines), `leaderboard/`, `matches/` (`MatchesPage`), `match/` (`MatchPage`, `match-stats.ts`: a game's lines as standings, the stat leaders) |
-| `admin/` | `adminGuard`, `api.ts` (the admin API's shapes), `players/` (`PlayersAdminPage`: aliases typed as one line, a previous Riot ID keeps its kind), `action.ts` (`AdminAction`: one change at a time, then a status line), `seasons/` (`SeasonsAdminPage`, `problemOf` checking details as the API does), `scoring/` (`ScoringAdminPage`: the rules as typed, `problemOf` and `inputOf`; locked for a finished season), `scores/` (`ScoresAdminPage`; `scores-form.ts`: lines as typed, stat boxes parsed with a decimal comma, an empty place taken from the line's number, the request) |
+| `admin/` | `adminGuard`, `api.ts` (the admin API's shapes), `players/` (`PlayersAdminPage`: aliases typed as one line, a previous Riot ID keeps its kind), `action.ts` (`AdminAction`: one change at a time, then a status line), `seasons/` (`SeasonsAdminPage`, `problemOf` checking details as the API does), `scoring/` (`ScoringAdminPage`: the rules as typed, `problemOf` and `inputOf`; locked for a finished season), `members/` (`MembersAdminPage`, the invite message to copy), `scores/` (`ScoresAdminPage`; `scores-form.ts`: lines as typed, stat boxes parsed with a decimal comma, an empty place taken from the line's number, the request) |
 | `sign-in/` | `SignInPage` |
+| `join/` | `JoinPage`, `stepOf` (sign in, accept, wrong account, expired, used, revoked, accepted), `tidyCode` |
 | `legal/` | `LegalPage` and `legal-content.ts`: the legal notice, privacy policy, cookie policy and terms, in English and French, one route each |
 | `not-found/` | `NotFoundPage` |
 | `testing.ts` | Fixtures and helpers shared by the tests (`openAlsace`, `answer`, `text`) |

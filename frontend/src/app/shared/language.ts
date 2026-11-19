@@ -95,6 +95,17 @@ export class LanguageService {
     }).format(new Date(`${date}T00:00:00Z`));
   }
 
+  /** A moment in the visitor's own time: "Thu 20 Nov, 21:14" or "jeu. 20 nov., 21:14". */
+  moment(instant: string): string {
+    return new Intl.DateTimeFormat(this.active, {
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      month: "short",
+      weekday: "short",
+    }).format(new Date(instant));
+  }
+
   /** A date as a short month and year, such as "Jan 2026" or "janv. 2026". */
   month(date: string): string {
     return new Intl.DateTimeFormat(this.active, {

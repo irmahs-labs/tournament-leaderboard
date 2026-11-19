@@ -115,6 +115,7 @@ describe("the admin pages", () => {
       "Players",
       "Seasons",
       "Scoring",
+      "Members",
     ]);
     expect(page.querySelector("header select")).toBeNull();
   });

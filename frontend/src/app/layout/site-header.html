@@ -36,6 +36,12 @@
         ariaCurrentWhenActive="page"
         >{{ t("admin.scoring") }}</a
       >
+      <a
+        [routerLink]="['/o', org.slug, 'admin', 'members']"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        >{{ t("admin.members") }}</a
+      >
     </nav>
     } @else {
     <nav class="nav" [attr.aria-label]="t('nav.label')">
