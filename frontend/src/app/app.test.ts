@@ -1,6 +1,5 @@
 import { HttpTestingController } from "@angular/common/http/testing";
 import { TestBed } from "@angular/core/testing";
-import { Router } from "@angular/router";
 import { RouterTestingHarness } from "@angular/router/testing";
 import { TranslocoService } from "@jsverse/transloco";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -44,14 +43,6 @@ describe("the app's pages", () => {
     );
     expect(page.querySelector("#create form")).not.toBeNull();
     expect(page.querySelector(".featured")).toBeNull();
-  });
-
-  it("sends the addresses from before /org/ on to /org/, with the season", async () => {
-    await open("/o/alsace-arena/matches?season=1");
-
-    expect(TestBed.inject(Router).url).toBe(
-      "/org/alsace-arena/matches?season=1"
-    );
   });
 
   it("shows the organisation in the header and the footer", async () => {

@@ -16,9 +16,6 @@ public class SpaController {
     @GetMapping({
         "/org/*",
         "/org/*/**",
-        // The addresses before /org/, which the app sends on to /org/.
-        "/o/*",
-        "/o/*/**",
         "/not-found",
         "/platform",
         "/account",

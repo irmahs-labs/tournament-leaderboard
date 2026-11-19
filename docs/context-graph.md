@@ -87,7 +87,7 @@ flowchart LR
 | `platform` | `PlatformService` (platform admins only: every organisation with its owner, members, activity and whether the home page features it; suspending and reactivating), `PlatformController` |
 | `team` | `Invite` (organization_invites; only a hash of the code), `InviteCodes` (8 characters without look-alikes, SHA-256), `TeamService` (the Members screen: roles, removal, ownership, admin invites), `JoinService` (what a code is for; using it, its row locked), `MembershipController` (leaving an organisation, never as its owner), `CodeLookupLimit` (10 lookups a minute per address, in memory) |
 | `presence` | `OnlineCount` (open pages, in memory only; changes sent at most once a second, a heartbeat every 25 s), `GET /api/online` as server-sent events |
-| `system` | `/api/version`; `SpaController` forwards the Angular router's addresses (`/org/**`, and `/o/**` from before, which the app sends on to `/org/**`; `/not-found`, `/platform`, `/account`, `/join`, `/join/*`, `/sign-in`, `/legal`, `/privacy`, `/cookies`, `/terms`) to `index.html` |
+| `system` | `/api/version`; `SpaController` forwards the Angular router's addresses (`/org/**`, `/not-found`, `/platform`, `/account`, `/join`, `/join/*`, `/sign-in`, `/legal`, `/privacy`, `/cookies`, `/terms`) to `index.html` |
 
 ## API
 
@@ -184,7 +184,6 @@ planned.
 ```mermaid
 flowchart TD
     app[App<br/>starts ThemeService, LanguageService, SessionService] --> routes[app.routes.ts]
-    routes -->|"/o/** goes on to /org/**"| routes
     routes -->|"/org/:slug, organizationResolver"| shell[OrgShell<br/>accent, language, title, season]
     routes -->|"/, /account, /platform, /sign-in, /join, /join/:code, /legal, /privacy, /cookies, /terms, /not-found, **"| platform[PlatformShell<br/>platform name and red]
     platform --> home[HomePage /<br/>what it does, create an organisation, the featured one]
