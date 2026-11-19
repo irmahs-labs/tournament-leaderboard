@@ -30,6 +30,11 @@ public class OrganizationService {
         return organizations.findBySlugAndStatus(slug, OrganizationStatus.ACTIVE);
     }
 
+    /** The organisation with this id, unless there's none or it's suspended. */
+    public Optional<Organization> findActive(UUID id) {
+        return organizations.findById(id).filter(organization -> organization.getStatus() == OrganizationStatus.ACTIVE);
+    }
+
     /**
      * The organisation with this slug. A suspended organisation is treated as if it didn't exist.
      *

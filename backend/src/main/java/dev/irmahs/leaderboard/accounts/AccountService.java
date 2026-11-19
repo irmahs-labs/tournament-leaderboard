@@ -6,7 +6,10 @@ import dev.irmahs.leaderboard.members.Membership;
 import dev.irmahs.leaderboard.members.OrganizationMember;
 import dev.irmahs.leaderboard.members.OrganizationMemberRepository;
 import dev.irmahs.leaderboard.organizations.OrganizationService;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -96,6 +99,20 @@ public class AccountService {
                         user.getDisplayName(),
                         user.isPlatformAdmin(),
                         members.findMemberships(user.getId())));
+    }
+
+    /** The account with this Google id, or nothing when it no longer exists. */
+    @Transactional(readOnly = true)
+    public Optional<AppUser> user(String googleSub) {
+        return users.findByGoogleSub(googleSub);
+    }
+
+    /** The accounts with these ids, by id; an id with no account is left out. */
+    @Transactional(readOnly = true)
+    public Map<UUID, AppUser> usersById(Collection<UUID> ids) {
+        Map<UUID, AppUser> byId = new HashMap<>();
+        users.findAllById(ids).forEach(user -> byId.put(user.getId(), user));
+        return byId;
     }
 
     /**
