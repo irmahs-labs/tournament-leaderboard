@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -168,6 +169,25 @@ public class BrandingService {
         return new ResponseStatusException(HttpStatus.BAD_REQUEST, reason);
     }
 
-    /** A logo as it's served. */
-    public record Logo(String contentType, byte[] bytes, Instant updatedAt) {}
+    /** A logo as it's served. Compared and printed by its content, not by the array's identity. */
+    public record Logo(String contentType, byte[] bytes, Instant updatedAt) {
+
+        @Override
+        public boolean equals(Object other) {
+            return other instanceof Logo logo
+                    && contentType.equals(logo.contentType)
+                    && Arrays.equals(bytes, logo.bytes)
+                    && updatedAt.equals(logo.updatedAt);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(contentType, Arrays.hashCode(bytes), updatedAt);
+        }
+
+        @Override
+        public String toString() {
+            return "Logo[" + contentType + ", " + bytes.length + " bytes, " + updatedAt + "]";
+        }
+    }
 }
