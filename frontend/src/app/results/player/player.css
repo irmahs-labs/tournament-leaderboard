@@ -215,8 +215,7 @@ p {
   gap: 6px;
 }
 
-.field input,
-.field select {
+.field input {
   min-height: 44px;
   padding: 0 12px;
   box-sizing: border-box;
@@ -246,4 +245,8 @@ p {
 
 .status.failed {
   color: var(--danger);
+}
+
+.field select {
+  width: 100%;
 }

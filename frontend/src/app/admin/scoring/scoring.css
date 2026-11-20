@@ -27,16 +27,6 @@
   min-width: 180px;
 }
 
-select {
-  min-height: 44px;
-  padding: 0 10px;
-  background: var(--input-bg);
-  color: var(--text);
-  border: 1px solid var(--input-line);
-  border-radius: 0;
-  font: 500 15px var(--font-body);
-}
-
 .notice {
   margin: 0;
   padding: 24px;

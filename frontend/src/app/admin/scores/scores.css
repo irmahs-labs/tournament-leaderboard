@@ -31,8 +31,7 @@
   gap: 6px;
 }
 
-input:not([type="checkbox"]),
-select {
+input:not([type="checkbox"]) {
   min-height: 44px;
   padding: 0 10px;
   box-sizing: border-box;
@@ -197,4 +196,8 @@ input[aria-invalid="true"] {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 12px;
+}
+
+select {
+  width: 100%;
 }

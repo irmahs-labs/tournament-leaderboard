@@ -44,8 +44,7 @@
   gap: 6px;
 }
 
-input,
-select {
+input {
   min-height: 44px;
   padding: 0 12px;
   box-sizing: border-box;
@@ -152,4 +151,8 @@ input::placeholder {
   display: block;
   font-size: 12px;
   overflow-wrap: anywhere;
+}
+
+select {
+  width: 100%;
 }

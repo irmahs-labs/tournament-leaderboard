@@ -44,8 +44,7 @@
   gap: 6px;
 }
 
-input,
-select {
+input {
   min-height: 44px;
   padding: 0 12px;
   box-sizing: border-box;
@@ -179,4 +178,8 @@ input::placeholder {
 
 .pill.live {
   color: var(--good);
+}
+
+select {
+  width: 100%;
 }
