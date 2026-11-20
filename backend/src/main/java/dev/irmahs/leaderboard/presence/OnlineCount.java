@@ -1,6 +1,7 @@
 package dev.irmahs.leaderboard.presence;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -80,8 +81,9 @@ public class OnlineCount {
      */
     @EventListener(ContextClosedEvent.class)
     public void closeAll() {
-        for (SseEmitter stream : streams) {
-            streams.remove(stream);
+        List<SseEmitter> open = List.copyOf(streams);
+        streams.removeAll(open);
+        for (SseEmitter stream : open) {
             try {
                 stream.complete();
             } catch (IllegalStateException alreadyClosed) {
