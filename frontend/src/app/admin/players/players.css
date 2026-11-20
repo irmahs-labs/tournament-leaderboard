@@ -44,8 +44,7 @@
   gap: 6px;
 }
 
-input,
-select {
+input {
   min-height: 44px;
   padding: 0 12px;
   box-sizing: border-box;
@@ -115,6 +114,8 @@ input::placeholder {
 
 .table tr.editing input,
 .table tr.editing select {
+  /* One under the other: Discord and the Google email share a cell, and cells never wrap. */
+  display: block;
   min-width: 140px;
 }
 
@@ -152,6 +153,10 @@ input::placeholder {
   display: block;
   font-size: 12px;
   overflow-wrap: anywhere;
+}
+
+select {
+  width: 100%;
 }
 
 /* A linked player's Riot ID and Discord are theirs: shown, not editable. */

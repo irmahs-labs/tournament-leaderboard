@@ -246,3 +246,27 @@ a {
   white-space: nowrap;
   border: 0;
 }
+
+/*
+ * Every dropdown, drawn by us rather than the browser: Safari otherwise ignores the height and
+ * draws its own, shorter box beside the 44px inputs. The arrow is two half-squares in the text colour.
+ */
+select {
+  appearance: none;
+  min-height: 44px;
+  padding: 0 34px 0 12px;
+  box-sizing: border-box;
+  background-color: var(--input-bg);
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - 19px) 50%,
+    calc(100% - 14px) 50%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+  color: var(--text);
+  border: 1px solid var(--input-line);
+  border-radius: 0;
+  font: 500 15px var(--font-body);
+}

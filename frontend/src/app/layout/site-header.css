@@ -65,6 +65,10 @@
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+}
+
+/* On the platform's own pages the nav stands alone and pushes the controls right. */
+.inner > .nav {
   flex-grow: 1;
 }
 
@@ -79,6 +83,67 @@
   border-bottom: 3px solid transparent;
 }
 
+/* The organisations one joined, when there are several: a menu opening under its tab. */
+.menu {
+  position: relative;
+}
+
+.menu summary {
+  padding: 10px 14px;
+  color: var(--nav-muted);
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: var(--label-track);
+  cursor: pointer;
+  list-style: none;
+}
+
+.menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.menu summary::after {
+  content: "";
+  display: inline-block;
+  margin-left: 8px;
+  border: 5px solid transparent;
+  border-top-color: currentColor;
+  vertical-align: -2px;
+}
+
+.menu summary:hover,
+.menu[open] summary {
+  color: var(--nav-text);
+}
+
+.menu ul {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 20;
+  min-width: 220px;
+  margin: 4px 0 0;
+  padding: 6px 0;
+  list-style: none;
+  background: var(--nav-bg);
+  border: 1px solid var(--nav-ghost);
+}
+
+.menu ul a {
+  display: block;
+  padding: 10px 16px;
+  border-bottom: 0;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 15px;
+  color: var(--nav-text);
+}
+
+.menu ul a:hover {
+  background: var(--nav-ghost);
+}
+
 .nav a:hover,
 .nav a.active {
   color: var(--nav-text);
@@ -89,27 +154,80 @@
   border-bottom-color: var(--accent);
 }
 
-.tools,
-/* Site | Admin, for admins: which side of the organisation is on screen. */
+/* The organisation's pages, then Site | Admin for those who run it, all as tabs. */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  flex-grow: 1;
+}
+
+.tools {
+  display: flex;
+}
+
+/* Site | Admin: which side of the organisation is on screen, set apart by a thin rule. */
 .mode {
   display: flex;
   gap: 4px;
+  padding-left: 12px;
+  border-left: 1px solid var(--nav-ghost);
 }
 
 .mode a {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 12px;
-  box-sizing: border-box;
+  padding: 10px 14px;
+  color: var(--nav-muted);
   text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
   text-transform: uppercase;
-  letter-spacing: var(--button-track);
+  letter-spacing: var(--label-track);
+  border-bottom: 3px solid transparent;
+}
+
+.mode a:hover,
+.mode a[aria-current] {
+  color: var(--nav-text);
 }
 
 .mode a[aria-current] {
-  background: var(--nav-text);
-  color: var(--nav-bg);
+  font-weight: 700;
+  border-bottom-color: var(--nav-ghost);
+}
+
+/*
+ * Those who run the organisation get its pages and its admin pages, too many tabs to share a
+ * line with the controls: the tabs take a row of their own, under the name and the controls,
+ * the same on both sides so switching doesn't move anything.
+ */
+.tiered {
+  padding-bottom: 0;
+}
+
+.tiered .tabs {
+  order: 3;
+  flex-basis: 100%;
+}
+
+.tiered .tools {
+  margin-left: auto;
+}
+
+/* Back to Tournament Leaderboard's home, beside the organisation's own name. */
+.home {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  color: var(--nav-muted);
+  border: 1px solid var(--nav-ghost);
+  margin-right: -12px;
+}
+
+.home:hover {
+  color: var(--nav-text);
 }
 
 /* EN / FR in one button: the language on screen stands out. */
@@ -283,6 +401,10 @@
     gap: 10px 16px;
   }
 
+  .tiered {
+    padding-bottom: 0;
+  }
+
   .tools {
     flex-basis: 100%;
     gap: 6px;
@@ -305,7 +427,8 @@
     max-width: 140px;
   }
 
-  .nav {
+  .tabs,
+  .inner > .nav {
     order: 3;
     flex-basis: 100%;
   }
@@ -314,6 +437,8 @@
 .season {
   /* Without the browser's own look, which on iPhone ignores the height the other boxes share. */
   appearance: none;
+  /* The forms' 44px floor doesn't apply here: the header has its own size, smaller on phones. */
+  min-height: 0;
   padding: 0 30px 0 12px;
   font-weight: 600;
   font-size: 14px;

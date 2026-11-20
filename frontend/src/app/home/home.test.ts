@@ -27,6 +27,20 @@ describe("the founding checks", () => {
   });
 });
 
+const SEVERAL: Me = {
+  ...ME,
+  memberships: [
+    ...ME.memberships,
+    {
+      name: "Metz Esport",
+      owner: false,
+      playerId: null,
+      role: "PLAYER",
+      slug: "metz-esport",
+    },
+  ],
+};
+
 describe("the home page", () => {
   let http: HttpTestingController;
   let harness: RouterTestingHarness;
@@ -93,6 +107,38 @@ describe("the home page", () => {
     expect(page.querySelector(".featured a")?.getAttribute("href")).toBe(
       "/org/alsace-arena"
     );
+  });
+
+  it("links the organisations you joined from the header", async () => {
+    await open(ME);
+
+    const links = [...page.querySelectorAll("header nav.nav a")];
+
+    expect(links.map((link) => text(link))).toStrictEqual(["Alsace Arena"]);
+    expect(links[0]?.getAttribute("href")).toBe("/org/alsace-arena");
+  });
+
+  it("puts several organisations in a menu", async () => {
+    await open(SEVERAL);
+
+    expect(text(page.querySelector("header details summary"))).toBe(
+      "My organisations"
+    );
+    expect(
+      [...page.querySelectorAll("header details a")].map((link) =>
+        link.getAttribute("href")
+      )
+    ).toStrictEqual(["/org/alsace-arena", "/org/metz-esport"]);
+
+    const menu = page.querySelector("details");
+
+    if (menu) {
+      menu.open = true;
+    }
+
+    page.querySelector("h1")?.click();
+
+    expect(menu?.open).toBeFalsy();
   });
 
   it("fills the address from the name until it's typed by hand", async () => {
