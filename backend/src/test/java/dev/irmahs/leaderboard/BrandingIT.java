@@ -186,11 +186,14 @@ class BrandingIT {
     @Test
     void theLogoIsToldApartByItsContent() {
         byte[] webp = "RIFF\0\0\0\0WEBPVP8 ".getBytes(StandardCharsets.US_ASCII);
+        byte[] jpeg = {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0, 0, 0x10, 'J', 'F', 'I', 'F'};
         byte[] svg =
                 "<?xml version=\"1.0\"?>\n<svg xmlns=\"http://www.w3.org/2000/svg\"/>".getBytes(StandardCharsets.UTF_8);
 
         assertThat(upload(webp, "application/octet-stream")).hasStatusOk();
         assertThat(send(HttpMethod.GET, ORG + "/logo", null, null)).hasContentType("image/webp");
+        assertThat(upload(jpeg, "image/jpeg")).hasStatusOk();
+        assertThat(send(HttpMethod.GET, ORG + "/logo", null, null)).hasContentType("image/jpeg");
         assertThat(upload(svg, "image/svg+xml")).hasStatusOk();
         assertThat(send(HttpMethod.GET, ORG + "/logo", null, null)).hasContentType("image/svg+xml");
     }
