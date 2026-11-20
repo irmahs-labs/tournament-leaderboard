@@ -199,6 +199,12 @@ const EN: Record<LegalPageId, LegalDocument> = {
               "As long as your account exists. Ask for its deletion at any time.",
             ],
             [
+              "People who sign in",
+              "Your sign-in session: what Google sent when you signed in (account id, email address and name), kept in the site's database so an update of the site doesn't sign you out.",
+              "Keeping you signed in, which you ask for by signing in. Necessary for the service you use (article 6(1)(b)).",
+              "Deleted when you sign out, or 30 minutes after your last visit.",
+            ],
+            [
               "People invited to an organisation",
               "The email address the invitation is for.",
               "Making sure only that person can use it. Necessary for the service (article 6(1)(b)).",
@@ -460,6 +466,12 @@ const FR: Record<LegalPageId, LegalDocument> = {
               "Tant que votre compte existe. Vous pouvez demander sa suppression à tout moment.",
             ],
             [
+              "Personnes qui se connectent",
+              "Votre session de connexion : ce que Google a transmis à la connexion (identifiant du compte, adresse e-mail et nom), gardé dans la base de données du site pour qu'une mise à jour du site ne vous déconnecte pas.",
+              "Vous garder connecté, ce que vous demandez en vous connectant. Nécessaire au service utilisé (article 6(1)(b)).",
+              "Supprimée à la déconnexion, ou 30 minutes après votre dernière visite.",
+            ],
+            [
               "Personnes invitées dans une organisation",
               "L'adresse e-mail à laquelle l'invitation est destinée.",
               "Garantir que seule cette personne peut l'utiliser. Nécessaire au service (article 6(1)(b)).",
@@ -575,4 +587,4 @@ export const LEGAL: Record<Language, Record<LegalPageId, LegalDocument>> = {
 };
 
 /** When the legal pages last changed, as YYYY-MM-DD. */
-export const UPDATED = "2026-11-18";
+export const UPDATED = "2026-11-20";
