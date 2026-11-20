@@ -114,6 +114,8 @@ input::placeholder {
 
 .table tr.editing input,
 .table tr.editing select {
+  /* One under the other: Discord and the Google email share a cell, and cells never wrap. */
+  display: block;
   min-width: 140px;
 }
 
