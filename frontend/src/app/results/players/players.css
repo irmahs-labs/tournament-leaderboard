@@ -35,8 +35,7 @@
   max-width: 420px;
 }
 
-input,
-select {
+input {
   min-height: 44px;
   padding: 0 12px;
   box-sizing: border-box;
@@ -138,4 +137,8 @@ p {
 .view {
   align-self: flex-start;
   margin-top: auto;
+}
+
+select {
+  width: 100%;
 }

@@ -2,8 +2,30 @@
   <a class="skip" href="#main" (click)="skipToContent($event)"
     >{{ t("header.skip") }}</a
   >
-  <div class="inner">
+  <div class="inner" [class.tiered]="admin()">
     @if (organization(); as org) {
+    <a
+      class="home"
+      routerLink="/"
+      [attr.aria-label]="t('header.home')"
+      [attr.title]="t('header.home')"
+    >
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M3 10.5 12 3l9 7.5"></path>
+        <path d="M5 9v12h14V9"></path>
+        <path d="M10 21v-6h4v6"></path>
+      </svg>
+    </a>
     <a class="brand" [routerLink]="['/org', org.slug]">
       @if (org.logo) {
       <img class="logo image" [src]="org.logo" alt="" width="40" height="40" />
@@ -12,85 +34,119 @@
       }
       <span class="name">{{ org.name }}</span>
     </a>
-    @if (inAdmin()) {
-    <nav class="nav" [attr.aria-label]="t('admin.navLabel')">
-      <a
-        [routerLink]="['/org', org.slug, 'admin', 'scores']"
-        routerLinkActive="active"
-        queryParamsHandling="preserve"
-        ariaCurrentWhenActive="page"
-        >{{ t("admin.scores") }}</a
-      >
-      <a
-        [routerLink]="['/org', org.slug, 'admin', 'players']"
-        routerLinkActive="active"
-        ariaCurrentWhenActive="page"
-        >{{ t("admin.players") }}</a
-      >
-      <a
-        [routerLink]="['/org', org.slug, 'admin', 'seasons']"
-        routerLinkActive="active"
-        ariaCurrentWhenActive="page"
-        >{{ t("admin.seasons") }}</a
-      >
-      <a
-        [routerLink]="['/org', org.slug, 'admin', 'scoring']"
-        routerLinkActive="active"
-        queryParamsHandling="preserve"
-        ariaCurrentWhenActive="page"
-        >{{ t("admin.scoring") }}</a
-      >
-      <a
-        [routerLink]="['/org', org.slug, 'admin', 'members']"
-        routerLinkActive="active"
-        ariaCurrentWhenActive="page"
-        >{{ t("admin.members") }}</a
-      >
-      <a
-        [routerLink]="['/org', org.slug, 'admin', 'claims']"
-        routerLinkActive="active"
-        ariaCurrentWhenActive="page"
-        >{{ t("admin.claims") }}</a
-      >
-      <a
-        [routerLink]="['/org', org.slug, 'admin', 'branding']"
-        routerLinkActive="active"
-        ariaCurrentWhenActive="page"
-        >{{ t("admin.branding") }}</a
-      >
-    </nav>
+    <div class="tabs">
+      @if (inAdmin()) {
+      <nav class="nav" [attr.aria-label]="t('admin.navLabel')">
+        <a
+          [routerLink]="['/org', org.slug, 'admin', 'scores']"
+          routerLinkActive="active"
+          queryParamsHandling="preserve"
+          ariaCurrentWhenActive="page"
+          >{{ t("admin.scores") }}</a
+        >
+        <a
+          [routerLink]="['/org', org.slug, 'admin', 'players']"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+          >{{ t("admin.players") }}</a
+        >
+        <a
+          [routerLink]="['/org', org.slug, 'admin', 'seasons']"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+          >{{ t("admin.seasons") }}</a
+        >
+        <a
+          [routerLink]="['/org', org.slug, 'admin', 'scoring']"
+          routerLinkActive="active"
+          queryParamsHandling="preserve"
+          ariaCurrentWhenActive="page"
+          >{{ t("admin.scoring") }}</a
+        >
+        <a
+          [routerLink]="['/org', org.slug, 'admin', 'members']"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+          >{{ t("admin.members") }}</a
+        >
+        <a
+          [routerLink]="['/org', org.slug, 'admin', 'claims']"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+          >{{ t("admin.claims") }}</a
+        >
+        <a
+          [routerLink]="['/org', org.slug, 'admin', 'branding']"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+          >{{ t("admin.branding") }}</a
+        >
+      </nav>
+      } @else {
+      <nav class="nav" [attr.aria-label]="t('nav.label')">
+        <a
+          [routerLink]="['/org', org.slug]"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          queryParamsHandling="preserve"
+          ariaCurrentWhenActive="page"
+          >{{ t("nav.leaderboard") }}</a
+        >
+        <a
+          [routerLink]="['/org', org.slug, 'matches']"
+          routerLinkActive="active"
+          queryParamsHandling="preserve"
+          ariaCurrentWhenActive="page"
+          >{{ t("nav.matches") }}</a
+        >
+        <a
+          [routerLink]="['/org', org.slug, 'players']"
+          routerLinkActive="active"
+          queryParamsHandling="preserve"
+          ariaCurrentWhenActive="page"
+          >{{ t("nav.players") }}</a
+        >
+      </nav>
+      } @if (admin()) {
+      <nav class="mode" [attr.aria-label]="t('admin.mode')">
+        <a
+          [routerLink]="['/org', org.slug]"
+          [attr.aria-current]="inAdmin() ? null : 'true'"
+          >{{ t("admin.site") }}</a
+        >
+        <a
+          [routerLink]="['/org', org.slug, 'admin']"
+          [attr.aria-current]="inAdmin() ? 'true' : null"
+          >{{ t("admin.open") }}</a
+        >
+      </nav>
+      }
+    </div>
     } @else {
-    <nav class="nav" [attr.aria-label]="t('nav.label')">
-      <a
-        [routerLink]="['/org', org.slug]"
-        routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: true }"
-        queryParamsHandling="preserve"
-        ariaCurrentWhenActive="page"
-        >{{ t("nav.leaderboard") }}</a
-      >
-      <a
-        [routerLink]="['/org', org.slug, 'matches']"
-        routerLinkActive="active"
-        queryParamsHandling="preserve"
-        ariaCurrentWhenActive="page"
-        >{{ t("nav.matches") }}</a
-      >
-      <a
-        [routerLink]="['/org', org.slug, 'players']"
-        routerLinkActive="active"
-        queryParamsHandling="preserve"
-        ariaCurrentWhenActive="page"
-        >{{ t("nav.players") }}</a
-      >
-    </nav>
-    } } @else {
     <a class="brand" routerLink="/">
       <span class="mark" aria-hidden="true"></span>
       <span class="name">Tournament Leaderboard</span>
     </a>
     <nav class="nav" [attr.aria-label]="t('platform.navLabel')">
-      @if (session.me()?.platformAdmin) {
+      @let joined = session.me()?.memberships ?? []; @if (joined.length === 1) {
+      @let only = joined[0];
+      <a [routerLink]="['/org', only.slug]">{{ only.name }}</a>
+      } @else if (joined.length > 1) {
+      <details class="menu" #orgsMenu>
+        <summary>{{ t("header.myOrganisations") }}</summary>
+        <ul>
+          @for (membership of joined; track membership.slug) {
+          <li>
+            <a
+              [routerLink]="['/org', membership.slug]"
+              (click)="orgsMenu.open = false"
+              >{{ membership.name }}</a
+            >
+          </li>
+          }
+        </ul>
+      </details>
+      } @if (session.me()?.platformAdmin) {
       <a
         routerLink="/platform"
         routerLinkActive="active"
@@ -101,22 +157,7 @@
     </nav>
     }
     <div class="tools">
-      @if (admin() && organization(); as org) {
-      <nav class="mode" [attr.aria-label]="t('admin.mode')">
-        <a
-          class="tool"
-          [routerLink]="['/org', org.slug]"
-          [attr.aria-current]="inAdmin() ? null : 'true'"
-          >{{ t("admin.site") }}</a
-        >
-        <a
-          class="tool"
-          [routerLink]="['/org', org.slug, 'admin']"
-          [attr.aria-current]="inAdmin() ? 'true' : null"
-          >{{ t("admin.open") }}</a
-        >
-      </nav>
-      } @if (online.count(); as count) {
+      @if (online.count(); as count) {
       <span class="online" [attr.title]="t('header.onlineTitle')">
         <span class="dot" aria-hidden="true"></span>
         <strong>{{ language.number(count) }}</strong>
