@@ -31,6 +31,16 @@
         />
       </label>
       <label class="field">
+        <span class="label">{{ t("adminPlayers.email") }}</span>
+        <input
+          name="email"
+          type="email"
+          maxlength="254"
+          autocomplete="off"
+          [placeholder]="t('adminPlayers.emailHint')"
+        />
+      </label>
+      <label class="field">
         <span class="label">{{ t("adminPlayers.aliases") }}</span>
         <input
           name="aliases"
@@ -115,6 +125,15 @@
                 [attr.aria-label]="t('adminPlayers.discord')"
                 [value]="player.discordUsername ?? ''"
               />
+              <input
+                #email
+                type="email"
+                maxlength="254"
+                class="email-input"
+                [attr.aria-label]="t('adminPlayers.email')"
+                [placeholder]="t('adminPlayers.email')"
+                [value]="player.expectedEmail ?? ''"
+              />
             </td>
             <td>
               <input
@@ -151,7 +170,7 @@
                   type="button"
                   class="button small-button"
                   [disabled]="busy()"
-                  (click)="save(player, { riotId: riotId.value, discord: discord.value, aliases: aliases.value, rank: rank.value })"
+                  (click)="save(player, { riotId: riotId.value, discord: discord.value, aliases: aliases.value, rank: rank.value, email: email.value })"
                 >
                   {{ t("adminPlayers.save") }}
                 </button>
@@ -164,7 +183,14 @@
               <strong class="player">{{ id.name }}</strong
               ><span class="tag">{{ id.tag }}</span>
             </td>
-            <td>{{ player.discordUsername ?? "–" }}</td>
+            <td>
+              {{ player.discordUsername ?? "–" }} @if (player.expectedEmail; as
+              email) {
+              <span class="muted small expected"
+                >{{ t("adminPlayers.waitingFor", { email }) }}</span
+              >
+              }
+            </td>
             <td class="aliases">{{ aliasesText(player.aliases) || "–" }}</td>
             <td>
               @if (player.rank; as rank) {

@@ -9,6 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.jayway.jsonpath.JsonPath;
 import dev.irmahs.leaderboard.accounts.AccountService;
+import dev.irmahs.leaderboard.accounts.GoogleProfile;
 import dev.irmahs.leaderboard.organizations.Organization;
 import dev.irmahs.leaderboard.players.Player;
 import jakarta.persistence.EntityManager;
@@ -237,5 +238,64 @@ class ClaimsIT {
         assertThat(send(HttpMethod.GET, ORG + "/admin/claims", null, PLAYER)).hasStatus(403);
         assertThat(send(HttpMethod.GET, ORG + "/admin/claims", null, LYON_ADMIN))
                 .hasStatus(403);
+    }
+
+    @Test
+    void signingInWithTheExpectedEmailLinksThePlayerAndUsesTheEmailUp() {
+        jdbc.sql("UPDATE players SET expected_email = 'newcomer@example.com' WHERE id = :id")
+                .param("id", wren)
+                .update();
+        // Forget the players loaded so far: sign-in reads Wren again, with the email just set.
+        em.flush();
+        em.clear();
+
+        accounts.signIn(new GoogleProfile("google-newcomer", "Newcomer@Example.com", "Newcomer"));
+        em.flush();
+        em.clear();
+
+        assertThat(send(HttpMethod.GET, ORG + "/claim", null, AdminTestSupport.as("google-newcomer")))
+                .bodyJson()
+                .isLenientlyEqualTo("{\"member\": true, \"linked\": {\"riotId\": \"Wren#EUW\"}}");
+        assertThat(send(HttpMethod.GET, "/api/me", null, AdminTestSupport.as("google-newcomer")))
+                .bodyJson()
+                .isLenientlyEqualTo(
+                        "{\"memberships\": [{\"slug\": \"alsace-arena\", \"role\": \"PLAYER\", \"playerId\": \"" + wren
+                                + "\"}]}");
+        assertThat(jdbc.sql("SELECT count(*) FROM players WHERE id = :id AND expected_email IS NULL")
+                        .param("id", wren)
+                        .query(Long.class)
+                        .single())
+                .isEqualTo(1);
+    }
+
+    @Test
+    void aLinkedPlayerEditsTheirOwnDetails() throws Exception {
+        assertThat(send(HttpMethod.PUT, ORG + "/claim/player", "{\"riotId\": \"Kes#EUW\"}", PLAYER))
+                .hasStatus(409);
+        claim(kestrel, PLAYER);
+        send(HttpMethod.POST, ORG + "/admin/claims/" + waitingClaimId() + "/accept", null, ADMIN);
+
+        assertThat(send(HttpMethod.PUT, ORG + "/claim/player", """
+                        {"riotId": "Kes#EUW", "discordUsername": "kes", "aliases": [{"alias": "K", "kind": "NICKNAME"}]}""", PLAYER))
+                .hasStatusOk()
+                .bodyJson()
+                .isLenientlyEqualTo("""
+                        {"riotId": "Kes#EUW", "discordUsername": "kes", "expectedEmail": null,
+                         "aliases": [{"alias": "K"}, {"alias": "Kestrel#EUW", "kind": "PREVIOUS_RIOT_ID"}]}""");
+        assertThat(send(HttpMethod.PUT, ORG + "/claim/player", "{\"riotId\": \"Kes#EUW\"}", NOBODY))
+                .hasStatus(403);
+        // A rank left out stays as it is. The edit above is written first, so it can't overwrite the rank.
+        em.flush();
+        jdbc.sql("INSERT INTO ranks (rank_name, rank_value) VALUES ('Gold 2', 11)")
+                .update();
+        jdbc.sql(
+                        "UPDATE players SET current_rank_id = (SELECT id FROM ranks WHERE rank_name = 'Gold 2') WHERE id = :id")
+                .param("id", kestrel)
+                .update();
+        em.clear();
+        assertThat(send(HttpMethod.PUT, ORG + "/claim/player", "{\"riotId\": \"Kes#EUW\"}", PLAYER))
+                .bodyJson()
+                .extractingPath("$.rank.name")
+                .isEqualTo("Gold 2");
     }
 }

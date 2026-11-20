@@ -14,6 +14,7 @@ const MEMBER: Me = {
     {
       name: "Lyon Game Bar",
       owner: false,
+      playerId: null,
       role: "PLAYER",
       slug: "lyon-game-bar",
     },
@@ -81,6 +82,28 @@ describe("My account", () => {
     expect(text(page.querySelector(".orgs .pill"))).toBe("Owner");
     expect(button("Leave")).toBeUndefined();
     expect(page.querySelector("input[name=confirm]")).toBeNull();
+  });
+
+  it("links to the player's profile, or to claiming it", async () => {
+    await open({
+      ...ME,
+      memberships: [
+        ...ME.memberships.map((membership) => ({
+          ...membership,
+          playerId: "kestrel",
+        })),
+        ...MEMBER.memberships,
+      ],
+    });
+
+    expect(
+      [...page.querySelectorAll(".orgs a.button-ghost")].map((link) =>
+        link.getAttribute("href")
+      )
+    ).toStrictEqual([
+      "/org/alsace-arena/players/kestrel",
+      "/org/lyon-game-bar/claim",
+    ]);
   });
 
   it("leaves an organisation after asking", async () => {

@@ -257,7 +257,11 @@
     "failed": "That didn't work. Try again in a moment.",
     "none": "No player yet.",
     "noMatch": "No player matches “{{query}}”.",
-    "loading": "Loading the players…"
+    "loading": "Loading the players…",
+    "email": "Google email (optional)",
+    "emailHint": "name@gmail.com",
+    "waitingFor": "Linked at sign-in: {{email}}",
+    "emailHelp": "The first person to sign in with this Google email gets this profile, with no claim. Only admins see it."
   },
   "adminScores": {
     "title": "Enter scores",
@@ -688,7 +692,9 @@
     "typeToConfirm": "Type {{word}} to confirm",
     "deleteButton": "Delete account",
     "deleted": "Your account is deleted.",
-    "failed": "That didn't work. Try again."
+    "failed": "That didn't work. Try again.",
+    "myProfile": "My profile",
+    "claimProfile": "Claim your profile"
   },
   "players": {
     "title": "Players",
@@ -813,5 +819,18 @@
     "conflict": "This claim was already answered, or the player is already linked. The list is up to date now.",
     "failed": "That didn't work. Try again in a moment.",
     "loading": "Loading the claims…"
+  },
+  "mine": {
+    "you": "You",
+    "edit": "Edit my details",
+    "editTitle": "My details",
+    "save": "Save my details",
+    "saved": "Your details are saved.",
+    "riotIdHint": "Name#TAG",
+    "aliasesHint": "Separated by commas",
+    "taken": "That Riot ID is already a player here.",
+    "invalid": "Check your Riot ID and aliases, then try again.",
+    "failed": "That didn't work. Try again in a moment.",
+    "renameNote": "A new Riot ID keeps the old one as an alias."
   }
 }

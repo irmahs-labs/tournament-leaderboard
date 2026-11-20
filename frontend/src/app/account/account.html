@@ -61,7 +61,19 @@
             [routerLink]="['/org', membership.slug]"
             >{{ t("signIn.open") }}</a
           >
-          @if (!membership.owner) {
+          @if (membership.playerId) {
+          <a
+            class="button-ghost small-button"
+            [routerLink]="['/org', membership.slug, 'players', membership.playerId]"
+            >{{ t("account.myProfile") }}</a
+          >
+          } @else {
+          <a
+            class="button-ghost small-button"
+            [routerLink]="['/org', membership.slug, 'claim']"
+            >{{ t("account.claimProfile") }}</a
+          >
+          } @if (!membership.owner) {
           <button
             type="button"
             class="button-ghost small-button"

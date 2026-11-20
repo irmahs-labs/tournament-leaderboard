@@ -33,7 +33,7 @@ public interface OrganizationMemberRepository extends JpaRepository<Organization
 
     /** An account's memberships of active organisations, by organisation name. */
     @Query("""
-            select new dev.irmahs.leaderboard.members.Membership(o.slug, o.name, m.role, m.owner)
+            select new dev.irmahs.leaderboard.members.Membership(o.slug, o.name, m.role, m.owner, m.playerId)
             from OrganizationMember m, Organization o
             where o.id = m.organizationId and m.userId = :userId
             and o.status = dev.irmahs.leaderboard.organizations.OrganizationStatus.ACTIVE

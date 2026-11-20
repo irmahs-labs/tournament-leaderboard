@@ -182,3 +182,68 @@ p {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
+
+.you {
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.edit-open {
+  align-self: flex-start;
+}
+
+.edit {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 16px;
+  border-top: 1px solid var(--row-line);
+}
+
+.edit-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field input,
+.field select {
+  min-height: 44px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  width: 100%;
+  background: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--input-line);
+  border-radius: 0;
+  font: 500 15px var(--font-body);
+}
+
+.edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.status {
+  margin: 0;
+  color: var(--good);
+  font-weight: 600;
+}
+
+.status:empty {
+  display: none;
+}
+
+.status.failed {
+  color: var(--danger);
+}

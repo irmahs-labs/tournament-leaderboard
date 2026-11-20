@@ -257,7 +257,11 @@
     "failed": "Ça n'a pas marché. Réessayez dans un instant.",
     "none": "Aucun joueur pour l’instant.",
     "noMatch": "Aucun joueur ne correspond à « {{query}} ».",
-    "loading": "Chargement des joueurs…"
+    "loading": "Chargement des joueurs…",
+    "email": "E-mail Google (facultatif)",
+    "emailHint": "nom@gmail.com",
+    "waitingFor": "Lié à la connexion : {{email}}",
+    "emailHelp": "La première personne à se connecter avec cet e-mail Google obtient ce profil, sans demande. Seuls les admins le voient."
   },
   "adminScores": {
     "title": "Saisir les scores",
@@ -688,7 +692,9 @@
     "typeToConfirm": "Tapez {{word}} pour confirmer",
     "deleteButton": "Supprimer le compte",
     "deleted": "Votre compte est supprimé.",
-    "failed": "Ça n'a pas marché. Réessayez."
+    "failed": "Ça n'a pas marché. Réessayez.",
+    "myProfile": "Mon profil",
+    "claimProfile": "Revendiquer mon profil"
   },
   "players": {
     "title": "Joueurs",
@@ -813,5 +819,18 @@
     "conflict": "Cette demande a déjà reçu une réponse, ou le joueur est déjà lié. La liste est à jour maintenant.",
     "failed": "Ça n'a pas marché. Réessayez dans un instant.",
     "loading": "Chargement des demandes…"
+  },
+  "mine": {
+    "you": "Vous",
+    "edit": "Modifier mes infos",
+    "editTitle": "Mes infos",
+    "save": "Enregistrer mes infos",
+    "saved": "Vos infos sont enregistrées.",
+    "riotIdHint": "Nom#TAG",
+    "aliasesHint": "Séparés par des virgules",
+    "taken": "Ce Riot ID est déjà un joueur ici.",
+    "invalid": "Vérifiez votre Riot ID et vos alias, puis réessayez.",
+    "failed": "Ça n'a pas marché. Réessayez dans un instant.",
+    "renameNote": "Un nouveau Riot ID garde l'ancien comme alias."
   }
 }

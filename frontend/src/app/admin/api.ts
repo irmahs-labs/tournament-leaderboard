@@ -24,6 +24,8 @@ export interface AdminPlayer {
   discordUsername: string | null;
   rank: RankOption | null;
   aliases: Alias[];
+  /** A Google email typed in advance: whoever signs in with it first is linked. Admins only. */
+  expectedEmail: string | null;
 }
 
 /** What `POST …/admin/players` and `PUT …/admin/players/{id}` take. */
@@ -32,6 +34,7 @@ export interface PlayerInput {
   discordUsername: string | null;
   rankId: number | null;
   aliases: Alias[];
+  expectedEmail: string | null;
 }
 
 /** What `POST …/admin/seasons` takes: whatever is left out comes from the copied rules. */

@@ -7,6 +7,7 @@ import static dev.irmahs.leaderboard.AdminTestSupport.PLAYER;
 import static dev.irmahs.leaderboard.AdminTestSupport.call;
 import static dev.irmahs.leaderboard.AdminTestSupport.callWithoutCsrf;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import dev.irmahs.leaderboard.accounts.AccountService;
 import dev.irmahs.leaderboard.organizations.Organization;
@@ -28,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
@@ -143,8 +145,9 @@ class PlayersAdminIT {
         assertThat(mvc.get().uri(PLAYERS).with(ADMIN)).hasStatusOk().bodyJson().isStrictlyEqualTo("""
                 [{"id": "%s", "riotId": "Kestrel#EUW", "discordUsername": "kes_tv",
                   "rank": {"id": %d, "name": "Gold 2", "color": "#E5B842"},
-                  "aliases": [{"alias": "Birdie", "kind": "NICKNAME"}]},
-                 {"id": "%s", "riotId": "Osprey#EUW", "discordUsername": null, "rank": null, "aliases": []}]""".formatted(
+                  "aliases": [{"alias": "Birdie", "kind": "NICKNAME"}], "expectedEmail": null},
+                 {"id": "%s", "riotId": "Osprey#EUW", "discordUsername": null, "rank": null, "aliases": [],
+                  "expectedEmail": null}]""".formatted(
                         kestrel, gold, idOf("Osprey#EUW")));
     }
 
@@ -219,6 +222,34 @@ class PlayersAdminIT {
                         .query(Long.class)
                         .single())
                 .isEqualTo(1);
+    }
+
+    @Test
+    void aGoogleEmailCanBeTypedInAdvanceOncePerOrganisation() {
+        assertThat(mvc.post()
+                        .uri(PLAYERS)
+                        .with(ADMIN)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"riotId\": \"Swift#EUW\", \"expectedEmail\": \" Swift@Example.com \"}"))
+                .hasStatus(201)
+                .bodyJson()
+                .extractingPath("$.expectedEmail")
+                .isEqualTo("swift@example.com");
+        assertThat(mvc.post()
+                        .uri(PLAYERS)
+                        .with(ADMIN)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"riotId\": \"Hawk#EUW\", \"expectedEmail\": \"SWIFT@example.com\"}"))
+                .hasStatus(409);
+        assertThat(mvc.post()
+                        .uri(PLAYERS)
+                        .with(ADMIN)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"riotId\": \"Hawk#EUW\", \"expectedEmail\": \"not an email\"}"))
+                .hasStatus(400);
     }
 
     @Test

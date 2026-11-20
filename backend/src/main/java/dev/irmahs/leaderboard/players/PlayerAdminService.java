@@ -21,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class PlayerAdminService {
 
     static final int MAX_NAME = 100;
+    static final int MAX_EMAIL = 254;
 
     private final OrganizationService organizations;
     private final PlayerRepository players;
@@ -53,10 +54,13 @@ public class PlayerAdminService {
         UUID organizationId = organizations.requireActive(slug).getId();
         Details details = check(input);
         requireFree(organizationId, details.riotId(), null);
+        String expected = checkEmail(input.expectedEmail());
+        requireEmailFree(organizationId, expected, null);
         Player player = new Player(organizationId, details.riotId(), details.discordUsername(), details.rank());
         if (details.aliases() != null) {
             player.replaceAliases(details.aliases());
         }
+        player.expectEmail(expected);
         return PlayerView.of(players.save(player));
     }
 
@@ -74,13 +78,73 @@ public class PlayerAdminService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There's no player " + playerId));
         Details details = check(input);
         requireFree(organizationId, details.riotId(), playerId);
+        String expected = checkEmail(input.expectedEmail());
+        requireEmailFree(organizationId, expected, playerId);
+        apply(player, details);
+        player.expectEmail(expected);
+        return PlayerView.of(player);
+    }
+
+    /**
+     * A linked player changes their own Riot ID, Discord, rank and aliases; the email typed in
+     * advance isn't theirs to see or change. A rank or aliases left out stay as they are.
+     *
+     * @throws ResponseStatusException 404 when the organisation has no such player, 400 when the
+     *     details are wrong, 409 when the Riot ID is taken
+     */
+    @Transactional
+    public PlayerView editOwn(UUID organizationId, UUID playerId, PlayerInput input) {
+        Player player = players.findByIdAndOrganizationId(playerId, organizationId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There's no player " + playerId));
+        Details details = check(input);
+        requireFree(organizationId, details.riotId(), playerId);
+        Rank rank = input.rankId() == null ? player.getCurrentRank() : details.rank();
+        apply(player, new Details(details.riotId(), details.discordUsername(), rank, details.aliases()));
+        return PlayerView.of(player).withoutEmail();
+    }
+
+    private static void apply(Player player, Details details) {
         if (details.aliases() != null) {
             player.replaceAliases(details.aliases());
         }
         player.rename(details.riotId());
         player.setDiscordUsername(details.discordUsername());
         player.setCurrentRank(details.rank());
-        return PlayerView.of(player);
+    }
+
+    /** Lowercase, nothing when empty. */
+    private static String checkEmail(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        String email = value.strip().toLowerCase(Locale.ROOT);
+        if (email.length() > MAX_EMAIL || !looksLikeEmail(email)) {
+            throw badRequest("The Google email isn't an email address");
+        }
+        return email;
+    }
+
+    /** One @, no spaces, and a dot inside the part after the @: enough to catch a typo. */
+    static boolean looksLikeEmail(String email) {
+        int at = email.indexOf('@');
+        if (at <= 0 || at != email.lastIndexOf('@') || email.chars().anyMatch(Character::isWhitespace)) {
+            return false;
+        }
+        String domain = email.substring(at + 1);
+        int dot = domain.indexOf('.');
+        return dot > 0 && !domain.endsWith(".");
+    }
+
+    private void requireEmailFree(UUID organizationId, String email, UUID except) {
+        if (email == null) {
+            return;
+        }
+        players.findByOrganizationIdAndExpectedEmailIgnoreCase(organizationId, email)
+                .filter(other -> !other.getId().equals(except))
+                .ifPresent(other -> {
+                    throw new ResponseStatusException(
+                            HttpStatus.CONFLICT, other.getRiotId() + " already waits for this email");
+                });
     }
 
     private void requireFree(UUID organizationId, String riotId, UUID except) {
@@ -149,7 +213,8 @@ public class PlayerAdminService {
     /**
      * @param aliases the player's aliases as they should be; left out, they stay as they are
      */
-    public record PlayerInput(String riotId, String discordUsername, Integer rankId, List<AliasInput> aliases) {}
+    public record PlayerInput(
+            String riotId, String discordUsername, Integer rankId, List<AliasInput> aliases, String expectedEmail) {}
 
     public record AliasInput(String alias, AliasKind kind) {}
 
@@ -158,7 +223,13 @@ public class PlayerAdminService {
     /**
      * @param rank nothing when the player has none
      */
-    public record PlayerView(UUID id, String riotId, String discordUsername, RankView rank, List<AliasView> aliases) {
+    public record PlayerView(
+            UUID id,
+            String riotId,
+            String discordUsername,
+            RankView rank,
+            List<AliasView> aliases,
+            String expectedEmail) {
 
         static PlayerView of(Player player) {
             return new PlayerView(
@@ -168,7 +239,12 @@ public class PlayerAdminService {
                     player.getCurrentRank() == null ? null : RankView.of(player.getCurrentRank()),
                     player.getAliases().stream()
                             .map(alias -> new AliasView(alias.getAlias(), alias.getKind()))
-                            .toList());
+                            .toList(),
+                    player.getExpectedEmail());
+        }
+
+        PlayerView withoutEmail() {
+            return new PlayerView(id, riotId, discordUsername, rank, aliases, null);
         }
     }
 }
