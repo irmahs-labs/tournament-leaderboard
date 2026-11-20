@@ -128,6 +128,7 @@ describe("the admin pages", () => {
       "Branding",
     ]);
     expect(page.querySelector("header select")).toBeNull();
+    expect(page.querySelector("header a.home")?.getAttribute("href")).toBe("/");
   });
 });
 
@@ -153,7 +154,10 @@ describe("the Site | Admin switch", () => {
     harness.detectChanges();
     const page = rendered(harness);
 
-    expect(texts(page, "header .mode a")).toStrictEqual(["Site", "Admin"]);
+    expect(texts(page, "header .tabs .mode a")).toStrictEqual([
+      "Site",
+      "Admin",
+    ]);
     expect(text(page.querySelector("header .mode [aria-current]"))).toBe(
       "Admin"
     );
