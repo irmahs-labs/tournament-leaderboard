@@ -57,6 +57,7 @@ const PLAYERS: AdminPlayer[] = [
   {
     aliases: [],
     discordUsername: null,
+    expectedEmail: null,
     id: "kestrel",
     rank: null,
     riotId: "Kestrel#EUW",
@@ -64,6 +65,7 @@ const PLAYERS: AdminPlayer[] = [
   {
     aliases: [],
     discordUsername: null,
+    expectedEmail: null,
     id: "wren",
     rank: null,
     riotId: "Wren#EUW",

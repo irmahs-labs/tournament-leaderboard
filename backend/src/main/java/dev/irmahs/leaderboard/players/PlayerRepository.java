@@ -12,6 +12,11 @@ public interface PlayerRepository extends JpaRepository<Player, UUID> {
 
     Optional<Player> findByOrganizationIdAndRiotIdIgnoreCase(UUID organizationId, String riotId);
 
+    Optional<Player> findByOrganizationIdAndExpectedEmailIgnoreCase(UUID organizationId, String email);
+
+    /** The players, in any organisation, waiting for someone to sign in with this email. */
+    List<Player> findByExpectedEmailIgnoreCase(String email);
+
     /**
      * The organisation's players whose Riot ID, Discord username or an alias contains the
      * pattern, by Riot ID.

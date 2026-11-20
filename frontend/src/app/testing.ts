@@ -49,7 +49,13 @@ export const ME: Me = {
   displayName: "Camille Martin",
   email: "camille@example.com",
   memberships: [
-    { name: "Alsace Arena", owner: true, role: "ADMIN", slug: "alsace-arena" },
+    {
+      name: "Alsace Arena",
+      owner: true,
+      playerId: null,
+      role: "ADMIN",
+      slug: "alsace-arena",
+    },
   ],
   platformAdmin: false,
 };

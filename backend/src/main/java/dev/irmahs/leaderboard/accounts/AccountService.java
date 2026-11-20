@@ -6,6 +6,8 @@ import dev.irmahs.leaderboard.members.Membership;
 import dev.irmahs.leaderboard.members.OrganizationMember;
 import dev.irmahs.leaderboard.members.OrganizationMemberRepository;
 import dev.irmahs.leaderboard.organizations.OrganizationService;
+import dev.irmahs.leaderboard.players.Player;
+import dev.irmahs.leaderboard.players.PlayerRepository;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -29,12 +31,15 @@ public class AccountService {
     private final OrganizationMemberRepository members;
     private final OrganizationService organizations;
     private final AccessProperties access;
+    private final PlayerRepository players;
 
     AccountService(
             AppUserRepository users,
             OrganizationMemberRepository members,
             OrganizationService organizations,
-            AccessProperties access) {
+            AccessProperties access,
+            PlayerRepository players) {
+        this.players = players;
         this.users = users;
         this.members = members;
         this.organizations = organizations;
@@ -63,7 +68,30 @@ public class AccountService {
                             organization -> join(user.getId(), organization.getId(), initial),
                             () -> log.warn("Initial member for {}: there's no such organisation", initial.slug()));
         }
+        for (Player player : players.findByExpectedEmailIgnoreCase(profile.email())) {
+            linkExpected(user.getId(), player);
+        }
         return user;
+    }
+
+    /**
+     * Someone signed in with the email an admin typed on a player: they join as a player if they
+     * aren't a member, and are linked to it unless they or the player already are. The email is
+     * then used up.
+     */
+    private void linkExpected(UUID userId, Player player) {
+        UUID organizationId = player.getOrganizationId();
+        if (organizations.findActive(organizationId).isEmpty()) {
+            return;
+        }
+        OrganizationMember member = members.findById(new OrganizationMember.Key(userId, organizationId))
+                .orElseGet(() -> members.save(OrganizationMember.player(userId, organizationId)));
+        if (member.getPlayerId() == null
+                && !members.existsByOrganizationIdAndPlayerId(organizationId, player.getId())) {
+            member.linkPlayer(player.getId());
+            player.expectEmail(null);
+            log.info("Linked a member to their player by the email expected for it");
+        }
     }
 
     private void join(UUID userId, UUID organizationId, InitialMember initial) {

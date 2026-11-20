@@ -53,6 +53,8 @@ export interface PlayerFields {
   discord: string;
   aliases: string;
   rank: string;
+  /** The Google email typed in advance; empty for none. */
+  email: string;
 }
 
 /** The request for a player's fields; `previous` is the player being edited, if any. */
@@ -66,6 +68,7 @@ export const inputFrom = (
   return {
     aliases: aliasesFrom(fields.aliases, previous?.aliases ?? [], riotId),
     discordUsername: fields.discord.trim() || null,
+    expectedEmail: fields.email.trim() || null,
     rankId: fields.rank && Number.isInteger(rankId) ? rankId : null,
     riotId,
   };
@@ -142,6 +145,7 @@ export class PlayersAdminPage {
       {
         aliases: field("aliases"),
         discord: field("discord"),
+        email: field("email"),
         rank: field("rank"),
         riotId: field("riotId"),
       },

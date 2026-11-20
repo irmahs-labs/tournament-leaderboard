@@ -26,8 +26,82 @@
       </div>
       @if (view.player.currentRank; as rank) {
       <app-rank-pill [name]="rank.name" [color]="rank.color" />
+      } @if (mine()) {
+      <span class="pill you">{{ t("mine.you") }}</span>
       }
     </div>
+
+    @if (mine()) { @if (editing()) {
+    <form
+      class="edit"
+      (submit)="$event.preventDefault(); saveMine(riotId.value, discord.value, rank.value)"
+    >
+      <h2 class="heading">{{ t("mine.editTitle") }}</h2>
+      <div class="edit-fields">
+        <label class="field">
+          <span class="label">{{ t("adminPlayers.riotId") }}</span>
+          <input
+            #riotId
+            required
+            maxlength="100"
+            autocomplete="off"
+            [placeholder]="t('mine.riotIdHint')"
+            [value]="view.player.riotId"
+          />
+        </label>
+        <label class="field">
+          <span class="label">{{ t("adminPlayers.discord") }}</span>
+          <input
+            #discord
+            maxlength="100"
+            autocomplete="off"
+            [value]="view.player.discordUsername ?? ''"
+          />
+        </label>
+        <label class="field">
+          <span class="label">{{ t("adminPlayers.rank") }}</span>
+          <select #rank>
+            <option value="" [selected]="!view.player.currentRank">
+              {{ t("adminPlayers.unranked") }}
+            </option>
+            @for (option of ranks.hasValue() ? ranks.value() : []; track
+            option.id) {
+            <option
+              [value]="option.id"
+              [selected]="option.name === view.player.currentRank?.name"
+            >
+              {{ option.name }}
+            </option>
+            }
+          </select>
+        </label>
+      </div>
+      <p class="muted small">{{ t("mine.renameNote") }}</p>
+      <div class="edit-actions">
+        <button class="button" type="submit" [disabled]="action.busy()">
+          {{ t("mine.save") }}
+        </button>
+        <button type="button" class="button-ghost" (click)="editing.set(false)">
+          {{ t("adminPlayers.cancel") }}
+        </button>
+      </div>
+    </form>
+    } @else {
+    <button
+      type="button"
+      class="button-ghost edit-open"
+      (click)="editing.set(true)"
+    >
+      {{ t("mine.edit") }}
+    </button>
+    } }
+    <p
+      class="status"
+      role="status"
+      [class.failed]="action.outcome()?.ok === false"
+    >
+      {{ action.outcome()?.text }}
+    </p>
 
     @if (view.standing; as standing) {
     <dl class="tiles">

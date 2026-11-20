@@ -33,6 +33,7 @@ const PLAYERS: AdminPlayer[] = [
       { alias: "Bramble#OLD", kind: "PREVIOUS_RIOT_ID" },
     ],
     discordUsername: "bramble.gg",
+    expectedEmail: null,
     id: "bramble",
     rank: RANKS[1] ?? null,
     riotId: "Bramble#EUW",
@@ -40,6 +41,7 @@ const PLAYERS: AdminPlayer[] = [
   {
     aliases: [],
     discordUsername: null,
+    expectedEmail: null,
     id: "wren",
     rank: null,
     riotId: "Wren#EUW",
@@ -49,7 +51,13 @@ const PLAYERS: AdminPlayer[] = [
 const PLAYER_ONLY: Me = {
   ...ME,
   memberships: [
-    { name: "Alsace Arena", owner: false, role: "PLAYER", slug: ALSACE.slug },
+    {
+      name: "Alsace Arena",
+      owner: false,
+      playerId: null,
+      role: "PLAYER",
+      slug: ALSACE.slug,
+    },
   ],
 };
 
@@ -247,6 +255,7 @@ describe("the Players page", () => {
     expect(request.request.body).toStrictEqual({
       aliases: [{ alias: "Mo", kind: "NICKNAME" }],
       discordUsername: null,
+      expectedEmail: null,
       rankId: 25,
       riotId: "Moth#MOTH",
     });
@@ -292,6 +301,7 @@ describe("the Players page", () => {
         { alias: "Thorn", kind: "NICKNAME" },
       ],
       discordUsername: "bramble.gg",
+      expectedEmail: null,
       rankId: 18,
       riotId: "Bramble#EUW",
     });
@@ -344,10 +354,14 @@ describe("a player's aliases", () => {
 
   it("make a request with no rank and no Discord when left empty", () => {
     expect(
-      inputFrom({ aliases: "", discord: "  ", rank: "", riotId: "A#1" }, null)
+      inputFrom(
+        { aliases: "", discord: "  ", email: " ", rank: "", riotId: "A#1" },
+        null
+      )
     ).toStrictEqual({
       aliases: [],
       discordUsername: null,
+      expectedEmail: null,
       rankId: null,
       riotId: "A#1",
     });

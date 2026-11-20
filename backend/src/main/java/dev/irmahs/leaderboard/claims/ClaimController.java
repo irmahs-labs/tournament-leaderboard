@@ -4,6 +4,8 @@ import dev.irmahs.leaderboard.claims.ClaimService.ClaimRow;
 import dev.irmahs.leaderboard.claims.ClaimService.ClaimState;
 import dev.irmahs.leaderboard.claims.ClaimService.NewClaim;
 import dev.irmahs.leaderboard.claims.ClaimService.PlayerSummary;
+import dev.irmahs.leaderboard.players.PlayerAdminService.PlayerInput;
+import dev.irmahs.leaderboard.players.PlayerAdminService.PlayerView;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -51,6 +54,13 @@ public class ClaimController {
     @DeleteMapping("/api/orgs/{slug}/claim")
     public ClaimState cancel(@PathVariable String slug, @AuthenticationPrincipal OidcUser user) {
         return claims.cancel(slug, user.getSubject());
+    }
+
+    /** The linked player changes their own Riot ID, Discord, rank and aliases. */
+    @PutMapping("/api/orgs/{slug}/claim/player")
+    public PlayerView editMine(
+            @PathVariable String slug, @RequestBody PlayerInput input, @AuthenticationPrincipal OidcUser user) {
+        return claims.editMine(slug, user.getSubject(), input);
     }
 
     @GetMapping("/api/orgs/{slug}/admin/claims")

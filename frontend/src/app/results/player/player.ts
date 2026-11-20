@@ -1,10 +1,14 @@
-import { httpResource } from "@angular/common/http";
-import { Component, computed, inject, input } from "@angular/core";
+import { HttpClient, httpResource } from "@angular/common/http";
+import { Component, computed, inject, input, signal } from "@angular/core";
 import { RouterLink } from "@angular/router";
-import { TranslocoDirective } from "@jsverse/transloco";
+import { TranslocoDirective, TranslocoService } from "@jsverse/transloco";
+import { firstValueFrom } from "rxjs";
 
+import { AdminAction } from "../../admin/action";
+import type { RankOption } from "../../admin/api";
 import { LanguageService } from "../../shared/language";
 import { RankPill } from "../../shared/rank-pill";
+import { SessionService } from "../../shared/session";
 import type { PlayerMatch, PlayerSeason, Stat } from "../api";
 import { CurrentSeason } from "../current-season";
 import { splitRiotId } from "../stats";
@@ -74,6 +78,74 @@ export class PlayerPage {
 
     return AVERAGES.filter((stat) => columns.includes(stat));
   });
+
+  /** Whether the signed-in person is this player: their own profile, which they can edit. */
+  protected readonly mine = computed(() => {
+    const slug = this.current.organization()?.slug;
+
+    return (
+      this.#session
+        .me()
+        ?.memberships.some(
+          (membership) =>
+            membership.slug === slug && membership.playerId === this.player()
+        ) ?? false
+    );
+  });
+
+  /** Whether the form to edit their own details is open. */
+  protected readonly editing = signal(false);
+
+  protected readonly ranks = httpResource<RankOption[]>(() =>
+    this.editing() ? "/api/ranks" : undefined
+  );
+
+  protected readonly action = new AdminAction((status) =>
+    this.#transloco.translate(
+      {
+        400: "mine.invalid",
+        409: "mine.taken",
+      }[status] ?? "mine.failed"
+    )
+  );
+
+  readonly #session = inject(SessionService);
+  readonly #http = inject(HttpClient);
+  readonly #transloco = inject(TranslocoService);
+
+  /** Saves their own Riot ID, Discord and rank; their aliases stay as they are. */
+  protected async saveMine(
+    riotId: string,
+    discord: string,
+    rank: string
+  ): Promise<void> {
+    const org = this.current.organization();
+    const rankId = Number(rank);
+
+    if (!org) {
+      return;
+    }
+
+    const done = await this.action.run(async () => {
+      await firstValueFrom(
+        this.#http.put(
+          `/api/orgs/${encodeURIComponent(org.slug)}/claim/player`,
+          {
+            discordUsername: discord.trim() || null,
+            rankId: rank && Number.isInteger(rankId) ? rankId : null,
+            riotId: riotId.trim(),
+          }
+        )
+      );
+      this.profile.reload();
+
+      return this.#transloco.translate("mine.saved");
+    });
+
+    if (done) {
+      this.editing.set(false);
+    }
+  }
 
   protected readonly kda = kdaOf;
 

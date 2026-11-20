@@ -40,6 +40,9 @@ public class Player {
 
     private String discordUsername;
 
+    /** A Google email typed in advance: whoever signs in with it first is linked. Admins only. */
+    private String expectedEmail;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "current_rank_id")
     private Rank currentRank;
@@ -102,6 +105,15 @@ public class Player {
 
     /** An alias as an admin types it. */
     public record NewAlias(String alias, AliasKind kind) {}
+
+    /** Nothing forgets it, once it's been used or it's no longer wanted. */
+    public void expectEmail(String email) {
+        this.expectedEmail = email;
+    }
+
+    public String getExpectedEmail() {
+        return expectedEmail;
+    }
 
     public UUID getId() {
         return id;

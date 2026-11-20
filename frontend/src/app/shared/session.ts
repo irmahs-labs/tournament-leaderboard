@@ -16,6 +16,8 @@ export interface Membership {
   name: string;
   role: MemberRole;
   owner: boolean;
+  /** The player they're linked to there; nothing until their profile is linked. */
+  playerId: string | null;
 }
 
 /** The signed-in person, from `GET /api/me`. */

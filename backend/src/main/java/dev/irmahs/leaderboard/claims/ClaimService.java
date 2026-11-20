@@ -8,6 +8,9 @@ import dev.irmahs.leaderboard.members.OrganizationMemberRepository;
 import dev.irmahs.leaderboard.organizations.Organization;
 import dev.irmahs.leaderboard.organizations.OrganizationService;
 import dev.irmahs.leaderboard.players.Player;
+import dev.irmahs.leaderboard.players.PlayerAdminService;
+import dev.irmahs.leaderboard.players.PlayerAdminService.PlayerInput;
+import dev.irmahs.leaderboard.players.PlayerAdminService.PlayerView;
 import dev.irmahs.leaderboard.players.PlayerAlias;
 import dev.irmahs.leaderboard.players.PlayerRepository;
 import java.time.Instant;
@@ -39,13 +42,16 @@ public class ClaimService {
     private final OrganizationMemberRepository members;
     private final PlayerRepository players;
     private final PlayerClaimRepository claims;
+    private final PlayerAdminService playerAdmin;
 
     ClaimService(
             AccountService accounts,
             OrganizationService organizations,
             OrganizationMemberRepository members,
             PlayerRepository players,
-            PlayerClaimRepository claims) {
+            PlayerClaimRepository claims,
+            PlayerAdminService playerAdmin) {
+        this.playerAdmin = playerAdmin;
         this.accounts = accounts;
         this.organizations = organizations;
         this.members = members;
@@ -148,6 +154,21 @@ public class ClaimService {
         claim.cancel();
         claims.flush();
         return mine(slug, googleSub);
+    }
+
+    /**
+     * The linked player changes their own details: Riot ID, Discord, rank and aliases.
+     *
+     * @throws ResponseStatusException 403 for someone who isn't a member, 409 when they aren't
+     *     linked to a player yet, 400 and 409 as an admin's edit would
+     */
+    public PlayerView editMine(String slug, String googleSub, PlayerInput input) {
+        Organization organization = organizations.requireActive(slug);
+        OrganizationMember member = requireMember(organization, googleSub);
+        if (member.getPlayerId() == null) {
+            throw conflict("Claim your profile first");
+        }
+        return playerAdmin.editOwn(organization.getId(), member.getPlayerId(), input);
     }
 
     /** The admins' queue: the claims in this state, oldest first. */

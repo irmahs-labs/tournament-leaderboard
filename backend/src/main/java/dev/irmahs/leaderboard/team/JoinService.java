@@ -95,7 +95,12 @@ public class JoinService {
             member.changeRole(MemberRole.ADMIN);
         }
         invite.use();
-        return new Membership(organization.getSlug(), organization.getName(), member.getRole(), member.isOwner());
+        return new Membership(
+                organization.getSlug(),
+                organization.getName(),
+                member.getRole(),
+                member.isOwner(),
+                member.getPlayerId());
     }
 
     private Invite find(String typed) {

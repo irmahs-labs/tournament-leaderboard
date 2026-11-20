@@ -1,12 +1,14 @@
 import { HttpTestingController } from "@angular/common/http/testing";
 import { TestBed } from "@angular/core/testing";
 import type { RouterTestingHarness } from "@angular/router/testing";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { SessionService } from "../../shared/session";
 import {
   ALSACE,
   answer,
   LEADERBOARD,
+  ME,
   openAlsace,
   rendered,
   SEASONS,
@@ -132,5 +134,93 @@ describe("the player page", () => {
       "/org/alsace-arena/matches/1"
     );
     expect(texts(page, "tbody tr:last-child td").at(-2)).toBe("#1");
+  });
+
+  it("shows no edit form on someone else's profile", () => {
+    expect(page.querySelector(".you")).toBeNull();
+    expect(page.querySelector(".edit-open")).toBeNull();
+  });
+});
+
+describe("the signed-in player's own profile", () => {
+  let http: HttpTestingController;
+  let harness: RouterTestingHarness;
+  let page: HTMLElement;
+
+  beforeEach(async () => {
+    localStorage.setItem("lang", "en");
+    TestBed.configureTestingModule({ providers: testProviders() });
+    http = TestBed.inject(HttpTestingController);
+    const loading = TestBed.inject(SessionService).load();
+
+    http.expectOne("/api/me").flush({
+      ...ME,
+      memberships: [
+        {
+          name: "Alsace Arena",
+          owner: false,
+          playerId: "wren",
+          role: "PLAYER",
+          slug: "alsace-arena",
+        },
+      ],
+    });
+    await loading;
+    harness = await openAlsace("/org/alsace-arena/players/wren", SEASONS);
+    await answer(
+      harness,
+      `/api/orgs/${ALSACE.slug}/seasons/3/players/wren`,
+      PROFILE
+    );
+    harness.detectChanges();
+    page = rendered(harness);
+  });
+
+  afterEach(() => {
+    http.verify();
+    localStorage.clear();
+  });
+
+  it("marks it as theirs and saves their Riot ID, Discord and rank", async () => {
+    expect(text(page.querySelector(".you"))).toBe("You");
+
+    page.querySelector<HTMLButtonElement>(".edit-open")?.click();
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      http
+        .expectOne("/api/ranks")
+        .flush([{ color: null, id: 18, name: "Gold 2" }]);
+    });
+    harness.detectChanges();
+    const riotId = page.querySelector<HTMLInputElement>(".edit input");
+
+    if (riotId) {
+      riotId.value = "Wrenna#EUW";
+    }
+
+    page.querySelector<HTMLFormElement>("form.edit")?.requestSubmit();
+
+    const save = await vi.waitFor(() =>
+      http.expectOne(`/api/orgs/${ALSACE.slug}/claim/player`)
+    );
+
+    expect(save.request.body).toStrictEqual({
+      discordUsername: "wren.gg",
+      rankId: null,
+      riotId: "Wrenna#EUW",
+    });
+    save.flush({});
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      http
+        .expectOne(`/api/orgs/${ALSACE.slug}/seasons/3/players/wren`)
+        .flush(PROFILE);
+    });
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      expect(text(page.querySelector("[role=status]"))).toBe(
+        "Your details are saved."
+      );
+    });
   });
 });
