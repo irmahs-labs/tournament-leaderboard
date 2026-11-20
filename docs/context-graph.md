@@ -28,9 +28,9 @@ flowchart TD
     root --> be[backend/<br/>Spring Boot]
     fe -->|jar with static/| be
     be --> mig[db/migration<br/>Flyway scripts]
-    deploy[deploy/<br/>db-init, import, README] --> prod[compose.prod.yaml]
+    deploy[deploy/<br/>db-init, import, rollout.sh, README] --> prod[compose.prod.yaml]
     ci[.github/workflows/ci.yml<br/>mvnw verify + SonarQube Cloud] --> root
-    ci -->|"after build, on a push to migration"| dep[.github/workflows/deploy.yml<br/>dump, compose up --wait, health check through Caddy]
+    ci -->|"after build, on a push to migration"| dep[.github/workflows/deploy.yml<br/>dump, rollout.sh: the new app beside the old, then the old stopped; health check through Caddy]
     dep --> prod
     legacy[legacy/<br/>frozen: never touch]
 ```
@@ -293,10 +293,11 @@ Not on the leaderboard yet: Export CSV and Export poster (phase 11).
 ```mermaid
 flowchart LR
     p0[0 Setup ✓] --> p1[1 Schema, import, public API ✓] --> p2[2 Sign-in and admin API ✓]
-    p2 --> p3[3 Angular shell and public pages ✓] --> p4[4 Angular admin ✓] --> p5[5 Deploy pipelines ✓] --> p6[6 Cutover ▶]
+    p2 --> p3[3 Angular shell and public pages ✓] --> p4[4 Angular admin ✓] --> p5[5 Deploy pipelines ✓] --> p6[6 Cutover ✓]
     p6 --> p7[7 Open the platform<br/>release 2 ✓]
-    p7 --> p8[8 Scoring rules editor ✓] --> p9[9 Players and claims ✓] --> p10[10 Seasons, matches<br/>and waiting lists]
-    p10 --> p11[11 Exports and poster] --> p12[12 Moderation] --> p13[13 Merge tool and scan]
+    p7 --> p8[8 Scoring rules editor ✓] --> p9[9 Players and claims ✓] --> p9b[9b Deploys players<br/>don't notice ▶]
+    p9b --> p10[10 Seasons, matches<br/>and waiting lists] --> p10b[10b Help]
+    p10b --> p11[11 Exports and poster] --> p12[12 Moderation] --> p13[13 Merge tool and scan]
 ```
 
 ✓ done · ▶ next. Until the switch-over (6), every merge into `migration` that passes CI deploys
