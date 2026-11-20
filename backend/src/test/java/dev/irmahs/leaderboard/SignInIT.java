@@ -149,6 +149,7 @@ class SignInIT {
                 .bodyJson()
                 .isStrictlyEqualTo("""
                         {"email": "owner@example.com", "displayName": "Name of google-1", "platformAdmin": false,
+                         "riotId": null, "discordUsername": null,
                          "memberships": [{"slug": "alsace-arena", "name": "Alsace Arena", "role": "ADMIN", "owner": true,
                                           "playerId": null}]}""");
     }

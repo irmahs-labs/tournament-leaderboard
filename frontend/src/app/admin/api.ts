@@ -26,6 +26,8 @@ export interface AdminPlayer {
   aliases: Alias[];
   /** A Google email typed in advance: whoever signs in with it first is linked. Admins only. */
   expectedEmail: string | null;
+  /** Linked to someone's account: their Riot ID and Discord are then theirs to change. */
+  linked: boolean;
 }
 
 /** What `POST …/admin/players` and `PUT …/admin/players/{id}` take. */

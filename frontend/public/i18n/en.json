@@ -263,7 +263,9 @@
     "email": "Google email (optional)",
     "emailHint": "name@gmail.com",
     "waitingFor": "Linked at sign-in: {{email}}",
-    "emailHelp": "The first person to sign in with this Google email gets this profile, with no claim. Only admins see it."
+    "emailHelp": "The first person to sign in with this Google email gets this profile, with no claim. Only admins see it.",
+    "linked": "Linked to an account",
+    "linkedNote": "Linked to an account: the player changes their Riot ID and Discord on My account."
   },
   "adminScores": {
     "title": "Enter scores",
@@ -696,7 +698,13 @@
     "deleted": "Your account is deleted.",
     "failed": "That didn't work. Try again.",
     "myProfile": "My profile",
-    "claimProfile": "Claim your profile"
+    "claimProfile": "Claim your profile",
+    "identity": "Riot ID and Discord",
+    "identityHelp": "Shown on your player profile in every organisation you play in. Claiming a profile gives it these too.",
+    "identitySave": "Save",
+    "identitySaved": "Your Riot ID and Discord are saved everywhere.",
+    "identityInvalid": "Check your Riot ID, then try again.",
+    "identityTaken": "Another player in one of your organisations already has this Riot ID."
   },
   "players": {
     "title": "Players",
@@ -825,14 +833,16 @@
   "mine": {
     "you": "You",
     "edit": "Edit my details",
-    "editTitle": "My details",
-    "save": "Save my details",
-    "saved": "Your details are saved.",
+    "editTitle": "My rank",
+    "save": "Save my rank",
+    "saved": "Your rank is saved.",
     "riotIdHint": "Name#TAG",
     "aliasesHint": "Separated by commas",
     "taken": "That Riot ID is already a player here.",
     "invalid": "Check your Riot ID and aliases, then try again.",
     "failed": "That didn't work. Try again in a moment.",
-    "renameNote": "A new Riot ID keeps the old one as an alias."
+    "renameNote": "A new Riot ID keeps the old one as an alias.",
+    "identityNote": "Your Riot ID and Discord are the same in every organisation:",
+    "identityLink": "change them on My account"
   }
 }

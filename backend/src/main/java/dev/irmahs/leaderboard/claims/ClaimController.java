@@ -3,8 +3,8 @@ package dev.irmahs.leaderboard.claims;
 import dev.irmahs.leaderboard.claims.ClaimService.ClaimRow;
 import dev.irmahs.leaderboard.claims.ClaimService.ClaimState;
 import dev.irmahs.leaderboard.claims.ClaimService.NewClaim;
+import dev.irmahs.leaderboard.claims.ClaimService.OwnDetails;
 import dev.irmahs.leaderboard.claims.ClaimService.PlayerSummary;
-import dev.irmahs.leaderboard.players.PlayerAdminService.PlayerInput;
 import dev.irmahs.leaderboard.players.PlayerAdminService.PlayerView;
 import java.util.List;
 import java.util.UUID;
@@ -56,10 +56,10 @@ public class ClaimController {
         return claims.cancel(slug, user.getSubject());
     }
 
-    /** The linked player changes their own Riot ID, Discord, rank and aliases. */
+    /** The linked player changes their rank here; Riot ID and Discord are changed on My account. */
     @PutMapping("/api/orgs/{slug}/claim/player")
     public PlayerView editMine(
-            @PathVariable String slug, @RequestBody PlayerInput input, @AuthenticationPrincipal OidcUser user) {
+            @PathVariable String slug, @RequestBody OwnDetails input, @AuthenticationPrincipal OidcUser user) {
         return claims.editMine(slug, user.getSubject(), input);
     }
 

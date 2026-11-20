@@ -106,6 +106,50 @@ describe("My account", () => {
     ]);
   });
 
+  it("saves the Riot ID and Discord for every organisation", async () => {
+    await open({ ...MEMBER, discordUsername: "wren.gg", riotId: "Wren#EUW" });
+    harness.detectChanges();
+    const riotId = page.querySelector<HTMLInputElement>("input[name=riotId]");
+
+    expect(riotId?.value).toBe("Wren#EUW");
+
+    if (riotId) {
+      riotId.value = " Wrenna#EUW ";
+    }
+
+    page.querySelector<HTMLFormElement>("form.identity")?.requestSubmit();
+
+    const save = http.expectOne("/api/me/identity");
+
+    expect(save.request.body).toStrictEqual({
+      discordUsername: "wren.gg",
+      riotId: "Wrenna#EUW",
+    });
+    save.flush(null);
+    await vi.waitFor(() => http.expectOne("/api/me").flush(MEMBER));
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      expect(text(page.querySelector(".identity + p + [role=status]"))).toBe(
+        "Your Riot ID and Discord are saved everywhere."
+      );
+    });
+  });
+
+  it("says when the Riot ID is another player's", async () => {
+    await open({ ...MEMBER, riotId: "Wren#EUW" });
+    harness.detectChanges();
+    page.querySelector<HTMLFormElement>("form.identity")?.requestSubmit();
+    http
+      .expectOne("/api/me/identity")
+      .flush(null, { status: 409, statusText: "Conflict" });
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      expect(text(page.querySelector(".identity + p + [role=status]"))).toBe(
+        "Another player in one of your organisations already has this Riot ID."
+      );
+    });
+  });
+
   it("leaves an organisation after asking", async () => {
     await open(MEMBER);
     vi.spyOn(globalThis, "confirm").mockReturnValue(true);

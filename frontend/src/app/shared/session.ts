@@ -25,6 +25,9 @@ export interface Me {
   email: string;
   displayName: string | null;
   platformAdmin: boolean;
+  /** Shown on every player profile linked to the account; null before the first. */
+  riotId: string | null;
+  discordUsername: string | null;
   memberships: Membership[];
 }
 

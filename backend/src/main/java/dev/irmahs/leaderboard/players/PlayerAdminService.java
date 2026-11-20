@@ -1,5 +1,7 @@
 package dev.irmahs.leaderboard.players;
 
+import dev.irmahs.leaderboard.members.OrganizationMember;
+import dev.irmahs.leaderboard.members.OrganizationMemberRepository;
 import dev.irmahs.leaderboard.organizations.OrganizationService;
 import dev.irmahs.leaderboard.players.Player.NewAlias;
 import dev.irmahs.leaderboard.ranks.Rank;
@@ -9,8 +11,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,11 +30,17 @@ public class PlayerAdminService {
     private final OrganizationService organizations;
     private final PlayerRepository players;
     private final RankRepository ranks;
+    private final OrganizationMemberRepository members;
 
-    PlayerAdminService(OrganizationService organizations, PlayerRepository players, RankRepository ranks) {
+    PlayerAdminService(
+            OrganizationService organizations,
+            PlayerRepository players,
+            RankRepository ranks,
+            OrganizationMemberRepository members) {
         this.organizations = organizations;
         this.players = players;
         this.ranks = ranks;
+        this.members = members;
     }
 
     /**
@@ -41,8 +51,11 @@ public class PlayerAdminService {
     public List<PlayerView> search(String slug, String query) {
         UUID organizationId = organizations.requireActive(slug).getId();
         String pattern = "%" + escapeLike(query == null ? "" : query.strip().toLowerCase(Locale.ROOT)) + "%";
+        Set<UUID> linked = members.findByOrganizationIdAndPlayerIdNotNull(organizationId).stream()
+                .map(OrganizationMember::getPlayerId)
+                .collect(Collectors.toSet());
         return players.search(organizationId, pattern).stream()
-                .map(PlayerView::of)
+                .map(player -> PlayerView.of(player, linked.contains(player.getId())))
                 .toList();
     }
 
@@ -61,7 +74,7 @@ public class PlayerAdminService {
             player.replaceAliases(details.aliases());
         }
         player.expectEmail(expected);
-        return PlayerView.of(players.save(player));
+        return PlayerView.of(players.save(player), false);
     }
 
     /**
@@ -77,30 +90,38 @@ public class PlayerAdminService {
         Player player = players.findByIdAndOrganizationId(playerId, organizationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There's no player " + playerId));
         Details details = check(input);
+        boolean linked = members.existsByOrganizationIdAndPlayerId(organizationId, playerId);
+        if (linked
+                && (!details.riotId().equals(player.getRiotId())
+                        || !Objects.equals(details.discordUsername(), player.getDiscordUsername()))) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    player.getRiotId() + " keeps their Riot ID and Discord up to date from their account");
+        }
         requireFree(organizationId, details.riotId(), playerId);
         String expected = checkEmail(input.expectedEmail());
         requireEmailFree(organizationId, expected, playerId);
         apply(player, details);
         player.expectEmail(expected);
-        return PlayerView.of(player);
+        return PlayerView.of(player, linked);
     }
 
     /**
-     * A linked player changes their own Riot ID, Discord, rank and aliases; the email typed in
-     * advance isn't theirs to see or change. A rank or aliases left out stay as they are.
+     * A linked player changes their own rank in this organisation; nothing means Unranked. Their
+     * Riot ID and Discord are their account's.
      *
-     * @throws ResponseStatusException 404 when the organisation has no such player, 400 when the
-     *     details are wrong, 409 when the Riot ID is taken
+     * @throws ResponseStatusException 404 when the organisation has no such player, 400 for a rank
+     *     that doesn't exist
      */
     @Transactional
-    public PlayerView editOwn(UUID organizationId, UUID playerId, PlayerInput input) {
+    public PlayerView rerank(UUID organizationId, UUID playerId, Integer rankId) {
         Player player = players.findByIdAndOrganizationId(playerId, organizationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There's no player " + playerId));
-        Details details = check(input);
-        requireFree(organizationId, details.riotId(), playerId);
-        Rank rank = input.rankId() == null ? player.getCurrentRank() : details.rank();
-        apply(player, new Details(details.riotId(), details.discordUsername(), rank, details.aliases()));
-        return PlayerView.of(player).withoutEmail();
+        player.setCurrentRank(
+                rankId == null
+                        ? null
+                        : ranks.findById(rankId).orElseThrow(() -> badRequest("There's no rank " + rankId)));
+        return PlayerView.of(player, true).withoutEmail();
     }
 
     private static void apply(Player player, Details details) {
@@ -222,6 +243,8 @@ public class PlayerAdminService {
 
     /**
      * @param rank nothing when the player has none
+     * @param linked whether someone's account is linked to the player: their Riot ID and Discord
+     *     are then the account's, which only they change
      */
     public record PlayerView(
             UUID id,
@@ -229,9 +252,10 @@ public class PlayerAdminService {
             String discordUsername,
             RankView rank,
             List<AliasView> aliases,
-            String expectedEmail) {
+            String expectedEmail,
+            boolean linked) {
 
-        static PlayerView of(Player player) {
+        static PlayerView of(Player player, boolean linked) {
             return new PlayerView(
                     player.getId(),
                     player.getRiotId(),
@@ -240,11 +264,12 @@ public class PlayerAdminService {
                     player.getAliases().stream()
                             .map(alias -> new AliasView(alias.getAlias(), alias.getKind()))
                             .toList(),
-                    player.getExpectedEmail());
+                    player.getExpectedEmail(),
+                    linked);
         }
 
         PlayerView withoutEmail() {
-            return new PlayerView(id, riotId, discordUsername, rank, aliases, null);
+            return new PlayerView(id, riotId, discordUsername, rank, aliases, null, linked);
         }
     }
 }

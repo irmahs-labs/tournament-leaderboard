@@ -158,3 +158,9 @@ input::placeholder {
 select {
   width: 100%;
 }
+
+/* A linked player's Riot ID and Discord are theirs: shown, not editable. */
+.table tr.editing input:read-only {
+  color: var(--muted);
+  cursor: not-allowed;
+}

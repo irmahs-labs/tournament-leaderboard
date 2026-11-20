@@ -116,6 +116,8 @@
                 required
                 [attr.aria-label]="t('adminPlayers.riotId')"
                 [value]="player.riotId"
+                [readOnly]="player.linked"
+                [attr.title]="player.linked ? t('adminPlayers.linkedNote') : null"
               />
             </td>
             <td>
@@ -124,6 +126,8 @@
                 maxlength="100"
                 [attr.aria-label]="t('adminPlayers.discord')"
                 [value]="player.discordUsername ?? ''"
+                [readOnly]="player.linked"
+                [attr.title]="player.linked ? t('adminPlayers.linkedNote') : null"
               />
               <input
                 #email
@@ -184,8 +188,11 @@
               ><span class="tag">{{ id.tag }}</span>
             </td>
             <td>
-              {{ player.discordUsername ?? "–" }} @if (player.expectedEmail; as
-              email) {
+              {{ player.discordUsername ?? "–" }} @if (player.linked) {
+              <span class="muted small expected"
+                >{{ t("adminPlayers.linked") }}</span
+              >
+              } @if (player.expectedEmail; as email) {
               <span class="muted small expected"
                 >{{ t("adminPlayers.waitingFor", { email }) }}</span
               >

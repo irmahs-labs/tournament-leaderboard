@@ -36,6 +36,49 @@
     </button>
   </section>
 
+  <section class="panel block" aria-labelledby="identity-title">
+    <h2 class="heading" id="identity-title">{{ t("account.identity") }}</h2>
+    <p class="muted">{{ t("account.identityHelp") }}</p>
+    <form
+      class="identity"
+      (submit)="saveIdentity($event, riotId.value, discord.value)"
+    >
+      <label class="field">
+        <span class="label">{{ t("adminPlayers.riotId") }}</span>
+        <input
+          #riotId
+          name="riotId"
+          required
+          maxlength="100"
+          autocomplete="off"
+          [placeholder]="t('mine.riotIdHint')"
+          [value]="me.riotId ?? ''"
+        />
+      </label>
+      <label class="field">
+        <span class="label">{{ t("adminPlayers.discord") }}</span>
+        <input
+          #discord
+          name="discord"
+          maxlength="100"
+          autocomplete="off"
+          [value]="me.discordUsername ?? ''"
+        />
+      </label>
+      <button type="submit" class="button" [disabled]="identity.busy()">
+        {{ t("account.identitySave") }}
+      </button>
+    </form>
+    <p class="muted small">{{ t("mine.renameNote") }}</p>
+    <p
+      class="status"
+      role="status"
+      [class.failed]="identity.outcome()?.ok === false"
+    >
+      {{ identity.outcome()?.text }}
+    </p>
+  </section>
+
   <section class="panel block" aria-labelledby="orgs-title">
     <h2 class="heading" id="orgs-title">{{ t("account.organisations") }}</h2>
     @if (me.memberships.length) {

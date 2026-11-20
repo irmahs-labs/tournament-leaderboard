@@ -32,14 +32,17 @@ public class AccountService {
     private final OrganizationService organizations;
     private final AccessProperties access;
     private final PlayerRepository players;
+    private final IdentityService identity;
 
     AccountService(
             AppUserRepository users,
             OrganizationMemberRepository members,
             OrganizationService organizations,
             AccessProperties access,
-            PlayerRepository players) {
+            PlayerRepository players,
+            IdentityService identity) {
         this.players = players;
+        this.identity = identity;
         this.users = users;
         this.members = members;
         this.organizations = organizations;
@@ -90,6 +93,7 @@ public class AccountService {
                 && !members.existsByOrganizationIdAndPlayerId(organizationId, player.getId())) {
             member.linkPlayer(player.getId());
             player.expectEmail(null);
+            identity.linked(userId, player);
             log.info("Linked a member to their player by the email expected for it");
         }
     }
@@ -128,6 +132,8 @@ public class AccountService {
                         user.getEmail(),
                         user.getDisplayName(),
                         user.isPlatformAdmin(),
+                        user.getRiotId(),
+                        user.getDiscordUsername(),
                         members.findMemberships(user.getId())));
     }
 
@@ -164,7 +170,14 @@ public class AccountService {
     }
 
     /**
+     * @param riotId shown on every player profile linked to the account; nothing before the first
      * @param memberships the active organisations they belong to
      */
-    public record Me(String email, String displayName, boolean platformAdmin, List<Membership> memberships) {}
+    public record Me(
+            String email,
+            String displayName,
+            boolean platformAdmin,
+            String riotId,
+            String discordUsername,
+            List<Membership> memberships) {}
 }

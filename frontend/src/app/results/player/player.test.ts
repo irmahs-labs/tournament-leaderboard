@@ -181,7 +181,7 @@ describe("the signed-in player's own profile", () => {
     localStorage.clear();
   });
 
-  it("marks it as theirs and saves their Riot ID, Discord and rank", async () => {
+  it("marks it as theirs and saves their rank, sending the rest to My account", async () => {
     expect(text(page.querySelector(".you"))).toBe("You");
 
     page.querySelector<HTMLButtonElement>(".edit-open")?.click();
@@ -192,11 +192,15 @@ describe("the signed-in player's own profile", () => {
         .flush([{ color: null, id: 18, name: "Gold 2" }]);
     });
     harness.detectChanges();
-    const riotId = page.querySelector<HTMLInputElement>(".edit input");
+    const rank = page.querySelector<HTMLSelectElement>(".edit select");
 
-    if (riotId) {
-      riotId.value = "Wrenna#EUW";
+    if (rank) {
+      rank.value = "18";
     }
+
+    expect(page.querySelector(".edit a")?.getAttribute("href")).toBe(
+      "/account"
+    );
 
     page.querySelector<HTMLFormElement>("form.edit")?.requestSubmit();
 
@@ -204,11 +208,7 @@ describe("the signed-in player's own profile", () => {
       http.expectOne(`/api/orgs/${ALSACE.slug}/claim/player`)
     );
 
-    expect(save.request.body).toStrictEqual({
-      discordUsername: "wren.gg",
-      rankId: null,
-      riotId: "Wrenna#EUW",
-    });
+    expect(save.request.body).toStrictEqual({ rankId: 18 });
     save.flush({});
     await vi.waitFor(() => {
       harness.detectChanges();
@@ -219,7 +219,7 @@ describe("the signed-in player's own profile", () => {
     await vi.waitFor(() => {
       harness.detectChanges();
       expect(text(page.querySelector("[role=status]"))).toBe(
-        "Your details are saved."
+        "Your rank is saved."
       );
     });
   });

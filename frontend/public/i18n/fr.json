@@ -263,7 +263,9 @@
     "email": "E-mail Google (facultatif)",
     "emailHint": "nom@gmail.com",
     "waitingFor": "Lié à la connexion : {{email}}",
-    "emailHelp": "La première personne à se connecter avec cet e-mail Google obtient ce profil, sans demande. Seuls les admins le voient."
+    "emailHelp": "La première personne à se connecter avec cet e-mail Google obtient ce profil, sans demande. Seuls les admins le voient.",
+    "linked": "Lié à un compte",
+    "linkedNote": "Lié à un compte : le joueur modifie son Riot ID et son Discord dans Mon compte."
   },
   "adminScores": {
     "title": "Saisir les scores",
@@ -696,7 +698,13 @@
     "deleted": "Votre compte est supprimé.",
     "failed": "Ça n'a pas marché. Réessayez.",
     "myProfile": "Mon profil",
-    "claimProfile": "Revendiquer mon profil"
+    "claimProfile": "Revendiquer mon profil",
+    "identity": "Riot ID et Discord",
+    "identityHelp": "Affichés sur votre profil de joueur dans chaque organisation où vous jouez. Un profil revendiqué les prend aussi.",
+    "identitySave": "Enregistrer",
+    "identitySaved": "Votre Riot ID et votre Discord sont enregistrés partout.",
+    "identityInvalid": "Vérifiez votre Riot ID, puis réessayez.",
+    "identityTaken": "Un autre joueur de l'une de vos organisations a déjà ce Riot ID."
   },
   "players": {
     "title": "Joueurs",
@@ -825,14 +833,16 @@
   "mine": {
     "you": "Vous",
     "edit": "Modifier mes infos",
-    "editTitle": "Mes infos",
-    "save": "Enregistrer mes infos",
-    "saved": "Vos infos sont enregistrées.",
+    "editTitle": "Mon rang",
+    "save": "Enregistrer mon rang",
+    "saved": "Votre rang est enregistré.",
     "riotIdHint": "Nom#TAG",
     "aliasesHint": "Séparés par des virgules",
     "taken": "Ce Riot ID est déjà un joueur ici.",
     "invalid": "Vérifiez votre Riot ID et vos alias, puis réessayez.",
     "failed": "Ça n'a pas marché. Réessayez dans un instant.",
-    "renameNote": "Un nouveau Riot ID garde l'ancien comme alias."
+    "renameNote": "Un nouveau Riot ID garde l'ancien comme alias.",
+    "identityNote": "Votre Riot ID et votre Discord sont les mêmes dans chaque organisation :",
+    "identityLink": "modifiez-les dans Mon compte"
   }
 }

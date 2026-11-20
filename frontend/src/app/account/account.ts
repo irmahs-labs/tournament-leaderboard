@@ -14,7 +14,8 @@ import { SessionService } from "../shared/session";
 export const DELETE_WORD = "DELETE";
 
 /**
- * My account: who is signed in, the organisations they belong to (leaving any they don't own),
+ * My account: who is signed in, their Riot ID and Discord (the same at every organisation), the
+ * organisations they belong to (leaving any they don't own),
  * signing out, and deleting the account once they own no organisation.
  */
 @Component({
@@ -37,6 +38,16 @@ export class AccountPage {
     )
   );
 
+  /** Saving the Riot ID and Discord, with its own message under the form. */
+  protected readonly identity = new AdminAction((status) =>
+    this.#transloco.translate(
+      {
+        400: "account.identityInvalid",
+        409: "account.identityTaken",
+      }[status] ?? "account.failed"
+    )
+  );
+
   readonly #http = inject(HttpClient);
   readonly #router = inject(Router);
   readonly #transloco = inject(TranslocoService);
@@ -48,6 +59,26 @@ export class AccountPage {
       this.session.me()?.memberships.some((membership) => membership.owner) ??
       false
     );
+  }
+
+  /** Changes the Riot ID and Discord on the account and on every linked profile. */
+  protected async saveIdentity(
+    event: Event,
+    riotId: string,
+    discord: string
+  ): Promise<void> {
+    event.preventDefault();
+    await this.identity.run(async () => {
+      await firstValueFrom(
+        this.#http.put("/api/me/identity", {
+          discordUsername: discord.trim() || null,
+          riotId: riotId.trim(),
+        })
+      );
+      await this.session.load();
+
+      return this.#transloco.translate("account.identitySaved");
+    });
   }
 
   /** Leaves an organisation after asking; its player record stays there, unlinked. */
