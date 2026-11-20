@@ -13,6 +13,10 @@ spring:
             client-id: ${GOOGLE_CLIENT_ID:}
             client-secret: ${GOOGLE_CLIENT_SECRET:}
             scope: openid, email, profile
+  session:
+    jdbc:
+      # Flyway makes the tables (V2026_11_20_6__sessions.sql).
+      initialize-schema: never
   threads:
     virtual:
       enabled: true
@@ -29,6 +33,10 @@ spring:
 server:
   # Behind Caddy: build redirect URLs (Google sign-in) with https, not http.
   forward-headers-strategy: framework
+  servlet:
+    session:
+      # Signed out 30 minutes after the last request, as before sessions moved to the database.
+      timeout: 30m
 
 leaderboard:
   access:

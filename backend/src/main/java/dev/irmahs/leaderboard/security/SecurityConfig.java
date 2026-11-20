@@ -14,7 +14,8 @@ import org.springframework.security.web.authentication.logout.HttpStatusReturnin
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 /**
- * Who can reach what. Sign-in is with Google only, and the session lives in a cookie.
+ * Who can reach what. Sign-in is with Google only; the session lives in the database and its id
+ * in a cookie (see {@link SessionConfig}).
  *
  * <ul>
  *   <li>Public: the result pages' API, the version and the health check. Nobody needs to sign
