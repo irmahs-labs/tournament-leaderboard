@@ -60,7 +60,7 @@ public class BrandingService {
     }
 
     /**
-     * Replaces the logo with a PNG, WebP or SVG image, told apart by its first bytes.
+     * Replaces the logo with a PNG, JPEG, WebP or SVG image, told apart by its first bytes.
      *
      * @throws ResponseStatusException 413 above 256 KB, 415 for any other kind of file
      */
@@ -71,7 +71,7 @@ public class BrandingService {
         }
         String contentType = imageType(image)
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.UNSUPPORTED_MEDIA_TYPE, "A logo is a PNG, WebP or SVG image"));
+                        HttpStatus.UNSUPPORTED_MEDIA_TYPE, "A logo is a PNG, JPEG, WebP or SVG image"));
         OrganizationLogo logo =
                 logos.findById(organization.getId()).orElseGet(() -> new OrganizationLogo(organization.getId()));
         logo.replace(contentType, image, Instant.now());
@@ -100,10 +100,13 @@ public class BrandingService {
                 organization, logos.findUpdatedAt(organization.getId()).orElse(null));
     }
 
-    /** PNG, WebP or a scriptless SVG, from the file's content rather than its name. */
+    /** PNG, JPEG, WebP or a scriptless SVG, from the file's content rather than its name. */
     static Optional<String> imageType(byte[] image) {
         if (startsWith(image, 0, new byte[] {(byte) 0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n'})) {
             return Optional.of("image/png");
+        }
+        if (startsWith(image, 0, new byte[] {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF})) {
+            return Optional.of("image/jpeg");
         }
         if (startsWith(image, 0, "RIFF".getBytes(StandardCharsets.US_ASCII))
                 && startsWith(image, 8, "WEBP".getBytes(StandardCharsets.US_ASCII))) {
