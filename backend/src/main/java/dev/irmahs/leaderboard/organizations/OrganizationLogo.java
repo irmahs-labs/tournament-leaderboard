@@ -7,7 +7,7 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
 
-/** An organisation's logo: a square PNG, WebP or SVG, shown in its header. */
+/** An organisation's logo: a square PNG, JPEG, WebP or SVG, shown in its header. */
 @Entity
 @Table(name = "organization_logos")
 class OrganizationLogo {

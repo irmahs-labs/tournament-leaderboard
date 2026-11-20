@@ -52,6 +52,11 @@
       <artifactId>spring-boot-starter-flyway</artifactId>
     </dependency>
     <dependency>
+      <!-- Sessions in the database, so a deploy or a restart doesn't sign anyone out. -->
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-session-jdbc</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.flywaydb</groupId>
       <artifactId>flyway-database-postgresql</artifactId>
     </dependency>

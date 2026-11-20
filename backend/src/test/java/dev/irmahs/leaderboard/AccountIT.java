@@ -1,11 +1,11 @@
 package dev.irmahs.leaderboard;
 
-import static dev.irmahs.leaderboard.AdminTestSupport.ADMIN;
 import static dev.irmahs.leaderboard.AdminTestSupport.LYON_ADMIN;
 import static dev.irmahs.leaderboard.AdminTestSupport.NOBODY;
 import static dev.irmahs.leaderboard.AdminTestSupport.PLAYER;
 import static dev.irmahs.leaderboard.AdminTestSupport.call;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import dev.irmahs.leaderboard.accounts.AccountService;
 import dev.irmahs.leaderboard.organizations.Organization;
@@ -19,6 +19,8 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpMethod;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.session.Session;
+import org.springframework.session.SessionRepository;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Container;
@@ -44,6 +46,9 @@ class AccountIT {
 
     @Autowired
     JdbcClient jdbc;
+
+    @Autowired
+    SessionRepository<? extends Session> sessions;
 
     @Autowired
     AccountService accounts;
@@ -99,16 +104,12 @@ class AccountIT {
                 .param("admin", admin)
                 .update();
 
-        var deleted = call(mvc, HttpMethod.DELETE, "/api/me", null, ADMIN);
+        String session = StoredSignIn.save(sessions, "google-admin");
+
+        var deleted = mvc.delete().uri("/api/me").with(csrf()).cookie(StoredSignIn.cookie(session));
 
         assertThat(deleted).hasStatus(204);
-        assertThat(deleted.getRequest().getSession(false) == null
-                        || deleted.getRequest()
-                                        .getSession(false)
-                                        .getAttributeNames()
-                                        .hasMoreElements()
-                                == false)
-                .isTrue();
+        assertThat(sessions.findById(session)).as("signed out").isNull();
         em.flush();
         assertThat(accountsWithEmail("admin@example.com")).isZero();
         assertThat(jdbc.sql("SELECT count(*) FROM organization_members WHERE user_id = :admin")
