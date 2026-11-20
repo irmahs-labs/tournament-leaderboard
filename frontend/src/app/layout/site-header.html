@@ -128,7 +128,25 @@
       <span class="name">Tournament Leaderboard</span>
     </a>
     <nav class="nav" [attr.aria-label]="t('platform.navLabel')">
-      @if (session.me()?.platformAdmin) {
+      @let joined = session.me()?.memberships ?? []; @if (joined.length === 1) {
+      @let only = joined[0];
+      <a [routerLink]="['/org', only.slug]">{{ only.name }}</a>
+      } @else if (joined.length > 1) {
+      <details class="menu" #orgsMenu>
+        <summary>{{ t("header.myOrganisations") }}</summary>
+        <ul>
+          @for (membership of joined; track membership.slug) {
+          <li>
+            <a
+              [routerLink]="['/org', membership.slug]"
+              (click)="orgsMenu.open = false"
+              >{{ membership.name }}</a
+            >
+          </li>
+          }
+        </ul>
+      </details>
+      } @if (session.me()?.platformAdmin) {
       <a
         routerLink="/platform"
         routerLinkActive="active"

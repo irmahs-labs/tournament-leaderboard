@@ -17,6 +17,7 @@ import { ThemeService } from "../shared/theme";
  * otherwise; then how many pages are open, the season picker, the language and theme switches, and sign-in.
  */
 @Component({
+  host: { "(document:click)": "closeMenus($event)" },
   imports: [RouterLink, RouterLinkActive, TranslocoDirective],
   selector: "app-site-header",
   styleUrl: "./site-header.css",
@@ -60,6 +61,17 @@ export class SiteHeader {
       org !== null &&
       this.#router.url.startsWith(`/org/${encodeURIComponent(org.slug)}/admin`)
     );
+  }
+
+  /** Closes an open menu when the click lands outside it, as menus do. */
+  protected closeMenus(event: Event): void {
+    for (const menu of this.#document.querySelectorAll<HTMLDetailsElement>(
+      "app-site-header details[open]"
+    )) {
+      if (!(event.target instanceof Node && menu.contains(event.target))) {
+        menu.open = false;
+      }
+    }
   }
 
   /** The page to come back to after signing in. */

@@ -83,6 +83,67 @@
   border-bottom: 3px solid transparent;
 }
 
+/* The organisations one joined, when there are several: a menu opening under its tab. */
+.menu {
+  position: relative;
+}
+
+.menu summary {
+  padding: 10px 14px;
+  color: var(--nav-muted);
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: var(--label-track);
+  cursor: pointer;
+  list-style: none;
+}
+
+.menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.menu summary::after {
+  content: "";
+  display: inline-block;
+  margin-left: 8px;
+  border: 5px solid transparent;
+  border-top-color: currentColor;
+  vertical-align: -2px;
+}
+
+.menu summary:hover,
+.menu[open] summary {
+  color: var(--nav-text);
+}
+
+.menu ul {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 20;
+  min-width: 220px;
+  margin: 4px 0 0;
+  padding: 6px 0;
+  list-style: none;
+  background: var(--nav-bg);
+  border: 1px solid var(--nav-ghost);
+}
+
+.menu ul a {
+  display: block;
+  padding: 10px 16px;
+  border-bottom: 0;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 15px;
+  color: var(--nav-text);
+}
+
+.menu ul a:hover {
+  background: var(--nav-ghost);
+}
+
 .nav a:hover,
 .nav a.active {
   color: var(--nav-text);
