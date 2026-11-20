@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
-import java.util.regex.Pattern;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +22,6 @@ public class PlayerAdminService {
 
     static final int MAX_NAME = 100;
     static final int MAX_EMAIL = 254;
-    private static final Pattern EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
 
     private final OrganizationService organizations;
     private final PlayerRepository players;
@@ -120,10 +118,21 @@ public class PlayerAdminService {
             return null;
         }
         String email = value.strip().toLowerCase(Locale.ROOT);
-        if (email.length() > MAX_EMAIL || !EMAIL.matcher(email).matches()) {
+        if (email.length() > MAX_EMAIL || !looksLikeEmail(email)) {
             throw badRequest("The Google email isn't an email address");
         }
         return email;
+    }
+
+    /** One @, no spaces, and a dot inside the part after the @: enough to catch a typo. */
+    static boolean looksLikeEmail(String email) {
+        int at = email.indexOf('@');
+        if (at <= 0 || at != email.lastIndexOf('@') || email.chars().anyMatch(Character::isWhitespace)) {
+            return false;
+        }
+        String domain = email.substring(at + 1);
+        int dot = domain.indexOf('.');
+        return dot > 0 && !domain.endsWith(".");
     }
 
     private void requireEmailFree(UUID organizationId, String email, UUID except) {
