@@ -124,7 +124,19 @@
     </div>
     } @else {
     <a class="brand" routerLink="/">
-      <span class="mark" aria-hidden="true"></span>
+      <svg
+        class="mark"
+        width="36"
+        height="36"
+        viewBox="0 0 40 40"
+        fill="none"
+        stroke-width="3"
+        aria-hidden="true"
+      >
+        <path class="badge" d="M20 2l16 9v18l-16 9-16-9V11z" />
+        <path class="up" d="M12 24l8-8 8 8" stroke-width="3.5" />
+        <path class="up below" d="M12 31l8-8 8 8" stroke-width="3.5" />
+      </svg>
       <span class="name">Tournament Leaderboard</span>
     </a>
     <nav class="nav" [attr.aria-label]="t('platform.navLabel')">

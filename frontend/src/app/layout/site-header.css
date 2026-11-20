@@ -45,11 +45,23 @@
   background: transparent;
 }
 
+/* Rank up: two chevrons climbing inside a badge, the top one in the text colour. */
 .mark {
-  width: 14px;
-  height: 28px;
-  background: var(--accent);
-  clip-path: polygon(0 0, 100% 0, 100% 70%, 0 100%);
+  flex-shrink: 0;
+}
+
+.mark .badge {
+  stroke: var(--accent);
+}
+
+.mark .up {
+  stroke: var(--nav-text);
+  stroke-linecap: square;
+}
+
+.mark .below {
+  stroke: var(--accent);
+  opacity: 0.55;
 }
 
 .name {
