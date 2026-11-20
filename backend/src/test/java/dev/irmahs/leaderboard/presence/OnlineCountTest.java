@@ -38,6 +38,16 @@ class OnlineCountTest {
     }
 
     @Test
+    void endsEveryStreamWhenTheAppStops() {
+        online.join(1_000);
+        online.join(1_000);
+
+        online.closeAll();
+
+        assertThat(online.count()).isZero();
+    }
+
+    @Test
     void turnsAwayPagesAboveTheLimit() {
         for (int i = 0; i < OnlineCount.MAX_STREAMS; i++) {
             online.join(1_000);

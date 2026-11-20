@@ -92,6 +92,12 @@ CI (`.github/workflows/ci.yml`) runs `./mvnw verify` on pull requests and on pus
 - `main` is protected by a ruleset: changes land through pull requests only. So is `migration`,
   whose ruleset also requires the **Build and test** check (with the quality gate) before merging,
   since every merge into it deploys production. Until the rewrite is ready, work stays in `migration`; it reaches `dev` and `main` only when Irma decides.
+- Database changes must work with the previous version too: a deploy starts the new app next to
+  the old one (`deploy/rollout.sh`), so Flyway migrates while the old version still serves.
+  Expand, then contract: add columns as nullable or with a default, add tables freely; rename or
+  drop a column or table, or tighten a constraint, only in a later release, once no running
+  version uses the old shape. A migration that can't follow this says so in its PR, and is merged
+  outside match nights.
 - Commit messages and pull request titles follow Conventional Commits (`feat:`, `fix:`, `chore:`,
   `docs:`, `refactor:`, `test:`, `ci:`), since release versions will be derived from them.
 - Repository: `irmahs-labs/tournament-leaderboard` (moved from `irmahs/alsace-arena-spike-tournament`;

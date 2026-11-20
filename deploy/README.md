@@ -16,7 +16,8 @@ visitor ──HTTPS──▶ Cloudflare ──▶ Caddy (irmahs-labs/proxy) ─�
 | `Dockerfile` (repo root) | Builds the Spring Boot jar, Angular included, into one image on port 8080 |
 | `compose.prod.yaml` (repo root) | Postgres on `internal` only; the app on `internal` and `proxy`, publishing no port |
 | `deploy/db-init/01-app-role.sh` | First start only: creates `leaderboard_app`, the role the app connects with |
-| `.github/workflows/deploy.yml` | Called by CI after the build and tests pass on a merge into `migration`: SSH in as `deploy`, check out the run's commit, write `.env`, dump the database, `docker compose up --build --wait`, then check the address through Caddy |
+| `.github/workflows/deploy.yml` | Called by CI after the build and tests pass on a merge into `migration`: SSH in as `deploy`, check out the run's commit, write `.env`, dump the database, `deploy/rollout.sh`, then check the address through Caddy |
+| `deploy/rollout.sh` | Builds the new image and starts it next to the running app; once healthy, stops the old one gracefully. See below |
 
 ## Database roles
 
@@ -82,6 +83,28 @@ The **Protect migration** ruleset makes this safe: `migration` changes only thro
 can't be force-pushed or deleted, and a pull request merges only once its **Build and test** check
 has passed. On pull requests that check includes the SonarQube Cloud quality gate, so a failing
 gate stops a change before it can reach production.
+
+## Deploys without a gap
+
+Caddy reaches the app as `tournament-leaderboard:8080` on the `proxy` network, and Docker's DNS
+answers with every running container under that alias (Caddy tries the next one when one refuses
+the connection). `deploy/rollout.sh` uses that:
+
+1. Builds the image, and makes sure `db` is up.
+2. Starts a second app container from the new image, next to the running one, under the same alias.
+   Flyway migrates as it starts, while the old version still serves: see the database-change rule
+   in [`CLAUDE.md`](../CLAUDE.md).
+3. Waits for its health check (`/actuator/health/readiness`, up to 4 minutes). If it fails, the new
+   container is removed and the deploy fails; the old version keeps serving.
+4. Stops the old container (graceful: it finishes its requests within 20 s and ends its online-count
+   streams, which pages reopen on the new one), then removes it.
+
+Sessions are in the database, so nobody is signed out. For a moment both versions run, so the
+server needs room for two apps (`mem_limit: 1g` each). On the very first start, with no app
+running, it simply starts one.
+
+Tried locally with `compose.prod.yaml` and a Caddy in front, sending requests every 0.2 s through a
+deploy: no errors.
 
 ## Dumps before each deploy
 

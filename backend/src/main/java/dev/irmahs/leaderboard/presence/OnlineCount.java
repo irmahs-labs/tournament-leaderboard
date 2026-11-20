@@ -1,9 +1,12 @@
 package dev.irmahs.leaderboard.presence;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -69,6 +72,23 @@ public class OnlineCount {
         int count = streams.size();
         for (SseEmitter stream : streams) {
             send(stream, count);
+        }
+    }
+
+    /**
+     * The app is stopping, during a deploy: ends every stream first, so the graceful shutdown
+     * doesn't wait for them. The pages reopen theirs on the new app straight away.
+     */
+    @EventListener(ContextClosedEvent.class)
+    public void closeAll() {
+        List<SseEmitter> open = List.copyOf(streams);
+        streams.removeAll(open);
+        for (SseEmitter stream : open) {
+            try {
+                stream.complete();
+            } catch (IllegalStateException alreadyClosed) {
+                // Nothing left to end.
+            }
         }
     }
 

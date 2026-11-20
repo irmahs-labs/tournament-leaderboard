@@ -45,10 +45,14 @@ services:
       # The JVM sizes its heap from the container limit below; tune both here, no rebuild.
       JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=75
     mem_limit: 1g
+    # Time to finish the requests under way when a deploy stops it (graceful shutdown: 20 s).
+    stop_grace_period: 30s
     depends_on:
       db:
         condition: service_healthy
     # Publishes no port: Caddy reaches it on the proxy network as tournament-leaderboard:8080.
+    # During a deploy two containers share the alias for a moment (deploy/rollout.sh), so no
+    # container_name here.
     networks:
       internal:
       proxy:

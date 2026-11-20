@@ -64,7 +64,8 @@ jobs:
               [ -s "$dump" ] || { echo "The database dump is empty"; exit 1; }
               ls -1t backups/*.dump | tail -n +15 | xargs -r rm --
             fi
-            docker compose up -d --build --remove-orphans --wait
+            # The new app next to the old one, then the old one stopped: no gap.
+            ./deploy/rollout.sh
             docker image prune -f
             docker builder prune -f --filter until=168h'
 
