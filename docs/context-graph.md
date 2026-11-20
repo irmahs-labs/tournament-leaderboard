@@ -163,7 +163,7 @@ organization_invites and organization_logos), `V2026_11_18_1__drop_avatar_url.sq
 picture isn't kept: data minimisation), `V2026_11_19_1__weighted_scoring.sql`,
 `V2026_11_19_2__social_links.sql` (six `*_url` columns on organizations, https only),
 `V2026_11_20_1__player_claims.sql` (player_claims, one waiting per member, with the same policy),
-`V2026_11_20_2__expected_email.sql` (players.expected_email, once per organisation), `V2026_11_20_3__account_identity.sql` (app_users.riot_id and discord_username, filled from each linked account's first profile).
+`V2026_11_20_2__expected_email.sql` (players.expected_email, once per organisation), `V2026_11_20_3__account_identity.sql` (app_users.riot_id and discord_username, filled from each linked account's first profile), `V2026_11_20_4__rank_colours.sql` (a colour per Valorant tier, for ranks that had none).
 
 ```mermaid
 erDiagram
