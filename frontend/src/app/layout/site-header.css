@@ -227,19 +227,30 @@
 }
 
 /* Back to Tournament Leaderboard's home, beside the organisation's own name. */
+/* The platform's rank-up mark, then a divider before the organisation's own logo. */
 .home {
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
   display: grid;
   place-items: center;
-  color: var(--nav-muted);
-  border: 1px solid var(--nav-ghost);
-  margin-right: -12px;
+  min-width: 44px;
+  min-height: 44px;
+  padding-right: 14px;
+  border-right: 1px solid var(--nav-ghost);
+  margin-right: -6px;
 }
 
-.home:hover {
-  color: var(--nav-text);
+.home .mark {
+  transition: transform 0.15s ease;
+}
+
+.home:hover .mark {
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home .mark {
+    transition: none;
+  }
 }
 
 /* EN / FR in one button: the language on screen stands out. */

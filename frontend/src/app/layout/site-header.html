@@ -11,19 +11,17 @@
       [attr.title]="t('header.home')"
     >
       <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
+        class="mark"
+        width="30"
+        height="30"
+        viewBox="0 0 40 40"
         fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        stroke-width="3"
         aria-hidden="true"
       >
-        <path d="M3 10.5 12 3l9 7.5"></path>
-        <path d="M5 9v12h14V9"></path>
-        <path d="M10 21v-6h4v6"></path>
+        <path class="badge" d="M20 2l16 9v18l-16 9-16-9V11z" />
+        <path class="up" d="M12 24l8-8 8 8" stroke-width="3.5" />
+        <path class="up below" d="M12 31l8-8 8 8" stroke-width="3.5" />
       </svg>
     </a>
     <a class="brand" [routerLink]="['/org', org.slug]">
