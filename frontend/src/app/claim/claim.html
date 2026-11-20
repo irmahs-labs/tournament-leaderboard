@@ -44,9 +44,14 @@
       {{ t(mine.claim?.selfApproved ? "claim.linkedSelf" : "claim.linkedHelp")
       }}
     </p>
-    <a class="button-ghost start" [routerLink]="['../players', linked.id]"
-      >{{ t("claim.viewProfile") }}</a
-    >
+    <div class="row">
+      <a class="button start" [routerLink]="['../me', 'seasons']"
+        >{{ t("claim.toSeasons") }}</a
+      >
+      <a class="button-ghost start" [routerLink]="['../players', linked.id]"
+        >{{ t("claim.viewProfile") }}</a
+      >
+    </div>
   </section>
   } @else if (mine.claim?.status === "PENDING" && mine.claim; as waiting) {
   <section class="panel block" aria-labelledby="waiting-title">
@@ -166,6 +171,50 @@
     </ul>
     }
     <p class="muted small">{{ t("claim.notListed") }}</p>
+  </section>
+  <section class="panel block" aria-labelledby="create-title">
+    <h2 class="heading" id="create-title">{{ t("claim.createTitle") }}</h2>
+    <p class="muted">{{ t("claim.createHelp") }}</p>
+    @if (accountRiotId(); as riotId) {
+    <p>{{ t("claim.createAs", { riotId }) }}</p>
+    <button
+      type="button"
+      class="button start"
+      [disabled]="action.busy()"
+      (click)="create('', '')"
+    >
+      {{ t("claim.create") }}
+    </button>
+    } @else {
+    <form
+      class="create"
+      (submit)="$event.preventDefault(); create(riotId.value, discord.value)"
+    >
+      <label class="field">
+        <span class="label">{{ t("claim.riotId") }}</span>
+        <input
+          #riotId
+          name="riotId"
+          required
+          autocomplete="off"
+          [attr.maxlength]="maxName"
+          placeholder="Name#TAG"
+        />
+      </label>
+      <label class="field">
+        <span class="label">{{ t("claim.discord") }}</span>
+        <input
+          #discord
+          name="discord"
+          autocomplete="off"
+          [attr.maxlength]="maxName"
+        />
+      </label>
+      <button type="submit" class="button start" [disabled]="action.busy()">
+        {{ t("claim.create") }}
+      </button>
+    </form>
+    }
   </section>
   } } } @else {
   <p class="muted" aria-live="polite">{{ t("claim.loading") }}</p>

@@ -10,6 +10,7 @@ import { PlayersAdminPage } from "./admin/players/players";
 import { ScoresAdminPage } from "./admin/scores/scores";
 import { ScoringAdminPage } from "./admin/scoring/scoring";
 import { SeasonsAdminPage } from "./admin/seasons/seasons";
+import { SignUpsAdminPage } from "./admin/sign-ups/sign-ups";
 import { ClaimPage } from "./claim/claim";
 import { HomePage } from "./home/home";
 import { JoinPage } from "./join/join";
@@ -27,6 +28,7 @@ import { PlayerPage } from "./results/player/player";
 import { PlayersPage } from "./results/players/players";
 import { organizationResolver } from "./shared/organization";
 import { SignInPage } from "./sign-in/sign-in";
+import { MySeasonsPage } from "./sign-ups/my-seasons";
 
 export const routes: Routes = [
   {
@@ -38,12 +40,21 @@ export const routes: Routes = [
       { component: PlayerPage, path: "players/:player" },
       { canActivate: [accountGuard], component: ClaimPage, path: "claim" },
       {
+        canActivate: [accountGuard],
+        component: MySeasonsPage,
+        path: "me/seasons",
+      },
+      {
         canActivate: [adminGuard],
         children: [
           { path: "", pathMatch: "full", redirectTo: "scores" },
           { component: ScoresAdminPage, path: "scores" },
           { component: PlayersAdminPage, path: "players" },
           { component: SeasonsAdminPage, path: "seasons" },
+          {
+            component: SignUpsAdminPage,
+            path: "seasons/:season/sign-ups",
+          },
           { component: ScoringAdminPage, path: "scoring" },
           { component: MembersAdminPage, path: "members" },
           { component: BrandingAdminPage, path: "branding" },

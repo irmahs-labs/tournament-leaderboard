@@ -1,5 +1,9 @@
 # Tests only. Loaded on top of the main application.yml.
 spring:
+  session:
+    jdbc:
+      # No cleanup job: each test class's Postgres stops while its cached context lives on.
+      cleanup-cron: "-"
   security:
     oauth2:
       client:

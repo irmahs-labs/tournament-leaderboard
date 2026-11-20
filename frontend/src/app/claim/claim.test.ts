@@ -169,8 +169,103 @@ describe("the Claim page", () => {
     await open({ ...MEMBER, linked: PLAYERS[0] ?? null });
 
     expect(text(page.querySelector("h2"))).toBe("Your profile is Kestrel");
-    expect(page.querySelector("a.start")?.getAttribute("href")).toBe(
-      "/org/alsace-arena/players/kestrel"
+    expect(
+      [...page.querySelectorAll("a.start")].map((link) =>
+        link.getAttribute("href")
+      )
+    ).toStrictEqual([
+      "/org/alsace-arena/me/seasons",
+      "/org/alsace-arena/players/kestrel",
+    ]);
+  });
+
+  it("lets a member who never played create their profile", async () => {
+    await open(MEMBER);
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      http.expectOne(`${API}/players`).flush(PLAYERS);
+    });
+    harness.detectChanges();
+
+    const form = page.querySelector<HTMLFormElement>("form.create");
+    const riotId = form?.querySelector<HTMLInputElement>("[name=riotId]");
+
+    if (riotId) {
+      riotId.value = "  ";
+    }
+
+    form?.requestSubmit();
+    harness.detectChanges();
+
+    expect(text(page.querySelector("[role=status]"))).toBe(
+      "Type your Riot ID, such as Name#TAG."
     );
+
+    if (riotId) {
+      riotId.value = " Moth#EUW ";
+    }
+
+    form?.requestSubmit();
+
+    const created = await vi.waitFor(() =>
+      http.expectOne(`/api/orgs/${ALSACE.slug}/players/me`)
+    );
+
+    expect(created.request.body).toStrictEqual({
+      discordUsername: null,
+      riotId: "Moth#EUW",
+    });
+    created.flush({
+      ...MEMBER,
+      linked: { ...PLAYERS[1], games: 0, id: "moth", riotId: "Moth#EUW" },
+    });
+    await vi.waitFor(() => http.expectOne("/api/me").flush(ME));
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      expect(text(page.querySelector("h2"))).toBe("Your profile is Moth");
+    });
+    expect(text(page.querySelector("[role=status]"))).toBe(
+      "Your profile is created. Now sign up for a season."
+    );
+  });
+
+  it("creates the profile with the account's Riot ID when it has one", async () => {
+    const loading = TestBed.inject(SessionService).load();
+
+    http.expectOne("/api/me").flush({ ...ME, riotId: "Heron#EUW" });
+    await loading;
+    harness = await RouterTestingHarness.create();
+    const navigation = harness.navigateByUrl("/org/alsace-arena/claim");
+
+    await answer(harness, `/api/orgs/${ALSACE.slug}`, ALSACE);
+    await navigation;
+    await answer(harness, `/api/orgs/${ALSACE.slug}/seasons`, SEASONS);
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      http.expectOne(API).flush(MEMBER);
+    });
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      http.expectOne(`${API}/players`).flush(PLAYERS);
+    });
+    harness.detectChanges();
+    page = rendered(harness);
+
+    expect(page.querySelector("form.create")).toBeNull();
+    expect(text(page.querySelector("#create-title + p + p"))).toBe(
+      "It takes the Riot ID on your account: Heron#EUW."
+    );
+    button("Create my profile")?.click();
+
+    const created = await vi.waitFor(() =>
+      http.expectOne(`/api/orgs/${ALSACE.slug}/players/me`)
+    );
+
+    expect(created.request.body).toStrictEqual({
+      discordUsername: null,
+      riotId: null,
+    });
+    created.flush({ ...MEMBER, linked: PLAYERS[1] ?? null });
+    await vi.waitFor(() => http.expectOne("/api/me").flush(ME));
   });
 });

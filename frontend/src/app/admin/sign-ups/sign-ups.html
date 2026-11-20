@@ -1,0 +1,206 @@
+<ng-container *transloco="let t">
+  <div class="intro-text">
+    <span class="eyebrow"
+      >{{ t("admin.eyebrow", { org: current.organization()?.name ?? "" })
+      }}</span
+    >
+    <h1 class="display">
+      {{ t("adminSignUps.title", { name: signUps.hasValue() ?
+      signUps.value().name : "" }) }}
+    </h1>
+    <p class="lede muted">{{ t("adminSignUps.lede") }}</p>
+    <a
+      class="back"
+      [routerLink]="['/org', current.organization()?.slug, 'admin', 'seasons']"
+      >← {{ t("adminSignUps.back") }}</a
+    >
+  </div>
+
+  <p
+    class="status"
+    role="status"
+    [class.failed]="action.outcome()?.ok === false"
+  >
+    {{ action.outcome()?.text }}
+  </p>
+
+  @if (signUps.error()) {
+  <p class="panel notice" role="alert">{{ t("adminSignUps.failed") }}</p>
+  } @else if (signUps.hasValue()) { @let season = signUps.value(); @if
+  (season.finished) {
+  <p class="panel notice">{{ t("adminSignUps.over") }}</p>
+  } @else {
+  <section class="panel block" aria-labelledby="settings-title">
+    <div class="block-head">
+      <h2 class="heading" id="settings-title">
+        {{ t("adminSignUps.settings") }}
+      </h2>
+      <span class="pill" [class.live]="season.takesSignUps"
+        >{{ t(season.takesSignUps ? "adminSignUps.isOpen" :
+        "adminSignUps.isClosed") }}</span
+      >
+    </div>
+    <form
+      class="settings"
+      (submit)="$event.preventDefault(); saveSettings(open.checked, closesOn.value)"
+    >
+      <label class="check">
+        <input #open type="checkbox" name="open" [checked]="season.open" />
+        {{ t("adminSignUps.open") }}
+      </label>
+      <label class="field">
+        <span class="label">{{ t("adminSignUps.closesOn") }}</span>
+        <input
+          #closesOn
+          type="date"
+          name="closesOn"
+          [value]="season.closesOn ?? ''"
+        />
+      </label>
+      <button type="submit" class="button" [disabled]="action.busy()">
+        {{ t("adminPlayers.save") }}
+      </button>
+    </form>
+    <p class="muted small">{{ t("adminSignUps.settingsHelp") }}</p>
+  </section>
+
+  <section class="panel block" aria-labelledby="add-title">
+    <h2 class="heading" id="add-title">{{ t("adminSignUps.addTitle") }}</h2>
+    <p class="muted">{{ t("adminSignUps.addHelp") }}</p>
+    <label class="field search">
+      <span class="label">{{ t("adminSignUps.search") }}</span>
+      <input
+        #query
+        type="search"
+        name="search"
+        autocomplete="off"
+        [placeholder]="t('players.searchHint')"
+        [value]="search()"
+        (input)="search.set(query.value)"
+      />
+    </label>
+    @if (search().trim() !== "") { @if (candidates().length === 0) {
+    <p class="muted">{{ t("adminSignUps.noMatch") }}</p>
+    } @else {
+    <ul class="choices">
+      @for (player of candidates(); track player.id) { @let id =
+      splitRiotId(player.riotId);
+      <li>
+        <span
+          ><strong>{{ id.name }}</strong
+          ><span class="muted"> {{ id.tag }}</span> @if (!player.linked) {
+          &ngsp;<span class="pill">{{ t("adminSignUps.noAccount") }}</span>
+          }</span
+        >
+        <button
+          type="button"
+          class="button-ghost small-button"
+          [disabled]="action.busy()"
+          (click)="add(player)"
+        >
+          {{ t("adminSignUps.add") }}<span class="visually-hidden">
+            {{ id.name }}</span
+          >
+        </button>
+      </li>
+      }
+    </ul>
+    } }
+  </section>
+  }
+
+  <section class="panel block" aria-labelledby="list-title">
+    <h2 class="heading" id="list-title">
+      {{ t("adminSignUps.signedUp", { count: signedUp().length }) }}
+    </h2>
+    @if (signedUp().length === 0) {
+    <p class="muted">{{ t("adminSignUps.nobody") }}</p>
+    } @else {
+    <div class="scroll">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col" class="num">#</th>
+            <th scope="col">{{ t("adminSignUps.player") }}</th>
+            <th scope="col">{{ t("adminSignUps.when") }}</th>
+            <th scope="col">{{ t("adminSignUps.how") }}</th>
+            <th scope="col">
+              <span class="visually-hidden"
+                >{{ t("adminPlayers.actions") }}</span
+              >
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of signedUp(); track row.playerId; let index = $index) {
+          @let id = splitRiotId(row.riotId ?? "");
+          <tr>
+            <td class="num">{{ index + 1 }}</td>
+            <td>
+              <strong>{{ id.name }}</strong
+              ><span class="muted"> {{ id.tag }}</span> @if (!row.account) {
+              &ngsp;<span class="pill">{{ t("adminSignUps.noAccount") }}</span>
+              }
+            </td>
+            <td>{{ language.moment(row.registeredAt) }}</td>
+            <td>
+              {{ row.byAdmin ? t("adminSignUps.byAdmin", { name: row.addedBy ??
+              t("adminSignUps.anAdmin") }) : t("adminSignUps.themselves") }}
+            </td>
+            <td>
+              @if (!season.finished) {
+              <button
+                type="button"
+                class="button-ghost small-button"
+                [disabled]="action.busy()"
+                (click)="remove(row)"
+              >
+                {{ t("adminSignUps.remove") }}<span class="visually-hidden">
+                  {{ id.name }}</span
+                >
+              </button>
+              }
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    }
+  </section>
+
+  @if (gone().length > 0) {
+  <section class="panel block" aria-labelledby="gone-title">
+    <h2 class="heading" id="gone-title">{{ t("adminSignUps.goneTitle") }}</h2>
+    <ul class="choices">
+      @for (row of gone(); track row.playerId) { @let id =
+      splitRiotId(row.riotId ?? "");
+      <li>
+        <span
+          ><strong>{{ id.name }}</strong
+          ><span class="muted"> {{ id.tag }}</span> ·
+          <span class="muted"
+            >{{ t(row.status === "REMOVED" ? "adminSignUps.wasRemoved" :
+            "adminSignUps.withdrew") }}</span
+          ></span
+        >
+        @if (!season.finished) {
+        <button
+          type="button"
+          class="button-ghost small-button"
+          [disabled]="action.busy()"
+          (click)="add({ id: row.playerId, riotId: row.riotId ?? '' })"
+        >
+          {{ t("adminSignUps.again") }}<span class="visually-hidden">
+            {{ id.name }}</span
+          >
+        </button>
+        }
+      </li>
+      }
+    </ul>
+  </section>
+  } } @else {
+  <p class="muted" aria-live="polite">{{ t("claim.loading") }}</p>
+  }
+</ng-container>

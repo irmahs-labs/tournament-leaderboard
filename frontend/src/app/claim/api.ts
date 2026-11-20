@@ -67,3 +67,6 @@ export const matchingPlayers = (
 
 /** The longest note or reason the API takes. */
 export const MAX_TEXT = 200;
+
+/** The longest Riot ID or Discord username the API takes. */
+export const MAX_NAME = 100;

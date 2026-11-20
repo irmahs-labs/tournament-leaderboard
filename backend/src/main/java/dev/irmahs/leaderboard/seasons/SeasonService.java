@@ -34,6 +34,11 @@ public class SeasonService {
                         () -> new ResponseStatusException(HttpStatus.NOT_FOUND, slug + " has no season " + number));
     }
 
+    /** The organisation's seasons themselves, newest first. */
+    public List<Season> newestFirst(UUID organizationId) {
+        return seasons.findByOrganizationIdOrderByNumber(organizationId).reversed();
+    }
+
     /** The organisation's seasons, oldest first. */
     public List<SeasonView> list(String slug) {
         return seasons

@@ -104,6 +104,14 @@
           ariaCurrentWhenActive="page"
           >{{ t("nav.players") }}</a
         >
+        @if (member()) {
+        <a
+          [routerLink]="['/org', org.slug, 'me', 'seasons']"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+          >{{ t("nav.mySeasons") }}</a
+        >
+        }
       </nav>
       } @if (admin()) {
       <nav class="mode" [attr.aria-label]="t('admin.mode')">

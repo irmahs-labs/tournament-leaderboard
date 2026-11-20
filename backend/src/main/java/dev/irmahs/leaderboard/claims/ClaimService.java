@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class ClaimService {
 
     static final int MAX_TEXT = 200;
+    static final int MAX_NAME = 100;
     static final String TAKEN = "Claimed by another account";
 
     private final AccountService accounts;
@@ -131,14 +133,53 @@ public class ClaimService {
         if (members.existsByOrganizationIdAndPlayerId(organization.getId(), player.getId())) {
             throw conflict(player.getRiotId() + " is already someone's profile");
         }
-        if (claims.findFirstByOrganizationIdAndUserIdAndStatusNotOrderByCreatedAtDesc(
-                        organization.getId(), member.getUserId(), ClaimStatus.CANCELLED)
-                .filter(claim -> claim.getStatus() == ClaimStatus.PENDING)
-                .isPresent()) {
+        if (hasWaitingClaim(organization, member)) {
             throw conflict("Cancel the claim you sent before sending another");
         }
         claims.saveAndFlush(
                 new PlayerClaim(organization.getId(), player.getId(), member.getUserId(), text(input.note())));
+        return mine(slug, googleSub);
+    }
+
+    /**
+     * A member who has never played here creates their player profile, linked to them at once with
+     * no admin needed. It takes their account's Riot ID and Discord when they have one from
+     * another organisation; otherwise the ones they give, which become their account's.
+     *
+     * @throws ResponseStatusException 400 without a Riot ID or for a name that's too long, 403 for
+     *     someone who isn't a member, 409 when they're already linked or have a claim waiting, or
+     *     another player here has the Riot ID
+     */
+    public ClaimState create(String slug, String googleSub, NewProfile input) {
+        Organization organization = organizations.requireActive(slug);
+        OrganizationMember member = requireMember(organization, googleSub);
+        if (member.getPlayerId() != null) {
+            throw conflict("Your profile is already linked");
+        }
+        if (hasWaitingClaim(organization, member)) {
+            throw conflict("Cancel the claim you sent before creating a profile");
+        }
+        AppUser user = requireUser(googleSub);
+        String riotId = user.getRiotId() != null ? user.getRiotId() : name(input.riotId(), "Your Riot ID");
+        if (riotId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your Riot ID can't be empty");
+        }
+        String discord = user.getRiotId() != null
+                ? user.getDiscordUsername()
+                : name(input.discordUsername(), "Your Discord username");
+        if (players.findByOrganizationIdAndRiotIdIgnoreCase(organization.getId(), riotId)
+                .isPresent()) {
+            throw conflict(riotId + " is already a player here: claim that profile instead");
+        }
+        Player player;
+        try {
+            player = players.saveAndFlush(new Player(organization.getId(), riotId, discord, null));
+            member.linkPlayer(player.getId());
+            members.flush();
+        } catch (DataIntegrityViolationException taken) {
+            throw conflict(riotId + " is already a player here: claim that profile instead");
+        }
+        identity.linked(user.getId(), player);
         return mine(slug, googleSub);
     }
 
@@ -276,6 +317,13 @@ public class ClaimService {
         return claim;
     }
 
+    private boolean hasWaitingClaim(Organization organization, OrganizationMember member) {
+        return claims.findFirstByOrganizationIdAndUserIdAndStatusNotOrderByCreatedAtDesc(
+                        organization.getId(), member.getUserId(), ClaimStatus.CANCELLED)
+                .filter(claim -> claim.getStatus() == ClaimStatus.PENDING)
+                .isPresent();
+    }
+
     private Set<UUID> linkedPlayers(Organization organization) {
         return members.findByOrganizationIdAndPlayerIdNotNull(organization.getId()).stream()
                 .map(OrganizationMember::getPlayerId)
@@ -317,6 +365,19 @@ public class ClaimService {
                 player.getAliases().stream().map(PlayerAlias::getAlias).toList(),
                 player.getCurrentRank() == null ? null : player.getCurrentRank().getRankName(),
                 games);
+    }
+
+    /** A Riot ID or Discord username without its surrounding spaces, nothing when empty. */
+    private static String name(String value, String what) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        String name = value.strip();
+        if (name.length() > MAX_NAME) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, what + " has at most " + MAX_NAME + " characters");
+        }
+        return name;
     }
 
     /** Trimmed, nothing when empty. */
@@ -376,6 +437,9 @@ public class ClaimService {
             ClaimView claim) {}
 
     public record NewClaim(UUID playerId, String note) {}
+
+    /** The Riot ID and Discord of a new profile; left out when the account already has them. */
+    public record NewProfile(String riotId, String discordUsername) {}
 
     /** What a linked player changes about themselves in one organisation: an empty rank is Unranked. */
     public record OwnDetails(Integer rankId) {}

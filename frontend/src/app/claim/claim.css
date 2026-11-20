@@ -133,3 +133,10 @@ input {
 .facts dd {
   margin: 0;
 }
+
+.create {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  align-items: end;
+  gap: 14px 16px;
+}
