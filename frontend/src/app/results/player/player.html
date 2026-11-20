@@ -32,32 +32,9 @@
     </div>
 
     @if (mine()) { @if (editing()) {
-    <form
-      class="edit"
-      (submit)="$event.preventDefault(); saveMine(riotId.value, discord.value, rank.value)"
-    >
+    <form class="edit" (submit)="$event.preventDefault(); saveMine(rank.value)">
       <h2 class="heading">{{ t("mine.editTitle") }}</h2>
       <div class="edit-fields">
-        <label class="field">
-          <span class="label">{{ t("adminPlayers.riotId") }}</span>
-          <input
-            #riotId
-            required
-            maxlength="100"
-            autocomplete="off"
-            [placeholder]="t('mine.riotIdHint')"
-            [value]="view.player.riotId"
-          />
-        </label>
-        <label class="field">
-          <span class="label">{{ t("adminPlayers.discord") }}</span>
-          <input
-            #discord
-            maxlength="100"
-            autocomplete="off"
-            [value]="view.player.discordUsername ?? ''"
-          />
-        </label>
         <label class="field">
           <span class="label">{{ t("adminPlayers.rank") }}</span>
           <select #rank>
@@ -76,7 +53,10 @@
           </select>
         </label>
       </div>
-      <p class="muted small">{{ t("mine.renameNote") }}</p>
+      <p class="muted small">
+        {{ t("mine.identityNote") }}
+        <a routerLink="/account">{{ t("mine.identityLink") }}</a>
+      </p>
       <div class="edit-actions">
         <button class="button" type="submit" [disabled]="action.busy()">
           {{ t("mine.save") }}

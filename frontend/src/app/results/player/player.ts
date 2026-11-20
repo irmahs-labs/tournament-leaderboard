@@ -113,12 +113,8 @@ export class PlayerPage {
   readonly #http = inject(HttpClient);
   readonly #transloco = inject(TranslocoService);
 
-  /** Saves their own Riot ID, Discord and rank; their aliases stay as they are. */
-  protected async saveMine(
-    riotId: string,
-    discord: string,
-    rank: string
-  ): Promise<void> {
+  /** Saves their rank here; their Riot ID and Discord are changed on My account. */
+  protected async saveMine(rank: string): Promise<void> {
     const org = this.current.organization();
     const rankId = Number(rank);
 
@@ -130,11 +126,7 @@ export class PlayerPage {
       await firstValueFrom(
         this.#http.put(
           `/api/orgs/${encodeURIComponent(org.slug)}/claim/player`,
-          {
-            discordUsername: discord.trim() || null,
-            rankId: rank && Number.isInteger(rankId) ? rankId : null,
-            riotId: riotId.trim(),
-          }
+          { rankId: rank && Number.isInteger(rankId) ? rankId : null }
         )
       );
       this.profile.reload();

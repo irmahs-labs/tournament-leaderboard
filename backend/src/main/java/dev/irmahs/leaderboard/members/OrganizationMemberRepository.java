@@ -25,6 +25,9 @@ public interface OrganizationMemberRepository extends JpaRepository<Organization
     /** The members already linked to a player. */
     List<OrganizationMember> findByOrganizationIdAndPlayerIdNotNull(UUID organizationId);
 
+    /** Someone's memberships linked to a player profile, in every organisation they're in. */
+    List<OrganizationMember> findByUserIdAndPlayerIdNotNull(UUID userId);
+
     /** How many organisations someone owns. */
     long countByUserIdAndOwnerTrue(UUID userId);
 

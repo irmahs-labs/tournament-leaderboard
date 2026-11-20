@@ -2,6 +2,7 @@ package dev.irmahs.leaderboard.claims;
 
 import dev.irmahs.leaderboard.accounts.AccountService;
 import dev.irmahs.leaderboard.accounts.AppUser;
+import dev.irmahs.leaderboard.accounts.IdentityService;
 import dev.irmahs.leaderboard.members.MemberRole;
 import dev.irmahs.leaderboard.members.OrganizationMember;
 import dev.irmahs.leaderboard.members.OrganizationMemberRepository;
@@ -9,7 +10,6 @@ import dev.irmahs.leaderboard.organizations.Organization;
 import dev.irmahs.leaderboard.organizations.OrganizationService;
 import dev.irmahs.leaderboard.players.Player;
 import dev.irmahs.leaderboard.players.PlayerAdminService;
-import dev.irmahs.leaderboard.players.PlayerAdminService.PlayerInput;
 import dev.irmahs.leaderboard.players.PlayerAdminService.PlayerView;
 import dev.irmahs.leaderboard.players.PlayerAlias;
 import dev.irmahs.leaderboard.players.PlayerRepository;
@@ -43,6 +43,7 @@ public class ClaimService {
     private final PlayerRepository players;
     private final PlayerClaimRepository claims;
     private final PlayerAdminService playerAdmin;
+    private final IdentityService identity;
 
     ClaimService(
             AccountService accounts,
@@ -50,8 +51,10 @@ public class ClaimService {
             OrganizationMemberRepository members,
             PlayerRepository players,
             PlayerClaimRepository claims,
-            PlayerAdminService playerAdmin) {
+            PlayerAdminService playerAdmin,
+            IdentityService identity) {
         this.playerAdmin = playerAdmin;
+        this.identity = identity;
         this.accounts = accounts;
         this.organizations = organizations;
         this.members = members;
@@ -157,18 +160,19 @@ public class ClaimService {
     }
 
     /**
-     * The linked player changes their own details: Riot ID, Discord, rank and aliases.
+     * The linked player changes their rank here. Their Riot ID and Discord are their account's,
+     * changed on My account for every organisation at once.
      *
      * @throws ResponseStatusException 403 for someone who isn't a member, 409 when they aren't
-     *     linked to a player yet, 400 and 409 as an admin's edit would
+     *     linked to a player yet, 400 for a rank that doesn't exist
      */
-    public PlayerView editMine(String slug, String googleSub, PlayerInput input) {
+    public PlayerView editMine(String slug, String googleSub, OwnDetails input) {
         Organization organization = organizations.requireActive(slug);
         OrganizationMember member = requireMember(organization, googleSub);
         if (member.getPlayerId() == null) {
             throw conflict("Claim your profile first");
         }
-        return playerAdmin.editOwn(organization.getId(), member.getPlayerId(), input);
+        return playerAdmin.rerank(organization.getId(), member.getPlayerId(), input.rankId());
     }
 
     /** The admins' queue: the claims in this state, oldest first. */
@@ -229,6 +233,7 @@ public class ClaimService {
             throw conflict("This player is already someone's profile");
         }
         member.linkPlayer(claim.getPlayerId());
+        identity.linked(claim.getUserId(), players.findById(claim.getPlayerId()).orElseThrow());
         claim.accept(admin, own);
         for (PlayerClaim other : claims.findByOrganizationIdAndPlayerIdAndStatus(
                 organization.getId(), claim.getPlayerId(), ClaimStatus.PENDING)) {
@@ -371,4 +376,7 @@ public class ClaimService {
             ClaimView claim) {}
 
     public record NewClaim(UUID playerId, String note) {}
+
+    /** What a linked player changes about themselves in one organisation: an empty rank is Unranked. */
+    public record OwnDetails(Integer rankId) {}
 }

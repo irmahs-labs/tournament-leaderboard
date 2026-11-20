@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-20, with the expected Google email (linked at sign-in), memberships carrying the linked player, and editing one's own player.
+Last updated: 2026-11-20, with the Riot ID and Discord kept on the account and shared by every linked profile (`PUT /api/me/identity`), and a linked player changing only their rank per organisation.
 
 ## System
 
@@ -76,12 +76,12 @@ flowchart LR
 
 | Package | Holds |
 |---|---|
-| `accounts` | `AppUser`, `GoogleProfile`, `AccountService` (sign-in, initial memberships, platform admins, linking a player whose expected email matches, deleting an account unless it owns an organisation), `AccessProperties`, `MeController` (`GET` and `DELETE /api/me`, signing out after a deletion) |
+| `accounts` | `AppUser`, `GoogleProfile`, `AccountService` (sign-in, initial memberships, platform admins, linking a player whose expected email matches, deleting an account unless it owns an organisation), `AccessProperties`, `IdentityService` (the account's Riot ID and Discord: changed on every linked profile at once, given to a profile when it's linked, taken from the first one), `MeController` (`GET` and `DELETE /api/me`, signing out after a deletion; `PUT /api/me/identity`) |
 | `members` | `OrganizationMember` (role ADMIN or PLAYER, one owner), `Membership` |
 | `organizations` | `Organization` (with its `SocialLinks`), `OrganizationService` (`requireActive`, `recordActivity`), `OrganizationView`, `BrandingService` (names, language, accent, places per match, links checked by `SocialSite`; the logo, told apart by its bytes), `OrganizationLogo`, the public org and logo endpoints, `BrandingController` |
 | `security` | `SecurityConfig` (CSRF for SPAs, 401 on `/api/**`, Google sign-in ending on the Angular `/sign-in`), `GoogleUserService` (verified email only), `OrgAccess` (`@orgAccess.isAdmin`) |
 | `tenancy` | `OrganizationScopeFilter` + `OrganizationScopedTransactionManager`: sets `app.organization_id` per transaction for row-level security |
-| `players` | `Player`, `PlayerAlias`, `AliasKind`, `PlayerAdminService` (search, add, edit, a Google email expected in advance seen by admins only; `editOwn` for a linked player; rename keeps the old Riot ID as an alias), `PlayerController` (the public list: Riot ID, Discord, aliases) |
+| `players` | `Player`, `PlayerAlias`, `AliasKind`, `PlayerAdminService` (search, add, edit, a Google email expected in advance seen by admins only; `rerank` for a linked player; a linked player's Riot ID and Discord are refused to admins (409) and the list marks them `linked`; rename keeps the old Riot ID as an alias), `PlayerController` (the public list: Riot ID, Discord, aliases) |
 | `ranks` | `Rank`, public rank list |
 | `seasons` | `Season` (rules, bonuses, shape, KDA points), `Stat` (`isCountable`; `PLACE` and `HONOURS` among them), `StatRule` (recorded, points per unit), `SeasonBonus`, `BonusAward` (HIGHEST, LOWEST, MANUAL, TOP_WINNER, TOP_LOSER, AT_LEAST), `PlatformDefaults`, `Points` (points as the API writes them), `RulesSnapshot` (a season's rules on their own), `NextSeasonRules` (rules kept for the next season, as JSON) and `NextSeasonRulesController`, `SeasonService` (public), `SeasonAdminService` |
 | `matches` | `Match`, `Game` and their repositories |
@@ -115,11 +115,11 @@ flowchart LR
         pl2["/api/orgs/{slug}/players"]
     end
     subgraph signedin[Signed in]
-        me["/api/me: GET, DELETE (delete my account)"]
+        me["/api/me: GET, DELETE (delete my account); /api/me/identity: PUT (Riot ID and Discord everywhere)"]
         lv["/api/orgs/{slug}/membership: DELETE (leave)"]
         acc["/api/invites/{code}/accept: POST"]
         fo["/api/orgs: POST, create an organisation"]
-        cl["/api/orgs/{slug}/membership: POST (join); /claim: GET, POST, DELETE; /claim/players: GET; /claim/player: PUT (edit my details)"]
+        cl["/api/orgs/{slug}/membership: POST (join); /claim: GET, POST, DELETE; /claim/players: GET; /claim/player: PUT (my rank here)"]
         pl["/api/platform/organizations: GET; /{slug}/status: PUT (platform admins)"]
     end
     jv["/api/invites/{code}: GET, public, 10 a minute"]
@@ -163,7 +163,7 @@ organization_invites and organization_logos), `V2026_11_18_1__drop_avatar_url.sq
 picture isn't kept: data minimisation), `V2026_11_19_1__weighted_scoring.sql`,
 `V2026_11_19_2__social_links.sql` (six `*_url` columns on organizations, https only),
 `V2026_11_20_1__player_claims.sql` (player_claims, one waiting per member, with the same policy),
-`V2026_11_20_2__expected_email.sql` (players.expected_email, once per organisation).
+`V2026_11_20_2__expected_email.sql` (players.expected_email, once per organisation), `V2026_11_20_3__account_identity.sql` (app_users.riot_id and discord_username, filled from each linked account's first profile).
 
 ```mermaid
 erDiagram
@@ -207,8 +207,8 @@ flowchart TD
     home -->|"GET /api/featured, POST /api/orgs"| foundApi["/api/featured, /api/orgs"]
     platform --> padmin[PlatformPage /platform, platformGuard<br/>counts, search, every organisation, suspend or reactivate]
     padmin -->|"GET, PUT …/status"| platformApi["/api/platform/organizations"]
-    platform --> acct[AccountPage /account, accountGuard<br/>profile, sign out, organisations and leaving, deleting the account]
-    acct -->|"DELETE /api/me, DELETE …/membership"| accountApi["/api/me, /api/orgs/{slug}/membership"]
+    platform --> acct[AccountPage /account, accountGuard<br/>profile, Riot ID and Discord for every organisation, sign out, organisations and leaving, deleting the account]
+    acct -->|"PUT /api/me/identity, DELETE /api/me, DELETE …/membership"| accountApi["/api/me, /api/orgs/{slug}/membership"]
     platform --> si[SignInPage<br/>Google, your organisations, sign out, create one]
     platform --> legal[LegalPage<br/>legal notice, privacy, cookies, terms]
     platform --> nf[NotFoundPage]
@@ -232,7 +232,7 @@ flowchart TD
     lb --> pill
     shell -->|"/org/:slug/players"| plp["PlayersPage<br/>a card per player, search, sort, rank filter"]
     shell -->|"/org/:slug/claim, accountGuard"| clp["ClaimPage<br/>join, pick your profile, note, wait or cancel"]
-    shell -->|"/org/:slug/players/:player?season="| pp["PlayerPage<br/>standing, the player ahead, averages, points per match, matches; on one's own, You and Edit my details"]
+    shell -->|"/org/:slug/players/:player?season="| pp["PlayerPage<br/>standing, the player ahead, averages, points per match, matches; on one's own, You and My rank"]
     shell -->|"/org/:slug/matches"| mt["MatchesPage<br/>a card per match, its MVP"]
     mt --> current
     mt -->|GET| mtApi["…/seasons/{n}/matches"]
@@ -272,7 +272,7 @@ flowchart TD
 | `admin/` | `adminGuard`, `api.ts` (the admin API's shapes), `players/` (`PlayersAdminPage`: aliases typed as one line, a previous Riot ID keeps its kind), `action.ts` (`AdminAction`: one change at a time, then a status line), `seasons/` (`SeasonsAdminPage`, `problemOf` checking details as the API does), `scoring/` (`ScoringAdminPage`: the rules as typed, `problemOf` and `inputOf`, `previewOf` for the formula, `newBonusProblem` and `newBonusInput`; locked for a finished season), `members/` (`MembersAdminPage`, the invite message to copy), `claims/` (`ClaimsAdminPage`), `branding/` (`BrandingAdminPage`, `problemOf` and `linkAllowed` checking as the API does), `scores/` (`ScoresAdminPage`; `scores-form.ts`: lines as typed, stat boxes parsed with a decimal comma, an empty place taken from the line's number, the request) |
 | `home/` | `HomePage` (the form kept in session storage across Google sign-in), `slugFrom`, `foundingProblem` |
 | `platform/` | `PlatformPage`, `platformGuard` (platform admins only; others see Not found), `matching` (search by name, address or owner's email) |
-| `account/` | `AccountPage` (typing DELETE to delete), `accountGuard` (signed in only) |
+| `account/` | `AccountPage` (Riot ID and Discord for every organisation, typing DELETE to delete), `accountGuard` (signed in only) |
 | `claim/` | `ClaimPage`, `api.ts` (claims' shapes, `matchingPlayers`) |
 | `sign-in/` | `SignInPage` |
 | `join/` | `JoinPage`, `stepOf` (sign in, accept, wrong account, expired, used, revoked, accepted), `tidyCode` |

@@ -46,6 +46,7 @@ export const ALSACE: Organization = {
 };
 
 export const ME: Me = {
+  discordUsername: null,
   displayName: "Camille Martin",
   email: "camille@example.com",
   memberships: [
@@ -58,6 +59,7 @@ export const ME: Me = {
     },
   ],
   platformAdmin: false,
+  riotId: null,
 };
 
 const season = (number: number, finished: boolean): Season => ({

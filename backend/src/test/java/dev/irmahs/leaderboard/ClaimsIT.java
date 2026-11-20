@@ -269,33 +269,141 @@ class ClaimsIT {
     }
 
     @Test
-    void aLinkedPlayerEditsTheirOwnDetails() throws Exception {
-        assertThat(send(HttpMethod.PUT, ORG + "/claim/player", "{\"riotId\": \"Kes#EUW\"}", PLAYER))
+    void aLinkedPlayerChangesOnlyTheirRankInAnOrganisation() throws Exception {
+        assertThat(send(HttpMethod.PUT, ORG + "/claim/player", "{\"rankId\": null}", PLAYER))
                 .hasStatus(409);
         claim(kestrel, PLAYER);
         send(HttpMethod.POST, ORG + "/admin/claims/" + waitingClaimId() + "/accept", null, ADMIN);
-
-        assertThat(send(HttpMethod.PUT, ORG + "/claim/player", """
-                        {"riotId": "Kes#EUW", "discordUsername": "kes", "aliases": [{"alias": "K", "kind": "NICKNAME"}]}""", PLAYER))
-                .hasStatusOk()
-                .bodyJson()
-                .isLenientlyEqualTo("""
-                        {"riotId": "Kes#EUW", "discordUsername": "kes", "expectedEmail": null,
-                         "aliases": [{"alias": "K"}, {"alias": "Kestrel#EUW", "kind": "PREVIOUS_RIOT_ID"}]}""");
-        assertThat(send(HttpMethod.PUT, ORG + "/claim/player", "{\"riotId\": \"Kes#EUW\"}", NOBODY))
-                .hasStatus(403);
-        // A rank left out stays as it is. The edit above is written first, so it can't overwrite the rank.
         em.flush();
         jdbc.sql("INSERT INTO ranks (rank_name, rank_value) VALUES ('Gold 2', 11)")
                 .update();
-        jdbc.sql(
-                        "UPDATE players SET current_rank_id = (SELECT id FROM ranks WHERE rank_name = 'Gold 2') WHERE id = :id")
-                .param("id", kestrel)
-                .update();
-        em.clear();
-        assertThat(send(HttpMethod.PUT, ORG + "/claim/player", "{\"riotId\": \"Kes#EUW\"}", PLAYER))
+        Integer gold = jdbc.sql("SELECT id FROM ranks WHERE rank_name = 'Gold 2'")
+                .query(Integer.class)
+                .single();
+
+        assertThat(send(HttpMethod.PUT, ORG + "/claim/player", """
+                        {"rankId": %d, "riotId": "Ignored#EUW"}""".formatted(gold), PLAYER))
+                .hasStatusOk()
                 .bodyJson()
-                .extractingPath("$.rank.name")
-                .isEqualTo("Gold 2");
+                .isLenientlyEqualTo("""
+                        {"riotId": "Kestrel#EUW", "discordUsername": "kestrel.gg", "rank": {"name": "Gold 2"},
+                         "expectedEmail": null, "linked": true}""");
+        assertThat(send(HttpMethod.PUT, ORG + "/claim/player", "{\"rankId\": 999}", PLAYER))
+                .hasStatus(400);
+        assertThat(send(HttpMethod.PUT, ORG + "/claim/player", "{\"rankId\": null}", NOBODY))
+                .hasStatus(403);
+    }
+
+    @Test
+    void theFirstLinkedProfileGivesTheAccountItsRiotIdAndDiscord() throws Exception {
+        claim(kestrel, PLAYER);
+        send(HttpMethod.POST, ORG + "/admin/claims/" + waitingClaimId() + "/accept", null, ADMIN);
+
+        assertThat(send(HttpMethod.GET, "/api/me", null, PLAYER))
+                .bodyJson()
+                .isLenientlyEqualTo("{\"riotId\": \"Kestrel#EUW\", \"discordUsername\": \"kestrel.gg\"}");
+    }
+
+    @Test
+    void aLaterLinkedProfileTakesTheAccountsRiotIdAndDiscord() throws Exception {
+        claim(kestrel, PLAYER);
+        send(HttpMethod.POST, ORG + "/admin/claims/" + waitingClaimId() + "/accept", null, ADMIN);
+        linkAtLyon();
+        em.flush();
+
+        assertThat(riotIdAndDiscordOf(osprey)).isEqualTo("Kestrel#EUW kestrel.gg");
+        assertThat(aliasesOf(osprey)).containsExactly("Osprey#EUW");
+    }
+
+    @Test
+    void aLaterProfileKeepsItsRiotIdWhenAnotherPlayerThereHasTheAccounts() throws Exception {
+        claim(kestrel, PLAYER);
+        send(HttpMethod.POST, ORG + "/admin/claims/" + waitingClaimId() + "/accept", null, ADMIN);
+        em.persist(new Player(
+                jdbc.sql("SELECT id FROM organizations WHERE slug = 'lyon-game-bar'")
+                        .query(UUID.class)
+                        .single(),
+                "Kestrel#EUW",
+                null,
+                null));
+        em.flush();
+        linkAtLyon();
+        em.flush();
+
+        assertThat(riotIdAndDiscordOf(osprey)).isEqualTo("Osprey#EUW kestrel.gg");
+    }
+
+    @Test
+    void changingTheRiotIdOnMyAccountChangesEveryLinkedProfile() throws Exception {
+        claim(kestrel, PLAYER);
+        send(HttpMethod.POST, ORG + "/admin/claims/" + waitingClaimId() + "/accept", null, ADMIN);
+        linkAtLyon();
+
+        assertThat(send(HttpMethod.PUT, "/api/me/identity", """
+                        {"riotId": " Kes#EUW ", "discordUsername": "kes"}""", PLAYER))
+                .hasStatusOk()
+                .bodyJson()
+                .isLenientlyEqualTo("{\"riotId\": \"Kes#EUW\", \"discordUsername\": \"kes\"}");
+        em.flush();
+        assertThat(riotIdAndDiscordOf(kestrel)).isEqualTo("Kes#EUW kes");
+        assertThat(riotIdAndDiscordOf(osprey)).isEqualTo("Kes#EUW kes");
+        assertThat(aliasesOf(kestrel)).containsExactly("Kestrel#EUW");
+        assertThat(aliasesOf(osprey)).containsExactly("Kestrel#EUW", "Osprey#EUW");
+    }
+
+    @Test
+    void myRiotIdCantBeAnotherPlayersInOneOfMyOrganisations() throws Exception {
+        claim(kestrel, PLAYER);
+        send(HttpMethod.POST, ORG + "/admin/claims/" + waitingClaimId() + "/accept", null, ADMIN);
+
+        assertThat(send(HttpMethod.PUT, "/api/me/identity", "{\"riotId\": \"wren#euw\"}", PLAYER))
+                .hasStatus(409)
+                .bodyJson()
+                .extractingPath("$.detail")
+                .isEqualTo("wren#euw is already another player at Alsace Arena");
+        assertThat(send(HttpMethod.PUT, "/api/me/identity", "{\"riotId\": \" \"}", PLAYER))
+                .hasStatus(400);
+        assertThat(send(HttpMethod.PUT, "/api/me/identity", "{\"riotId\": \"A#1\"}", null))
+                .hasStatus(401);
+    }
+
+    @Test
+    void adminsCantChangeALinkedPlayersRiotIdOrDiscord() throws Exception {
+        claim(kestrel, PLAYER);
+        send(HttpMethod.POST, ORG + "/admin/claims/" + waitingClaimId() + "/accept", null, ADMIN);
+
+        assertThat(send(HttpMethod.PUT, ORG + "/admin/players/" + kestrel, """
+                        {"riotId": "Other#EUW", "discordUsername": "kestrel.gg"}""", ADMIN))
+                .hasStatus(409);
+        assertThat(send(HttpMethod.PUT, ORG + "/admin/players/" + kestrel, """
+                        {"riotId": "Kestrel#EUW", "discordUsername": "kestrel.gg", "aliases": [{"alias": "K", "kind": "NICKNAME"}]}""", ADMIN))
+                .hasStatusOk()
+                .bodyJson()
+                .isLenientlyEqualTo("{\"linked\": true, \"aliases\": [{\"alias\": \"K\"}]}");
+    }
+
+    /** The player joins Lyon Game Bar and its admin accepts their claim on Osprey. */
+    private void linkAtLyon() throws Exception {
+        String lyon = "/api/orgs/lyon-game-bar";
+        send(HttpMethod.POST, lyon + "/membership", null, PLAYER);
+        send(HttpMethod.POST, lyon + "/claim", "{\"playerId\": \"" + osprey + "\"}", PLAYER);
+        String body = send(HttpMethod.GET, lyon + "/admin/claims", null, LYON_ADMIN)
+                .getResponse()
+                .getContentAsString(StandardCharsets.UTF_8);
+        send(HttpMethod.POST, lyon + "/admin/claims/" + JsonPath.read(body, "$[0].id") + "/accept", null, LYON_ADMIN);
+    }
+
+    private String riotIdAndDiscordOf(UUID player) {
+        return jdbc.sql("SELECT riot_id || ' ' || coalesce(discord_username, '-') FROM players WHERE id = :id")
+                .param("id", player)
+                .query(String.class)
+                .single();
+    }
+
+    private List<String> aliasesOf(UUID player) {
+        return jdbc.sql("SELECT alias FROM player_aliases WHERE player_id = :id ORDER BY alias")
+                .param("id", player)
+                .query(String.class)
+                .list();
     }
 }
