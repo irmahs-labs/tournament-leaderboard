@@ -149,7 +149,7 @@ export const brandingInput = (
 });
 
 /** The image types the API accepts, as the file picker offers them. */
-export const LOGO_TYPES = "image/png,image/webp,image/svg+xml";
+export const LOGO_TYPES = "image/png,image/jpeg,image/webp,image/svg+xml";
 
 /**
  * The Branding screen: the organisation's names, language, logo, accent colour, places per match
@@ -264,7 +264,7 @@ export class BrandingAdminPage {
     });
   }
 
-  /** Sends the picked image as it is; the API tells PNG, WebP and SVG apart by their content. */
+  /** Sends the picked image as it is; the API tells PNG, JPEG, WebP and SVG apart by their content. */
   protected async upload(field: HTMLInputElement): Promise<void> {
     const file = field.files?.[0];
     const api = this.#api();

@@ -26,6 +26,10 @@ class LogoTest {
                 .contains("image/svg+xml");
         assertThat(BrandingService.imageType("<svg><script>alert(1)</script></svg>".getBytes()))
                 .isEmpty();
+        assertThat(BrandingService.imageType(new byte[] {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0}))
+                .contains("image/jpeg");
+        assertThat(BrandingService.imageType(new byte[] {(byte) 0xFF, (byte) 0xD8}))
+                .isEmpty();
         assertThat(BrandingService.imageType(new byte[] {1, 2})).isEmpty();
     }
 }

@@ -532,7 +532,7 @@
     "logo": "Logo",
     "upload": "Upload a logo",
     "removeLogo": "Remove",
-    "logoHelp": "A square PNG, WebP or SVG image of 256 KB at most. Shown in the header of every page.",
+    "logoHelp": "A square PNG, JPEG, WebP or SVG image of 256 KB at most. Shown in the header of every page.",
     "accent": "Accent colour",
     "useColour": "Use {{hex}}",
     "hex": "Hex code",
@@ -569,7 +569,7 @@
     "logoSaved": "Logo saved.",
     "logoRemoved": "Logo removed.",
     "logoTooLarge": "That image is larger than 256 KB.",
-    "logoType": "A logo is a PNG, WebP or SVG image, without scripts.",
+    "logoType": "A logo is a PNG, JPEG, WebP or SVG image, without scripts.",
     "invalid": "Something in the form isn't allowed. Check each field and try again.",
     "failed": "That didn't work. Try again.",
     "problem": {

@@ -532,7 +532,7 @@
     "logo": "Logo",
     "upload": "Envoyer un logo",
     "removeLogo": "Retirer",
-    "logoHelp": "Une image carrée PNG, WebP ou SVG de 256 Ko au plus. Affichée en haut de chaque page.",
+    "logoHelp": "Une image carrée PNG, JPEG, WebP ou SVG de 256 Ko au plus. Affichée en haut de chaque page.",
     "accent": "Couleur d'accent",
     "useColour": "Utiliser {{hex}}",
     "hex": "Code hexadécimal",
@@ -569,7 +569,7 @@
     "logoSaved": "Logo enregistré.",
     "logoRemoved": "Logo retiré.",
     "logoTooLarge": "Cette image dépasse 256 Ko.",
-    "logoType": "Un logo est une image PNG, WebP ou SVG, sans script.",
+    "logoType": "Un logo est une image PNG, JPEG, WebP ou SVG, sans script.",
     "invalid": "Une valeur du formulaire n'est pas acceptée. Vérifiez chaque champ et réessayez.",
     "failed": "Ça n'a pas marché. Réessayez.",
     "problem": {
