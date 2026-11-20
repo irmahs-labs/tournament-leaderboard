@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-20, with player claims: the `claims` package, the `player_claims` table, the Claim page and the admin Claims queue.
+Last updated: 2026-11-20, with the expected Google email (linked at sign-in), memberships carrying the linked player, and editing one's own player.
 
 ## System
 
@@ -76,12 +76,12 @@ flowchart LR
 
 | Package | Holds |
 |---|---|
-| `accounts` | `AppUser`, `GoogleProfile`, `AccountService` (sign-in, initial memberships, platform admins, deleting an account unless it owns an organisation), `AccessProperties`, `MeController` (`GET` and `DELETE /api/me`, signing out after a deletion) |
+| `accounts` | `AppUser`, `GoogleProfile`, `AccountService` (sign-in, initial memberships, platform admins, linking a player whose expected email matches, deleting an account unless it owns an organisation), `AccessProperties`, `MeController` (`GET` and `DELETE /api/me`, signing out after a deletion) |
 | `members` | `OrganizationMember` (role ADMIN or PLAYER, one owner), `Membership` |
 | `organizations` | `Organization` (with its `SocialLinks`), `OrganizationService` (`requireActive`, `recordActivity`), `OrganizationView`, `BrandingService` (names, language, accent, places per match, links checked by `SocialSite`; the logo, told apart by its bytes), `OrganizationLogo`, the public org and logo endpoints, `BrandingController` |
 | `security` | `SecurityConfig` (CSRF for SPAs, 401 on `/api/**`, Google sign-in ending on the Angular `/sign-in`), `GoogleUserService` (verified email only), `OrgAccess` (`@orgAccess.isAdmin`) |
 | `tenancy` | `OrganizationScopeFilter` + `OrganizationScopedTransactionManager`: sets `app.organization_id` per transaction for row-level security |
-| `players` | `Player`, `PlayerAlias`, `AliasKind`, `PlayerAdminService` (search, add, edit; rename keeps the old Riot ID as an alias), `PlayerController` (the public list: Riot ID, Discord, aliases) |
+| `players` | `Player`, `PlayerAlias`, `AliasKind`, `PlayerAdminService` (search, add, edit, a Google email expected in advance seen by admins only; `editOwn` for a linked player; rename keeps the old Riot ID as an alias), `PlayerController` (the public list: Riot ID, Discord, aliases) |
 | `ranks` | `Rank`, public rank list |
 | `seasons` | `Season` (rules, bonuses, shape, KDA points), `Stat` (`isCountable`; `PLACE` and `HONOURS` among them), `StatRule` (recorded, points per unit), `SeasonBonus`, `BonusAward` (HIGHEST, LOWEST, MANUAL, TOP_WINNER, TOP_LOSER, AT_LEAST), `PlatformDefaults`, `Points` (points as the API writes them), `RulesSnapshot` (a season's rules on their own), `NextSeasonRules` (rules kept for the next season, as JSON) and `NextSeasonRulesController`, `SeasonService` (public), `SeasonAdminService` |
 | `matches` | `Match`, `Game` and their repositories |
@@ -89,7 +89,7 @@ flowchart LR
 | `stats` | `GameStat`, `StatLine`, `PlayerTally`, `SeasonResultsService` (public results; each standing carries the player's current rank), `ScoresService` (Enter scores), `RulesAdminService` (the Scoring screen: changes a season's rules and works out every saved game's automatic bonuses again; adds the admins' own bonuses, coded from their name, and removes bonuses with their awards; a finished season's rules can't change) |
 | `founding` | `FoundingService` (anyone signed in creates an organisation and owns it: address checked and not reserved, 3 owned at most except for platform admins, 409 when taken), `FoundingController` |
 | `platform` | `PlatformService` (platform admins only: every organisation with its owner, members, activity and whether the home page features it; suspending and reactivating), `PlatformController` |
-| `claims` | `PlayerClaim` (player_claims), `ClaimService` (join as a player; claim an unclaimed player with a note; cancel; the admins' queue; accepting links the member and declines the other claims for that player; nobody accepts their own while another admin exists, the only admin's is marked self-approved), `ClaimController` |
+| `claims` | `PlayerClaim` (player_claims), `ClaimService` (join as a player; claim an unclaimed player with a note; cancel; the admins' queue; accepting links the member and declines the other claims for that player; nobody accepts their own while another admin exists, the only admin's is marked self-approved; the linked player edits their own details), `ClaimController` |
 | `team` | `Invite` (organization_invites; only a hash of the code), `InviteCodes` (8 characters without look-alikes, SHA-256), `TeamService` (the Members screen: roles, removal, ownership, admin invites), `JoinService` (what a code is for; using it, its row locked), `MembershipController` (leaving an organisation, never as its owner), `CodeLookupLimit` (10 lookups a minute per address, in memory) |
 | `presence` | `OnlineCount` (open pages, in memory only; changes sent at most once a second, a heartbeat every 25 s), `GET /api/online` as server-sent events |
 | `system` | `/api/version`; `SpaController` forwards the Angular router's addresses (`/org/**` (the claim page included), `/not-found`, `/platform`, `/account`, `/join`, `/join/*`, `/sign-in`, `/legal`, `/privacy`, `/cookies`, `/terms`) to `index.html` |
@@ -119,7 +119,7 @@ flowchart LR
         lv["/api/orgs/{slug}/membership: DELETE (leave)"]
         acc["/api/invites/{code}/accept: POST"]
         fo["/api/orgs: POST, create an organisation"]
-        cl["/api/orgs/{slug}/membership: POST (join); /claim: GET, POST, DELETE; /claim/players: GET"]
+        cl["/api/orgs/{slug}/membership: POST (join); /claim: GET, POST, DELETE; /claim/players: GET; /claim/player: PUT (edit my details)"]
         pl["/api/platform/organizations: GET; /{slug}/status: PUT (platform admins)"]
     end
     jv["/api/invites/{code}: GET, public, 10 a minute"]
@@ -162,7 +162,8 @@ Flyway: `V2026_11_10_1__schema.sql` (all tables), `V2026_11_13_1__row_level_secu
 organization_invites and organization_logos), `V2026_11_18_1__drop_avatar_url.sql` (the Google
 picture isn't kept: data minimisation), `V2026_11_19_1__weighted_scoring.sql`,
 `V2026_11_19_2__social_links.sql` (six `*_url` columns on organizations, https only),
-`V2026_11_20_1__player_claims.sql` (player_claims, one waiting per member, with the same policy).
+`V2026_11_20_1__player_claims.sql` (player_claims, one waiting per member, with the same policy),
+`V2026_11_20_2__expected_email.sql` (players.expected_email, once per organisation).
 
 ```mermaid
 erDiagram
@@ -231,7 +232,7 @@ flowchart TD
     lb --> pill
     shell -->|"/org/:slug/players"| plp["PlayersPage<br/>a card per player, search, sort, rank filter"]
     shell -->|"/org/:slug/claim, accountGuard"| clp["ClaimPage<br/>join, pick your profile, note, wait or cancel"]
-    shell -->|"/org/:slug/players/:player?season="| pp["PlayerPage<br/>standing, the player ahead, averages, points per match, matches"]
+    shell -->|"/org/:slug/players/:player?season="| pp["PlayerPage<br/>standing, the player ahead, averages, points per match, matches; on one's own, You and Edit my details"]
     shell -->|"/org/:slug/matches"| mt["MatchesPage<br/>a card per match, its MVP"]
     mt --> current
     mt -->|GET| mtApi["…/seasons/{n}/matches"]
@@ -294,7 +295,7 @@ flowchart LR
     p0[0 Setup ✓] --> p1[1 Schema, import, public API ✓] --> p2[2 Sign-in and admin API ✓]
     p2 --> p3[3 Angular shell and public pages ✓] --> p4[4 Angular admin ✓] --> p5[5 Deploy pipelines ✓] --> p6[6 Cutover ▶]
     p6 --> p7[7 Open the platform<br/>release 2 ✓]
-    p7 --> p8[8 Scoring rules editor ✓] --> p9[9 Players and claims] --> p10[10 Seasons, matches<br/>and waiting lists]
+    p7 --> p8[8 Scoring rules editor ✓] --> p9[9 Players and claims ✓] --> p10[10 Seasons, matches<br/>and waiting lists]
     p10 --> p11[11 Exports and poster] --> p12[12 Moderation] --> p13[13 Merge tool and scan]
 ```
 
@@ -304,5 +305,5 @@ production, and the Protect migration ruleset lets a pull request merge only onc
 come with it. The full plan, with each phase's exit criterion, is the migration plan page
 kept with the project designs.
 
-Phases 7 and 8 are built; not built yet: expected emails and My profile (9); schedule and sign-ups (10);
+Phases 7, 8 and 9 are built; not built yet: schedule and sign-ups (10);
 exports (11); moderation (12); merging duplicate players (13).
