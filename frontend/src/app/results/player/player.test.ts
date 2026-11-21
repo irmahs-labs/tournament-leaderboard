@@ -51,7 +51,6 @@ const PROFILE: PlayerSeason = {
   player: {
     aliases: ["wrenny"],
     currentRank: null,
-    discordUsername: "wren.gg",
     id: "wren",
     riotId: "Wren#EUW",
   },
@@ -112,7 +111,7 @@ describe("the player page", () => {
   it("shows who the player is and where they stand", () => {
     expect(text(page.querySelector("h1"))).toBe("Wren");
     expect(text(page.querySelector(".who-text p"))).toBe(
-      "Wren#EUW · Discord wren.gg · also wrenny"
+      "Wren#EUW · also wrenny"
     );
     expect(text(page.querySelector(".tiles div"))).toBe(
       "Position #2 of 2 players"

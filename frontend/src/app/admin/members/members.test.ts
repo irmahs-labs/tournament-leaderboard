@@ -132,6 +132,9 @@ describe("the Members screen", () => {
     expect(
       page.querySelector<HTMLTextAreaElement>("textarea")?.value
     ).toContain("/join/K7QM-4FXP (code K7QM-4FXP)");
+    expect(
+      page.querySelector<HTMLSelectElement>("select[name=expiry]")?.value
+    ).toBe("1440");
   });
 
   it("makes a player an admin and removes a member after asking", async () => {

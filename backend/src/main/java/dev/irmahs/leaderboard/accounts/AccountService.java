@@ -134,7 +134,8 @@ public class AccountService {
                         user.isPlatformAdmin(),
                         user.getRiotId(),
                         user.getDiscordUsername(),
-                        members.findMemberships(user.getId())));
+                        members.findMemberships(user.getId()),
+                        members.findSuspendedMemberships(user.getId())));
     }
 
     /**
@@ -172,6 +173,8 @@ public class AccountService {
     /**
      * @param riotId shown on every player profile linked to the account; nothing before the first
      * @param memberships the active organisations they belong to
+     * @param suspended the organisations they belong to that the platform admin suspended: their
+     *     pages are hidden, but members are told why
      */
     public record Me(
             String email,
@@ -179,5 +182,6 @@ public class AccountService {
             boolean platformAdmin,
             String riotId,
             String discordUsername,
-            List<Membership> memberships) {}
+            List<Membership> memberships,
+            List<Membership> suspended) {}
 }

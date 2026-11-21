@@ -165,8 +165,7 @@ export interface MatchView {
 export interface PublicPlayer {
   id: string;
   riotId: string;
-  discordUsername: string | null;
-  /** Their other names: previous Riot IDs and nicknames. */
+  /** Their other names: previous Riot IDs and nicknames. Never their Discord: only admins see it. */
   aliases: string[];
 }
 

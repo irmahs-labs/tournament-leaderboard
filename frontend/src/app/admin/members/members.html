@@ -29,7 +29,10 @@
         <span class="label">{{ t("adminMembers.expiresAfter") }}</span>
         <select name="expiry">
           @for (minutes of expiries; track minutes) {
-          <option [value]="minutes" [selected]="minutes === 1440">
+          <option
+            [value]="minutes"
+            [attr.selected]="minutes === 1440 ? '' : null"
+          >
             {{ expiry(minutes) }}
           </option>
           }

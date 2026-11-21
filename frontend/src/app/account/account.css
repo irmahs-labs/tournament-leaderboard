@@ -177,3 +177,8 @@ input {
   align-items: end;
   gap: 12px 16px;
 }
+
+.pill.suspended {
+  color: var(--warn);
+  border-color: var(--warn);
+}

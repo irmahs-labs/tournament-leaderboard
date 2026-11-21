@@ -188,7 +188,7 @@ const EN: Record<LegalPageId, LegalDocument> = {
             ],
             [
               "Players of a tournament",
-              "Discord username, if the organisation adds it. Only the organisation's admins can see it; it is never public.",
+              "Discord username, if the organisation adds it. Only the organisation's admins see it, and its members while they pick which profile is theirs; it is never public.",
               "Letting the admins recognise and contact players. Legitimate interest of the organisers (article 6(1)(f)).",
               "Until the admins remove it, or until you object.",
             ],
@@ -461,7 +461,7 @@ const FR: Record<LegalPageId, LegalDocument> = {
             ],
             [
               "Joueurs d'un tournoi",
-              "Nom d'utilisateur Discord, si l'organisation l'ajoute. Seuls les administrateurs de l'organisation le voient ; il n'est jamais public.",
+              "Nom d'utilisateur Discord, si l'organisation l'ajoute. Seuls les administrateurs de l'organisation le voient, ainsi que ses membres quand ils choisissent leur profil ; il n'est jamais public.",
               "Permettre aux administrateurs de reconnaître et de contacter les joueurs. Intérêt légitime des organisateurs (article 6(1)(f)).",
               "Jusqu'à ce que les administrateurs le retirent, ou jusqu'à votre opposition.",
             ],
@@ -599,4 +599,4 @@ export const LEGAL: Record<Language, Record<LegalPageId, LegalDocument>> = {
 };
 
 /** When the legal pages last changed, as YYYY-MM-DD. */
-export const UPDATED = "2026-11-20";
+export const UPDATED = "2026-11-21";

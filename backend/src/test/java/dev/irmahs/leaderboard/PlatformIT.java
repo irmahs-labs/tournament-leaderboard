@@ -112,6 +112,9 @@ class PlatformIT {
         assertThat(call(mvc, HttpMethod.GET, "/api/orgs/alsace-arena", null, null))
                 .hasStatus(404);
         assertThat(call(mvc, HttpMethod.GET, "/api/featured", null, null)).hasStatus(204);
+        assertThat(call(mvc, HttpMethod.GET, "/api/me", null, ADMIN)).bodyJson().isLenientlyEqualTo("""
+                        {"memberships": [],
+                         "suspended": [{"slug": "alsace-arena", "name": "Alsace Arena", "role": "ADMIN"}]}""");
         assertThat(call(mvc, HttpMethod.GET, API, null, PLATFORM)).bodyJson().isLenientlyEqualTo("""
                         [{"slug": "alsace-arena", "status": "SUSPENDED", "featured": false},
                          {"slug": "lyon-game-bar", "status": "ACTIVE"}]""");
@@ -122,6 +125,9 @@ class PlatformIT {
         em.clear();
         assertThat(call(mvc, HttpMethod.GET, "/api/orgs/alsace-arena", null, null))
                 .hasStatusOk();
+        assertThat(call(mvc, HttpMethod.GET, "/api/me", null, ADMIN))
+                .bodyJson()
+                .isLenientlyEqualTo("{\"memberships\": [{\"slug\": \"alsace-arena\"}], \"suspended\": []}");
     }
 
     @Test

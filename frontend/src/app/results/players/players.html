@@ -25,7 +25,7 @@
         #query
         type="search"
         autocomplete="off"
-        [placeholder]="t('players.searchHint')"
+        [placeholder]="t('players.publicSearchHint')"
         (input)="search.set(query.value)"
       />
     </label>
@@ -73,12 +73,9 @@
         }} · {{ t(language.plural("players.games", standing.games), { count:
         standing.games }) }}
       </p>
-      @if (card.discordUsername || card.aliases.length) {
+      @if (card.aliases.length) {
       <p class="muted small names">
-        @if (card.discordUsername) { Discord {{ card.discordUsername }} } @if
-        (card.discordUsername && card.aliases.length) { · } @if
-        (card.aliases.length) { {{ t("players.also", { names:
-        card.aliases.join(", ") }) }} }
+        {{ t("players.also", { names: card.aliases.join(", ") }) }}
       </p>
       }
       <dl class="facts">

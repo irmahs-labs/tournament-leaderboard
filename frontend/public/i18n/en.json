@@ -143,7 +143,9 @@
   "notFound": {
     "body": "This page doesn't exist, or the organisation behind it is no longer available. Check the address, or start from the home page.",
     "home": "Go to the home page",
-    "title": "Page not found"
+    "title": "Page not found",
+    "suspendedTitle": "{{org}} is suspended",
+    "suspendedBody": "The platform admin suspended {{org}}, so its pages are hidden for now. Nothing is deleted: when it's reactivated, everything comes back. Questions? Write to tournament-leaderboard@irmahs.dev."
   },
   "roles": {
     "ADMIN": "Admin",
@@ -705,7 +707,9 @@
     "identitySave": "Save",
     "identitySaved": "Your Riot ID and Discord are saved everywhere.",
     "identityInvalid": "Check your Riot ID, then try again.",
-    "identityTaken": "Another player in one of your organisations already has this Riot ID."
+    "identityTaken": "Another player in one of your organisations already has this Riot ID.",
+    "suspended": "Suspended",
+    "suspendedNote": "Suspended by the platform admin: its pages are hidden until it's reactivated."
   },
   "players": {
     "title": "Players",
@@ -736,7 +740,8 @@
     "noMatch": "No player matches.",
     "failed": "The players couldn't be loaded. Try again in a moment.",
     "loading": "Loading the players…",
-    "claimLink": "Is one of them you? Claim your profile"
+    "claimLink": "Is one of them you? Claim your profile",
+    "publicSearchHint": "Riot ID or alias"
   },
   "player": {
     "allPlayers": "All players",

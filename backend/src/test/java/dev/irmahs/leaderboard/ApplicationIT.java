@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
@@ -96,5 +97,27 @@ class ApplicationIT {
     @Test
     void leavesTheApiAlone() {
         assertThat(mvc.get().uri("/api/orgs/nowhere")).hasStatus(404);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/nope", "/nope/deeper", "/org"})
+    void sendsABrowserOnAnUnknownAddressToTheNotFoundPage(String address) {
+        assertThat(mvc.get().uri(address).accept(MediaType.TEXT_HTML))
+                .hasStatus(404)
+                .hasForwardedUrl("/index.html");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/api/nope", "/nope.js", "/actuator/nope"})
+    void neverAnswersApiCallsAndFilesWithThePage(String address) {
+        assertThat(mvc.get().uri(address).accept(MediaType.TEXT_HTML, MediaType.ALL))
+                .hasForwardedUrl(null);
+    }
+
+    @Test
+    void answersAnUnknownAddressWithAProblemOutsideABrowser() {
+        assertThat(mvc.get().uri("/nope").accept(MediaType.APPLICATION_JSON))
+                .hasStatus(404)
+                .hasForwardedUrl(null);
     }
 }

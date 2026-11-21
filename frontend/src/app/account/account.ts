@@ -53,11 +53,16 @@ export class AccountPage {
   readonly #transloco = inject(TranslocoService);
   readonly #document = inject(DOCUMENT);
 
-  /** Whether they own an organisation, which keeps the account from being deleted. */
+  /** Whether they own an organisation, suspended ones too, which keeps the account from being deleted. */
   protected owns(): boolean {
+    const me = this.session.me();
+
     return (
-      this.session.me()?.memberships.some((membership) => membership.owner) ??
-      false
+      me !== null &&
+      me !== undefined &&
+      [...me.memberships, ...me.suspended].some(
+        (membership) => membership.owner
+      )
     );
   }
 
