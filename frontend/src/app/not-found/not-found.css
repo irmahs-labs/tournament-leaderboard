@@ -1,20 +1,19 @@
-/* On top of the page's own 40px above and 72px below. */
+/* On top of the page's own 40px above and 72px below. The message sits in the middle. */
 :host {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 48px;
+  justify-content: center;
   padding-top: 56px;
   padding-bottom: 48px;
 }
 
 .copy {
-  flex: 999 1 560px;
   min-width: 0;
   max-width: 640px;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 18px;
+  text-align: center;
 }
 
 .code {
