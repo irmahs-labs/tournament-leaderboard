@@ -32,7 +32,6 @@ import { SessionService } from "../shared/session";
           <a class="button" routerLink="/">{{ t("notFound.home") }}</a>
         </div>
       </div>
-      <div class="slab" aria-hidden="true"><span></span></div>
     </ng-container>
   `,
 })
