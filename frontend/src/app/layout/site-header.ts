@@ -53,6 +53,19 @@ export class SiteHeader {
     return org !== null && canAdmin(this.session.me(), org.slug);
   });
 
+  /** Whether the signed-in person joined this organisation, so the header offers My seasons. */
+  protected readonly member = computed(() => {
+    const org = this.organization();
+
+    return (
+      org !== null &&
+      (this.session
+        .me()
+        ?.memberships.some((membership) => membership.slug === org.slug) ??
+        false)
+    );
+  });
+
   /** Whether the page is one of the organisation's admin pages. */
   protected inAdmin(): boolean {
     const org = this.organization();

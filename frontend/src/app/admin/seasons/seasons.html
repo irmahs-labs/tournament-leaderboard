@@ -137,15 +137,24 @@
               >
             </td>
             <td>
-              <button
-                type="button"
-                class="button-ghost small-button"
-                (click)="editing.set(season.number)"
-              >
-                {{ t("adminPlayers.edit") }}<span class="visually-hidden">
-                  {{ season.name }}</span
+              <div class="actions">
+                <button
+                  type="button"
+                  class="button-ghost small-button"
+                  (click)="editing.set(season.number)"
                 >
-              </button>
+                  {{ t("adminPlayers.edit") }}<span class="visually-hidden">
+                    {{ season.name }}</span
+                  >
+                </button>
+                <a
+                  class="button-ghost small-button"
+                  [routerLink]="[season.number, 'sign-ups']"
+                  >{{ t("adminSignUps.link") }}<span class="visually-hidden">
+                    {{ season.name }}</span
+                  ></a
+                >
+              </div>
             </td>
           </tr>
           } }

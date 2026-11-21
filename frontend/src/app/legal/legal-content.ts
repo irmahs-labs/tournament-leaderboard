@@ -193,6 +193,12 @@ const EN: Record<LegalPageId, LegalDocument> = {
               "Until the admins remove it, or until you object.",
             ],
             [
+              "Players of a tournament",
+              "The seasons you signed up for, when, whether you withdrew, and whether an admin signed you up or withdrew you. Only you and the organisation's admins see it.",
+              "Organising the season's matches. Necessary for the service you ask for by signing up (article 6(1)(b)); when an admin signs you up, legitimate interest of the organisers (article 6(1)(f)).",
+              "As long as the organisation keeps its tournament history, or until you object.",
+            ],
+            [
               "People who sign in (organisers)",
               "Google account id, email address and name, sent by Google when you sign in; which organisations you belong to and your role there. The site doesn't keep your Google picture or your password: it never sees it.",
               "Signing you in and letting you manage your organisation, which you ask for by signing in. Necessary for the service you use (article 6(1)(b)).",
@@ -458,6 +464,12 @@ const FR: Record<LegalPageId, LegalDocument> = {
               "Nom d'utilisateur Discord, si l'organisation l'ajoute. Seuls les administrateurs de l'organisation le voient ; il n'est jamais public.",
               "Permettre aux administrateurs de reconnaître et de contacter les joueurs. Intérêt légitime des organisateurs (article 6(1)(f)).",
               "Jusqu'à ce que les administrateurs le retirent, ou jusqu'à votre opposition.",
+            ],
+            [
+              "Joueurs d'un tournoi",
+              "Les saisons auxquelles vous vous êtes inscrit, quand, si vous vous êtes désinscrit, et si un administrateur vous a inscrit ou désinscrit. Seuls vous et les administrateurs de l'organisation le voient.",
+              "Organiser les matchs de la saison. Nécessaire au service que vous demandez en vous inscrivant (article 6(1)(b)) ; quand un administrateur vous inscrit, intérêt légitime des organisateurs (article 6(1)(f)).",
+              "Tant que l'organisation conserve l'historique de son tournoi, ou jusqu'à votre opposition.",
             ],
             [
               "Personnes qui se connectent (organisateurs)",

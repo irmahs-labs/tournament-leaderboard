@@ -3,6 +3,7 @@ package dev.irmahs.leaderboard.claims;
 import dev.irmahs.leaderboard.claims.ClaimService.ClaimRow;
 import dev.irmahs.leaderboard.claims.ClaimService.ClaimState;
 import dev.irmahs.leaderboard.claims.ClaimService.NewClaim;
+import dev.irmahs.leaderboard.claims.ClaimService.NewProfile;
 import dev.irmahs.leaderboard.claims.ClaimService.OwnDetails;
 import dev.irmahs.leaderboard.claims.ClaimService.PlayerSummary;
 import dev.irmahs.leaderboard.players.PlayerAdminService.PlayerView;
@@ -49,6 +50,13 @@ public class ClaimController {
     public ClaimState claim(
             @PathVariable String slug, @RequestBody NewClaim input, @AuthenticationPrincipal OidcUser user) {
         return claims.claim(slug, user.getSubject(), input);
+    }
+
+    /** A member who has never played here creates their player profile, with no admin needed. */
+    @PostMapping("/api/orgs/{slug}/players/me")
+    public ClaimState create(
+            @PathVariable String slug, @RequestBody NewProfile input, @AuthenticationPrincipal OidcUser user) {
+        return claims.create(slug, user.getSubject(), input);
     }
 
     @DeleteMapping("/api/orgs/{slug}/claim")

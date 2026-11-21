@@ -1,5 +1,6 @@
 import { HttpClient, httpResource } from "@angular/common/http";
 import { Component, computed, inject, signal } from "@angular/core";
+import { RouterLink } from "@angular/router";
 import { TranslocoDirective, TranslocoService } from "@jsverse/transloco";
 import { firstValueFrom } from "rxjs";
 
@@ -74,7 +75,7 @@ export const detailsOf = (fields: SeasonFields) => ({
  * (and closed or reopened there), and a form to start the next one with copied or default rules.
  */
 @Component({
-  imports: [TranslocoDirective],
+  imports: [RouterLink, TranslocoDirective],
   selector: "app-seasons-admin",
   styleUrl: "./seasons.css",
   templateUrl: "./seasons.html",

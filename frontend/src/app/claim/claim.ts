@@ -11,7 +11,7 @@ import { splitRiotId } from "../results/stats";
 import { LanguageService } from "../shared/language";
 import { SessionService } from "../shared/session";
 import type { ClaimState, PlayerSummary } from "./api";
-import { MAX_TEXT, matchingPlayers } from "./api";
+import { MAX_NAME, MAX_TEXT, matchingPlayers } from "./api";
 
 /**
  * Claim your profile: join the organisation as a player if needed, pick the player record admins
@@ -27,6 +27,7 @@ export class ClaimPage {
   protected readonly current = inject(CurrentSeason);
   protected readonly language = inject(LanguageService);
   protected readonly maxText = MAX_TEXT;
+  protected readonly maxName = MAX_NAME;
   protected readonly splitRiotId = splitRiotId;
 
   /** The organisation's API, such as `/api/orgs/alsace-arena`. */
@@ -72,6 +73,11 @@ export class ClaimPage {
     () => this.#unclaimed.isLoading() && !this.#unclaimed.hasValue()
   );
 
+  /** The Riot ID the account already has from another organisation, which a new profile takes. */
+  protected readonly accountRiotId = computed(
+    () => this.#session.me()?.riotId ?? null
+  );
+
   protected readonly action = new AdminAction((status) =>
     this.#transloco.translate(
       status === 409 ? "claim.conflict" : "claim.failed"
@@ -110,6 +116,31 @@ export class ClaimPage {
       "claim.sentDone"
     );
     this.picked.set(null);
+  }
+
+  /** Creates their player profile, linked at once: with the account's Riot ID when it has one. */
+  protected async create(riotId: string, discord: string): Promise<void> {
+    const org = this.#org();
+
+    if (!org) {
+      return;
+    }
+
+    if (!this.accountRiotId() && riotId.trim() === "") {
+      this.action.refuse(this.#transloco.translate("claim.riotIdNeeded"));
+
+      return;
+    }
+
+    await this.#change(
+      () =>
+        this.#http.post<ClaimState>(`${org}/players/me`, {
+          discordUsername: discord.trim() === "" ? null : discord.trim(),
+          riotId: riotId.trim() === "" ? null : riotId.trim(),
+        }),
+      "claim.created"
+    );
+    await this.#session.load();
   }
 
   protected async cancel(): Promise<void> {

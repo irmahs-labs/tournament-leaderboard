@@ -75,6 +75,10 @@ public class Season {
 
     private Instant finishedAt;
 
+    /** Whether players can sign up themselves; admins sign people up either way. */
+    @Column(name = "signup_open", nullable = false)
+    private boolean signUpOpen = true;
+
     @ElementCollection
     @CollectionTable(name = "season_stat_rules", joinColumns = @JoinColumn(name = "season_id"))
     @MapKeyColumn(name = "stat")
@@ -137,6 +141,15 @@ public class Season {
 
     public void reopen() {
         finishedAt = null;
+    }
+
+    public void setSignUpOpen(boolean open) {
+        this.signUpOpen = open;
+    }
+
+    /** Whether a player can sign up themselves: the season isn't over and sign-ups are open. */
+    public boolean takesSignUps() {
+        return finishedAt == null && signUpOpen;
     }
 
     /** Sets what a win and each game's KDA ratio are worth. */
@@ -246,6 +259,10 @@ public class Season {
 
     public Instant getFinishedAt() {
         return finishedAt;
+    }
+
+    public boolean isSignUpOpen() {
+        return signUpOpen;
     }
 
     public Map<Stat, StatRule> getStatRules() {

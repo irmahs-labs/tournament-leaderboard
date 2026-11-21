@@ -90,4 +90,14 @@ class SeasonTest {
         season.reopen();
         assertThat(season.getFinishedAt()).isNull();
     }
+
+    @Test
+    void takesSignUpsWhileOpenAndNotOnceOver() {
+        assertThat(season.takesSignUps()).isTrue();
+        season.setSignUpOpen(false);
+        assertThat(season.takesSignUps()).isFalse();
+        season.setSignUpOpen(true);
+        season.finish(Instant.parse("2026-11-20T21:00:00Z"));
+        assertThat(season.takesSignUps()).isFalse();
+    }
 }

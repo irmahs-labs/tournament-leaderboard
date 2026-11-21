@@ -1,0 +1,63 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 820px;
+  min-width: 0;
+}
+
+.intro-text {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.block {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+p {
+  margin: 0;
+}
+
+.status {
+  color: var(--good);
+  font-weight: 600;
+}
+
+.status:empty {
+  display: none;
+}
+
+.status.failed {
+  color: var(--danger);
+}
+
+.notice {
+  padding: 16px 18px;
+}
+
+.start {
+  align-self: flex-start;
+}
+
+.seasons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.season-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
