@@ -304,7 +304,8 @@
     "invalid": "Line {{row}}: {{stat}} isn’t a valid number.",
     "refused": "The scores were refused: check every number, then save again.",
     "failed": "That didn't work. Try again in a moment.",
-    "loading": "Loading the game…"
+    "loading": "Loading the game…",
+    "notWhole": "Line {{row}}: {{stat}} is a whole number, such as 3."
   },
   "adminSeasons": {
     "title": "Seasons",
@@ -838,7 +839,9 @@
     "ownClaim": "Another admin accepts your own claim.",
     "conflict": "This claim was already answered, or the player is already linked. The list is up to date now.",
     "failed": "That didn't work. Try again in a moment.",
-    "loading": "Loading the claims…"
+    "loading": "Loading the claims…",
+    "linkedTo": "Linked to",
+    "wanted": "Wanted to be"
   },
   "mine": {
     "you": "You",

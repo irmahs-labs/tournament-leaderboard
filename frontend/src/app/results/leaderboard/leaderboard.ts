@@ -8,7 +8,7 @@ import type { Leaderboard, Rules, Summary } from "../api";
 import { CurrentSeason } from "../current-season";
 import { StandingsTable } from "../standings-table/standings-table";
 import type { FormulaTerm } from "../stats";
-import { formulaOf, splitRiotId } from "../stats";
+import { formulaOf, splitRiotId, winnableBonuses } from "../stats";
 
 /**
  * The season leaderboard: the top three, the season's numbers, every player's standing, and how
@@ -39,9 +39,8 @@ export class LeaderboardPage {
   /** "Most first bloods (FB), Fewest deaths (LD)". */
   protected readonly bonusList = computed(() =>
     this.rules.hasValue()
-      ? this.rules
-          .value()
-          .bonuses.map((bonus) => `${bonus.label} (${bonus.code})`)
+      ? winnableBonuses(this.rules.value())
+          .map((bonus) => `${bonus.label} (${bonus.code})`)
           .join(", ")
       : ""
   );

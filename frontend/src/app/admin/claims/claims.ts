@@ -17,6 +17,14 @@ export const CLAIM_TABS: readonly ClaimStatus[] = [
   "DECLINED",
 ];
 
+/** What a claim's player is called on its card, by the claim's state. */
+export const CLAIM_LABELS: Readonly<Record<ClaimStatus, string>> = {
+  ACCEPTED: "adminClaims.linkedTo",
+  CANCELLED: "adminClaims.wanted",
+  DECLINED: "adminClaims.wanted",
+  PENDING: "adminClaims.wantsToBe",
+};
+
 /**
  * The admin Claims screen: players asking to be linked to a profile, with Accept and Decline (and a
  * reason the player sees). Accepting links their account; their stats stay where they are. An
@@ -32,6 +40,7 @@ export class ClaimsAdminPage {
   protected readonly current = inject(CurrentSeason);
   protected readonly language = inject(LanguageService);
   protected readonly tabs = CLAIM_TABS;
+  protected readonly claimLabels = CLAIM_LABELS;
   protected readonly maxText = MAX_TEXT;
   protected readonly splitRiotId = splitRiotId;
 

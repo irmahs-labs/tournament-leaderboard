@@ -69,7 +69,10 @@
       <span class="label"
         >{{ t(shownGame() ? "match.gameMvp" : "match.mvp") }}</span
       >
-      <strong class="mvp-name">{{ splitRiotId(best.riotId).name }}</strong>
+      @let mvpName = splitRiotId(best.riotId).name;
+      <strong class="mvp-name" [style.--chars]="mvpName.length"
+        >{{ mvpName }}</strong
+      >
       <span class="mvp-stats">
         <span
           >{{ t("leaderboard.points", { points: language.points(best.points) })

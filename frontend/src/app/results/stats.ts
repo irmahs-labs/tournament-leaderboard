@@ -78,6 +78,16 @@ export interface FormulaTerm {
   win: boolean;
 }
 
+/**
+ * The bonuses someone can win this season: a bonus worked out from a stat that isn't recorded,
+ * such as Most honourable without Honours, can't be won, so it isn't shown.
+ */
+export const winnableBonuses = (rules: Rules): Rules["bonuses"] =>
+  rules.bonuses.filter(
+    (bonus) =>
+      !rules.stats.some((rule) => rule.stat === bonus.stat && !rule.recorded)
+  );
+
 /** Translates a key of public/i18n, as Transloco's `translate` does. */
 type Translate = (key: string, params?: Record<string, string>) => string;
 
@@ -110,15 +120,16 @@ export const formulaOf = (
     });
   }
 
-  const [first] = rules.bonuses;
+  const bonuses = winnableBonuses(rules);
+  const [first] = bonuses;
 
-  if (first && rules.bonuses.every((bonus) => bonus.points === first.points)) {
+  if (first && bonuses.every((bonus) => bonus.points === first.points)) {
     terms.push({
       points: first.points,
       text: t("leaderboard.perBonus", { points: format(first.points) }),
     });
   } else {
-    for (const bonus of rules.bonuses) {
+    for (const bonus of bonuses) {
       terms.push({
         points: bonus.points,
         text: `${format(bonus.points)} ${bonus.label}`,

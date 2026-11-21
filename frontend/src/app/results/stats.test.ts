@@ -7,6 +7,7 @@ import {
   formulaOf,
   splitRiotId,
   valueOf,
+  winnableBonuses,
 } from "./stats";
 
 /** A stand-in for Transloco: the key's last part, then the points. */
@@ -84,5 +85,38 @@ describe("a standing's value", () => {
       decimalsOf("PLANTS", true),
       decimalsOf("ADR", true),
     ]).toStrictEqual([2, 0, 0]);
+  });
+});
+
+describe(winnableBonuses, () => {
+  it("leaves out a bonus worked out from a stat that isn't recorded", () => {
+    const rules = {
+      ...RULES,
+      bonuses: [
+        ...RULES.bonuses,
+        {
+          award: "AT_LEAST" as const,
+          code: "HON",
+          label: "Most honourable",
+          points: 10,
+          stat: "CLUTCHES" as const,
+          threshold: 3,
+        },
+        {
+          award: "MANUAL" as const,
+          code: "ACE",
+          label: "Ace",
+          points: 5,
+          stat: null,
+          threshold: null,
+        },
+      ],
+    };
+
+    expect(winnableBonuses(rules).map((bonus) => bonus.code)).toStrictEqual([
+      "FB",
+      "LD",
+      "ACE",
+    ]);
   });
 });

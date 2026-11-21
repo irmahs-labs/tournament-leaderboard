@@ -304,7 +304,8 @@
     "invalid": "Ligne {{row}} : {{stat}} n’est pas un nombre valide.",
     "refused": "Les scores ont été refusés : vérifiez chaque nombre, puis enregistrez à nouveau.",
     "failed": "Ça n'a pas marché. Réessayez dans un instant.",
-    "loading": "Chargement de la partie…"
+    "loading": "Chargement de la partie…",
+    "notWhole": "Ligne {{row}} : {{stat}} est un nombre entier, par exemple 3."
   },
   "adminSeasons": {
     "title": "Saisons",
@@ -838,7 +839,9 @@
     "ownClaim": "Un autre admin accepte votre propre demande.",
     "conflict": "Cette demande a déjà reçu une réponse, ou le joueur est déjà lié. La liste est à jour maintenant.",
     "failed": "Ça n'a pas marché. Réessayez dans un instant.",
-    "loading": "Chargement des demandes…"
+    "loading": "Chargement des demandes…",
+    "linkedTo": "Lié à",
+    "wanted": "Voulait être"
   },
   "mine": {
     "you": "Vous",
