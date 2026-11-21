@@ -47,12 +47,10 @@ const signUp = (
   playerId,
   registeredAt: "2026-11-20T18:00:00Z",
   riotId,
-  status: "REGISTERED",
   ...extra,
 });
 
 const SIGN_UPS: SignUps = {
-  closesOn: null,
   finished: false,
   name: "Season 3",
   number: 3,
@@ -64,9 +62,7 @@ const SIGN_UPS: SignUps = {
       addedBy: "Camille Martin",
       byAdmin: true,
     }),
-    signUp("moth", "Moth#EUW", { status: "WITHDRAWN" }),
   ],
-  takesSignUps: true,
 };
 
 describe("the players left to sign up", () => {
@@ -74,6 +70,9 @@ describe("the players left to sign up", () => {
     expect(
       notSignedUp(PLAYERS, SIGN_UPS.registrations, "").map((each) => each.id)
     ).toStrictEqual(["moth"]);
+    expect(
+      notSignedUp(PLAYERS, SIGN_UPS.registrations, "KES").map((each) => each.id)
+    ).toStrictEqual([]);
     expect(notSignedUp(PLAYERS, [], "wr").map((each) => each.id)).toStrictEqual(
       ["wren"]
     );
@@ -113,7 +112,7 @@ describe("the Season sign-ups page", () => {
     localStorage.clear();
   });
 
-  it("lists who signed up, in order, and who withdrew", () => {
+  it("lists who signed up, in order", () => {
     expect(text(page.querySelector("h1"))).toBe("Season 3 sign-ups");
     expect(text(page.querySelector("#list-title"))).toBe("Signed up · 2");
     expect(
@@ -124,52 +123,39 @@ describe("the Season sign-ups page", () => {
         "Kestrel #EUW",
         expect.any(String),
         "Themselves",
-        "Take off Kestrel",
+        "Withdraw Kestrel",
       ],
       [
         "2",
         "Wren #EUW No account",
         expect.any(String),
         "By Camille Martin",
-        "Take off Wren",
+        "Withdraw Wren",
       ],
-    ]);
-    expect(texts(page, "#gone-title + .choices li > span")).toStrictEqual([
-      "Moth #EUW · Withdrew",
     ]);
   });
 
-  it("closes sign-ups with a last day", async () => {
+  it("closes sign-ups", async () => {
     const form = page.querySelector<HTMLFormElement>("form.settings");
     const open = form?.querySelector<HTMLInputElement>("[name=open]");
-    const last = form?.querySelector<HTMLInputElement>("[name=closesOn]");
 
-    if (open && last) {
+    if (open) {
       open.checked = false;
-      last.value = "2026-11-30";
     }
 
     form?.requestSubmit();
     const saved = http.expectOne(`${API}/signup`);
 
     expect(saved.request.method).toBe("PUT");
-    expect(saved.request.body).toStrictEqual({
-      closesOn: "2026-11-30",
-      open: false,
-    });
-    saved.flush({
-      ...SIGN_UPS,
-      closesOn: "2026-11-30",
-      open: false,
-      takesSignUps: false,
-    });
+    expect(saved.request.body).toStrictEqual({ open: false });
+    saved.flush({ ...SIGN_UPS, open: false });
     await vi.waitFor(() => {
       harness.detectChanges();
       expect(text(page.querySelector(".block-head .pill"))).toBe("Closed");
     });
   });
 
-  it("signs someone up from a search, and takes someone off", async () => {
+  it("signs someone up from a search, and withdraws someone", async () => {
     const search = page.querySelector<HTMLInputElement>("input[type=search]");
 
     if (search) {
@@ -192,7 +178,7 @@ describe("the Season sign-ups page", () => {
       );
     });
 
-    button("Take off Wren")?.click();
+    button("Withdraw Wren")?.click();
     const removed = http.expectOne(`${API}/registrations/wren`);
 
     expect(removed.request.method).toBe("DELETE");
@@ -200,7 +186,7 @@ describe("the Season sign-ups page", () => {
     await vi.waitFor(() => {
       harness.detectChanges();
       expect(text(page.querySelector("[role=status]"))).toBe(
-        "Wren was taken off. They stop hearing about this season's matches."
+        "Wren was withdrawn. They stop hearing about this season's matches."
       );
     });
   });

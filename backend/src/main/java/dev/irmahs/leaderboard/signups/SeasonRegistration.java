@@ -12,8 +12,8 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * A player signed up for a season. Withdrawing or being taken off keeps the row, so signing up
- * again starts a new place in the order.
+ * A player signed up for a season. Withdrawing keeps the row, so signing up again starts a new
+ * place in the order.
  */
 @Entity
 @Table(name = "season_registrations")
@@ -61,10 +61,6 @@ class SeasonRegistration {
         status = RegistrationStatus.WITHDRAWN;
     }
 
-    void remove() {
-        status = RegistrationStatus.REMOVED;
-    }
-
     boolean isRegistered() {
         return status == RegistrationStatus.REGISTERED;
     }
@@ -75,10 +71,6 @@ class SeasonRegistration {
 
     UUID getPlayerId() {
         return playerId;
-    }
-
-    RegistrationStatus getStatus() {
-        return status;
     }
 
     Instant getRegisteredAt() {

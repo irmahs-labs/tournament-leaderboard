@@ -9,8 +9,8 @@ interface SeasonRegistrationRepository extends JpaRepository<SeasonRegistration,
 
     Optional<SeasonRegistration> findBySeasonIdAndPlayerId(Integer seasonId, UUID playerId);
 
-    /** A season's sign-ups in the order they came. */
-    List<SeasonRegistration> findBySeasonIdOrderByRegisteredAt(Integer seasonId);
+    /** Who's signed up for a season, in the order they came. */
+    List<SeasonRegistration> findBySeasonIdAndStatusOrderByRegisteredAt(Integer seasonId, RegistrationStatus status);
 
-    List<SeasonRegistration> findByPlayerId(UUID playerId);
+    List<SeasonRegistration> findByPlayerIdAndStatus(UUID playerId, RegistrationStatus status);
 }

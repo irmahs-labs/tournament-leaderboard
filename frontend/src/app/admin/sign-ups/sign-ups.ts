@@ -5,7 +5,6 @@ import { TranslocoDirective, TranslocoService } from "@jsverse/transloco";
 import type { Observable } from "rxjs";
 import { firstValueFrom } from "rxjs";
 
-import { matchingPlayers } from "../../claim/api";
 import { CurrentSeason } from "../../results/current-season";
 import { splitRiotId } from "../../results/stats";
 import { LanguageService } from "../../shared/language";
@@ -13,40 +12,29 @@ import type { SignUp, SignUps } from "../../sign-ups/api";
 import { AdminAction } from "../action";
 import type { AdminPlayer } from "../api";
 
-/** The players an admin can still sign up: everyone not signed up, matching the search. */
+/** The players not signed up yet whose Riot ID, Discord or an alias has the search, ignoring case. */
 export const notSignedUp = (
   players: readonly AdminPlayer[],
   signUps: readonly SignUp[],
   search: string
 ): AdminPlayer[] => {
-  const signedUp = new Set(
-    signUps.flatMap((each) =>
-      each.status === "REGISTERED" ? [each.playerId] : []
-    )
+  const signedUp = new Set(signUps.map((each) => each.playerId));
+  const wanted = search.trim().toLowerCase();
+
+  return players.filter(
+    (player) =>
+      !signedUp.has(player.id) &&
+      [
+        player.riotId,
+        player.discordUsername ?? "",
+        ...player.aliases.map((alias) => alias.alias),
+      ].some((name) => name.toLowerCase().includes(wanted))
   );
-
-  const left = players.filter((player) => !signedUp.has(player.id));
-
-  const found = new Set(
-    matchingPlayers(
-      left.map((player) => ({
-        aliases: player.aliases.map((alias) => alias.alias),
-        discordUsername: player.discordUsername,
-        games: 0,
-        id: player.id,
-        rank: null,
-        riotId: player.riotId,
-      })),
-      search
-    ).map((player) => player.id)
-  );
-
-  return left.filter((player) => found.has(player.id));
 };
 
 /**
- * Season sign-ups: open or close them, with a last day; who signed up, in order; taking someone
- * off; and signing anyone up, players without an account too, whether sign-ups are open or not.
+ * Season sign-ups: open or close them; who signed up, in order; withdrawing someone; and signing
+ * anyone up, players without an account too, whether sign-ups are open or not.
  */
 @Component({
   imports: [RouterLink, TranslocoDirective],
@@ -84,22 +72,6 @@ export class SignUpsAdminPage {
 
   protected readonly search = signal("");
 
-  protected readonly signedUp = computed(() =>
-    this.signUps.hasValue()
-      ? this.signUps
-          .value()
-          .registrations.filter((each) => each.status === "REGISTERED")
-      : []
-  );
-
-  protected readonly gone = computed(() =>
-    this.signUps.hasValue()
-      ? this.signUps
-          .value()
-          .registrations.filter((each) => each.status !== "REGISTERED")
-      : []
-  );
-
   /** Whom the admin can sign up, once they search. */
   protected readonly candidates = computed(() =>
     this.search().trim() === "" ||
@@ -122,13 +94,9 @@ export class SignUpsAdminPage {
   readonly #http = inject(HttpClient);
   readonly #transloco = inject(TranslocoService);
 
-  protected async saveSettings(open: boolean, closesOn: string): Promise<void> {
+  protected async saveSettings(open: boolean): Promise<void> {
     await this.#change(
-      (api) =>
-        this.#http.put<SignUps>(`${api}/signup`, {
-          closesOn: closesOn === "" ? null : closesOn,
-          open,
-        }),
+      (api) => this.#http.put<SignUps>(`${api}/signup`, { open }),
       "adminSignUps.settingsSaved",
       ""
     );

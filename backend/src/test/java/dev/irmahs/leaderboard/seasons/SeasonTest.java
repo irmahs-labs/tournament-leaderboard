@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.tuple;
 
 import dev.irmahs.leaderboard.seasons.Season.GameRange;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -93,17 +92,12 @@ class SeasonTest {
     }
 
     @Test
-    void takesSignUpsWhileOpenUntilTheEndOfTheLastDayAndNotOnceOver() {
-        LocalDate today = LocalDate.of(2026, 11, 20);
-
-        assertThat(season.takesSignUps(today)).isTrue();
-        season.setSignUps(true, today);
-        assertThat(season.takesSignUps(today)).isTrue();
-        assertThat(season.takesSignUps(today.plusDays(1))).isFalse();
-        season.setSignUps(false, null);
-        assertThat(season.takesSignUps(today)).isFalse();
-        season.setSignUps(true, null);
+    void takesSignUpsWhileOpenAndNotOnceOver() {
+        assertThat(season.takesSignUps()).isTrue();
+        season.setSignUpOpen(false);
+        assertThat(season.takesSignUps()).isFalse();
+        season.setSignUpOpen(true);
         season.finish(Instant.parse("2026-11-20T21:00:00Z"));
-        assertThat(season.takesSignUps(today)).isFalse();
+        assertThat(season.takesSignUps()).isFalse();
     }
 }

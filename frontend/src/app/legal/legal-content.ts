@@ -194,7 +194,7 @@ const EN: Record<LegalPageId, LegalDocument> = {
             ],
             [
               "Players of a tournament",
-              "The seasons you signed up for, when, and whether you withdrew, or an admin signed you up or took you off. Only you and the organisation's admins see it.",
+              "The seasons you signed up for, when, whether you withdrew, and whether an admin signed you up or withdrew you. Only you and the organisation's admins see it.",
               "Organising the season's matches. Necessary for the service you ask for by signing up (article 6(1)(b)); when an admin signs you up, legitimate interest of the organisers (article 6(1)(f)).",
               "As long as the organisation keeps its tournament history, or until you object.",
             ],
@@ -467,7 +467,7 @@ const FR: Record<LegalPageId, LegalDocument> = {
             ],
             [
               "Joueurs d'un tournoi",
-              "Les saisons auxquelles vous vous êtes inscrit, quand, et si vous vous êtes désinscrit, ou si un administrateur vous a inscrit ou retiré. Seuls vous et les administrateurs de l'organisation le voient.",
+              "Les saisons auxquelles vous vous êtes inscrit, quand, si vous vous êtes désinscrit, et si un administrateur vous a inscrit ou désinscrit. Seuls vous et les administrateurs de l'organisation le voient.",
               "Organiser les matchs de la saison. Nécessaire au service que vous demandez en vous inscrivant (article 6(1)(b)) ; quand un administrateur vous inscrit, intérêt légitime des organisateurs (article 6(1)(f)).",
               "Tant que l'organisation conserve l'historique de son tournoi, ou jusqu'à votre opposition.",
             ],

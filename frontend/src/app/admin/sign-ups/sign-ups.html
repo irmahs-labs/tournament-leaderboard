@@ -35,33 +35,23 @@
       <h2 class="heading" id="settings-title">
         {{ t("adminSignUps.settings") }}
       </h2>
-      <span class="pill" [class.live]="season.takesSignUps"
-        >{{ t(season.takesSignUps ? "adminSignUps.isOpen" :
-        "adminSignUps.isClosed") }}</span
+      <span class="pill" [class.live]="season.open"
+        >{{ t(season.open ? "adminSignUps.isOpen" : "adminSignUps.isClosed")
+        }}</span
       >
     </div>
     <form
       class="settings"
-      (submit)="$event.preventDefault(); saveSettings(open.checked, closesOn.value)"
+      (submit)="$event.preventDefault(); saveSettings(open.checked)"
     >
       <label class="check">
         <input #open type="checkbox" name="open" [checked]="season.open" />
         {{ t("adminSignUps.open") }}
       </label>
-      <label class="field">
-        <span class="label">{{ t("adminSignUps.closesOn") }}</span>
-        <input
-          #closesOn
-          type="date"
-          name="closesOn"
-          [value]="season.closesOn ?? ''"
-        />
-      </label>
       <button type="submit" class="button" [disabled]="action.busy()">
         {{ t("adminPlayers.save") }}
       </button>
     </form>
-    <p class="muted small">{{ t("adminSignUps.settingsHelp") }}</p>
   </section>
 
   <section class="panel block" aria-labelledby="add-title">
@@ -111,9 +101,9 @@
 
   <section class="panel block" aria-labelledby="list-title">
     <h2 class="heading" id="list-title">
-      {{ t("adminSignUps.signedUp", { count: signedUp().length }) }}
+      {{ t("adminSignUps.signedUp", { count: season.registrations.length }) }}
     </h2>
-    @if (signedUp().length === 0) {
+    @if (season.registrations.length === 0) {
     <p class="muted">{{ t("adminSignUps.nobody") }}</p>
     } @else {
     <div class="scroll">
@@ -132,8 +122,8 @@
           </tr>
         </thead>
         <tbody>
-          @for (row of signedUp(); track row.playerId; let index = $index) {
-          @let id = splitRiotId(row.riotId ?? "");
+          @for (row of season.registrations; track row.playerId; let index =
+          $index) { @let id = splitRiotId(row.riotId ?? "");
           <tr>
             <td class="num">{{ index + 1 }}</td>
             <td>
@@ -169,38 +159,7 @@
     }
   </section>
 
-  @if (gone().length > 0) {
-  <section class="panel block" aria-labelledby="gone-title">
-    <h2 class="heading" id="gone-title">{{ t("adminSignUps.goneTitle") }}</h2>
-    <ul class="choices">
-      @for (row of gone(); track row.playerId) { @let id =
-      splitRiotId(row.riotId ?? "");
-      <li>
-        <span
-          ><strong>{{ id.name }}</strong
-          ><span class="muted"> {{ id.tag }}</span> ·
-          <span class="muted"
-            >{{ t(row.status === "REMOVED" ? "adminSignUps.wasRemoved" :
-            "adminSignUps.withdrew") }}</span
-          ></span
-        >
-        @if (!season.finished) {
-        <button
-          type="button"
-          class="button-ghost small-button"
-          [disabled]="action.busy()"
-          (click)="add({ id: row.playerId, riotId: row.riotId ?? '' })"
-        >
-          {{ t("adminSignUps.again") }}<span class="visually-hidden">
-            {{ id.name }}</span
-          >
-        </button>
-        }
-      </li>
-      }
-    </ul>
-  </section>
-  } } @else {
+  } @else {
   <p class="muted" aria-live="polite">{{ t("claim.loading") }}</p>
   }
 </ng-container>

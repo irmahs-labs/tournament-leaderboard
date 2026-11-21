@@ -95,7 +95,7 @@ flowchart LR
 | `founding` | `FoundingService` (anyone signed in creates an organisation and owns it: address checked and not reserved, 3 owned at most except for platform admins, 409 when taken), `FoundingController` |
 | `platform` | `PlatformService` (platform admins only: every organisation with its owner, members, activity and whether the home page features it; suspending and reactivating), `PlatformController` |
 | `claims` | `PlayerClaim` (player_claims), `ClaimService` (join as a player; claim an unclaimed player with a note; cancel; creating one's own profile with no admin (the account's Riot ID and Discord when it has them; refused while a claim waits or the Riot ID is taken); the admins' queue; accepting links the member and declines the other claims for that player; nobody accepts their own while another admin exists, the only admin's is marked self-approved; the linked player edits their own details), `ClaimController` |
-| `signups` | `SeasonRegistration` (season_registrations: REGISTERED, WITHDRAWN or REMOVED), `SignUpService` (a linked player signs up while `Season.takesSignUps`, open and before the last day in Europe/Paris, and withdraws; someone an admin took off can't sign up again alone; admins open or close sign-ups with a last day, sign anyone up at any time before the season is over, players without an account too, and take people off), `SignUpController` |
+| `signups` | `SeasonRegistration` (season_registrations: REGISTERED or WITHDRAWN), `SignUpService` (a linked player signs up while `Season.takesSignUps`, and withdraws; admins open or close sign-ups, sign anyone up at any time before the season is over, players without an account too, and withdraw people), `SignUpController` |
 | `team` | `Invite` (organization_invites; only a hash of the code), `InviteCodes` (8 characters without look-alikes, SHA-256), `TeamService` (the Members screen: roles, removal, ownership, admin invites), `JoinService` (what a code is for; using it, its row locked), `MembershipController` (leaving an organisation, never as its owner), `CodeLookupLimit` (10 lookups a minute per address, in memory) |
 | `presence` | `OnlineCount` (open pages, in memory only; changes sent at most once a second, a heartbeat every 25 s), `GET /api/online` as server-sent events |
 | `system` | `/api/version`; `SpaController` forwards the Angular router's addresses (`/org/**` (the claim page included), `/not-found`, `/platform`, `/account`, `/join`, `/join/*`, `/sign-in`, `/legal`, `/privacy`, `/cookies`, `/terms`) to `index.html` |
@@ -172,7 +172,7 @@ organization_invites and organization_logos), `V2026_11_18_1__drop_avatar_url.sq
 picture isn't kept: data minimisation), `V2026_11_19_1__weighted_scoring.sql`,
 `V2026_11_19_2__social_links.sql` (six `*_url` columns on organizations, https only),
 `V2026_11_20_1__player_claims.sql` (player_claims, one waiting per member, with the same policy),
-`V2026_11_20_2__expected_email.sql` (players.expected_email, once per organisation), `V2026_11_20_3__account_identity.sql` (app_users.riot_id and discord_username, filled from each linked account's first profile), `V2026_11_20_4__rank_colours.sql` (a colour per Valorant tier, for ranks that had none), `V2026_11_20_5__jpeg_logos.sql` (organization_logos also takes image/jpeg), `V2026_11_20_6__sessions.sql` (spring_session and spring_session_attributes, Spring Session's own schema), `V2026_11_20_7__season_sign_ups.sql` (seasons.signup_open and signup_closes_on; season_registrations, with the same policy).
+`V2026_11_20_2__expected_email.sql` (players.expected_email, once per organisation), `V2026_11_20_3__account_identity.sql` (app_users.riot_id and discord_username, filled from each linked account's first profile), `V2026_11_20_4__rank_colours.sql` (a colour per Valorant tier, for ranks that had none), `V2026_11_20_5__jpeg_logos.sql` (organization_logos also takes image/jpeg), `V2026_11_20_6__sessions.sql` (spring_session and spring_session_attributes, Spring Session's own schema), `V2026_11_20_7__season_sign_ups.sql` (seasons.signup_open; season_registrations, with the same policy).
 
 ```mermaid
 erDiagram
@@ -269,7 +269,7 @@ flowchart TD
     scadm -->|"GET …/rules, PUT, POST /platform-defaults, POST and DELETE /bonuses"| recordApi["…/admin/seasons/{n}/rules"]
     guard --> madm["MembersAdminPage /admin/members<br/>invite an admin, waiting invites, roles, remove, ownership"]
     madm -->|"GET, PUT, POST, DELETE"| teamApi["…/admin/members, …/admin/invites"]
-    guard --> suadm["SignUpsAdminPage /admin/seasons/:season/sign-ups<br/>open or close, last day, who signed up, take off, sign someone up"]
+    guard --> suadm["SignUpsAdminPage /admin/seasons/:season/sign-ups<br/>open or close, who signed up, withdraw, sign someone up"]
     suadm -->|"GET, PUT /signup, POST and DELETE /registrations/{player}"| suAdminApi["…/admin/seasons/{n}/registrations"]
     seadm --> suadm
     guard --> cadm["ClaimsAdminPage /admin/claims<br/>Waiting, Accepted, Declined; accept, decline with a reason"]

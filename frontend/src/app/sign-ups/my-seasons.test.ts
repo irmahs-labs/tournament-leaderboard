@@ -20,9 +20,8 @@ const SEASON: MySeason = {
   endsOn: "2026-12-15",
   name: "Season 9",
   number: 9,
-  signUpClosesOn: "2026-11-30",
+  signedUp: false,
   startsOn: "2026-11-25",
-  status: null,
   takesSignUps: true,
 };
 
@@ -73,10 +72,7 @@ describe("the My seasons page", () => {
     await open({ player: true, seasons: [SEASON] });
 
     expect(text(page.querySelector("h2"))).toBe("Season 9");
-    expect(texts(page, ".seasons p")).toStrictEqual([
-      "Nov 25 – Dec 15",
-      "Sign up by Nov 30.",
-    ]);
+    expect(texts(page, ".seasons p")).toStrictEqual(["Nov 25 – Dec 15"]);
 
     button("Sign up")?.click();
 
@@ -87,7 +83,7 @@ describe("the My seasons page", () => {
     expect(sent.request.method).toBe("POST");
     sent.flush({
       player: true,
-      seasons: [{ ...SEASON, status: "REGISTERED" }],
+      seasons: [{ ...SEASON, signedUp: true }],
     });
     await vi.waitFor(() => {
       harness.detectChanges();
@@ -106,7 +102,7 @@ describe("the My seasons page", () => {
     expect(withdrawn.request.method).toBe("DELETE");
     withdrawn.flush({
       player: true,
-      seasons: [{ ...SEASON, status: "WITHDRAWN" }],
+      seasons: [SEASON],
     });
     await vi.waitFor(() => {
       harness.detectChanges();
@@ -129,15 +125,6 @@ describe("the My seasons page", () => {
     expect(button("Sign up")).toBeUndefined();
     expect(texts(page, ".seasons p").at(-1)).toBe(
       "Sign-ups are closed. An admin can still sign you up."
-    );
-  });
-
-  it("tells someone taken off to ask an admin", async () => {
-    await open({ player: true, seasons: [{ ...SEASON, status: "REMOVED" }] });
-
-    expect(button("Sign up")).toBeUndefined();
-    expect(texts(page, ".seasons p").at(-1)).toBe(
-      "An admin took you off this season. Ask them if you'd like to come back."
     );
   });
 });

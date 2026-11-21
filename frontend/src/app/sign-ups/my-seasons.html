@@ -51,13 +51,13 @@
         <h2 class="heading" [id]="'season-' + season.number">
           {{ season.name }}
         </h2>
-        @if (season.status === "REGISTERED") {
+        @if (season.signedUp) {
         <span class="pill live">{{ t("mySeasons.in") }}</span>
         }
       </div>
       @if (dates(season); as when) {
       <p class="muted">{{ when }}</p>
-      } @switch (season.status) { @case ("REGISTERED") {
+      } @if (season.signedUp) {
       <p>{{ t("mySeasons.inHelp") }}</p>
       <button
         type="button"
@@ -69,14 +69,7 @@
           {{ season.name }}</span
         >
       </button>
-      } @case ("REMOVED") {
-      <p class="muted">{{ t("mySeasons.removed") }}</p>
-      } @default { @if (season.takesSignUps) { @if (season.signUpClosesOn; as
-      last) {
-      <p class="muted">
-        {{ t("mySeasons.closesOn", { day: language.day(last) }) }}
-      </p>
-      }
+      } @else if (season.takesSignUps) {
       <button
         type="button"
         class="button start"
@@ -89,7 +82,7 @@
       </button>
       } @else {
       <p class="muted">{{ t("mySeasons.closed") }}</p>
-      } } }
+      }
     </li>
     }
   </ul>

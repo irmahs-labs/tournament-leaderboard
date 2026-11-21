@@ -79,10 +79,6 @@ public class Season {
     @Column(name = "signup_open", nullable = false)
     private boolean signUpOpen = true;
 
-    /** The last day players can sign up themselves; nothing: until an admin closes sign-ups. */
-    @Column(name = "signup_closes_on")
-    private LocalDate signUpClosesOn;
-
     @ElementCollection
     @CollectionTable(name = "season_stat_rules", joinColumns = @JoinColumn(name = "season_id"))
     @MapKeyColumn(name = "stat")
@@ -147,15 +143,13 @@ public class Season {
         finishedAt = null;
     }
 
-    /** Opens or closes sign-ups, with the last day to sign up, or none. */
-    public void setSignUps(boolean open, LocalDate closesOn) {
+    public void setSignUpOpen(boolean open) {
         this.signUpOpen = open;
-        this.signUpClosesOn = closesOn;
     }
 
-    /** Whether a player can sign up themselves today: the season isn't over and sign-ups are open. */
-    public boolean takesSignUps(LocalDate today) {
-        return finishedAt == null && signUpOpen && (signUpClosesOn == null || !today.isAfter(signUpClosesOn));
+    /** Whether a player can sign up themselves: the season isn't over and sign-ups are open. */
+    public boolean takesSignUps() {
+        return finishedAt == null && signUpOpen;
     }
 
     /** Sets what a win and each game's KDA ratio are worth. */
@@ -269,10 +263,6 @@ public class Season {
 
     public boolean isSignUpOpen() {
         return signUpOpen;
-    }
-
-    public LocalDate getSignUpClosesOn() {
-        return signUpClosesOn;
     }
 
     public Map<Stat, StatRule> getStatRules() {

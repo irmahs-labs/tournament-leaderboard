@@ -10,13 +10,11 @@ import dev.irmahs.leaderboard.players.Player;
 import dev.irmahs.leaderboard.players.PlayerRepository;
 import dev.irmahs.leaderboard.seasons.Season;
 import dev.irmahs.leaderboard.seasons.SeasonService;
-import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -29,15 +27,12 @@ import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Season sign-ups. A linked player signs up for a season themselves, with no limit, while sign-ups
- * are open; admins sign anyone up at any time before the season is over, players without an
- * account too, and take people off. Someone an admin took off can't sign up again by themselves.
+ * are open, and withdraws. Admins open or close sign-ups, sign anyone up at any time before the
+ * season is over, players without an account too, and withdraw people.
  */
 @Service
 @Transactional
 public class SignUpService {
-
-    /** Where a sign-up's last day ends. Every organisation is in France for now. */
-    static final ZoneId ZONE = ZoneId.of("Europe/Paris");
 
     private final AccountService accounts;
     private final OrganizationService organizations;
@@ -45,7 +40,6 @@ public class SignUpService {
     private final PlayerRepository players;
     private final SeasonService seasons;
     private final SeasonRegistrationRepository registrations;
-    private final Clock clock;
 
     SignUpService(
             AccountService accounts,
@@ -60,7 +54,6 @@ public class SignUpService {
         this.players = players;
         this.seasons = seasons;
         this.registrations = registrations;
-        this.clock = Clock.system(ZONE);
     }
 
     /**
@@ -71,13 +64,12 @@ public class SignUpService {
     @Transactional(readOnly = true)
     public MySeasons mine(String slug, String googleSub) {
         Organization organization = organizations.requireActive(slug);
-        OrganizationMember member = requireMember(organization, googleSub);
-        UUID playerId = member.getPlayerId();
-        Map<Integer, RegistrationStatus> mine = playerId == null
-                ? Map.of()
-                : registrations.findByPlayerId(playerId).stream()
-                        .collect(Collectors.toMap(SeasonRegistration::getSeasonId, SeasonRegistration::getStatus));
-        LocalDate today = LocalDate.now(clock);
+        UUID playerId = requireMember(organization, googleSub).getPlayerId();
+        Set<Integer> signedUp = playerId == null
+                ? Set.of()
+                : registrations.findByPlayerIdAndStatus(playerId, RegistrationStatus.REGISTERED).stream()
+                        .map(SeasonRegistration::getSeasonId)
+                        .collect(Collectors.toSet());
         List<MySeason> open = seasons.newestFirst(organization.getId()).stream()
                 .filter(season -> season.getFinishedAt() == null)
                 .map(season -> new MySeason(
@@ -85,9 +77,8 @@ public class SignUpService {
                         season.getName(),
                         season.getStartsOn(),
                         season.getEndsOn(),
-                        season.takesSignUps(today),
-                        season.getSignUpClosesOn(),
-                        mine.get(season.getId())))
+                        season.takesSignUps(),
+                        signedUp.contains(season.getId())))
                 .toList();
         return new MySeasons(playerId != null, open);
     }
@@ -96,7 +87,7 @@ public class SignUpService {
      * Signs the linked player up. Signing up twice changes nothing.
      *
      * @throws ResponseStatusException 403 for someone who isn't a member, 404 for an unknown season,
-     *     409 without a player profile, when sign-ups are closed, or when an admin took them off
+     *     409 without a player profile or when sign-ups are closed
      */
     public MySeasons signUp(String slug, String googleSub, int number) {
         Organization organization = organizations.requireActive(slug);
@@ -108,17 +99,10 @@ public class SignUpService {
         if (registration != null && registration.isRegistered()) {
             return mine(slug, googleSub);
         }
-        if (registration != null && registration.getStatus() == RegistrationStatus.REMOVED) {
-            throw conflict("An admin took you off " + season.getName() + ": ask them to sign you up again");
-        }
-        if (!season.takesSignUps(LocalDate.now(clock))) {
+        if (!season.takesSignUps()) {
             throw conflict("Sign-ups for " + season.getName() + " are closed");
         }
-        if (registration == null) {
-            save(new SeasonRegistration(season.getId(), playerId, organization.getId(), null));
-        } else {
-            registration.register(null);
-        }
+        register(organization, season, playerId, registration, null);
         return mine(slug, googleSub);
     }
 
@@ -130,23 +114,17 @@ public class SignUpService {
      */
     public MySeasons withdraw(String slug, String googleSub, int number) {
         Organization organization = organizations.requireActive(slug);
-        UUID playerId = requirePlayer(organization, googleSub);
-        Season season = requireNotOver(slug, number);
-        registrations
-                .findBySeasonIdAndPlayerId(season.getId(), playerId)
-                .filter(SeasonRegistration::isRegistered)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "You aren't signed up for " + season.getName()))
-                .withdraw();
+        withdraw(requireNotOver(slug, number), requirePlayer(organization, googleSub));
         return mine(slug, googleSub);
     }
 
-    /** The admins' view: whether sign-ups are open, and everyone who ever signed up, in order. */
+    /** The admins' view: whether sign-ups are open, and who's signed up, in the order they came. */
     @Transactional(readOnly = true)
     public SignUps signUps(String slug, int number) {
         Organization organization = organizations.requireActive(slug);
         Season season = seasons.require(slug, number);
-        List<SeasonRegistration> found = registrations.findBySeasonIdOrderByRegisteredAt(season.getId());
+        List<SeasonRegistration> found =
+                registrations.findBySeasonIdAndStatusOrderByRegisteredAt(season.getId(), RegistrationStatus.REGISTERED);
         Map<UUID, Player> byId =
                 players
                         .findAllById(found.stream()
@@ -159,7 +137,7 @@ public class SignUpService {
                 .collect(Collectors.toSet());
         Map<UUID, AppUser> admins = accounts.usersById(found.stream()
                 .map(SeasonRegistration::getAddedBy)
-                .filter(java.util.Objects::nonNull)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet()));
         List<SignUp> rows = found.stream()
                 .map(registration -> {
@@ -169,25 +147,17 @@ public class SignUpService {
                             registration.getPlayerId(),
                             player == null ? null : player.getRiotId(),
                             linked.contains(registration.getPlayerId()),
-                            registration.getStatus(),
                             registration.getRegisteredAt(),
                             registration.getAddedBy() != null,
                             admin == null ? null : admin.getDisplayName());
                 })
-                .sorted(Comparator.comparing((SignUp row) -> row.status() != RegistrationStatus.REGISTERED))
                 .toList();
         return new SignUps(
-                season.getNumber(),
-                season.getName(),
-                season.getFinishedAt() != null,
-                season.isSignUpOpen(),
-                season.getSignUpClosesOn(),
-                season.takesSignUps(LocalDate.now(clock)),
-                rows);
+                season.getNumber(), season.getName(), season.getFinishedAt() != null, season.isSignUpOpen(), rows);
     }
 
     /**
-     * Opens or closes sign-ups, with the last day to sign up, or none.
+     * Opens or closes sign-ups.
      *
      * @throws ResponseStatusException 400 without the open switch, 404 for an unknown season, 409
      *     once the season is over
@@ -196,13 +166,12 @@ public class SignUpService {
         if (input.open() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Say whether sign-ups are open");
         }
-        requireNotOver(slug, number).setSignUps(input.open(), input.closesOn());
+        requireNotOver(slug, number).setSignUpOpen(input.open());
         return signUps(slug, number);
     }
 
     /**
-     * An admin signs a player up, whether sign-ups are open or not, players without an account and
-     * people taken off before too.
+     * An admin signs a player up, whether sign-ups are open or not, players without an account too.
      *
      * @throws ResponseStatusException 404 for an unknown season or another organisation's player,
      *     409 once the season is over
@@ -213,33 +182,42 @@ public class SignUpService {
         players.findByIdAndOrganizationId(playerId, organization.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There's no such player"));
         UUID admin = requireUser(adminSub).getId();
-        registrations
+        SeasonRegistration registration = registrations
                 .findBySeasonIdAndPlayerId(season.getId(), playerId)
-                .ifPresentOrElse(
-                        registration -> {
-                            if (!registration.isRegistered()) {
-                                registration.register(admin);
-                            }
-                        },
-                        () -> save(new SeasonRegistration(season.getId(), playerId, organization.getId(), admin)));
+                .orElse(null);
+        if (registration == null || !registration.isRegistered()) {
+            register(organization, season, playerId, registration, admin);
+        }
         return signUps(slug, number);
     }
 
     /**
-     * Takes a player off the season: they stop hearing about its matches and can't sign up again
-     * by themselves.
+     * An admin withdraws a player: they stop hearing about the season's matches.
      *
      * @throws ResponseStatusException 404 when they aren't signed up, 409 once the season is over
      */
     public SignUps remove(String slug, int number, UUID playerId) {
-        Season season = requireNotOver(slug, number);
+        withdraw(requireNotOver(slug, number), playerId);
+        return signUps(slug, number);
+    }
+
+    /** Signs them up, again when they had withdrawn; by themselves when no admin is given. */
+    private void register(
+            Organization organization, Season season, UUID playerId, SeasonRegistration existing, UUID admin) {
+        if (existing != null) {
+            existing.register(admin);
+            return;
+        }
+        save(new SeasonRegistration(season.getId(), playerId, organization.getId(), admin));
+    }
+
+    private void withdraw(Season season, UUID playerId) {
         registrations
                 .findBySeasonIdAndPlayerId(season.getId(), playerId)
                 .filter(SeasonRegistration::isRegistered)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "This player isn't signed up for " + season.getName()))
-                .remove();
-        return signUps(slug, number);
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Not signed up for " + season.getName()))
+                .withdraw();
     }
 
     private void save(SeasonRegistration registration) {
@@ -285,53 +263,30 @@ public class SignUpService {
     /**
      * A season not over yet, as a member sees it.
      *
-     * @param takesSignUps whether they can sign up themselves today
-     * @param status theirs; nothing when they never signed up
+     * @param takesSignUps whether they can sign up themselves
      */
     public record MySeason(
-            int number,
-            String name,
-            LocalDate startsOn,
-            LocalDate endsOn,
-            boolean takesSignUps,
-            LocalDate signUpClosesOn,
-            RegistrationStatus status) {}
+            int number, String name, LocalDate startsOn, LocalDate endsOn, boolean takesSignUps, boolean signedUp) {}
 
     /** @param player whether they have a player profile here, needed to sign up */
     public record MySeasons(boolean player, List<MySeason> seasons) {}
 
     /**
-     * Someone signed up, or who was.
+     * Someone signed up.
      *
      * @param account whether the player is linked to an account, so can answer matches themselves
      * @param byAdmin whether an admin signed them up
      * @param addedBy that admin's name, while they have an account
      */
     public record SignUp(
-            UUID playerId,
-            String riotId,
-            boolean account,
-            RegistrationStatus status,
-            Instant registeredAt,
-            boolean byAdmin,
-            String addedBy) {}
+            UUID playerId, String riotId, boolean account, Instant registeredAt, boolean byAdmin, String addedBy) {}
 
     /**
-     * A season's sign-ups: who's signed up first, in the order they came, then who withdrew or was
-     * taken off.
+     * A season's sign-ups, in the order they came.
      *
-     * @param open the admins' switch
-     * @param takesSignUps whether players can sign up themselves today: open, before the last day,
-     *     and the season not over
+     * @param open whether players can sign up themselves, until the season is over
      */
-    public record SignUps(
-            int number,
-            String name,
-            boolean finished,
-            boolean open,
-            LocalDate closesOn,
-            boolean takesSignUps,
-            List<SignUp> registrations) {}
+    public record SignUps(int number, String name, boolean finished, boolean open, List<SignUp> registrations) {}
 
-    public record SignUpSettings(Boolean open, LocalDate closesOn) {}
+    public record SignUpSettings(Boolean open) {}
 }

@@ -14,8 +14,6 @@ import dev.irmahs.leaderboard.seasons.Season;
 import dev.irmahs.leaderboard.seasons.Season.GameRange;
 import jakarta.persistence.EntityManager;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -96,10 +94,6 @@ class SignUpsIT {
         return send(HttpMethod.POST, ORG + "/seasons/2/registration", null, who);
     }
 
-    private static LocalDate today() {
-        return LocalDate.now(ZoneId.of("Europe/Paris"));
-    }
-
     @Test
     void aMemberWhoNeverPlayedCreatesTheirProfileAtOnce() {
         assertThat(create("Moth#EUW", NOBODY)).hasStatus(403);
@@ -151,14 +145,14 @@ class SignUpsIT {
                 .bodyJson()
                 .isLenientlyEqualTo("""
                         {"player": false,
-                         "seasons": [{"number": 2, "name": "Season 2", "takesSignUps": true, "status": null}]}""");
+                         "seasons": [{"number": 2, "name": "Season 2", "takesSignUps": true, "signedUp": false}]}""");
         assertThat(signUp(PLAYER)).hasStatus(409);
 
         create("Moth#EUW", PLAYER);
         assertThat(signUp(PLAYER))
                 .hasStatusOk()
                 .bodyJson()
-                .isLenientlyEqualTo("{\"player\": true, \"seasons\": [{\"number\": 2, \"status\": \"REGISTERED\"}]}");
+                .isLenientlyEqualTo("{\"player\": true, \"seasons\": [{\"number\": 2, \"signedUp\": true}]}");
         assertThat(signUp(PLAYER)).hasStatusOk();
         assertThat(send(HttpMethod.POST, ORG + "/seasons/1/registration", null, PLAYER))
                 .hasStatus(409);
@@ -166,7 +160,7 @@ class SignUpsIT {
         assertThat(send(HttpMethod.DELETE, ORG + "/seasons/2/registration", null, PLAYER))
                 .hasStatusOk()
                 .bodyJson()
-                .isLenientlyEqualTo("{\"seasons\": [{\"status\": \"WITHDRAWN\"}]}");
+                .isLenientlyEqualTo("{\"seasons\": [{\"signedUp\": false}]}");
         assertThat(send(HttpMethod.DELETE, ORG + "/seasons/2/registration", null, PLAYER))
                 .hasStatus(404);
         assertThat(signUp(PLAYER)).hasStatusOk();
@@ -180,23 +174,15 @@ class SignUpsIT {
         assertThat(send(HttpMethod.PUT, ORG + "/admin/seasons/2/signup", "{\"open\": false}", ADMIN))
                 .hasStatusOk()
                 .bodyJson()
-                .isLenientlyEqualTo("{\"open\": false, \"takesSignUps\": false}");
+                .isLenientlyEqualTo("{\"open\": false}");
+        assertThat(send(HttpMethod.GET, ORG + "/me/seasons", null, PLAYER))
+                .bodyJson()
+                .isLenientlyEqualTo("{\"seasons\": [{\"takesSignUps\": false}]}");
         assertThat(signUp(PLAYER)).hasStatus(409);
 
-        String yesterday = today().minusDays(1).toString();
-        send(
-                HttpMethod.PUT,
-                ORG + "/admin/seasons/2/signup",
-                "{\"open\": true, \"closesOn\": \"" + yesterday + "\"}",
-                ADMIN);
-        assertThat(signUp(PLAYER)).hasStatus(409);
+        assertThat(send(HttpMethod.POST, SIGN_UPS + "/" + wren, null, ADMIN)).hasStatusOk();
 
-        String todayToo = today().toString();
-        send(
-                HttpMethod.PUT,
-                ORG + "/admin/seasons/2/signup",
-                "{\"open\": true, \"closesOn\": \"" + todayToo + "\"}",
-                ADMIN);
+        send(HttpMethod.PUT, ORG + "/admin/seasons/2/signup", "{\"open\": true}", ADMIN);
         assertThat(signUp(PLAYER)).hasStatusOk();
 
         assertThat(send(HttpMethod.PUT, ORG + "/admin/seasons/1/signup", "{\"open\": true}", ADMIN))
@@ -204,14 +190,13 @@ class SignUpsIT {
     }
 
     @Test
-    void adminsSignUpPlayersWithoutAnAccountAndTakePeopleOff() {
+    void adminsSignUpPlayersWithoutAnAccountAndWithdrawPeople() {
         assertThat(send(HttpMethod.POST, SIGN_UPS + "/" + wren, null, ADMIN))
                 .hasStatusOk()
                 .bodyJson()
                 .isLenientlyEqualTo("""
                         {"number": 2, "open": true, "registrations": [
-                          {"riotId": "Wren#EUW", "account": false, "status": "REGISTERED",
-                           "byAdmin": true, "addedBy": "Admin"}]}""");
+                          {"riotId": "Wren#EUW", "account": false, "byAdmin": true, "addedBy": "Admin"}]}""");
         assertThat(send(HttpMethod.POST, SIGN_UPS + "/" + UUID.randomUUID(), null, ADMIN))
                 .hasStatus(404);
 
@@ -228,16 +213,18 @@ class SignUpsIT {
         assertThat(send(HttpMethod.DELETE, SIGN_UPS + "/" + moth, null, ADMIN))
                 .hasStatusOk()
                 .bodyJson()
-                .isLenientlyEqualTo("""
-                        {"registrations": [{"riotId": "Wren#EUW", "status": "REGISTERED"},
-                                           {"riotId": "Moth#EUW", "account": true, "status": "REMOVED"}]}""");
+                .extractingPath("$.registrations[*].riotId")
+                .isEqualTo(List.of("Wren#EUW"));
         assertThat(send(HttpMethod.DELETE, SIGN_UPS + "/" + moth, null, ADMIN)).hasStatus(404);
-        assertThat(signUp(PLAYER)).hasStatus(409);
-
-        assertThat(send(HttpMethod.POST, SIGN_UPS + "/" + moth, null, ADMIN)).hasStatusOk();
         assertThat(send(HttpMethod.GET, ORG + "/me/seasons", null, PLAYER))
                 .bodyJson()
-                .isLenientlyEqualTo("{\"seasons\": [{\"status\": \"REGISTERED\"}]}");
+                .isLenientlyEqualTo("{\"seasons\": [{\"signedUp\": false}]}");
+
+        assertThat(signUp(PLAYER)).hasStatusOk();
+        assertThat(send(HttpMethod.GET, SIGN_UPS, null, ADMIN))
+                .bodyJson()
+                .extractingPath("$.registrations[*].riotId")
+                .isEqualTo(List.of("Wren#EUW", "Moth#EUW"));
     }
 
     @Test
