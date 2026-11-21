@@ -22,6 +22,7 @@ import type { AdminPlayer } from "../api";
 import type { GameScores, PreviousRoster, Problem, Row } from "./scores-form";
 import {
   emptyRow,
+  isWhole,
   linesOf,
   parseStat,
   problemOf,
@@ -505,10 +506,15 @@ export class ScoresAdminPage {
       }
 
       default: {
-        return this.#transloco.translate("adminScores.invalid", {
-          row: problem.row,
-          stat: this.#transloco.translate(`stats.long.${problem.stat}`),
-        });
+        return this.#transloco.translate(
+          isWhole(problem.stat)
+            ? "adminScores.notWhole"
+            : "adminScores.invalid",
+          {
+            row: problem.row,
+            stat: this.#transloco.translate(`stats.long.${problem.stat}`),
+          }
+        );
       }
     }
   }

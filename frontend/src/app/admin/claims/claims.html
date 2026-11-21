@@ -60,11 +60,12 @@
         </div>
       </div>
       <div class="wants">
-        <span class="label">{{ t("adminClaims.wantsToBe") }}</span>
+        <span class="label">{{ t(claimLabels[row.claim.status]) }}</span>
         <strong class="player">{{ player.name }}</strong>
         <span class="muted small">
-          {{ row.player.riotId }}@if (row.player.rank) { · {{ row.player.rank }}
-          } · {{ t(language.plural("players.games", row.player.games), { count:
+          {{ row.player.riotId }}@if (row.player.rank) { · {{
+          language.rank(row.player.rank) }} } · {{
+          t(language.plural("players.games", row.player.games), { count:
           row.player.games }) }}
         </span>
         @if (row.competing > 1 && tab() === "PENDING") {

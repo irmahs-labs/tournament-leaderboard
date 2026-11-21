@@ -1,6 +1,14 @@
-import { booleanAttribute, Component, computed, input } from "@angular/core";
+import {
+  booleanAttribute,
+  Component,
+  computed,
+  inject,
+  input,
+} from "@angular/core";
+import { TranslocoDirective } from "@jsverse/transloco";
 
 import { rankText } from "./colour";
+import { LanguageService } from "./language";
 
 /** A player's Valorant rank, in the rank's colour made readable for the theme. */
 @Component({
@@ -9,6 +17,7 @@ import { rankText } from "./colour";
     "[style.--rank-dark]": "colours()?.dark",
     "[style.--rank-light]": "colours()?.light",
   },
+  imports: [TranslocoDirective],
   selector: "app-rank-pill",
   styles: `
     :host {
@@ -34,7 +43,10 @@ import { rankText } from "./colour";
       text-align: center;
     }
   `,
-  template: "{{ name() }}",
+  // Inside *transloco so the name follows a change of language.
+  template: `<ng-container *transloco="let t">{{
+    language.rank(name())
+  }}</ng-container>`,
 })
 export class RankPill {
   readonly name = input.required<string>();
@@ -46,4 +58,5 @@ export class RankPill {
   readonly fixed = input(false, { transform: booleanAttribute });
 
   protected readonly colours = computed(() => rankText(this.color()));
+  protected readonly language = inject(LanguageService);
 }

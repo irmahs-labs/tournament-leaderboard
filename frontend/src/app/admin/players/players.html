@@ -53,7 +53,7 @@
         <select name="rank">
           <option value="">{{ t("adminPlayers.unranked") }}</option>
           @for (rank of ranks(); track rank.id) {
-          <option [value]="rank.id">{{ rank.name }}</option>
+          <option [value]="rank.id">{{ language.rank(rank.name) }}</option>
           }
         </select>
       </label>
@@ -156,7 +156,7 @@
                   [value]="option.id"
                   [selected]="option.id === player.rank?.id"
                 >
-                  {{ option.name }}
+                  {{ language.rank(option.name) }}
                 </option>
                 }
               </select>

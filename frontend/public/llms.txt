@@ -15,6 +15,8 @@ Valorant and Riot Games are trademarks of Riot Games, Inc.; this site isn't endo
 - Season summary: `/api/orgs/{slug}/seasons/{n}/summary`, matches and games played, players, next match
 - Scoring rules: `/api/orgs/{slug}/seasons/{n}/rules`, points per stat, per win and per bonus
 - Matches: `/api/orgs/{slug}/seasons/{n}/matches` and `/api/orgs/{slug}/seasons/{n}/matches/{m}`
+- [Players](/api/orgs/alsace-arena/players): every player's Riot ID and other names
+- A player's season: `/api/orgs/{slug}/seasons/{n}/players/{id}`, their standing and match by match
 - [Ranks](/api/ranks): the Valorant ranks and their colours
 
 Errors are JSON problem details (RFC 9457).
@@ -23,6 +25,7 @@ Errors are JSON problem details (RFC 9457).
 
 - [Leaderboard](/org/alsace-arena): the season's podium, numbers, standings and scoring rules
 - [Matches](/org/alsace-arena/matches)
+- [Players](/org/alsace-arena/players): a card per player, and each player's page
 - [Legal notice](/legal), [Privacy policy](/privacy), [Cookie policy](/cookies), [Terms of use](/terms)
 
 ## Source

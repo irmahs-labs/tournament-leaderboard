@@ -10,6 +10,7 @@ import { firstValueFrom } from "rxjs";
 
 import { CurrentSeason } from "../../results/current-season";
 import { splitRiotId } from "../../results/stats";
+import { LanguageService } from "../../shared/language";
 import { RankPill } from "../../shared/rank-pill";
 import type { AdminPlayer, Alias, PlayerInput, RankOption } from "../api";
 
@@ -92,6 +93,7 @@ interface Outcome {
 })
 export class PlayersAdminPage {
   protected readonly current = inject(CurrentSeason);
+  protected readonly language = inject(LanguageService);
 
   protected readonly query = signal("");
 

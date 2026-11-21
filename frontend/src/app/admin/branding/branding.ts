@@ -241,6 +241,9 @@ export class BrandingAdminPage {
     const fields = this.#fields(new FormData(form));
     const problem = problemOf(fields);
 
+    // One message at a time: the logo's last one goes once the form is saved.
+    this.logoAction.outcome.set(null);
+
     if (!api) {
       return;
     }
@@ -270,6 +273,7 @@ export class BrandingAdminPage {
     const api = this.#api();
 
     field.value = "";
+    this.action.outcome.set(null);
 
     if (!file || !api) {
       return;
@@ -300,6 +304,7 @@ export class BrandingAdminPage {
 
   protected async removeLogo(): Promise<void> {
     const api = this.#api();
+    this.action.outcome.set(null);
 
     if (!api) {
       return;

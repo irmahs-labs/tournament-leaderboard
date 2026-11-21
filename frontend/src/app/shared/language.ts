@@ -36,9 +36,34 @@ export const formatNumber = (
         minimumFractionDigits: decimals,
       }).format(value);
 
+/** Valorant's tiers as the French game names them; the others keep their English name. */
+const FRENCH_TIERS = {
+  Diamond: "Diamant",
+  Gold: "Or",
+  Immortal: "Immortel",
+  Iron: "Fer",
+  Platinum: "Platine",
+  Silver: "Argent",
+} satisfies Record<string, string>;
+
+/** A Valorant rank's name as the game shows it in this language: "Immortal 1" is "Immortel 1". */
+export const rankIn = (name: string, lang: Language): string => {
+  if (lang !== "fr") {
+    return name;
+  }
+
+  const [tier = "", ...rest] = name.split(" ");
+
+  const french = Object.entries(FRENCH_TIERS).find(
+    ([english]) => english === tier
+  )?.[1];
+
+  return [french ?? tier, ...rest].join(" ");
+};
+
 /**
  * English or French. A visitor's own pick wins; otherwise each organisation's default language
- * applies. Also formats numbers, dates and plurals in the language on screen.
+ * applies. Also formats numbers, dates, plurals and rank names in the language on screen.
  */
 @Injectable({ providedIn: "root" })
 export class LanguageService {
@@ -113,6 +138,11 @@ export class LanguageService {
       timeZone: "UTC",
       year: "numeric",
     }).format(new Date(`${date}T00:00:00Z`));
+  }
+
+  /** A Valorant rank's name as the game shows it in the language on screen: "Immortel 1" in French. */
+  rank(name: string): string {
+    return rankIn(name, this.active);
   }
 
   /** The key for a count in the language's plural form, such as `leaderboard.wins.one`. */

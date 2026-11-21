@@ -150,7 +150,7 @@
         <div class="choice-text">
           <strong>{{ id.name }}<span class="muted"> {{ id.tag }}</span></strong>
           <span class="muted small">
-            @if (player.rank) { {{ player.rank }} · } {{
+            @if (player.rank) { {{ language.rank(player.rank) }} · } {{
             t(language.plural("players.games", player.games), { count:
             player.games }) }} @if (player.discordUsername) { · Discord {{
             player.discordUsername }} } @if (player.aliases.length) { · {{
@@ -210,7 +210,7 @@
           [attr.maxlength]="maxName"
         />
       </label>
-      <button type="submit" class="button start" [disabled]="action.busy()">
+      <button type="submit" class="button" [disabled]="action.busy()">
         {{ t("claim.create") }}
       </button>
     </form>

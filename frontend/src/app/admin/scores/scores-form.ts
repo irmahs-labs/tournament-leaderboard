@@ -59,6 +59,10 @@ const PRECISION: Partial<Record<Stat, Precision>> = {
   KAST_PCT: "percent",
 };
 
+/** Whether a stat takes only whole numbers, such as kills or clutches. */
+export const isWhole = (stat: Stat): boolean =>
+  (PRECISION[stat] ?? "whole") === "whole";
+
 /** The API's limits: smallint for counts, numeric(5,1) for averages. */
 const MAX_WHOLE = 32_767;
 const MAX_TENTHS = 9999.9;

@@ -44,7 +44,7 @@
       <select #rank (change)="tier.set(rank.value)">
         <option value="">{{ t("players.allRanks") }}</option>
         @for (each of tiers; track each) {
-        <option [value]="each">{{ each }}</option>
+        <option [value]="each">{{ language.rank(each) }}</option>
         }
       </select>
     </label>

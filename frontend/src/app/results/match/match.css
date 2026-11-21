@@ -50,6 +50,8 @@
 }
 
 .mvp {
+  /* The name's size follows the tile's width. */
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -66,7 +68,11 @@
 .mvp-name {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(40px, 5vw, 56px);
+  /* Big, but small enough that the whole name fits on one line, up to a point. */
+  font-size: max(
+    24px,
+    min(clamp(40px, 5vw, 56px), calc(100cqi / (var(--chars, 8) * 0.56)))
+  );
   line-height: 0.95;
   text-transform: uppercase;
   letter-spacing: 0.02em;

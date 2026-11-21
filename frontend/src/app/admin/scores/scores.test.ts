@@ -300,7 +300,7 @@ describe("Enter scores", () => {
     harness.detectChanges();
 
     expect(text(page.querySelector("[role=status]"))).toBe(
-      "Line 2: First bloods isn’t a valid number."
+      "Line 2: First bloods is a whole number, such as 3."
     );
   });
 
