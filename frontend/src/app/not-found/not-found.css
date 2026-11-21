@@ -30,25 +30,24 @@
   font-size: 18px;
 }
 
-.slab {
-  flex: 1 1 240px;
-  height: 300px;
-  position: relative;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  clip-path: polygon(
-    0 0,
-    100% 0,
-    100% calc(100% - 48px),
-    calc(100% - 48px) 100%,
-    0 100%
-  );
+.mark {
+  flex: 1 1 200px;
+  max-width: 260px;
+  max-height: 260px;
+  margin-inline: auto;
 }
 
-.slab span {
-  position: absolute;
-  inset: 0 auto auto 0;
-  width: 38%;
-  height: 8px;
-  background: var(--accent);
+.mark .badge {
+  stroke: var(--accent);
+  fill: var(--surface);
+}
+
+.mark .up {
+  stroke: var(--text);
+  stroke-linecap: square;
+}
+
+.mark .below {
+  stroke: var(--accent);
+  opacity: 0.55;
 }

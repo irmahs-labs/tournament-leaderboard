@@ -17,7 +17,18 @@ import { TranslocoDirective } from "@jsverse/transloco";
           <a class="button" routerLink="/">{{ t("notFound.home") }}</a>
         </div>
       </div>
-      <div class="slab" aria-hidden="true"><span></span></div>
+      <!-- The site's rank-up mark, as in the header, drawn large. -->
+      <svg
+        class="mark"
+        viewBox="0 0 40 40"
+        fill="none"
+        stroke-width="2"
+        aria-hidden="true"
+      >
+        <path class="badge" d="M20 2l16 9v18l-16 9-16-9V11z" />
+        <path class="up" d="M12 24l8-8 8 8" stroke-width="2.5" />
+        <path class="up below" d="M12 31l8-8 8 8" stroke-width="2.5" />
+      </svg>
     </ng-container>
   `,
 })
