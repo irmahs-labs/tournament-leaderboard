@@ -43,4 +43,14 @@ public interface OrganizationMemberRepository extends JpaRepository<Organization
             order by o.name
             """)
     List<Membership> findMemberships(UUID userId);
+
+    /** An account's memberships of organisations the platform admin suspended, by name. */
+    @Query("""
+            select new dev.irmahs.leaderboard.members.Membership(o.slug, o.name, m.role, m.owner, m.playerId)
+            from OrganizationMember m, Organization o
+            where o.id = m.organizationId and m.userId = :userId
+            and o.status = dev.irmahs.leaderboard.organizations.OrganizationStatus.SUSPENDED
+            order by o.name
+            """)
+    List<Membership> findSuspendedMemberships(UUID userId);
 }

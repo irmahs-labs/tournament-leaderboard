@@ -143,7 +143,9 @@
   "notFound": {
     "body": "Cette page n'existe pas, ou l'organisation à laquelle elle appartient n'est plus disponible. Vérifiez l'adresse, ou repartez de l'accueil.",
     "home": "Aller à l'accueil",
-    "title": "Page introuvable"
+    "title": "Page introuvable",
+    "suspendedTitle": "{{org}} est suspendue",
+    "suspendedBody": "L'admin de la plateforme a suspendu {{org}} : ses pages sont masquées pour l'instant. Rien n'est supprimé : quand elle sera réactivée, tout reviendra. Une question ? Écrivez à tournament-leaderboard@irmahs.dev."
   },
   "roles": {
     "ADMIN": "Admin",
@@ -705,7 +707,9 @@
     "identitySave": "Enregistrer",
     "identitySaved": "Votre Riot ID et votre Discord sont enregistrés partout.",
     "identityInvalid": "Vérifiez votre Riot ID, puis réessayez.",
-    "identityTaken": "Un autre joueur de l'une de vos organisations a déjà ce Riot ID."
+    "identityTaken": "Un autre joueur de l'une de vos organisations a déjà ce Riot ID.",
+    "suspended": "Suspendue",
+    "suspendedNote": "Suspendue par l'admin de la plateforme : ses pages sont masquées jusqu'à sa réactivation."
   },
   "players": {
     "title": "Joueurs",
@@ -736,7 +740,8 @@
     "noMatch": "Aucun joueur ne correspond.",
     "failed": "Les joueurs n'ont pas pu être chargés. Réessayez dans un instant.",
     "loading": "Chargement des joueurs…",
-    "claimLink": "L'un d'eux, c'est vous ? Revendiquez votre profil"
+    "claimLink": "L'un d'eux, c'est vous ? Revendiquez votre profil",
+    "publicSearchHint": "Riot ID ou alias"
   },
   "player": {
     "allPlayers": "Tous les joueurs",

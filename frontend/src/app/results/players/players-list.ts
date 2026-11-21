@@ -1,9 +1,8 @@
 import type { PublicPlayer, Standing } from "../api";
 
-/** A player of the season: their standing, with their Discord and other names. */
+/** A player of the season: their standing, with their other names. */
 export interface PlayerCard {
   standing: Standing;
-  discordUsername: string | null;
   aliases: string[];
 }
 
@@ -58,15 +57,14 @@ export const cardsOf = (
 
   return standings.map((standing) => ({
     aliases: byId.get(standing.playerId)?.aliases ?? [],
-    discordUsername: byId.get(standing.playerId)?.discordUsername ?? null,
     standing,
   }));
 };
 
-/** Whether the search is in their Riot ID, Discord or an alias, ignoring case. */
+/** Whether the search is in their Riot ID or an alias, ignoring case. */
 const matches = (card: PlayerCard, search: string): boolean =>
-  [card.standing.riotId, card.discordUsername ?? "", ...card.aliases].some(
-    (name) => name.toLowerCase().includes(search)
+  [card.standing.riotId, ...card.aliases].some((name) =>
+    name.toLowerCase().includes(search)
   );
 
 const SORTS: Record<PlayerSort, (a: PlayerCard, b: PlayerCard) => number> = {

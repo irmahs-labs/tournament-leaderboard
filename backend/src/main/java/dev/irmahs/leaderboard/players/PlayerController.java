@@ -8,7 +8,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-/** The organisation's players for the public Players page: who they are and their other names. */
+/**
+ * The organisation's players for the public Players page: who they are and their other names.
+ * Discord usernames stay with the organisation's admins, as the privacy policy says.
+ */
 @RestController
 public class PlayerController {
 
@@ -28,7 +31,6 @@ public class PlayerController {
                 .map(player -> new PublicPlayer(
                         player.getId(),
                         player.getRiotId(),
-                        player.getDiscordUsername(),
                         player.getAliases().stream().map(PlayerAlias::getAlias).toList()))
                 .toList();
     }
@@ -36,5 +38,5 @@ public class PlayerController {
     /**
      * @param aliases their other names: previous Riot IDs and nicknames
      */
-    public record PublicPlayer(UUID id, String riotId, String discordUsername, List<String> aliases) {}
+    public record PublicPlayer(UUID id, String riotId, List<String> aliases) {}
 }

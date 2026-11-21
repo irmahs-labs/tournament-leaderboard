@@ -192,7 +192,6 @@ public class SeasonResultsService {
                 new PlayerRef(
                         player.getId(),
                         player.getRiotId(),
-                        player.getDiscordUsername(),
                         player.getAliases().stream().map(PlayerAlias::getAlias).toList(),
                         RankRef.of(player.getCurrentRank())),
                 mine,
@@ -379,8 +378,8 @@ public class SeasonResultsService {
      *
      * @param aliases their other names: previous Riot IDs and nicknames
      */
-    public record PlayerRef(
-            UUID id, String riotId, String discordUsername, List<String> aliases, RankRef currentRank) {}
+    /** A player as the public pages show them: never their Discord, which only admins see. */
+    public record PlayerRef(UUID id, String riotId, List<String> aliases, RankRef currentRank) {}
 
     /** The player just ahead, and how many points they lead by. */
     public record Ahead(String riotId, BigDecimal points) {}

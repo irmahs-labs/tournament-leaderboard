@@ -145,6 +145,11 @@ describe("the app's pages", () => {
         .expectOne("/api/orgs/nowhere")
         .flush(null, { status: 404, statusText: "Not Found" });
     });
+    await vi.waitFor(() => {
+      http
+        .expectOne("/api/me")
+        .flush(null, { status: 401, statusText: "Unauthorized" });
+    });
     await navigation;
     harness.detectChanges();
 
@@ -153,6 +158,38 @@ describe("the app's pages", () => {
     expect(text(page.querySelector("h1"))).toBe("Page not found");
     expect(text(page.querySelector("header .name"))).toBe(
       "Tournament Leaderboard"
+    );
+  });
+
+  it("tells a member their organisation is suspended", async () => {
+    const loading = TestBed.inject(SessionService).load();
+
+    http.expectOne("/api/me").flush({
+      ...ME,
+      suspended: [
+        {
+          name: "Closed Bar",
+          owner: false,
+          playerId: null,
+          role: "PLAYER",
+          slug: "closed-bar",
+        },
+      ],
+    });
+    await loading;
+    const harness = await RouterTestingHarness.create();
+    const navigation = harness.navigateByUrl("/org/closed-bar");
+
+    await vi.waitFor(() => {
+      http
+        .expectOne("/api/orgs/closed-bar")
+        .flush(null, { status: 404, statusText: "Not Found" });
+    });
+    await navigation;
+    harness.detectChanges();
+
+    expect(text(rendered(harness).querySelector("h1"))).toBe(
+      "Closed Bar is suspended"
     );
   });
 

@@ -18,13 +18,8 @@ import type { PlayerCard } from "./players-list";
 import { cardsOf, shownCards, tierOf } from "./players-list";
 
 const PLAYERS: PublicPlayer[] = [
-  {
-    aliases: ["kes"],
-    discordUsername: "kestrel.gg",
-    id: "kestrel",
-    riotId: "Kestrel#EUW",
-  },
-  { aliases: [], discordUsername: null, id: "wren", riotId: "Wren#EUW" },
+  { aliases: ["kes"], id: "kestrel", riotId: "Kestrel#EUW" },
+  { aliases: [], id: "wren", riotId: "Wren#EUW" },
 ];
 
 const CARDS: PlayerCard[] = cardsOf(LEADERBOARD.standings, PLAYERS);
@@ -36,18 +31,15 @@ const names = (search: string): string[] =>
   );
 
 describe("the Players list", () => {
-  it("adds each player's Discord and aliases to their standing", () => {
-    expect(CARDS[0]).toMatchObject({
-      aliases: ["kes"],
-      discordUsername: "kestrel.gg",
-    });
-    expect(CARDS[1]?.discordUsername).toBeNull();
+  it("adds each player's aliases to their standing", () => {
+    expect(CARDS[0]).toMatchObject({ aliases: ["kes"] });
+    expect(CARDS[1]?.aliases).toStrictEqual([]);
   });
 
-  it("finds players by Riot ID, Discord or alias", () => {
+  it("finds players by Riot ID or alias, never by Discord", () => {
     expect(names("")).toStrictEqual(["Kestrel#EUW", "Wren#EUW"]);
     expect(names("WREN")).toStrictEqual(["Wren#EUW"]);
-    expect(names("kestrel.gg")).toStrictEqual(["Kestrel#EUW"]);
+    expect(names("kestrel.gg")).toStrictEqual([]);
     expect(names("kes")).toStrictEqual(["Kestrel#EUW"]);
   });
 
@@ -98,9 +90,7 @@ describe("the Players page", () => {
       "Kestrel #EUW",
       "Wren #EUW",
     ]);
-    expect(texts(page, ".card .names")).toStrictEqual([
-      "Discord kestrel.gg · also kes",
-    ]);
+    expect(texts(page, ".card .names")).toStrictEqual(["also kes"]);
     expect(page.querySelector(".card a")?.getAttribute("href")).toBe(
       "/org/alsace-arena/players/kestrel"
     );

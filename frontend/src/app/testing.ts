@@ -60,6 +60,7 @@ export const ME: Me = {
   ],
   platformAdmin: false,
   riotId: null,
+  suspended: [],
 };
 
 const season = (number: number, finished: boolean): Season => ({

@@ -29,6 +29,8 @@ export interface Me {
   riotId: string | null;
   discordUsername: string | null;
   memberships: Membership[];
+  /** Organisations they belong to that the platform admin suspended: hidden, but members are told. */
+  suspended: Membership[];
 }
 
 const RETURN_KEY = "signInReturnTo";

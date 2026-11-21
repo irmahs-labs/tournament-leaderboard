@@ -132,8 +132,23 @@
       </li>
       }
     </ul>
-    } @else {
+    } @else if (!me.suspended.length) {
     <p class="muted">{{ t("signIn.noOrganisations") }}</p>
+    } @if (me.suspended.length) {
+    <ul class="orgs">
+      @for (membership of me.suspended; track membership.slug) {
+      <li>
+        <span class="logo" aria-hidden="true"
+          >{{ initials(membership.name) }}</span
+        >
+        <div class="org-text">
+          <strong>{{ membership.name }}</strong>
+          <span class="muted small">{{ t("account.suspendedNote") }}</span>
+        </div>
+        <span class="pill suspended">{{ t("account.suspended") }}</span>
+      </li>
+      }
+    </ul>
     }
   </section>
 

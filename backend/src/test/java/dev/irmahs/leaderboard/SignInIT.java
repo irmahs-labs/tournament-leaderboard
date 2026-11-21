@@ -151,7 +151,9 @@ class SignInIT {
                         {"email": "owner@example.com", "displayName": "Name of google-1", "platformAdmin": false,
                          "riotId": null, "discordUsername": null,
                          "memberships": [{"slug": "alsace-arena", "name": "Alsace Arena", "role": "ADMIN", "owner": true,
-                                          "playerId": null}]}""");
+                                          "playerId": null}],
+                         "suspended": [{"slug": "closed-bar", "name": "Closed Bar", "role": "ADMIN", "owner": false,
+                                        "playerId": null}]}""");
     }
 
     @Test

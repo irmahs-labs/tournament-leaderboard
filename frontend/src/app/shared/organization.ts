@@ -3,7 +3,9 @@ import { Injectable, inject } from "@angular/core";
 import type { ResolveFn } from "@angular/router";
 import { RedirectCommand, Router } from "@angular/router";
 import type { Observable } from "rxjs";
-import { catchError, of } from "rxjs";
+import { catchError, from, map } from "rxjs";
+
+import { SessionService } from "./session";
 
 /** The sites an organisation can link to, in the order the footer shows them. */
 export const SOCIAL_SITES = [
@@ -49,15 +51,28 @@ export class OrganizationService {
 /** Loads the organisation an address names; an unknown or suspended one shows Not found. */
 export const organizationResolver: ResolveFn<Organization> = (route) => {
   const router = inject(Router);
+  const session = inject(SessionService);
+  const slug = route.paramMap.get("slug") ?? "";
 
   return inject(OrganizationService)
-    .load(route.paramMap.get("slug") ?? "")
+    .load(slug)
     .pipe(
       catchError(() =>
-        of(
-          new RedirectCommand(router.parseUrl("/not-found"), {
-            skipLocationChange: true,
-          })
+        // A member of a suspended organisation is told so on the Not found page.
+        from(session.known()).pipe(
+          map(
+            (me) =>
+              new RedirectCommand(
+                router.createUrlTree(["/not-found"], {
+                  queryParams: me?.suspended.some(
+                    (membership) => membership.slug === slug
+                  )
+                    ? { suspended: slug }
+                    : {},
+                }),
+                { skipLocationChange: true }
+              )
+          )
         )
       )
     );

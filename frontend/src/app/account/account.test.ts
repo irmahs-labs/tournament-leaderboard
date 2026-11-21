@@ -84,6 +84,21 @@ describe("My account", () => {
     expect(page.querySelector("input[name=confirm]")).toBeNull();
   });
 
+  it("says which organisations are suspended, and their owner still can't delete", async () => {
+    await open({
+      ...ME,
+      memberships: [],
+      suspended: [
+        { ...ME.memberships[0], name: "Closed Bar", slug: "closed-bar" },
+      ],
+    });
+
+    expect(texts(page, ".orgs strong")).toStrictEqual(["Closed Bar"]);
+    expect(text(page.querySelector(".orgs .pill"))).toBe("Suspended");
+    expect(page.querySelector(".orgs a")).toBeNull();
+    expect(page.querySelector("input[name=confirm]")).toBeNull();
+  });
+
   it("links to the player's profile, or to claiming it", async () => {
     await open({
       ...ME,

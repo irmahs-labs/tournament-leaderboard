@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-20, with phase 10's first part: season sign-ups (My seasons, the admins' Season sign-ups screen) and a member creating their own player profile.
+Last updated: 2026-11-21, with fixes from the production test: Discord usernames only for admins, unknown addresses on the Not found page, and members told when their organisation is suspended.
 
 ## System
 
@@ -81,12 +81,12 @@ flowchart LR
 
 | Package | Holds |
 |---|---|
-| `accounts` | `AppUser`, `GoogleProfile`, `AccountService` (sign-in, initial memberships, platform admins, linking a player whose expected email matches, deleting an account unless it owns an organisation), `AccessProperties`, `IdentityService` (the account's Riot ID and Discord: changed on every linked profile at once, given to a profile when it's linked, taken from the first one), `MeController` (`GET` and `DELETE /api/me`, signing out after a deletion; `PUT /api/me/identity`) |
+| `accounts` | `AppUser`, `GoogleProfile`, `AccountService` (sign-in, initial memberships, platform admins, linking a player whose expected email matches, deleting an account unless it owns an organisation), `AccessProperties`, `IdentityService` (the account's Riot ID and Discord: changed on every linked profile at once, given to a profile when it's linked, taken from the first one), `MeController` (`GET` and `DELETE /api/me`, signing out after a deletion; `PUT /api/me/identity`; `/api/me` lists active memberships and, apart, suspended ones) |
 | `members` | `OrganizationMember` (role ADMIN or PLAYER, one owner), `Membership` |
 | `organizations` | `Organization` (with its `SocialLinks`), `OrganizationService` (`requireActive`, `recordActivity`), `OrganizationView`, `BrandingService` (names, language, accent, places per match, links checked by `SocialSite`; the logo, told apart by its bytes), `OrganizationLogo`, the public org and logo endpoints, `BrandingController` |
 | `security` | `SecurityConfig` (CSRF for SPAs, 401 on `/api/**`, Google sign-in ending on the Angular `/sign-in`), `GoogleUserService` (verified email only), `OrgAccess` (`@orgAccess.isAdmin`; `/api/orgs/*/me/**` needs sign-in, even to read), `SessionConfig` (sessions in the database through Spring Session JDBC, so deploys don't sign anyone out; an attribute a new version can't read signs that person out instead of failing) |
 | `tenancy` | `OrganizationScopeFilter` + `OrganizationScopedTransactionManager`: sets `app.organization_id` per transaction for row-level security |
-| `players` | `Player`, `PlayerAlias`, `AliasKind`, `PlayerAdminService` (search, add, edit, a Google email expected in advance seen by admins only; `rerank` for a linked player; a linked player's Riot ID and Discord are refused to admins (409) and the list marks them `linked`; rename keeps the old Riot ID as an alias), `PlayerController` (the public list: Riot ID, Discord, aliases) |
+| `players` | `Player`, `PlayerAlias`, `AliasKind`, `PlayerAdminService` (search, add, edit, a Google email expected in advance seen by admins only; `rerank` for a linked player; a linked player's Riot ID and Discord are refused to admins (409) and the list marks them `linked`; rename keeps the old Riot ID as an alias), `PlayerController` (the public list: Riot ID and aliases; Discord only for admins and members claiming) |
 | `ranks` | `Rank`, public rank list |
 | `seasons` | `Season` (rules, bonuses, shape, KDA points), `Stat` (`isCountable`; `PLACE` and `HONOURS` among them), `StatRule` (recorded, points per unit), `SeasonBonus`, `BonusAward` (HIGHEST, LOWEST, MANUAL, TOP_WINNER, TOP_LOSER, AT_LEAST), `PlatformDefaults`, `Points` (points as the API writes them), `RulesSnapshot` (a season's rules on their own), `NextSeasonRules` (rules kept for the next season, as JSON) and `NextSeasonRulesController`, `SeasonService` (public), `SeasonAdminService` |
 | `matches` | `Match`, `Game` and their repositories |
@@ -98,7 +98,7 @@ flowchart LR
 | `signups` | `SeasonRegistration` (season_registrations: REGISTERED or WITHDRAWN), `SignUpService` (a linked player signs up while `Season.takesSignUps`, and withdraws; admins open or close sign-ups, sign anyone up at any time before the season is over, players without an account too, and withdraw people), `SignUpController` |
 | `team` | `Invite` (organization_invites; only a hash of the code), `InviteCodes` (8 characters without look-alikes, SHA-256), `TeamService` (the Members screen: roles, removal, ownership, admin invites), `JoinService` (what a code is for; using it, its row locked), `MembershipController` (leaving an organisation, never as its owner), `CodeLookupLimit` (10 lookups a minute per address, in memory) |
 | `presence` | `OnlineCount` (open pages, in memory only; changes sent at most once a second, a heartbeat every 25 s), `GET /api/online` as server-sent events |
-| `system` | `/api/version`; `SpaController` forwards the Angular router's addresses (`/org/**` (the claim page included), `/not-found`, `/platform`, `/account`, `/join`, `/join/*`, `/sign-in`, `/legal`, `/privacy`, `/cookies`, `/terms`) to `index.html` |
+| `system` | `/api/version`; `UnknownPageResolver` (a browser on an address nobody serves gets the app's Not found page with a 404; the API and files keep JSON problems); `SpaController` forwards the Angular router's addresses (`/org/**` (the claim page included), `/not-found`, `/platform`, `/account`, `/join`, `/join/*`, `/sign-in`, `/legal`, `/privacy`, `/cookies`, `/terms`) to `index.html` |
 
 ## API
 
@@ -223,7 +223,7 @@ flowchart TD
     acct -->|"PUT /api/me/identity, DELETE /api/me, DELETE …/membership"| accountApi["/api/me, /api/orgs/{slug}/membership"]
     platform --> si[SignInPage<br/>Google, your organisations, sign out, create one]
     platform --> legal[LegalPage<br/>legal notice, privacy, cookies, terms]
-    platform --> nf[NotFoundPage]
+    platform --> nf[NotFoundPage<br/>or, for its members, 'this organisation is suspended']
     platform --> join[JoinPage /join/:code<br/>what the code is for, sign in with the invited account, accept; or type a code]
     shell --> header[SiteHeader<br/>skip link, logo, nav keeping ?season= (My seasons for members; Scores, Players, Seasons, Scoring, Members and Branding on admin pages; a Site | Admin switch for admins), online count, season, one EN / FR button, a light/dark pill switch, Sign in or My account]
     shell --> footer[SiteFooter<br/>org name and its social links; credit, legal pages, GitHub and Contact on three centred lines]
