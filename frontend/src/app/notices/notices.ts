@@ -74,7 +74,11 @@ export class NoticesPage implements OnInit {
 
   readonly #transloco = inject(TranslocoService);
 
-  async ngOnInit(): Promise<void> {
+  ngOnInit(): void {
+    void this.#loadAndMarkRead();
+  }
+
+  async #loadAndMarkRead(): Promise<void> {
     const loaded = await this.notices.load();
 
     if (loaded && loaded.unread > 0) {
