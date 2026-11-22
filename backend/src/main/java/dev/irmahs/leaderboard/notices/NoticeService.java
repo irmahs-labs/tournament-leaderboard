@@ -25,13 +25,11 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.context.event.EventListener;
-import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Notices in the app. Each one is created from an event, in the same transaction as the change it
@@ -65,14 +63,14 @@ public class NoticeService {
     /** The signed-in person's latest notices, and how many are unread. */
     @Transactional(readOnly = true)
     public Notices mine(String googleSub) {
-        UUID userId = requireUser(googleSub).getId();
+        UUID userId = accounts.requireUser(googleSub).getId();
         Instant now = Instant.now();
         return new Notices(store.unread(userId, now), store.shown(userId, now, SHOWN));
     }
 
     /** Marks every notice shown so far as read. */
     public void read(String googleSub) {
-        store.markRead(requireUser(googleSub).getId(), Instant.now());
+        store.markRead(accounts.requireUser(googleSub).getId(), Instant.now());
     }
 
     // Players.
@@ -210,11 +208,6 @@ public class NoticeService {
 
     private static String nameOf(AppUser user) {
         return user.getDisplayName() == null ? user.getEmail() : user.getDisplayName();
-    }
-
-    private AppUser requireUser(String googleSub) {
-        return accounts.user(googleSub)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Sign in again"));
     }
 
     /** @param unread how many shown notices aren't read yet */

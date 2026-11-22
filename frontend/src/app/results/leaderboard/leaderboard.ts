@@ -5,12 +5,13 @@ import { TranslocoDirective, TranslocoService } from "@jsverse/transloco";
 
 import { LanguageService } from "../../shared/language";
 import { RankPill } from "../../shared/rank-pill";
+import { splitRiotId } from "../../shared/riot-id";
 import { SessionService } from "../../shared/session";
 import type { Leaderboard, Rules, Summary } from "../api";
 import { CurrentSeason } from "../current-season";
 import { StandingsTable } from "../standings-table/standings-table";
 import type { FormulaTerm } from "../stats";
-import { formulaOf, splitRiotId, winnableBonuses } from "../stats";
+import { formulaOf, winnableBonuses } from "../stats";
 
 /**
  * The season leaderboard: the top three, the season's numbers, every player's standing, and how

@@ -5,6 +5,7 @@ import dev.irmahs.leaderboard.members.MemberRole;
 import dev.irmahs.leaderboard.members.Membership;
 import dev.irmahs.leaderboard.members.OrganizationMember;
 import dev.irmahs.leaderboard.members.OrganizationMemberRepository;
+import dev.irmahs.leaderboard.organizations.Organization;
 import dev.irmahs.leaderboard.organizations.OrganizationService;
 import dev.irmahs.leaderboard.players.Player;
 import dev.irmahs.leaderboard.players.PlayerRepository;
@@ -164,6 +165,30 @@ public class AccountService {
     @Transactional(readOnly = true)
     public Optional<AppUser> user(String googleSub) {
         return users.findByGoogleSub(googleSub);
+    }
+
+    /**
+     * The signed-in person's account.
+     *
+     * @throws ResponseStatusException 401 when it no longer exists
+     */
+    @Transactional(readOnly = true)
+    public AppUser requireUser(String googleSub) {
+        return users.findByGoogleSub(googleSub)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Sign in again"));
+    }
+
+    /**
+     * The signed-in person's membership of this organisation.
+     *
+     * @throws ResponseStatusException 401 without an account, 403 when they aren't a member
+     */
+    @Transactional(readOnly = true)
+    public OrganizationMember requireMember(Organization organization, String googleSub) {
+        return members.findById(
+                        new OrganizationMember.Key(requireUser(googleSub).getId(), organization.getId()))
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.FORBIDDEN, "Join " + organization.getName() + " as a player first"));
     }
 
     /** The accounts with these ids, by id; an id with no account is left out. */

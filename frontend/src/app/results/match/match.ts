@@ -10,10 +10,10 @@ import { RouterLink } from "@angular/router";
 import { TranslocoDirective } from "@jsverse/transloco";
 
 import { LanguageService } from "../../shared/language";
+import { splitRiotId } from "../../shared/riot-id";
 import type { MatchView, Standing } from "../api";
 import { CurrentSeason } from "../current-season";
 import { StandingsTable } from "../standings-table/standings-table";
-import { splitRiotId } from "../stats";
 import { gameStandings, leadersOf } from "./match-stats";
 
 /** A positive whole number from the address, or nothing. */

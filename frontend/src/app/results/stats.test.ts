@@ -5,7 +5,6 @@ import {
   columnsFor,
   decimalsOf,
   formulaOf,
-  splitRiotId,
   valueOf,
   winnableBonuses,
 } from "./stats";
@@ -53,14 +52,6 @@ describe("stats", () => {
       "+ 10 Most first bloods",
       "+ 20 Fewest deaths",
     ]);
-  });
-
-  it("splits a Riot ID at its last #", () => {
-    expect(splitRiotId("Kestrel#EUW")).toStrictEqual({
-      name: "Kestrel",
-      tag: "#EUW",
-    });
-    expect(splitRiotId("nyxx")).toStrictEqual({ name: "nyxx", tag: "" });
   });
 });
 
