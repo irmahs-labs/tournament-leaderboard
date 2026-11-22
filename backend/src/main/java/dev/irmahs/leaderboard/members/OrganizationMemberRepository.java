@@ -1,7 +1,9 @@
 package dev.irmahs.leaderboard.members;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -24,6 +26,13 @@ public interface OrganizationMemberRepository extends JpaRepository<Organization
 
     /** The members already linked to a player. */
     List<OrganizationMember> findByOrganizationIdAndPlayerIdNotNull(UUID organizationId);
+
+    /** The organisation's players linked to an account. */
+    default Set<UUID> linkedPlayerIds(UUID organizationId) {
+        return findByOrganizationIdAndPlayerIdNotNull(organizationId).stream()
+                .map(OrganizationMember::getPlayerId)
+                .collect(Collectors.toSet());
+    }
 
     /** Someone's memberships linked to a player profile, in every organisation they're in. */
     List<OrganizationMember> findByUserIdAndPlayerIdNotNull(UUID userId);

@@ -5,10 +5,9 @@ import { TranslocoDirective } from "@jsverse/transloco";
 
 import { LanguageService } from "../../shared/language";
 import { RankPill } from "../../shared/rank-pill";
-import { RiotId } from "../../shared/riot-id";
+import { RiotId, splitRiotId } from "../../shared/riot-id";
 import type { Leaderboard, PublicPlayer } from "../api";
 import { CurrentSeason } from "../current-season";
-import { splitRiotId } from "../stats";
 import type { PlayerSort } from "./players-list";
 import { cardsOf, PLAYER_SORTS, shownCards, TIERS } from "./players-list";
 

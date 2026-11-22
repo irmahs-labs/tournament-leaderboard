@@ -6,9 +6,8 @@ import type { Observable } from "rxjs";
 import { firstValueFrom } from "rxjs";
 
 import { CurrentSeason } from "../../results/current-season";
-import { splitRiotId } from "../../results/stats";
 import { LanguageService } from "../../shared/language";
-import { RiotId } from "../../shared/riot-id";
+import { RiotId, splitRiotId } from "../../shared/riot-id";
 import { AdminAction } from "../action";
 import type { AttendanceStatus, Roster, RosterLine } from "../api";
 

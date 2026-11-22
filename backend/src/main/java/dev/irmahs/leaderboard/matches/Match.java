@@ -172,10 +172,6 @@ public class Match {
         return places;
     }
 
-    public Instant getLockedAt() {
-        return lockedAt;
-    }
-
     public MatchStatus getStatus() {
         return status;
     }

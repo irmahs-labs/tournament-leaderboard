@@ -139,8 +139,4 @@ public class Invite {
     public Instant getExpiresAt() {
         return expiresAt;
     }
-
-    public int getUseCount() {
-        return useCount;
-    }
 }

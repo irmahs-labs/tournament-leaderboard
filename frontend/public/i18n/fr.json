@@ -20,7 +20,6 @@
     }
   },
   "header": {
-    "language": "Langue",
     "signIn": "Se connecter",
     "account": "Votre compte : {{name}}",
     "season": "Saison",
@@ -272,7 +271,6 @@
     "email": "E-mail Google (facultatif)",
     "emailHint": "nom@gmail.com",
     "waitingFor": "Lié à la connexion : {{email}}",
-    "emailHelp": "La première personne à se connecter avec cet e-mail Google obtient ce profil, sans demande. Seuls les admins le voient.",
     "linked": "Lié à un compte",
     "linkedNote": "Lié à un compte : le joueur modifie son Riot ID et son Discord dans Mon compte.",
     "delete": "Supprimer",
@@ -872,7 +870,6 @@
     "save": "Enregistrer mon rang",
     "saved": "Votre rang est enregistré.",
     "riotIdHint": "Nom#TAG",
-    "aliasesHint": "Séparés par des virgules",
     "taken": "Ce Riot ID est déjà un joueur ici.",
     "invalid": "Vérifiez votre Riot ID et vos alias, puis réessayez.",
     "failed": "Ça n'a pas marché. Réessayez dans un instant.",

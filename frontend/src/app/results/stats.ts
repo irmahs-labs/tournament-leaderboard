@@ -153,5 +153,3 @@ export const formulaOf = (
     win: term.win ?? false,
   }));
 };
-
-export { splitRiotId } from "../shared/riot-id";

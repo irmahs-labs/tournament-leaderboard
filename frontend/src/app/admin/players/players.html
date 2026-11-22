@@ -106,8 +106,8 @@
           </tr>
         </thead>
         <tbody>
-          @for (player of players.value(); track player.id) { @let id =
-          splitRiotId(player.riotId); @if (editing() === player.id) {
+          @for (player of players.value(); track player.id) { @if (editing() ===
+          player.id) {
           <tr class="editing">
             <td>
               <input

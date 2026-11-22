@@ -35,7 +35,7 @@
     </thead>
     <tbody>
       @for (standing of standings(); track standing.playerId; let first =
-      $first) { @let id = splitRiotId(standing.riotId);
+      $first) {
       <tr [class.leader]="first">
         <td class="position">{{ standing.rank }}</td>
         <td>
