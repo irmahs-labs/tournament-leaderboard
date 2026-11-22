@@ -39,7 +39,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
  * Notices, on a real Postgres. Alsace Arena has Season 1 under way; its player account is linked
- * to Kestrel and signed up; Nobody is a second admin. Each test rolls back.
+ * to Kestrel; Nobody is a second admin. Each test rolls back.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -97,7 +97,6 @@ class NoticesIT {
                         INSERT INTO organization_members (user_id, organization_id, role)
                         SELECT id, :org, 'ADMIN' FROM app_users WHERE google_sub = 'google-nobody'""").param("org", alsace.getId()).update();
         em.clear();
-        send(HttpMethod.POST, ORG + "/seasons/1/registration", null, PLAYER);
     }
 
     private MvcTestResult send(HttpMethod method, String uri, String body, OidcLoginRequestPostProcessor who) {

@@ -13,8 +13,8 @@ import {
   text,
   texts,
 } from "../../testing";
-import type { AdminPlayer, Roster, RosterLine } from "../api";
-import { notOnRoster } from "./roster";
+import type { Roster, RosterLine } from "../api";
+import { availableMatching } from "./roster";
 
 const ADMIN = `/api/orgs/${ALSACE.slug}/admin`;
 const API = `${ADMIN}/matches/33`;
@@ -62,30 +62,18 @@ const ROSTER: Roster = {
   ],
 };
 
-const player = (id: string, riotId: string): AdminPlayer => ({
-  aliases: [],
-  discordUsername: null,
-  expectedEmail: null,
-  id,
-  linked: false,
-  played: false,
-  rank: null,
-  riotId,
-});
+describe("the available players", () => {
+  it("are everyone who hasn't answered, matching the search", () => {
+    const roster: Roster = {
+      ...ROSTER,
+      noAnswer: [...ROSTER.noAnswer, line("moth", "Moth#EUW")],
+    };
 
-const PLAYERS = [
-  player("kestrel", "Kestrel#EUW"),
-  player("wren", "Wren#EUW"),
-  player("heron", "Heron#EUW"),
-  player("moth", "Moth#EUW"),
-];
-
-describe("the players to write down", () => {
-  it("are everyone not on the roster yet, matching the search", () => {
     expect(
-      notOnRoster(PLAYERS, ROSTER, "").map((each) => each.id)
-    ).toStrictEqual(["moth"]);
-    expect(notOnRoster(PLAYERS, ROSTER, "KES")).toStrictEqual([]);
+      availableMatching(roster, "").map((each) => each.playerId)
+    ).toStrictEqual(["wren", "moth"]);
+    expect(availableMatching(roster, " MOTH ")).toHaveLength(1);
+    expect(availableMatching(roster, "kes")).toStrictEqual([]);
   });
 });
 
@@ -111,7 +99,6 @@ describe("the Match roster page", () => {
     await vi.waitFor(() => {
       harness.detectChanges();
       http.expectOne(`${API}/roster`).flush(ROSTER);
-      http.expectOne(`${ADMIN}/players`).flush(PLAYERS);
     });
     harness.detectChanges();
     page = rendered(harness);
@@ -129,8 +116,7 @@ describe("the Match roster page", () => {
       "Confirmed · 1 of 2",
       "Waiting list · 1",
       "Can't make it · 0",
-      "No answer · 1",
-      "Write someone down",
+      "Available · 1",
     ]);
     expect(
       text(page.querySelector("#waiting-title ~ ol .line-text"))

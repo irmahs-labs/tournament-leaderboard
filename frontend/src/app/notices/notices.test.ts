@@ -71,7 +71,7 @@ describe("a notice's text and link", () => {
       "/org",
       "alsace-arena",
       "me",
-      "seasons",
+      "matches",
     ]);
     expect(linkOf(notice(5, "CLAIM_ANSWERED", {}))?.at(-1)).toBe("claim");
     expect(linkOf(notice(5, "CLAIM_RECEIVED", {}))?.at(-1)).toBe("claims");
@@ -133,10 +133,10 @@ describe("the Notices page", () => {
     ]);
     expect(page.querySelectorAll(".notice.unread")).toHaveLength(3);
     expect(texts(page, ".notice a")).toStrictEqual([
-      "My seasons",
+      "My matches",
       "Admin",
       "Your claim",
-      "My seasons",
+      "My matches",
     ]);
   });
 

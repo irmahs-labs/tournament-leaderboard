@@ -174,7 +174,7 @@ describe("the Claim page", () => {
         link.getAttribute("href")
       )
     ).toStrictEqual([
-      "/org/alsace-arena/me/seasons",
+      "/org/alsace-arena/me/matches",
       "/org/alsace-arena/players/kestrel",
     ]);
   });
@@ -236,7 +236,7 @@ describe("the Claim page", () => {
       expect(text(page.querySelector("h2"))).toBe("Your profile is Moth");
     });
     expect(text(page.querySelector("[role=status]"))).toBe(
-      "Your profile is created. Now sign up for a season."
+      "Your profile is created. Now say which matches you can make."
     );
   });
 

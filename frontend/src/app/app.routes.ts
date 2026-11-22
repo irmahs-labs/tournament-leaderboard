@@ -12,7 +12,6 @@ import { ScheduleAdminPage } from "./admin/schedule/schedule";
 import { ScoresAdminPage } from "./admin/scores/scores";
 import { ScoringAdminPage } from "./admin/scoring/scoring";
 import { SeasonsAdminPage } from "./admin/seasons/seasons";
-import { SignUpsAdminPage } from "./admin/sign-ups/sign-ups";
 import { ClaimPage } from "./claim/claim";
 import { HomePage } from "./home/home";
 import { JoinPage } from "./join/join";
@@ -20,6 +19,7 @@ import { OrgShell } from "./layout/org-shell";
 import { PlatformShell } from "./layout/platform-shell";
 import { LEGAL_PAGES } from "./legal/legal-content";
 import { LegalPage } from "./legal/legal-page";
+import { MyMatchesPage } from "./my-matches/my-matches";
 import { NotFoundPage } from "./not-found/not-found";
 import { NoticesPage } from "./notices/notices";
 import { PlatformPage } from "./platform/platform";
@@ -31,7 +31,6 @@ import { PlayerPage } from "./results/player/player";
 import { PlayersPage } from "./results/players/players";
 import { organizationResolver } from "./shared/organization";
 import { SignInPage } from "./sign-in/sign-in";
-import { MySeasonsPage } from "./sign-ups/my-seasons";
 
 export const routes: Routes = [
   {
@@ -44,9 +43,10 @@ export const routes: Routes = [
       { canActivate: [accountGuard], component: ClaimPage, path: "claim" },
       {
         canActivate: [accountGuard],
-        component: MySeasonsPage,
-        path: "me/seasons",
+        component: MyMatchesPage,
+        path: "me/matches",
       },
+      { path: "me/seasons", redirectTo: "me/matches" },
       {
         canActivate: [adminGuard],
         children: [
@@ -54,10 +54,7 @@ export const routes: Routes = [
           { component: ScoresAdminPage, path: "scores" },
           { component: PlayersAdminPage, path: "players" },
           { component: SeasonsAdminPage, path: "seasons" },
-          {
-            component: SignUpsAdminPage,
-            path: "seasons/:season/sign-ups",
-          },
+
           { component: ScheduleAdminPage, path: "schedule" },
           { component: RosterAdminPage, path: "matches/:match/roster" },
           { component: ScoringAdminPage, path: "scoring" },

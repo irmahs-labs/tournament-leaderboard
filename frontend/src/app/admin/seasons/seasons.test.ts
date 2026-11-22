@@ -62,21 +62,14 @@ describe("the Seasons page", () => {
     expect(
       [...page.querySelectorAll("tbody tr")].map((row) => texts(row, "td"))
     ).toStrictEqual([
-      [
-        "Season 3",
-        "–",
-        "8",
-        "1–5",
-        "Current",
-        "Edit Season 3Sign-ups Season 3",
-      ],
+      ["Season 3", "–", "8", "1–5", "Current", "Edit Season 3"],
       [
         "Season 1",
         "Mar 2025 – Jul 2025",
         "8",
         "1–5",
         "Finished",
-        "Edit Season 1Sign-ups Season 1",
+        "Edit Season 1",
       ],
     ]);
   });

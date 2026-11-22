@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-22, with platform admins deleting any organisation and players who never played.
+Last updated: 2026-11-22, with season sign-ups replaced by answering each match, and every available player on a roster.
 
 ## System
 
@@ -70,25 +70,18 @@ flowchart LR
     claims --> members
     claims --> organizations
     claims --> players
-    signups --> accounts
-    signups --> members
-    signups --> organizations
-    signups --> players
-    signups --> seasons
     rosters --> accounts
     rosters --> matches
     rosters --> members
     rosters --> organizations
     rosters --> players
     rosters --> seasons
-    rosters --> signups
     rosters --> events
     notices --> accounts
     notices --> events
     notices --> matches
     notices --> members
     notices --> rosters
-    notices --> signups
     claims --> events
     platform --> events
     seasons --> events
@@ -115,8 +108,7 @@ flowchart LR
 | `founding` | `FoundingService` (anyone signed in creates an organisation and owns it: address checked and not reserved, 3 owned at most except for platform admins, 409 when taken), `FoundingController` |
 | `platform` | `PlatformService` (platform admins only: every organisation with its owner, members, activity and whether the home page features it; suspending and reactivating; deleting one once its name is typed, asking again when it has games or other admins; deleting a player who never played, in any organisation), `Deletions` (games and admins per organisation; deleting an organisation with its games, players, seasons and members, or a player with their aliases, claims and answers, through JDBC), `PlatformController` |
 | `claims` | `PlayerClaim` (player_claims), `ClaimService` (join as a player; claim an unclaimed player with a note; cancel; creating one's own profile with no admin (the account's Riot ID and Discord when it has them; refused while a claim waits or the Riot ID is taken); the admins' queue; accepting links the member and declines the other claims for that player; nobody accepts their own while another admin exists, the only admin's is marked self-approved; the linked player edits their own details), `ClaimController` |
-| `signups` | `SeasonRegistration` (season_registrations: REGISTERED or WITHDRAWN), `SignUpService` (a linked player signs up while `Season.takesSignUps`, and withdraws; admins open or close sign-ups, sign anyone up at any time before the season is over, players without an account too, and withdraw people), `SignUpController` |
-| `rosters` | `Attendance` (match_attendance: CONFIRMED, WAITING or DECLINED, from the app, an admin or the waiting list), `RosterService` (the season's schedule; planning, calling off; a match's roster with who hasn't answered; an admin moving anyone, even without an account or once locked, never past the places; places, set with the plan, never below those confirmed; locking; a signed-up player's upcoming matches and their answer: a place while there is one and nobody waiting, the waiting list after that, first come first served; when a place frees up (a confirmed player leaves, a place is added, automatic moves or the match back on, the roster unlocked) the first player waiting takes it unless locked or decided by hand, publishing `MovedUp`; admins reorder the waiting list; a match planned, moved or called off publishes `MatchChanged`; reminding those who haven't answered, by an admin or by `ReplyByReminders` two days before the reply-by date, once per match, publishes `Reminded`), `RosterController` |
+| `rosters` | `Attendance` (match_attendance: CONFIRMED, WAITING or DECLINED, from the app, an admin or the waiting list), `RosterService` (the season's schedule; planning, calling off; a match's roster with every player of the organisation who hasn't answered, as available; an admin moving anyone, even without an account or once locked, never past the places; places, set with the plan, never below those confirmed; locking; a player's upcoming matches in every season under way and their answer: a place while there is one and nobody waiting, the waiting list after that, first come first served; when a place frees up (a confirmed player leaves, a place is added, automatic moves or the match back on, the roster unlocked) the first player waiting takes it unless locked or decided by hand, publishing `MovedUp`; admins reorder the waiting list; a match planned, moved or called off publishes `MatchChanged`; reminding those who haven't answered, by an admin or by `ReplyByReminders` two days before the reply-by date, once per match, publishes `Reminded`), `RosterController` |
 | `events` | What other packages tell `notices` about, published in the same transaction as the change: `AdminChanged` (scores, seasons, rules, branding, members), `ClaimSent`, `ClaimAnswered`, `MatchChanged`, `OrganizationStatusChanged` |
 | `notices` | `NoticeStore` (notifications, through JDBC: a jsonb of details), `NoticeKind`, `NoticeService` (turns events into notices for the players linked to an account, or the admins but not the one who made the change; a match change waits 10 minutes and replaces one not shown yet, so a planned then moved match is one notice; read notices are forgotten after 90 days), `NoticeController` (`GET /api/me/notifications`, the latest 50 and the unread count; `POST /api/me/notifications/read`) |
 | `team` | `Invite` (organization_invites; only a hash of the code), `InviteCodes` (8 characters without look-alikes, SHA-256), `TeamService` (the Members screen: roles, removal, ownership, admin invites), `JoinService` (what a code is for; using it, its row locked), `MembershipController` (leaving an organisation, never as its owner), `CodeLookupLimit` (10 lookups a minute per address, in memory) |
@@ -149,7 +141,6 @@ flowchart LR
         acc["/api/invites/{code}/accept: POST"]
         fo["/api/orgs: POST, create an organisation"]
         cl["/api/orgs/{slug}/membership: POST (join); /claim: GET, POST, DELETE; /claim/players: GET; /claim/player: PUT (my rank here); /players/me: POST (create my profile)"]
-        su["/api/orgs/{slug}/me/seasons: GET; /seasons/{n}/registration: POST, DELETE"]
         mm["/api/orgs/{slug}/me/matches: GET; /matches/{id}/attendance: PUT"]
         nt["/api/me/notifications: GET; /read: POST"]
         pl["/api/platform/organizations: GET; /{slug}/status: PUT; /{slug}: DELETE; /{slug}/players/{id}: DELETE (platform admins)"]
@@ -165,7 +156,6 @@ flowchart LR
         nx["next-season-rules: GET, DELETE"]
         sc["seasons/{n}/matches/{m}/games/{g}: GET, PUT, DELETE, /previous-roster"]
         bc["seasons/{n}/bonus-check: POST"]
-        asu["seasons/{n}/signup: PUT; seasons/{n}/registrations: GET, POST /{player}, DELETE /{player}"]
         sch["seasons/{n}/schedule: GET; /schedule/{m}: PUT; matches/{id}/roster: GET, PUT and DELETE /{player}; /waiting: PUT (order); /remind: POST; /lock: POST, DELETE"]
     end
     r --> ranks
@@ -180,7 +170,6 @@ flowchart LR
     fe --> BrandingService
     fo --> FoundingService
     cl & cq --> ClaimService
-    su & asu --> SignUpService
     mm & sch --> RosterService
     pl --> PlatformService
     tm --> TeamService
@@ -200,7 +189,7 @@ organization_invites and organization_logos), `V2026_11_18_1__drop_avatar_url.sq
 picture isn't kept: data minimisation), `V2026_11_19_1__weighted_scoring.sql`,
 `V2026_11_19_2__social_links.sql` (six `*_url` columns on organizations, https only),
 `V2026_11_20_1__player_claims.sql` (player_claims, one waiting per member, with the same policy),
-`V2026_11_20_2__expected_email.sql` (players.expected_email, once per organisation), `V2026_11_20_3__account_identity.sql` (app_users.riot_id and discord_username, filled from each linked account's first profile), `V2026_11_20_4__rank_colours.sql` (a colour per Valorant tier, for ranks that had none), `V2026_11_20_5__jpeg_logos.sql` (organization_logos also takes image/jpeg), `V2026_11_20_6__sessions.sql` (spring_session and spring_session_attributes, Spring Session's own schema), `V2026_11_20_7__season_sign_ups.sql` (seasons.signup_open; season_registrations, with the same policy), `V2026_11_22_1__match_schedule.sql` (matches' start time, place, reply-by date, places, lock and status; match_attendance, with the same policy), `V2026_11_22_2__waiting_list_moves.sql` (matches.auto_promote), `V2026_11_22_3__notices.sql` (notifications, with the same policy; matches.reminded_at).
+`V2026_11_20_2__expected_email.sql` (players.expected_email, once per organisation), `V2026_11_20_3__account_identity.sql` (app_users.riot_id and discord_username, filled from each linked account's first profile), `V2026_11_20_4__rank_colours.sql` (a colour per Valorant tier, for ranks that had none), `V2026_11_20_5__jpeg_logos.sql` (organization_logos also takes image/jpeg), `V2026_11_20_6__sessions.sql` (spring_session and spring_session_attributes, Spring Session's own schema), `V2026_11_20_7__season_sign_ups.sql` (seasons.signup_open; season_registrations, with the same policy; both unused since sign-ups were replaced by answering each match, to be dropped in a later release), `V2026_11_22_1__match_schedule.sql` (matches' start time, place, reply-by date, places, lock and status; match_attendance, with the same policy), `V2026_11_22_2__waiting_list_moves.sql` (matches.auto_promote), `V2026_11_22_3__notices.sql` (notifications, with the same policy; matches.reminded_at).
 
 ```mermaid
 erDiagram
@@ -219,10 +208,8 @@ erDiagram
     seasons ||--o{ season_stat_rules : records
     seasons ||--o{ season_bonuses : awards
     seasons ||--o{ matches : has
-    seasons ||--o{ season_registrations : "signed up"
     matches ||--o{ match_attendance : "answered for"
     players ||--o{ match_attendance : answers
-    players ||--o{ season_registrations : "signs up for"
     matches ||--o{ games : has
     games ||--o{ game_stats : "one line per player"
     players ||--o{ game_stats : plays
@@ -256,7 +243,7 @@ flowchart TD
     platform --> legal[LegalPage<br/>legal notice, privacy, cookies, terms]
     platform --> nf[NotFoundPage<br/>or, for its members, 'this organisation is suspended']
     platform --> join[JoinPage /join/:code<br/>what the code is for, sign in with the invited account, accept; or type a code]
-    shell --> header[SiteHeader<br/>skip link, logo, nav keeping ?season= (My seasons for members; Scores, Players, Seasons, Schedule, Scoring, Members and Branding on admin pages; a Site | Admin switch for admins), online count, season, one EN / FR button, a light/dark pill switch, a notices bell with the unread count, Sign in or My account]
+    shell --> header[SiteHeader<br/>skip link, logo, nav keeping ?season= (My matches for members; Scores, Players, Seasons, Schedule, Scoring, Members and Branding on admin pages; a Site | Admin switch for admins), online count, season, one EN / FR button, a light/dark pill switch, a notices bell with the unread count, Sign in or My account]
     shell --> footer[SiteFooter<br/>org name and its social links; credit, legal pages, GitHub and Contact on three centred lines]
     platform --> header
     platform --> footer
@@ -276,8 +263,8 @@ flowchart TD
     lb --> pill
     shell -->|"/org/:slug/players"| plp["PlayersPage<br/>a card per player, search, sort, rank filter"]
     shell -->|"/org/:slug/claim, accountGuard"| clp["ClaimPage<br/>join, pick your profile, note, wait or cancel; or create one"]
-    shell -->|"/org/:slug/me/seasons, accountGuard"| mys["MySeasonsPage<br/>the seasons under way, sign up, withdraw; each upcoming match: I'm in, Can't make it"]
-    mys -->|"GET, POST, DELETE"| suApi["…/me/seasons, …/seasons/{n}/registration"]
+    shell -->|"/org/:slug/me/matches, accountGuard (/me/seasons redirects)"| mym["MyMatchesPage<br/>the upcoming matches of every season under way, by season: I'm in, Can't make it"]
+    mym -->|"GET, PUT attendance"| mmApi["…/me/matches, …/matches/{id}/attendance"]
     mys -->|"GET, PUT"| mmApi["…/me/matches, …/matches/{id}/attendance"]
     shell -->|"/org/:slug/players/:player?season="| pp["PlayerPage<br/>standing, the player ahead, averages, points per match, matches; on one's own, You and My rank"]
     shell -->|"/org/:slug/matches"| mt["MatchesPage<br/>a card per match, its MVP"]
@@ -303,12 +290,10 @@ flowchart TD
     scadm -->|"GET …/rules, PUT, POST /platform-defaults, POST and DELETE /bonuses"| recordApi["…/admin/seasons/{n}/rules"]
     guard --> madm["MembersAdminPage /admin/members<br/>invite an admin, waiting invites, roles, remove, ownership"]
     madm -->|"GET, PUT, POST, DELETE"| teamApi["…/admin/members, …/admin/invites"]
-    guard --> suadm["SignUpsAdminPage /admin/seasons/:season/sign-ups<br/>open or close, who signed up, withdraw, sign someone up"]
-    suadm -->|"GET, PUT /signup, POST and DELETE /registrations/{player}"| suAdminApi["…/admin/seasons/{n}/registrations"]
     seadm --> suadm
     guard --> schadm["ScheduleAdminPage /admin/schedule?season=<br/>every match: plan, edit, call off, how full"]
     schadm -->|"GET, PUT"| schApi["…/admin/seasons/{n}/schedule"]
-    schadm --> rosadm["RosterAdminPage /admin/matches/:match/roster<br/>confirmed, waiting list (reorder), can't make it, no answer; move, write down, places, automatic moves, remind, lock"]
+    schadm --> rosadm["RosterAdminPage /admin/matches/:match/roster<br/>confirmed, waiting list (reorder), can't make it, every available player (searchable); move anyone, places, automatic moves, remind, lock"]
     rosadm -->|"GET, PUT, DELETE, POST; places through the schedule"| rosApi["…/admin/matches/{id}/roster, /lock"]
     guard --> cadm["ClaimsAdminPage /admin/claims<br/>Waiting, Accepted, Declined; accept, decline with a reason"]
     guard --> badm["BrandingAdminPage /admin/branding<br/>names, language, logo, accent with its contrast, places per match, social links"]
@@ -324,12 +309,12 @@ flowchart TD
 | `shared/` | `ThemeService` (dark or light, the accent's CSS variables), `colour.ts` (WCAG contrast and mixing, the palettes, readable rank colours), `LanguageService` (EN or FR; numbers, dates, plurals and Valorant rank names, such as Immortel, in the language on screen), `OnlineService` (the header's count of open pages), `SessionService` (who is signed in, `canAdmin`, `meOrSignIn` for the guards, one `/api/me` request at a time, Google sign-in with a safe return address, sign-out), `organization.ts` (`organizationResolver`, `fullName`, `initials`), `storage.ts` (local and session storage that survives being blocked), `RankPill`, `riot-id.ts` (`RiotId`, a Riot ID with everything from its first # in a lighter grey, used wherever one is shown in full; `splitRiotId`; `isRiotId`, checking as the API does) |
 | `layout/` | `OrgShell` (an organisation's pages), `PlatformShell` (sign-in and Not found), `SiteHeader`, `SiteFooter`, page layout |
 | `results/` | The public results: `api.ts` (the API's shapes), `CurrentSeason` (the organisation's seasons, newest first, the one picked with `?season=`, `reload()` after an admin change, `adminApi` (the admin pages' API address), `show()` for the organisation after Branding saves it; its seasons are fetched by slug only), `stats.ts` (stat columns with K, D and A folded into KDA, decimals, the points formula without bonuses nobody can win, Riot ID name and tag), `StandingsTable` (a season's or a match's averages or totals, or one game's lines), `leaderboard/`, `matches/` (`MatchesPage`), `players/` (`PlayersPage`; `players-list.ts`: cards, search, sorts, tiers), `player/` (`PlayerPage`, `barsOf`, `kdaOf`), `match/` (`MatchPage`, `match-stats.ts`: a game's lines as standings, the stat leaders) |
-| `admin/` | `adminGuard`, `api.ts` (the admin API's shapes), `players/` (`PlayersAdminPage`: aliases typed as one line, a previous Riot ID keeps its kind), `action.ts` (`AdminAction`: one change at a time, then a status line), `seasons/` (`SeasonsAdminPage`, `problemOf` checking details as the API does), `scoring/` (`ScoringAdminPage`: the rules as typed, `problemOf` and `inputOf`, `previewOf` for the formula, `newBonusProblem` and `newBonusInput`; locked for a finished season), `members/` (`MembersAdminPage`, the invite message to copy), `claims/` (`ClaimsAdminPage`), `sign-ups/` (`SignUpsAdminPage`, `notSignedUp`), `schedule/` (`ScheduleAdminPage`, `planProblem`, `planInput`), `roster/` (`RosterAdminPage`, `notOnRoster`, `MOVES`), `branding/` (`BrandingAdminPage`, `problemOf` and `linkAllowed` checking as the API does), `scores/` (`ScoresAdminPage`; `scores-form.ts`: lines as typed, stat boxes parsed with a decimal comma, an empty place taken from the line's number, the request) |
+| `admin/` | `adminGuard`, `api.ts` (the admin API's shapes), `players/` (`PlayersAdminPage`: aliases typed as one line, a previous Riot ID keeps its kind), `action.ts` (`AdminAction`: one change at a time, then a status line), `seasons/` (`SeasonsAdminPage`, `problemOf` checking details as the API does), `scoring/` (`ScoringAdminPage`: the rules as typed, `problemOf` and `inputOf`, `previewOf` for the formula, `newBonusProblem` and `newBonusInput`; locked for a finished season), `members/` (`MembersAdminPage`, the invite message to copy), `claims/` (`ClaimsAdminPage`), `schedule/` (`ScheduleAdminPage`, `planProblem`, `planInput`), `roster/` (`RosterAdminPage`, `availableMatching`, `MOVES`), `branding/` (`BrandingAdminPage`, `problemOf` and `linkAllowed` checking as the API does), `scores/` (`ScoresAdminPage`; `scores-form.ts`: lines as typed, stat boxes parsed with a decimal comma, an empty place taken from the line's number, the request) |
 | `home/` | `HomePage` (the form kept in session storage across Google sign-in), `slugFrom`, `foundingProblem` |
 | `platform/` | `PlatformPage`, `platformGuard` (platform admins only; others see Not found), `matching` (search by name, address or owner's email) |
 | `account/` | `AccountPage` (Riot ID and Discord for every organisation, typing DELETE to delete), `accountGuard` (signed in only) |
 | `claim/` | `ClaimPage` (claim a profile, or create one), `api.ts` (claims' shapes, `matchingPlayers`) |
-| `sign-ups/` | `MySeasonsPage`, `api.ts` (sign-ups' shapes, used by the admin page too) |
+| `my-matches/` | `MyMatchesPage`, `bySeason`, `api.ts` |
 | `sign-in/` | `SignInPage` |
 | `join/` | `JoinPage`, `stepOf` (sign in, accept, wrong account, expired, used, revoked, accepted), `tidyCode` |
 | `legal/` | `LegalPage` and `legal-content.ts`: the legal notice, privacy policy, cookie policy and terms, in English and French, one route each |
@@ -362,7 +347,7 @@ production, and the Protect migration ruleset lets a pull request merge only onc
 come with it. The full plan, with each phase's exit criterion, is the migration plan page
 kept with the project designs.
 
-Phases 7, 8, 9, 9b and 10 are built. Phase 10 has season sign-ups, creating one's own profile, the
+Phases 7, 8, 9, 9b and 10 are built. Phase 10 has creating one's own profile, the
 schedule and match rosters with players' answers, automatic moves up the waiting list, notices
 with reminders, and deleting an empty organisation; not built yet: the Help page (10b);
 exports (11); moderation (12); merging duplicate players (13).

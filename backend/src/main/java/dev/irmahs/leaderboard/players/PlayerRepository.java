@@ -14,6 +14,8 @@ public interface PlayerRepository extends JpaRepository<Player, UUID> {
 
     Optional<Player> findByOrganizationIdAndExpectedEmailIgnoreCase(UUID organizationId, String email);
 
+    List<Player> findByOrganizationIdOrderByRiotId(UUID organizationId);
+
     /** The players, in any organisation, waiting for someone to sign in with this email. */
     List<Player> findByExpectedEmailIgnoreCase(String email);
 

@@ -10,8 +10,7 @@ import { splitRiotId } from "../../results/stats";
 import { LanguageService } from "../../shared/language";
 import { RiotId } from "../../shared/riot-id";
 import { AdminAction } from "../action";
-import type { AdminPlayer, AttendanceStatus, Roster, RosterLine } from "../api";
-import { playersMatching } from "../api";
+import type { AttendanceStatus, Roster, RosterLine } from "../api";
 
 /** The roster's lists, in the order they're shown. */
 export const ROSTER_LISTS = [
@@ -32,24 +31,24 @@ export const MOVES: Readonly<Record<RosterList, readonly AttendanceStatus[]>> =
     waiting: ["CONFIRMED", "DECLINED"],
   };
 
-/** The players not on the roster yet whose Riot ID or an alias has the search, ignoring case. */
-export const notOnRoster = (
-  players: readonly AdminPlayer[],
+/** The players who haven't answered whose Riot ID has the search, ignoring case. */
+export const availableMatching = (
   roster: Roster,
   search: string
-): AdminPlayer[] =>
-  playersMatching(
-    players,
-    new Set(
-      ROSTER_LISTS.flatMap((list) => roster[list].map((line) => line.playerId))
-    ),
-    search
-  );
+): RosterLine[] => {
+  const wanted = search.trim().toLowerCase();
+
+  return wanted === ""
+    ? roster.noAnswer
+    : roster.noAnswer.filter((line) =>
+        (line.riotId ?? "").toLowerCase().includes(wanted)
+      );
+};
 
 /**
  * The admin Match roster screen: who's in, the waiting list in order, who can't make it and who
- * hasn't answered, with how each answer came in. Admins move anyone, write down players without an
- * account, change the places and lock the roster.
+ * every player still available, with how each answer came in. Admins move anyone, players
+ * without an account too, change the places and lock the roster.
  */
 @Component({
   imports: [RiotId, RouterLink, TranslocoDirective],
@@ -81,26 +80,11 @@ export class RosterAdminPage {
     return api ? `${api}/roster` : undefined;
   });
 
-  readonly #players = httpResource<AdminPlayer[]>(() => {
-    const admin = this.current.adminApi();
-
-    return admin ? `${admin}/players` : undefined;
-  });
-
+  /** Narrows the available players. */
   protected readonly search = signal("");
 
-  /** Whom the admin can write down, once they search. */
-  protected readonly candidates = computed(() =>
-    this.search().trim() === "" ||
-    !this.#players.hasValue() ||
-    !this.roster.hasValue()
-      ? []
-      : notOnRoster(
-          this.#players.value(),
-          this.roster.value(),
-          this.search()
-        ).slice(0, 8)
-  );
+  protected readonly available = (roster: Roster): RosterLine[] =>
+    availableMatching(roster, this.search());
 
   protected readonly action = new AdminAction((status) =>
     this.#transloco.translate(
@@ -124,8 +108,7 @@ export class RosterAdminPage {
       case "ADMIN": {
         return this.#transloco.translate("adminRoster.byAdmin", {
           name:
-            line.answeredBy ??
-            this.#transloco.translate("adminSignUps.anAdmin"),
+            line.answeredBy ?? this.#transloco.translate("adminRoster.anAdmin"),
         });
       }
 

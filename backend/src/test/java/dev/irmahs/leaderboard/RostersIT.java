@@ -39,8 +39,8 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
  * The schedule, match rosters and players' answers, on a real Postgres. Alsace Arena has Season
- * 1, under way with 6 matches, and Season 0, over. Its player account is linked to Kestrel and
- * signed up for Season 1; Wren and Heron have no account. Each test rolls back.
+ * 1, under way with 6 matches, and Season 0, over. Its player account is linked to Kestrel; Wren
+ * and Heron have no account. Each test rolls back.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -102,8 +102,6 @@ class RostersIT {
                         UPDATE organization_members SET player_id = :player
                         WHERE organization_id = :org AND role = 'PLAYER'""").param("player", kestrel).param("org", alsace.getId()).update();
         em.clear();
-        assertThat(send(HttpMethod.POST, ORG + "/seasons/1/registration", null, PLAYER))
-                .hasStatusOk();
     }
 
     private MvcTestResult send(HttpMethod method, String uri, String body, OidcLoginRequestPostProcessor who) {
@@ -170,7 +168,7 @@ class RostersIT {
                 .hasStatusOk()
                 .bodyJson()
                 .isLenientlyEqualTo("""
-                        {"matches": [{"number": 1, "seasonNumber": 1, "places": 2, "confirmed": 0,
+                        {"player": true, "matches": [{"number": 1, "seasonNumber": 1, "places": 2, "confirmed": 0,
                                       "status": null, "position": null}]}""");
 
         assertThat(setStatus(match, wren, "CONFIRMED")).hasStatusOk();
@@ -193,15 +191,15 @@ class RostersIT {
     }
 
     @Test
-    void theRosterShowsEveryAnswerAndWhoHasntAnswered() throws Exception {
+    void theRosterShowsEveryAnswerAndEveryPlayerStillAvailable() throws Exception {
         int match = plan(1, "{\"date\": \"2026-12-05\", \"places\": 2}");
-        send(HttpMethod.POST, ORG + "/admin/seasons/1/registrations/" + wren, null, ADMIN);
 
         assertThat(send(HttpMethod.GET, ORG + "/admin/matches/" + match + "/roster", null, ADMIN))
                 .bodyJson()
                 .isLenientlyEqualTo("""
                         {"number": 1, "places": 2, "confirmed": [], "waiting": [], "declined": [],
-                         "noAnswer": [{"riotId": "Kestrel#EUW", "account": true},
+                         "noAnswer": [{"riotId": "Heron#EUW", "account": false},
+                                      {"riotId": "Kestrel#EUW", "account": true},
                                       {"riotId": "Wren#EUW", "account": false}]}""");
 
         answer(match, "YES", PLAYER);
@@ -219,17 +217,10 @@ class RostersIT {
     }
 
     @Test
-    void onlySignedUpPlayersAnswerAnOpenMatch() throws Exception {
+    void onlyAPlayerOfTheOrganisationAnswersAnOpenMatch() throws Exception {
         int match = plan(1, "{\"date\": \"2026-12-05\"}");
 
         assertThat(answer(match, "YES", NOBODY)).hasStatus(403);
-        send(HttpMethod.DELETE, ORG + "/seasons/1/registration", null, PLAYER);
-        assertThat(answer(match, "YES", PLAYER)).hasStatus(409);
-        assertThat(send(HttpMethod.GET, ORG + "/me/matches", null, PLAYER))
-                .bodyJson()
-                .extractingPath("$.matches")
-                .isEqualTo(List.of());
-        send(HttpMethod.POST, ORG + "/seasons/1/registration", null, PLAYER);
 
         assertThat(send(HttpMethod.POST, ORG + "/admin/matches/" + match + "/lock", null, ADMIN))
                 .hasStatusOk()

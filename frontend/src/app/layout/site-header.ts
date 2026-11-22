@@ -55,7 +55,7 @@ export class SiteHeader {
     return org !== null && canAdmin(this.session.me(), org.slug);
   });
 
-  /** Whether the signed-in person joined this organisation, so the header offers My seasons. */
+  /** Whether the signed-in person joined this organisation, so the header offers My matches. */
   protected readonly member = computed(() => {
     const org = this.organization();
 
