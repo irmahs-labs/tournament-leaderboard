@@ -12,26 +12,19 @@ import { RiotId } from "../../shared/riot-id";
 import type { SignUp, SignUps } from "../../sign-ups/api";
 import { AdminAction } from "../action";
 import type { AdminPlayer } from "../api";
+import { playersMatching } from "../api";
 
 /** The players not signed up yet whose Riot ID, Discord or an alias has the search, ignoring case. */
 export const notSignedUp = (
   players: readonly AdminPlayer[],
   signUps: readonly SignUp[],
   search: string
-): AdminPlayer[] => {
-  const signedUp = new Set(signUps.map((each) => each.playerId));
-  const wanted = search.trim().toLowerCase();
-
-  return players.filter(
-    (player) =>
-      !signedUp.has(player.id) &&
-      [
-        player.riotId,
-        player.discordUsername ?? "",
-        ...player.aliases.map((alias) => alias.alias),
-      ].some((name) => name.toLowerCase().includes(wanted))
+): AdminPlayer[] =>
+  playersMatching(
+    players,
+    new Set(signUps.map((each) => each.playerId)),
+    search
   );
-};
 
 /**
  * Season sign-ups: open or close them; who signed up, in order; withdrawing someone; and signing

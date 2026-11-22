@@ -246,15 +246,14 @@ class RostersIT {
         setStatus(match, wren, "CONFIRMED");
         setStatus(match, heron, "CONFIRMED");
 
-        assertThat(send(HttpMethod.PUT, ORG + "/admin/matches/" + match + "/places", "{\"places\": 2}", ADMIN))
-                .hasStatus(409);
-        assertThat(send(HttpMethod.PUT, ORG + "/admin/matches/" + match + "/places", "{\"places\": 41}", ADMIN))
-                .hasStatus(400);
-        assertThat(send(HttpMethod.PUT, ORG + "/admin/matches/" + match + "/places", "{\"places\": 4}", ADMIN))
-                .hasStatusOk()
-                .bodyJson()
-                .isLenientlyEqualTo("{\"places\": 4}");
         assertThat(send(HttpMethod.PUT, SCHEDULE + "/1", "{\"places\": 2}", ADMIN))
                 .hasStatus(409);
+        assertThat(send(HttpMethod.PUT, SCHEDULE + "/1", "{\"places\": 41}", ADMIN))
+                .hasStatus(400);
+        assertThat(send(HttpMethod.PUT, SCHEDULE + "/1", "{\"places\": 4}", ADMIN))
+                .hasStatusOk();
+        assertThat(send(HttpMethod.GET, ORG + "/admin/matches/" + match + "/roster", null, ADMIN))
+                .bodyJson()
+                .isLenientlyEqualTo("{\"places\": 4}");
     }
 }

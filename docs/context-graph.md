@@ -103,7 +103,7 @@ flowchart LR
 | `platform` | `PlatformService` (platform admins only: every organisation with its owner, members, activity and whether the home page features it; suspending and reactivating), `PlatformController` |
 | `claims` | `PlayerClaim` (player_claims), `ClaimService` (join as a player; claim an unclaimed player with a note; cancel; creating one's own profile with no admin (the account's Riot ID and Discord when it has them; refused while a claim waits or the Riot ID is taken); the admins' queue; accepting links the member and declines the other claims for that player; nobody accepts their own while another admin exists, the only admin's is marked self-approved; the linked player edits their own details), `ClaimController` |
 | `signups` | `SeasonRegistration` (season_registrations: REGISTERED or WITHDRAWN), `SignUpService` (a linked player signs up while `Season.takesSignUps`, and withdraws; admins open or close sign-ups, sign anyone up at any time before the season is over, players without an account too, and withdraw people), `SignUpController` |
-| `rosters` | `Attendance` (match_attendance: CONFIRMED, WAITING or DECLINED, from the app, an admin or the waiting list), `RosterService` (the season's schedule; planning, calling off; a match's roster with who hasn't answered; an admin moving anyone, even without an account or once locked, never past the places; places never below those confirmed; locking; a signed-up player's upcoming matches and their answer: a place while there is one, the waiting list after that, first come first served), `RosterController` |
+| `rosters` | `Attendance` (match_attendance: CONFIRMED, WAITING or DECLINED, from the app, an admin or the waiting list), `RosterService` (the season's schedule; planning, calling off; a match's roster with who hasn't answered; an admin moving anyone, even without an account or once locked, never past the places; places, set with the plan, never below those confirmed; locking; a signed-up player's upcoming matches and their answer: a place while there is one, the waiting list after that, first come first served), `RosterController` |
 | `team` | `Invite` (organization_invites; only a hash of the code), `InviteCodes` (8 characters without look-alikes, SHA-256), `TeamService` (the Members screen: roles, removal, ownership, admin invites), `JoinService` (what a code is for; using it, its row locked), `MembershipController` (leaving an organisation, never as its owner), `CodeLookupLimit` (10 lookups a minute per address, in memory) |
 | `presence` | `OnlineCount` (open pages, in memory only; changes sent at most once a second, a heartbeat every 25 s), `GET /api/online` as server-sent events |
 | `system` | `/api/version`; `UnknownPageResolver` (a browser on an address nobody serves gets the app's Not found page with a 404; the API and files keep JSON problems); `SpaController` forwards the Angular router's addresses (`/org/**` (the claim page included), `/not-found`, `/platform`, `/account`, `/join`, `/join/*`, `/sign-in`, `/legal`, `/privacy`, `/cookies`, `/terms`) to `index.html` |
@@ -150,7 +150,7 @@ flowchart LR
         sc["seasons/{n}/matches/{m}/games/{g}: GET, PUT, DELETE, /previous-roster"]
         bc["seasons/{n}/bonus-check: POST"]
         asu["seasons/{n}/signup: PUT; seasons/{n}/registrations: GET, POST /{player}, DELETE /{player}"]
-        sch["seasons/{n}/schedule: GET; /schedule/{m}: PUT; matches/{id}/roster: GET, PUT and DELETE /{player}; /places: PUT; /lock: POST, DELETE"]
+        sch["seasons/{n}/schedule: GET; /schedule/{m}: PUT; matches/{id}/roster: GET, PUT and DELETE /{player}; /lock: POST, DELETE"]
     end
     r --> ranks
     on --> presence
@@ -289,7 +289,7 @@ flowchart TD
     guard --> schadm["ScheduleAdminPage /admin/schedule?season=<br/>every match: plan, edit, call off, how full"]
     schadm -->|"GET, PUT"| schApi["…/admin/seasons/{n}/schedule"]
     schadm --> rosadm["RosterAdminPage /admin/matches/:match/roster<br/>confirmed, waiting list, can't make it, no answer; move, write down, places, lock"]
-    rosadm -->|"GET, PUT, DELETE, POST"| rosApi["…/admin/matches/{id}/roster, /places, /lock"]
+    rosadm -->|"GET, PUT, DELETE, POST; places through the schedule"| rosApi["…/admin/matches/{id}/roster, /lock"]
     guard --> cadm["ClaimsAdminPage /admin/claims<br/>Waiting, Accepted, Declined; accept, decline with a reason"]
     guard --> badm["BrandingAdminPage /admin/branding<br/>names, language, logo, accent with its contrast, places per match, social links"]
     badm -->|"PUT, DELETE; then CurrentSeason.show"| brandApi["…/admin/branding, …/admin/logo"]

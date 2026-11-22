@@ -10,7 +10,9 @@
     <h1 class="display">
       {{ t("adminRoster.title", { number: r.number, season: r.seasonName }) }}
     </h1>
-    <p class="lede muted">{{ when(r) || t("adminRoster.notDated") }}</p>
+    <p class="lede muted">
+      {{ language.when(r) || t("adminRoster.notDated") }}
+    </p>
     <p class="muted">
       @if (r.replyBy) { {{ t("adminRoster.replyBy", { day:
       language.day(r.replyBy) }) }} · } {{ t("adminSchedule.full", { confirmed:
@@ -51,7 +53,7 @@
     <div class="settings">
       <form
         class="places"
-        (submit)="$event.preventDefault(); savePlaces(places.value)"
+        (submit)="$event.preventDefault(); savePlaces(r, places.value)"
       >
         <label class="field">
           <span class="label">{{ t("adminSchedule.places") }}</span>

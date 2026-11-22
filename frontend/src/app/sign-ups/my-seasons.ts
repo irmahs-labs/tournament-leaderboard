@@ -79,17 +79,6 @@ export class MySeasonsPage {
       : [];
   }
 
-  /** When and where: "Sat, Dec 5 · 8:30 PM · Discord #matchs". */
-  protected when(match: MyMatch): string {
-    return [
-      match.date ? this.language.day(match.date) : null,
-      match.startTime ? this.language.time(match.startTime) : null,
-      match.location,
-    ]
-      .flatMap((part) => (part === null ? [] : [part]))
-      .join(" · ");
-  }
-
   /** "I'm in" or "Can't make it". */
   protected async answer(match: MyMatch, answer: "YES" | "NO"): Promise<void> {
     const org = this.#org();

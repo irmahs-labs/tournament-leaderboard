@@ -186,3 +186,25 @@ export interface Roster {
   /** Signed up for the season, but haven't answered. */
   noAnswer: RosterLine[];
 }
+
+/**
+ * The players not in `left` whose Riot ID, Discord or an alias has the search, ignoring case: whom
+ * an admin can still add to a season or a match.
+ */
+export const playersMatching = (
+  players: readonly AdminPlayer[],
+  left: ReadonlySet<string>,
+  search: string
+): AdminPlayer[] => {
+  const wanted = search.trim().toLowerCase();
+
+  return players.filter(
+    (player) =>
+      !left.has(player.id) &&
+      [
+        player.riotId,
+        player.discordUsername ?? "",
+        ...player.aliases.map((alias) => alias.alias),
+      ].some((name) => name.toLowerCase().includes(wanted))
+  );
+};

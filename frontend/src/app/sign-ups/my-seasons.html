@@ -82,7 +82,9 @@
             <span class="pill">{{ t("mySeasons.cant") }}</span>
             }
           </div>
-          <p class="muted">{{ when(match) || t("adminRoster.notDated") }}</p>
+          <p class="muted">
+            {{ language.when(match) || t("adminRoster.notDated") }}
+          </p>
           <p class="muted small">
             {{ t("adminSchedule.full", { confirmed: match.confirmed, places:
             match.places }) }} @if (match.replyBy) { · {{

@@ -159,10 +159,22 @@ describe("the Match roster page", () => {
     }
 
     page.querySelector<HTMLFormElement>("form.places")?.requestSubmit();
-    const saved = http.expectOne(`${API}/places`);
+    const saved = http.expectOne(`${ADMIN}/seasons/3/schedule/3`);
 
-    expect(saved.request.body).toStrictEqual({ places: 3 });
-    saved.flush({ ...ROSTER, places: 3 });
+    expect(saved.request.method).toBe("PUT");
+    expect(saved.request.body).toStrictEqual({
+      cancelled: null,
+      date: "2026-12-05",
+      location: "Discord #matchs",
+      places: 3,
+      replyBy: "2026-12-03",
+      startTime: "20:30:00",
+    });
+    saved.flush({});
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      http.expectOne(`${API}/roster`).flush({ ...ROSTER, places: 3 });
+    });
     await vi.waitFor(() => {
       harness.detectChanges();
       expect(text(page.querySelector("[role=status]"))).toBe(
