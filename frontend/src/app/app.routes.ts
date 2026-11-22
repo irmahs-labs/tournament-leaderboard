@@ -13,6 +13,7 @@ import { ScoresAdminPage } from "./admin/scores/scores";
 import { ScoringAdminPage } from "./admin/scoring/scoring";
 import { SeasonsAdminPage } from "./admin/seasons/seasons";
 import { ClaimPage } from "./claim/claim";
+import { HelpPage } from "./help/help-page";
 import { HomePage } from "./home/home";
 import { JoinPage } from "./join/join";
 import { OrgShell } from "./layout/org-shell";
@@ -86,6 +87,7 @@ export const routes: Routes = [
         path: "platform",
       },
       { canActivate: [accountGuard], component: AccountPage, path: "account" },
+      { component: HelpPage, path: "help" },
       { component: JoinPage, path: "join" },
       { component: JoinPage, path: "join/:code" },
       ...LEGAL_PAGES.map((page) => ({

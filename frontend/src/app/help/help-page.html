@@ -1,0 +1,25 @@
+<article class="help">
+  <header class="intro">
+    <h1 class="display">{{ doc().title }}</h1>
+    <p class="lede">{{ doc().intro }}</p>
+    <nav class="toc">
+      @for (section of doc().sections; track section.id) {
+      <a [href]="'#' + section.id">{{ section.title }}</a>
+      }
+    </nav>
+  </header>
+
+  @for (section of doc().sections; track section.id) {
+  <section class="panel block" [id]="section.id">
+    <h2 class="heading">{{ section.title }}</h2>
+    @for (item of section.questions; track item.id) {
+    <details [id]="section.id + '-' + item.id">
+      <summary>{{ item.question }}</summary>
+      @for (paragraph of item.answer; track $index) {
+      <p>{{ paragraph }}</p>
+      }
+    </details>
+    }
+  </section>
+  }
+</article>

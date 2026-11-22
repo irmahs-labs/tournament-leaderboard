@@ -133,6 +133,7 @@ describe("the footer", () => {
     const footer = page.ownerDocument.querySelector("footer .credit nav");
 
     expect(texts(footer ?? page, "a")).toStrictEqual([
+      "Help",
       "Legal notice",
       "Privacy",
       "Cookies",

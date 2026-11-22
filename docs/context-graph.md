@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-22, with /org/{slug}/join, the link that invites players; platform admins running every organisation and handing ownership on; and the claim page sending someone already linked to My matches.
+Last updated: 2026-11-22, with the Help page (phase 10b).
 
 ## System
 
@@ -113,7 +113,7 @@ flowchart LR
 | `notices` | `NoticeStore` (notifications, through JDBC: a jsonb of details), `NoticeKind`, `NoticeService` (turns events into notices for the players linked to an account, or the admins but not the one who made the change; a match change waits 10 minutes and replaces one not shown yet, so a planned then moved match is one notice; read notices are forgotten after 90 days), `NoticeController` (`GET /api/me/notifications`, the latest 50 and the unread count; `POST /api/me/notifications/read`) |
 | `team` | `Invite` (organization_invites; only a hash of the code), `InviteCodes` (8 characters without look-alikes, SHA-256), `TeamService` (the Members screen: roles, removal, ownership (handed on by the owner, or by a platform admin, also for an organisation without one), admin invites), `JoinService` (what a code is for; using it, its row locked), `MembershipController` (leaving an organisation, never as its owner), `CodeLookupLimit` (10 lookups a minute per address, in memory) |
 | `presence` | `OnlineCount` (open pages, in memory only; changes sent at most once a second, a heartbeat every 25 s), `GET /api/online` as server-sent events |
-| `system` | `/api/version`; `UnknownPageResolver` (a browser on an address nobody serves gets the app's Not found page with a 404; the API and files keep JSON problems); `SpaController` forwards the Angular router's addresses (`/org/**` (the claim page included), `/not-found`, `/platform`, `/account`, `/join`, `/join/*`, `/sign-in`, `/legal`, `/privacy`, `/cookies`, `/terms`) to `index.html` |
+| `system` | `/api/version`; `UnknownPageResolver` (a browser on an address nobody serves gets the app's Not found page with a 404; the API and files keep JSON problems); `SpaController` forwards the Angular router's addresses (`/org/**` (the claim page included), `/not-found`, `/platform`, `/account`, `/join`, `/join/*`, `/sign-in`, `/help`, `/legal`, `/privacy`, `/cookies`, `/terms`) to `index.html` |
 
 ## API
 
@@ -231,7 +231,7 @@ planned.
 flowchart TD
     app[App<br/>starts ThemeService, LanguageService, SessionService] --> routes[app.routes.ts]
     routes -->|"/org/:slug, organizationResolver"| shell[OrgShell<br/>accent, language, title, season]
-    routes -->|"/, /account, /platform, /sign-in, /join, /join/:code, /legal, /privacy, /cookies, /terms, /not-found, **"| platform[PlatformShell<br/>platform name and red]
+    routes -->|"/, /account, /platform, /sign-in, /help, /join, /join/:code, /legal, /privacy, /cookies, /terms, /not-found, **"| platform[PlatformShell<br/>platform name and red]
     platform --> home[HomePage /<br/>what it does, create an organisation, the featured one]
     home -->|"GET /api/featured, POST /api/orgs"| foundApi["/api/featured, /api/orgs"]
     platform --> padmin[PlatformPage /platform, platformGuard<br/>counts, search, every organisation, suspend or reactivate, delete (asking again when not empty)]
@@ -240,10 +240,11 @@ flowchart TD
     acct -->|"PUT /api/me/identity, DELETE /api/me, DELETE …/membership"| accountApi["/api/me, /api/orgs/{slug}/membership"]
     platform --> si[SignInPage<br/>Google, your organisations, sign out, create one]
     platform --> legal[LegalPage<br/>legal notice, privacy, cookies, terms]
+    platform --> help[HelpPage /help<br/>questions for players, admins and one's account, each opening on its own]
     platform --> nf[NotFoundPage<br/>or, for its members, 'this organisation is suspended']
     platform --> join[JoinPage /join/:code<br/>what the code is for, sign in with the invited account, accept; or type a code]
     shell --> header[SiteHeader<br/>skip link, logo, nav keeping ?season= (My matches for members; Scores, Players, Seasons, Schedule, Scoring, Members and Branding on admin pages; a Site | Admin switch for admins), online count, season, one EN / FR button, a light/dark pill switch, a notices bell with the unread count opening NoticesPanel over the page (every organisation's notices, newest first, each linking to its page; opening it marks them read), Sign in or My account]
-    shell --> footer[SiteFooter<br/>org name and its social links; credit, legal pages, GitHub and Contact on three centred lines]
+    shell --> footer[SiteFooter<br/>org name and its social links; credit, Help and the legal pages, GitHub and Contact on three centred lines]
     platform --> header
     platform --> footer
     shell -->|"organisation, ?season="| current[CurrentSeason]
@@ -318,6 +319,7 @@ flowchart TD
 | `my-matches/` | `MyMatchesPage`, `bySeason`, `api.ts` |
 | `sign-in/` | `SignInPage` |
 | `join/` | `JoinPage`, `stepOf` (sign in, accept, wrong account, expired, used, revoked, accepted), `tidyCode` |
+| `help/` | `HelpPage` and `help-content.ts`: the questions and answers, in English and French |
 | `legal/` | `LegalPage` and `legal-content.ts`: the legal notice, privacy policy, cookie policy and terms, in English and French, one route each |
 | `not-found/` | `NotFoundPage` |
 | `testing.ts` | Fixtures and helpers shared by the tests (`openAlsace`, `answer`, `text`) |
@@ -338,7 +340,7 @@ flowchart LR
     p2 --> p3[3 Angular shell and public pages ✓] --> p4[4 Angular admin ✓] --> p5[5 Deploy pipelines ✓] --> p6[6 Cutover ✓]
     p6 --> p7[7 Open the platform<br/>release 2 ✓]
     p7 --> p8[8 Scoring rules editor ✓] --> p9[9 Players and claims ✓] --> p9b[9b Deploys players<br/>don't notice ✓]
-    p9b --> p10[10 Seasons, matches<br/>and waiting lists ✓] --> p10b[10b Help ▶]
+    p9b --> p10[10 Seasons, matches<br/>and waiting lists ✓] --> p10b[10b Help ✓]
     p10b --> p11[11 Exports and poster] --> p12[12 Moderation] --> p13[13 Merge tool and scan]
 ```
 
@@ -348,7 +350,7 @@ production, and the Protect migration ruleset lets a pull request merge only onc
 come with it. The full plan, with each phase's exit criterion, is the migration plan page
 kept with the project designs.
 
-Phases 7, 8, 9, 9b and 10 are built. Phase 10 has creating one's own profile, the
+Phases 7, 8, 9, 9b, 10 and 10b are built. Phase 10 has creating one's own profile, the
 schedule and match rosters with players' answers, automatic moves up the waiting list, notices
-with reminders, and deleting an empty organisation; not built yet: the Help page (10b);
+with reminders, and deleting an empty organisation; 10b the Help page. Not built yet:
 exports (11); moderation (12); merging duplicate players (13).

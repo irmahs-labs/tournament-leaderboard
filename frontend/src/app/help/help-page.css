@@ -1,0 +1,54 @@
+.help {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 820px;
+  min-width: 0;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  font-weight: 600;
+}
+
+.block {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.block[id] {
+  scroll-margin-top: 16px;
+}
+
+.heading {
+  margin: 0 0 8px;
+}
+
+details {
+  border-top: 1px solid var(--row-line);
+}
+
+summary {
+  padding: 14px 0;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+details p {
+  margin: 0 0 12px;
+  line-height: 1.6;
+}
+
+details[open] {
+  padding-bottom: 4px;
+}

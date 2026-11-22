@@ -17,7 +17,8 @@
       "youtube": "YouTube",
       "tiktok": "TikTok",
       "website": "Site web"
-    }
+    },
+    "help": "Aide"
   },
   "header": {
     "signIn": "Se connecter",

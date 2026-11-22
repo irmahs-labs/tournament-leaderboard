@@ -26,8 +26,8 @@
     <sonar.javascript.lcov.reportPaths>coverage/frontend/lcov.info</sonar.javascript.lcov.reportPaths>
     <!-- Only bootstraps the app in a browser; tests start the app through TestBed instead. -->
     <sonar.coverage.exclusions>src/main.ts</sonar.coverage.exclusions>
-    <!-- The legal pages' English and French text share one shape: translations, not copied code. -->
-    <sonar.cpd.exclusions>src/app/legal/legal-content.ts</sonar.cpd.exclusions>
+    <!-- The legal and help pages' English and French text share one shape: translations, not copied code. -->
+    <sonar.cpd.exclusions>src/app/legal/legal-content.ts,src/app/help/help-content.ts</sonar.cpd.exclusions>
   </properties>
 
   <build>
