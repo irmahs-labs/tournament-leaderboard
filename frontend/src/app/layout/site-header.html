@@ -185,8 +185,10 @@
       @if (online.count(); as count) {
       <span class="online" [attr.title]="t('header.onlineTitle')">
         <span class="dot" aria-hidden="true"></span>
-        <strong>{{ language.number(count) }}</strong>
-        {{ t("header.online") }}
+        <strong>{{ language.number(count) }}</strong>&ngsp;<span
+          class="visually-hidden"
+          >{{ t("header.online") }}</span
+        >
       </span>
       } @if (organization() && !inAdmin() && current.seasons().length > 0) {
       <select
@@ -294,14 +296,14 @@
         }
       </details>
       <a
-        class="account"
+        class="account signed-in"
         routerLink="/account"
         [attr.aria-label]="t('header.account', { name: session.name() })"
+        [attr.title]="session.name()"
       >
         <span class="avatar" aria-hidden="true"
           >{{ session.name().slice(0, 1).toUpperCase() }}</span
         >
-        <span class="account-name">{{ session.name() }}</span>
       </a>
       } @else if (session.me() === null && !here().startsWith("/sign-in")) {
       <a class="account" routerLink="/sign-in" [queryParams]="{ from: here() }"
