@@ -75,7 +75,8 @@
     "perBonus": "{{points}} par bonus",
     "perWin": "{{points}} par victoire",
     "bonuses": "Bonus :",
-    "setBy": "Règles de {{season}}, fixées par les admins de l'organisation {{org}}."
+    "setBy": "Règles de {{season}}, fixées par les admins de l'organisation {{org}}.",
+    "join": "Rejoindre {{org}}"
   },
   "matches": {
     "title": "Matchs",

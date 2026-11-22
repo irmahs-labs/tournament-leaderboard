@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-22, with season sign-ups replaced by answering each match, every available player on a roster, notices in a panel over the page, and platform admins deleting any organisation and players who never played.
+Last updated: 2026-11-22, with a Join button on the leaderboard for anyone who isn't a member.
 
 ## System
 
@@ -254,14 +254,15 @@ flowchart TD
     header -->|event stream| online[OnlineService] -->|GET| onlineApi["/api/online"]
     header --> notices[NoticesService<br/>every 60 s while signed in] -->|GET, POST read| ntApi["/api/me/notifications"]
     header --> session[SessionService] -->|GET /api/me, POST /api/logout| meApi["/api/me"]
-    shell --> lb["LeaderboardPage<br/>top three, tiles, how points are counted"]
+    shell --> lb["LeaderboardPage<br/>top three, tiles, how points are counted; Join for non-members"]
     lb --> table[StandingsTable]
     lb --> current
     lb -->|GET| lbApi["…/seasons/{n}/leaderboard, /summary, /rules"]
     table --> pill[RankPill]
     lb --> pill
     shell -->|"/org/:slug/players"| plp["PlayersPage<br/>a card per player, search, sort, rank filter"]
-    shell -->|"/org/:slug/claim, accountGuard"| clp["ClaimPage<br/>join, pick your profile, note, wait or cancel; or create one"]
+    lb -->|"Join, ?join=1"| clp
+    shell -->|"/org/:slug/claim, accountGuard"| clp["ClaimPage<br/>join (at once with ?join=1), pick your profile, note, wait or cancel; or create one"]
     shell -->|"/org/:slug/me/matches, accountGuard (/me/seasons redirects)"| mym["MyMatchesPage<br/>the upcoming matches of every season under way, by season: I'm in, Can't make it"]
     mym -->|"GET, PUT attendance"| mmApi["…/me/matches, …/matches/{id}/attendance"]
     mys -->|"GET, PUT"| mmApi["…/me/matches, …/matches/{id}/attendance"]

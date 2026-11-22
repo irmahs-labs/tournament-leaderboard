@@ -67,13 +67,16 @@ describe("the Claim page", () => {
       text(each)?.startsWith(label)
     );
 
-  const open = async (state: ClaimState): Promise<void> => {
+  const open = async (
+    state: ClaimState,
+    url = "/org/alsace-arena/claim"
+  ): Promise<void> => {
     const loading = TestBed.inject(SessionService).load();
 
     http.expectOne("/api/me").flush(ME);
     await loading;
     harness = await RouterTestingHarness.create();
-    const navigation = harness.navigateByUrl("/org/alsace-arena/claim");
+    const navigation = harness.navigateByUrl(url);
 
     await answer(harness, `/api/orgs/${ALSACE.slug}`, ALSACE);
     await navigation;
@@ -101,6 +104,19 @@ describe("the Claim page", () => {
   it("offers to join as a player first", async () => {
     await open({ ...MEMBER, member: false });
     button("Join as a player")?.click();
+
+    const join = await vi.waitFor(() =>
+      http.expectOne(`/api/orgs/${ALSACE.slug}/membership`)
+    );
+
+    expect(join.request.method).toBe("POST");
+    join.flush(MEMBER);
+    await vi.waitFor(() => http.expectOne(`${API}/players`).flush(PLAYERS));
+    await vi.waitFor(() => http.expectOne("/api/me").flush(ME));
+  });
+
+  it("joins at once when they came from the leaderboard's Join button", async () => {
+    await open({ ...MEMBER, member: false }, "/org/alsace-arena/claim?join=1");
 
     const join = await vi.waitFor(() =>
       http.expectOne(`/api/orgs/${ALSACE.slug}/membership`)

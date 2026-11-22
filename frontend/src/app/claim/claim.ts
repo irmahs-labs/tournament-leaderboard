@@ -1,5 +1,12 @@
 import { HttpClient, httpResource } from "@angular/common/http";
-import { Component, computed, inject, signal } from "@angular/core";
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+} from "@angular/core";
 import { RouterLink } from "@angular/router";
 import { TranslocoDirective, TranslocoService } from "@jsverse/transloco";
 import type { Observable } from "rxjs";
@@ -25,6 +32,11 @@ import { MAX_NAME, MAX_TEXT, matchingPlayers } from "./api";
   templateUrl: "./claim.html",
 })
 export class ClaimPage {
+  /** From the address: `?join=1` when they came from the leaderboard's Join button. */
+  readonly joinRequested = input<string | undefined>(undefined, {
+    alias: "join",
+  });
+
   protected readonly current = inject(CurrentSeason);
   protected readonly language = inject(LanguageService);
   protected readonly maxText = MAX_TEXT;
@@ -89,7 +101,21 @@ export class ClaimPage {
   readonly #transloco = inject(TranslocoService);
   readonly #session = inject(SessionService);
 
-  protected async join(): Promise<void> {
+  /** Coming from Join, they become a player at once instead of pressing Join as a player again. */
+  #joined = false;
+
+  constructor() {
+    effect(() => {
+      const state = this.state.hasValue() ? this.state.value() : null;
+
+      if (this.joinRequested() && state && !state.member && !this.#joined) {
+        this.#joined = true;
+        void this.becomeMember();
+      }
+    });
+  }
+
+  protected async becomeMember(): Promise<void> {
     await this.#change(
       () => this.#http.post<ClaimState>(`${this.#org()}/membership`, null),
       "claim.joined"
