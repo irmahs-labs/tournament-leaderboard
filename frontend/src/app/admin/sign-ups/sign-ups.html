@@ -77,9 +77,10 @@
       splitRiotId(player.riotId);
       <li>
         <span
-          ><strong>{{ id.name }}</strong
-          ><span class="muted"> {{ id.tag }}</span> @if (!player.linked) {
-          &ngsp;<span class="pill">{{ t("adminSignUps.noAccount") }}</span>
+          ><strong><app-riot-id [value]="player.riotId" /></strong> @if
+          (!player.linked) { &ngsp;<span class="pill"
+            >{{ t("adminSignUps.noAccount") }}</span
+          >
           }</span
         >
         <button
@@ -127,9 +128,10 @@
           <tr>
             <td class="num">{{ index + 1 }}</td>
             <td>
-              <strong>{{ id.name }}</strong
-              ><span class="muted"> {{ id.tag }}</span> @if (!row.account) {
-              &ngsp;<span class="pill">{{ t("adminSignUps.noAccount") }}</span>
+              <strong><app-riot-id [value]="row.riotId" /></strong> @if
+              (!row.account) { &ngsp;<span class="pill"
+                >{{ t("adminSignUps.noAccount") }}</span
+              >
               }
             </td>
             <td>{{ language.moment(row.registeredAt) }}</td>

@@ -66,6 +66,7 @@ public class PlayerAdminService {
     public PlayerView add(String slug, PlayerInput input) {
         UUID organizationId = organizations.requireActive(slug).getId();
         Details details = check(input);
+        RiotIds.require(details.riotId());
         requireFree(organizationId, details.riotId(), null);
         String expected = checkEmail(input.expectedEmail());
         requireEmailFree(organizationId, expected, null);
@@ -90,6 +91,10 @@ public class PlayerAdminService {
         Player player = players.findByIdAndOrganizationId(playerId, organizationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There's no player " + playerId));
         Details details = check(input);
+        if (!details.riotId().equals(player.getRiotId())) {
+            // A changed Riot ID takes Riot's format; one left as it is stays, tag or not.
+            RiotIds.require(details.riotId());
+        }
         boolean linked = members.existsByOrganizationIdAndPlayerId(organizationId, playerId);
         if (linked
                 && (!details.riotId().equals(player.getRiotId())

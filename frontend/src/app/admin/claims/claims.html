@@ -63,8 +63,8 @@
         <span class="label">{{ t(claimLabels[row.claim.status]) }}</span>
         <strong class="player">{{ player.name }}</strong>
         <span class="muted small">
-          {{ row.player.riotId }}@if (row.player.rank) { · {{
-          language.rank(row.player.rank) }} } · {{
+          <app-riot-id [value]="row.player.riotId" />@if (row.player.rank) { ·
+          {{ language.rank(row.player.rank) }} } · {{
           t(language.plural("players.games", row.player.games), { count:
           row.player.games }) }}
         </span>

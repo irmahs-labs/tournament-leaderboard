@@ -5,6 +5,7 @@ import { TranslocoDirective } from "@jsverse/transloco";
 
 import { LanguageService } from "../../shared/language";
 import { RankPill } from "../../shared/rank-pill";
+import { RiotId } from "../../shared/riot-id";
 import type { Leaderboard, PublicPlayer } from "../api";
 import { CurrentSeason } from "../current-season";
 import { splitRiotId } from "../stats";
@@ -16,7 +17,7 @@ import { cardsOf, PLAYER_SORTS, shownCards, TIERS } from "./players-list";
  * points and averages, to search, sort and filter by rank. Each links to their profile.
  */
 @Component({
-  imports: [RankPill, RouterLink, TranslocoDirective],
+  imports: [RankPill, RiotId, RouterLink, TranslocoDirective],
   selector: "app-players",
   styleUrl: "./players.css",
   templateUrl: "./players.html",

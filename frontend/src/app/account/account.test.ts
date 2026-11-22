@@ -150,6 +150,23 @@ describe("My account", () => {
     });
   });
 
+  it("asks for Riot's format when the Riot ID changes", async () => {
+    await open({ ...MEMBER, riotId: "Wren" });
+    harness.detectChanges();
+    const riotId = page.querySelector<HTMLInputElement>("input[name=riotId]");
+
+    if (riotId) {
+      riotId.value = "Wrenna";
+    }
+
+    page.querySelector<HTMLFormElement>("form.identity")?.requestSubmit();
+    harness.detectChanges();
+
+    expect(text(page.querySelector(".identity + p + [role=status]"))).toBe(
+      "A Riot ID is a name of 3 to 16 characters, # and a tag of 3 to 5 letters or numbers, such as Kestrel#EUW."
+    );
+  });
+
   it("says when the Riot ID is another player's", async () => {
     await open({ ...MEMBER, riotId: "Wren#EUW" });
     harness.detectChanges();

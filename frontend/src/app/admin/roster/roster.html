@@ -95,7 +95,7 @@
       splitRiotId(line.riotId ?? "");
       <li>
         <div class="line-text">
-          <strong>{{ id.name }}<span class="muted"> {{ id.tag }}</span></strong>
+          <strong><app-riot-id [value]="line.riotId" /></strong>
           @if (!line.account) { &ngsp;<span class="pill"
             >{{ t("adminSignUps.noAccount") }}</span
           >
@@ -161,7 +161,7 @@
       splitRiotId(player.riotId);
       <li>
         <div class="line-text">
-          <strong>{{ id.name }}<span class="muted"> {{ id.tag }}</span></strong>
+          <strong><app-riot-id [value]="player.riotId" /></strong>
           @if (!player.linked) { &ngsp;<span class="pill"
             >{{ t("adminSignUps.noAccount") }}</span
           >

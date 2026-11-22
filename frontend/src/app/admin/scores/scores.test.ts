@@ -18,7 +18,7 @@ import {
   texts,
 } from "../../testing";
 import type { AdminPlayer } from "../api";
-import { emptyRow, linesOf } from "./scores-form";
+import { emptyRow, linesOf, problemOf } from "./scores-form";
 import type { GameScores, PreviousRoster } from "./scores-form";
 
 const ORG = `/api/orgs/${ALSACE.slug}`;
@@ -401,5 +401,19 @@ describe("a line's place", () => {
         new Set()
       ).map((line) => line.stats)
     ).toStrictEqual([{ PLACE: 1 }, { PLACE: 1 }, { PLACE: 4 }]);
+  });
+});
+
+describe("a new player on the Scores form", () => {
+  it("needs Riot's format; a known player doesn't", () => {
+    expect(
+      problemOf([emptyRow({ kind: "new", riotId: "Newcomer" })], [])
+    ).toStrictEqual({ kind: "riotId", row: 1 });
+    expect(
+      problemOf([emptyRow({ kind: "new", riotId: "Newcomer#EUW" })], [])
+    ).toBeNull();
+    expect(
+      problemOf([emptyRow({ kind: "known", playerId: "drrako" })], [])
+    ).toBeNull();
   });
 });

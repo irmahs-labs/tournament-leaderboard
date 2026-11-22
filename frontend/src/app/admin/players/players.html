@@ -184,8 +184,9 @@
           } @else {
           <tr>
             <td>
-              <strong class="player">{{ id.name }}</strong
-              ><span class="tag">{{ id.tag }}</span>
+              <strong class="player"
+                ><app-riot-id [value]="player.riotId"
+              /></strong>
             </td>
             <td>
               {{ player.discordUsername ?? "–" }} @if (player.linked) {

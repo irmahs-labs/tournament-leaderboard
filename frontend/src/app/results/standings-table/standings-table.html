@@ -44,8 +44,9 @@
           }
         </td>
         <td>
-          <strong class="player">{{ id.name }}</strong
-          ><span class="tag">{{ id.tag }}</span>
+          <strong class="player"
+            ><app-riot-id [value]="standing.riotId"
+          /></strong>
         </td>
         @if (!single()) {
         <td class="num">{{ standing.games }}</td>

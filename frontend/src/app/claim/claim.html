@@ -148,7 +148,7 @@
       splitRiotId(player.riotId);
       <li>
         <div class="choice-text">
-          <strong>{{ id.name }}<span class="muted"> {{ id.tag }}</span></strong>
+          <strong><app-riot-id [value]="player.riotId" /></strong>
           <span class="muted small">
             @if (player.rank) { {{ language.rank(player.rank) }} · } {{
             t(language.plural("players.games", player.games), { count:

@@ -87,8 +87,8 @@ describe("the Players page", () => {
 
   it("shows a card per player, linking to their profile", () => {
     expect(texts(page, ".card .name")).toStrictEqual([
-      "Kestrel #EUW",
-      "Wren #EUW",
+      "Kestrel#EUW",
+      "Wren#EUW",
     ]);
     expect(texts(page, ".card .names")).toStrictEqual(["also kes"]);
     expect(page.querySelector(".card a")?.getAttribute("href")).toBe(

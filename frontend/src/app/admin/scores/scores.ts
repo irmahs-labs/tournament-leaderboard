@@ -499,6 +499,12 @@ export class ScoresAdminPage {
         return this.#transloco.translate("adminScores.empty");
       }
 
+      case "riotId": {
+        return this.#transloco.translate("adminScores.riotIdShape", {
+          row: problem.row,
+        });
+      }
+
       case "twice": {
         return this.#transloco.translate("adminScores.twice", {
           row: problem.row,

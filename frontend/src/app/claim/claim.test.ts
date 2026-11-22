@@ -121,8 +121,8 @@ describe("the Claim page", () => {
     harness.detectChanges();
 
     expect(texts(page, ".choices strong")).toStrictEqual([
-      "Kestrel #EUW",
-      "Wren #EUW",
+      "Kestrel#EUW",
+      "Wren#EUW",
     ]);
 
     button("This is me Kestrel")?.click();
@@ -199,6 +199,17 @@ describe("the Claim page", () => {
 
     expect(text(page.querySelector("[role=status]"))).toBe(
       "Type your Riot ID, such as Name#TAG."
+    );
+
+    if (riotId) {
+      riotId.value = "Moth";
+    }
+
+    form?.requestSubmit();
+    harness.detectChanges();
+
+    expect(text(page.querySelector("[role=status]"))).toBe(
+      "A Riot ID is a name of 3 to 16 characters, # and a tag of 3 to 5 letters or numbers, such as Kestrel#EUW."
     );
 
     if (riotId) {

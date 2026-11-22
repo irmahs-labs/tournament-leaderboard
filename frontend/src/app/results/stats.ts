@@ -154,11 +154,4 @@ export const formulaOf = (
   }));
 };
 
-/** The player's name without the #tag, and the tag. */
-export const splitRiotId = (riotId: string): { name: string; tag: string } => {
-  const at = riotId.lastIndexOf("#");
-
-  return at > 0
-    ? { name: riotId.slice(0, at), tag: riotId.slice(at) }
-    : { name: riotId, tag: "" };
-};
+export { splitRiotId } from "../shared/riot-id";

@@ -98,6 +98,7 @@ class SignUpsIT {
     void aMemberWhoNeverPlayedCreatesTheirProfileAtOnce() {
         assertThat(create("Moth#EUW", NOBODY)).hasStatus(403);
         assertThat(create(" ", PLAYER)).hasStatus(400);
+        assertThat(create("Moth", PLAYER)).hasStatus(400);
         assertThat(create("kestrel#euw", PLAYER)).hasStatus(409);
 
         assertThat(create(" Moth#EUW ", PLAYER))

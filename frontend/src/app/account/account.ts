@@ -7,6 +7,7 @@ import { firstValueFrom } from "rxjs";
 
 import { AdminAction } from "../admin/action";
 import { initials } from "../shared/organization";
+import { isRiotId } from "../shared/riot-id";
 import type { Membership } from "../shared/session";
 import { SessionService } from "../shared/session";
 
@@ -73,6 +74,14 @@ export class AccountPage {
     discord: string
   ): Promise<void> {
     event.preventDefault();
+
+    // A changed Riot ID takes Riot's format; one left as it is stays, tag or not.
+    if (riotId.trim() !== this.session.me()?.riotId && !isRiotId(riotId)) {
+      this.identity.refuse(this.#transloco.translate("players.riotIdShape"));
+
+      return;
+    }
+
     await this.identity.run(async () => {
       await firstValueFrom(
         this.#http.put("/api/me/identity", {
