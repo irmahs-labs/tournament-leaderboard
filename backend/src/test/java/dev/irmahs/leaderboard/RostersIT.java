@@ -11,6 +11,7 @@ import com.jayway.jsonpath.JsonPath;
 import dev.irmahs.leaderboard.accounts.AccountService;
 import dev.irmahs.leaderboard.organizations.Organization;
 import dev.irmahs.leaderboard.players.Player;
+import dev.irmahs.leaderboard.rosters.MovedUp;
 import dev.irmahs.leaderboard.seasons.Season;
 import dev.irmahs.leaderboard.seasons.Season.GameRange;
 import jakarta.persistence.EntityManager;
@@ -27,6 +28,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpMethod;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.OidcLoginRequestPostProcessor;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +46,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 @AutoConfigureMockMvc
 @Testcontainers(disabledWithoutDocker = true)
 @Transactional
+@RecordApplicationEvents
 class RostersIT {
 
     @Container
@@ -64,6 +68,10 @@ class RostersIT {
     @Autowired
     AccountService accounts;
 
+    @Autowired
+    ApplicationEvents events;
+
+    UUID alsaceId;
     UUID kestrel;
     UUID wren;
     UUID heron;
@@ -74,6 +82,7 @@ class RostersIT {
         Organization lyon = new Organization("lyon-game-bar", "Lyon Game Bar", null);
         em.persist(alsace);
         em.persist(lyon);
+        alsaceId = alsace.getId();
         Season over = new Season(alsace.getId(), 0, "Season 0", 6, new GameRange(1, 3), 50);
         over.finish(Instant.parse("2026-06-30T20:00:00Z"));
         em.persist(over);
@@ -255,5 +264,93 @@ class RostersIT {
         assertThat(send(HttpMethod.GET, ORG + "/admin/matches/" + match + "/roster", null, ADMIN))
                 .bodyJson()
                 .isLenientlyEqualTo("{\"places\": 4}");
+    }
+
+    private List<String> waitingIds(int match) throws Exception {
+        String roster = send(HttpMethod.GET, ORG + "/admin/matches/" + match + "/roster", null, ADMIN)
+                .getResponse()
+                .getContentAsString(StandardCharsets.UTF_8);
+        return JsonPath.read(roster, "$.waiting[*].riotId");
+    }
+
+    @Test
+    void theFirstPlayerWaitingTakesAPlaceThatFreesUp() throws Exception {
+        int match = plan(1, "{\"date\": \"2026-12-05\", \"places\": 2}");
+        setStatus(match, wren, "CONFIRMED");
+        setStatus(match, heron, "CONFIRMED");
+        assertThat(answer(match, "YES", PLAYER))
+                .bodyJson()
+                .isLenientlyEqualTo("{\"matches\": [{\"status\": \"WAITING\", \"position\": 1}]}");
+
+        assertThat(setStatus(match, wren, "DECLINED")).bodyJson().isLenientlyEqualTo("""
+                        {"confirmed": [{"riotId": "Heron#EUW"}, {"riotId": "Kestrel#EUW", "source": "WAITING_LIST"}],
+                         "waiting": [], "declined": [{"riotId": "Wren#EUW"}]}""");
+        assertThat(events.stream(MovedUp.class)).containsExactly(new MovedUp(alsaceId, match, kestrel));
+    }
+
+    @Test
+    void addingAPlaceMovesTheNextOneUpAndNobodyJumpsTheQueue() throws Exception {
+        int match = plan(1, "{\"date\": \"2026-12-05\", \"places\": 2}");
+        setStatus(match, wren, "CONFIRMED");
+        setStatus(match, heron, "WAITING");
+        assertThat(answer(match, "YES", PLAYER))
+                .bodyJson()
+                .isLenientlyEqualTo("{\"matches\": [{\"status\": \"WAITING\", \"position\": 2}]}");
+        assertThat(waitingIds(match)).containsExactly("Heron#EUW", "Kestrel#EUW");
+
+        send(HttpMethod.PUT, SCHEDULE + "/1", "{\"date\": \"2026-12-05\", \"places\": 3}", ADMIN);
+        assertThat(waitingIds(match)).isEmpty();
+        assertThat(events.stream(MovedUp.class)).hasSize(2);
+    }
+
+    @Test
+    void nothingMovesWhileLockedOrDecidedByHand() throws Exception {
+        int match = plan(1, "{\"date\": \"2026-12-05\", \"places\": 2, \"autoPromote\": false}");
+        setStatus(match, wren, "CONFIRMED");
+        setStatus(match, heron, "CONFIRMED");
+        answer(match, "YES", PLAYER);
+        setStatus(match, wren, "DECLINED");
+        assertThat(waitingIds(match)).containsExactly("Kestrel#EUW");
+
+        send(HttpMethod.POST, ORG + "/admin/matches/" + match + "/lock", null, ADMIN);
+        send(
+                HttpMethod.PUT,
+                SCHEDULE + "/1",
+                "{\"date\": \"2026-12-05\", \"places\": 2, \"autoPromote\": true}",
+                ADMIN);
+        assertThat(waitingIds(match)).containsExactly("Kestrel#EUW");
+
+        send(HttpMethod.DELETE, ORG + "/admin/matches/" + match + "/lock", null, ADMIN);
+        assertThat(waitingIds(match)).isEmpty();
+        assertThat(events.stream(MovedUp.class)).hasSize(1);
+    }
+
+    @Test
+    void adminsReorderTheWaitingList() throws Exception {
+        int match = plan(1, "{\"date\": \"2026-12-05\", \"places\": 2}");
+        setStatus(match, kestrel, "CONFIRMED");
+        setStatus(match, wren, "CONFIRMED");
+        Player osprey = new Player(alsaceId, "Osprey#EUW", null, null);
+        em.persist(osprey);
+        em.flush();
+        setStatus(match, heron, "WAITING");
+        setStatus(match, osprey.getId(), "WAITING");
+
+        assertThat(send(
+                        HttpMethod.PUT,
+                        ORG + "/admin/matches/" + match + "/waiting",
+                        "{\"players\": [\"" + osprey.getId() + "\", \"" + heron + "\"]}",
+                        ADMIN))
+                .hasStatusOk();
+        assertThat(waitingIds(match)).containsExactly("Osprey#EUW", "Heron#EUW");
+        assertThat(send(
+                        HttpMethod.PUT,
+                        ORG + "/admin/matches/" + match + "/waiting",
+                        "{\"players\": [\"" + heron + "\"]}",
+                        ADMIN))
+                .hasStatus(409);
+
+        setStatus(match, kestrel, "DECLINED");
+        assertThat(waitingIds(match)).containsExactly("Heron#EUW");
     }
 }

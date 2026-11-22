@@ -1012,6 +1012,13 @@
     "noMatch": "No player left to write down matches this.",
     "invalid": "Check the number of places, then try again.",
     "conflict": "The match is full or called off: add a place, or move someone first.",
-    "failed": "That didn't work. Try again in a moment."
+    "failed": "That didn't work. Try again in a moment.",
+    "auto": "Move people up automatically",
+    "autoHelp": "When a place frees up, the first player waiting takes it. Turn it off to decide by hand.",
+    "autoOn": "Players waiting move up automatically.",
+    "autoOff": "You decide who moves up.",
+    "up": "Move {{name}} up",
+    "down": "Move {{name}} down",
+    "reordered": "The waiting list is saved."
   }
 }

@@ -1012,6 +1012,13 @@
     "noMatch": "Aucun joueur restant ne correspond.",
     "invalid": "Vérifiez le nombre de places, puis réessayez.",
     "conflict": "Le match est complet ou annulé : ajoutez une place, ou déplacez d'abord quelqu'un.",
-    "failed": "Cela n'a pas marché. Réessayez dans un instant."
+    "failed": "Cela n'a pas marché. Réessayez dans un instant.",
+    "auto": "Faire remonter automatiquement",
+    "autoHelp": "Quand une place se libère, le premier joueur en attente la prend. Désactivez pour décider à la main.",
+    "autoOn": "Les joueurs en attente remontent automatiquement.",
+    "autoOff": "Vous décidez qui remonte.",
+    "up": "Faire monter {{name}}",
+    "down": "Faire descendre {{name}}",
+    "reordered": "La liste d'attente est enregistrée."
   }
 }

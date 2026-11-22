@@ -151,6 +151,8 @@ export interface PlanInput {
   places: number;
   /** True calls it off, false puts it back on, null leaves it. */
   cancelled: boolean | null;
+  /** Whether the first player waiting takes a place that frees up; null leaves it. */
+  autoPromote?: boolean | null;
 }
 
 /** A player on a roster. */
@@ -178,6 +180,8 @@ export interface Roster {
   places: number;
   status: "PLANNED" | "CANCELLED";
   locked: boolean;
+  /** Whether the first player waiting takes a place as soon as one frees up. */
+  autoPromote: boolean;
   played: boolean;
   confirmed: RosterLine[];
   /** In the order they'll move up. */

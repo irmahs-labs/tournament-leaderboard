@@ -56,6 +56,10 @@ public class Match {
     @Column(nullable = false)
     private int places = 10;
 
+    /** Whether the first player waiting takes a place as soon as one frees up. */
+    @Column(nullable = false)
+    private boolean autoPromote = true;
+
     /** Set once the admins lock the roster: nobody's answer changes any more. */
     private Instant lockedAt;
 
@@ -84,6 +88,15 @@ public class Match {
         this.location = plan.location();
         this.replyBy = plan.replyBy();
         this.places = plan.places();
+    }
+
+    /** Turns automatic moves up the waiting list on, or off so the admins decide by hand. */
+    public void setAutoPromote(boolean autoPromote) {
+        this.autoPromote = autoPromote;
+    }
+
+    public boolean isAutoPromote() {
+        return autoPromote;
     }
 
     public void cancel() {

@@ -68,6 +68,11 @@ class Attendance {
         this.answeredAt = at;
     }
 
+    /** Moves them to another place in the waiting list. */
+    void requeue(Instant at) {
+        queuedAt = at;
+    }
+
     Integer getMatchId() {
         return matchId;
     }
