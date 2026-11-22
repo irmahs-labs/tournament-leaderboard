@@ -10,6 +10,27 @@
     </p>
   </div>
 
+  <section class="panel block" aria-labelledby="players-title">
+    <h2 class="heading" id="players-title">
+      {{ t("adminMembers.invitePlayers") }}
+    </h2>
+    <p class="muted small note">
+      {{ t("adminMembers.invitePlayersHelp", { org: current.organization()?.name
+      ?? "" }) }}
+    </p>
+    <div class="player-link">
+      <code>{{ playerLink() }}</code>
+      <button
+        type="button"
+        class="button-ghost small-button"
+        [disabled]="action.busy()"
+        (click)="copy(playerLink(), 'adminMembers.linkCopied')"
+      >
+        {{ t("adminMembers.copyLink") }}
+      </button>
+    </div>
+  </section>
+
   <section class="panel block" aria-labelledby="invite-title">
     <h2 class="heading" id="invite-title">{{ t("adminMembers.invite") }}</h2>
     <p class="muted small note">{{ t("adminMembers.inviteHelp") }}</p>

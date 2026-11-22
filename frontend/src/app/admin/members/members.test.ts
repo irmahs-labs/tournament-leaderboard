@@ -88,6 +88,28 @@ describe("the Members screen", () => {
     vi.restoreAllMocks();
   });
 
+  it("shows the link that invites players, and copies it", async () => {
+    const writeText = vi.fn<(text: string) => Promise<void>>(() =>
+      Promise.resolve()
+    );
+
+    vi.stubGlobal("navigator", { ...navigator, clipboard: { writeText } });
+
+    expect(text(page.querySelector(".player-link code"))).toBe(
+      `${location.origin}/org/alsace-arena/join`
+    );
+
+    button("Copy the link")?.click();
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      expect(text(page.querySelector("[role=status]"))).toBe("Link copied.");
+    });
+    expect(writeText).toHaveBeenCalledWith(
+      `${location.origin}/org/alsace-arena/join`
+    );
+    vi.unstubAllGlobals();
+  });
+
   it("lists the members with their role, and the waiting invites", () => {
     expect(
       texts(page, "#members-title ~ .scroll tbody td:first-child strong")

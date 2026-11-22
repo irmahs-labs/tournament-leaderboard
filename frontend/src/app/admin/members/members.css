@@ -178,3 +178,18 @@ textarea {
 select {
   width: 100%;
 }
+
+.player-link {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+}
+
+.player-link code {
+  padding: 10px 12px;
+  border: 1px solid var(--input-line);
+  background: var(--input-bg);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}

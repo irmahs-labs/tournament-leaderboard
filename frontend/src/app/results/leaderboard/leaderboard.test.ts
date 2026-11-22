@@ -83,7 +83,7 @@ describe("the season leaderboard", () => {
     const join = page.querySelector<HTMLAnchorElement>(".intro-side a.join");
 
     expect(text(join)).toBe("Join Alsace Arena");
-    expect(join?.getAttribute("href")).toBe("/org/alsace-arena/claim?join=1");
+    expect(join?.getAttribute("href")).toBe("/org/alsace-arena/join");
     expect(page.querySelector(".intro-side")?.firstElementChild).toBe(join);
   });
 

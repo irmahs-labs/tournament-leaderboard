@@ -1,5 +1,6 @@
 import { HttpTestingController } from "@angular/common/http/testing";
 import { TestBed } from "@angular/core/testing";
+import { Router } from "@angular/router";
 import { RouterTestingHarness } from "@angular/router/testing";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -115,8 +116,10 @@ describe("the Claim page", () => {
     await vi.waitFor(() => http.expectOne("/api/me").flush(ME));
   });
 
-  it("joins at once when they came from the leaderboard's Join button", async () => {
-    await open({ ...MEMBER, member: false }, "/org/alsace-arena/claim?join=1");
+  it("joins at once when they open the organisation's join link", async () => {
+    await open({ ...MEMBER, member: false }, "/org/alsace-arena/join");
+
+    expect(TestBed.inject(Router).url).toBe("/org/alsace-arena/join");
 
     const join = await vi.waitFor(() =>
       http.expectOne(`/api/orgs/${ALSACE.slug}/membership`)

@@ -12,10 +12,7 @@
     </div>
     <div class="intro-side">
       @if (canJoin(); as org) {
-      <a
-        class="button join"
-        [routerLink]="['/org', org.slug, 'claim']"
-        [queryParams]="{ join: 1 }"
+      <a class="button join" [routerLink]="['/org', org.slug, 'join']"
         >{{ t("leaderboard.join", { org: org.name }) }}</a
       >
       } @if (summary.hasValue()) {

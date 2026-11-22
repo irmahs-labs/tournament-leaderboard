@@ -491,7 +491,11 @@
     "invalid": "That was refused. Check the email and try again.",
     "conflict": "That isn't possible: they may already be an admin, or be the owner.",
     "failed": "That didn't work. Try again in a moment.",
-    "loading": "Loading the members…"
+    "loading": "Loading the members…",
+    "invitePlayers": "Invite players",
+    "invitePlayersHelp": "Share this link, on Discord for example: anyone who opens it signs in and joins {{org}} as a player, then claims their profile or creates one. It doesn't expire.",
+    "copyLink": "Copy the link",
+    "linkCopied": "Link copied."
   },
   "join": {
     "eyebrow": "Join an organisation",

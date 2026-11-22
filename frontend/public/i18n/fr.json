@@ -491,7 +491,11 @@
     "invalid": "Refusé. Vérifiez l’email et réessayez.",
     "conflict": "Impossible : cette personne est peut-être déjà admin, ou propriétaire.",
     "failed": "Ça n’a pas marché. Réessayez dans un instant.",
-    "loading": "Chargement des membres…"
+    "loading": "Chargement des membres…",
+    "invitePlayers": "Inviter des joueurs",
+    "invitePlayersHelp": "Partagez ce lien, sur Discord par exemple : toute personne qui l'ouvre se connecte et rejoint {{org}} comme joueur, puis revendique son profil ou en crée un. Il n'expire pas.",
+    "copyLink": "Copier le lien",
+    "linkCopied": "Lien copié."
   },
   "join": {
     "eyebrow": "Rejoindre une organisation",
