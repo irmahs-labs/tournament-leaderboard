@@ -8,6 +8,7 @@ import { MAX_TEXT } from "../../claim/api";
 import { CurrentSeason } from "../../results/current-season";
 import { splitRiotId } from "../../results/stats";
 import { LanguageService } from "../../shared/language";
+import { RiotId } from "../../shared/riot-id";
 import { AdminAction } from "../action";
 
 /** The tabs of the queue. */
@@ -31,7 +32,7 @@ export const CLAIM_LABELS: Readonly<Record<ClaimStatus, string>> = {
  * admin's own claim waits for another admin, unless they're the only one.
  */
 @Component({
-  imports: [TranslocoDirective],
+  imports: [RiotId, TranslocoDirective],
   selector: "app-claims-admin",
   styleUrl: "./claims.css",
   templateUrl: "./claims.html",

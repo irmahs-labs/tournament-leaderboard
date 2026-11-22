@@ -120,14 +120,14 @@ describe("the Season sign-ups page", () => {
     ).toStrictEqual([
       [
         "1",
-        "Kestrel #EUW",
+        "Kestrel#EUW",
         expect.any(String),
         "Themselves",
         "Withdraw Kestrel",
       ],
       [
         "2",
-        "Wren #EUW No account",
+        "Wren#EUW No account",
         expect.any(String),
         "By Camille Martin",
         "Withdraw Wren",
@@ -164,7 +164,9 @@ describe("the Season sign-ups page", () => {
     }
 
     harness.detectChanges();
-    expect(texts(page, "#add-title ~ .choices strong")).toStrictEqual(["Moth"]);
+    expect(texts(page, "#add-title ~ .choices strong")).toStrictEqual([
+      "Moth#EUW",
+    ]);
 
     button("Sign up Moth")?.click();
     const added = http.expectOne(`${API}/registrations/moth`);

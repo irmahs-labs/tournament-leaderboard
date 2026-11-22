@@ -1,4 +1,5 @@
 import type { GameLine, Stat } from "../../results/api";
+import { isRiotId } from "../../shared/riot-id";
 
 /** One player picked for a line, by id; or a Riot ID typed for a player not on the list yet. */
 export type LinePlayer =
@@ -172,7 +173,8 @@ export const isUsed = (row: Row): boolean =>
 export type Problem =
   | { kind: "empty" }
   | { kind: "invalid"; row: number; stat: Stat }
-  | { kind: "twice"; row: number };
+  | { kind: "twice"; row: number }
+  | { kind: "riotId"; row: number };
 
 export const problemOf = (
   rows: readonly Row[],
@@ -192,6 +194,10 @@ export const problemOf = (
 
       if (seen.has(who)) {
         return { kind: "twice", row: index + 1 };
+      }
+
+      if (row.player.kind === "new" && !isRiotId(row.player.riotId)) {
+        return { kind: "riotId", row: index + 1 };
       }
 
       seen.add(who);

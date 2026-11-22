@@ -9,6 +9,7 @@ import { TranslocoDirective } from "@jsverse/transloco";
 
 import { LanguageService } from "../../shared/language";
 import { RankPill } from "../../shared/rank-pill";
+import { RiotId } from "../../shared/riot-id";
 import type { Stat, Standing } from "../api";
 import type { Column } from "../stats";
 import { addsUp, columnsFor, decimalsOf, splitRiotId, valueOf } from "../stats";
@@ -20,7 +21,7 @@ import { addsUp, columnsFor, decimalsOf, splitRiotId, valueOf } from "../stats";
  * `totals`, the stats that add up show their totals over the games instead of their averages.
  */
 @Component({
-  imports: [RankPill, TranslocoDirective],
+  imports: [RankPill, RiotId, TranslocoDirective],
   selector: "app-standings-table",
   styleUrl: "./standings-table.css",
   templateUrl: "./standings-table.html",

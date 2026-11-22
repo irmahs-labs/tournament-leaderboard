@@ -7,6 +7,7 @@ import { firstValueFrom } from "rxjs";
 
 import { AdminAction } from "../admin/action";
 import { initials } from "../shared/organization";
+import { isRiotId } from "../shared/riot-id";
 import type { Membership } from "../shared/session";
 import { SessionService } from "../shared/session";
 
@@ -73,6 +74,13 @@ export class AccountPage {
     discord: string
   ): Promise<void> {
     event.preventDefault();
+
+    if (!isRiotId(riotId)) {
+      this.identity.refuse(this.#transloco.translate("players.riotIdShape"));
+
+      return;
+    }
+
     await this.identity.run(async () => {
       await firstValueFrom(
         this.#http.put("/api/me/identity", {

@@ -8,6 +8,7 @@ import { firstValueFrom } from "rxjs";
 import { CurrentSeason } from "../../results/current-season";
 import { splitRiotId } from "../../results/stats";
 import { LanguageService } from "../../shared/language";
+import { RiotId } from "../../shared/riot-id";
 import { AdminAction } from "../action";
 import type { AdminPlayer, AttendanceStatus, Roster, RosterLine } from "../api";
 
@@ -57,7 +58,7 @@ export const notOnRoster = (
  * account, change the places and lock the roster.
  */
 @Component({
-  imports: [RouterLink, TranslocoDirective],
+  imports: [RiotId, RouterLink, TranslocoDirective],
   selector: "app-roster-admin",
   styleUrl: "./roster.css",
   templateUrl: "./roster.html",

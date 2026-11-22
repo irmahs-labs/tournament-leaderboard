@@ -8,6 +8,7 @@ import { firstValueFrom } from "rxjs";
 import { CurrentSeason } from "../../results/current-season";
 import { splitRiotId } from "../../results/stats";
 import { LanguageService } from "../../shared/language";
+import { RiotId } from "../../shared/riot-id";
 import type { SignUp, SignUps } from "../../sign-ups/api";
 import { AdminAction } from "../action";
 import type { AdminPlayer } from "../api";
@@ -37,7 +38,7 @@ export const notSignedUp = (
  * anyone up, players without an account too, whether sign-ups are open or not.
  */
 @Component({
-  imports: [RouterLink, TranslocoDirective],
+  imports: [RiotId, RouterLink, TranslocoDirective],
   selector: "app-sign-ups-admin",
   styleUrl: "./sign-ups.css",
   templateUrl: "./sign-ups.html",

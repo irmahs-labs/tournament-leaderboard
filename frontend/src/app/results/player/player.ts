@@ -8,6 +8,7 @@ import { AdminAction } from "../../admin/action";
 import type { RankOption } from "../../admin/api";
 import { LanguageService } from "../../shared/language";
 import { RankPill } from "../../shared/rank-pill";
+import { RiotId } from "../../shared/riot-id";
 import { SessionService } from "../../shared/session";
 import type { PlayerMatch, PlayerSeason, Stat } from "../api";
 import { CurrentSeason } from "../current-season";
@@ -47,7 +48,7 @@ export const kdaOf = (match: PlayerMatch): string => {
  * averages, their points match by match and each match's line.
  */
 @Component({
-  imports: [RankPill, RouterLink, TranslocoDirective],
+  imports: [RankPill, RiotId, RouterLink, TranslocoDirective],
   selector: "app-player",
   styleUrl: "./player.css",
   templateUrl: "./player.html",

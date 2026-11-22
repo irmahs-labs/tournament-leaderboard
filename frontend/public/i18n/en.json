@@ -308,7 +308,8 @@
     "refused": "The scores were refused: check every number, then save again.",
     "failed": "That didn't work. Try again in a moment.",
     "loading": "Loading the game…",
-    "notWhole": "Line {{row}}: {{stat}} is a whole number, such as 3."
+    "notWhole": "Line {{row}}: {{stat}} is a whole number, such as 3.",
+    "riotIdShape": "Line {{row}}: a new player's Riot ID is Name#TAG, such as Kestrel#EUW."
   },
   "adminSeasons": {
     "title": "Seasons",
@@ -743,7 +744,8 @@
     "failed": "The players couldn't be loaded. Try again in a moment.",
     "loading": "Loading the players…",
     "claimLink": "Is one of them you? Claim your profile",
-    "publicSearchHint": "Riot ID or alias"
+    "publicSearchHint": "Riot ID or alias",
+    "riotIdShape": "A Riot ID is a name of 3 to 16 characters, # and a tag of 3 to 5 letters or numbers, such as Kestrel#EUW."
   },
   "player": {
     "allPlayers": "All players",
@@ -809,7 +811,6 @@
     "discord": "Your Discord username (optional)",
     "create": "Create my profile",
     "created": "Your profile is created. Now sign up for a season.",
-    "riotIdNeeded": "Type your Riot ID, such as Name#TAG.",
     "toSeasons": "Sign up for a season"
   },
   "adminClaims": {

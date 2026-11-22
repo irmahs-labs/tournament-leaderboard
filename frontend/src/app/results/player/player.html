@@ -19,8 +19,9 @@
         >
         <h1 class="display name">{{ id.name }}</h1>
         <p class="muted">
-          {{ view.player.riotId }} @if (view.player.aliases.length) { · {{
-          t("players.also", { names: view.player.aliases.join(", ") }) }} }
+          <app-riot-id [value]="view.player.riotId" /> @if
+          (view.player.aliases.length) { · {{ t("players.also", { names:
+          view.player.aliases.join(", ") }) }} }
         </p>
       </div>
       @if (view.player.currentRank; as rank) {
