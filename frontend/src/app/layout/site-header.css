@@ -210,36 +210,20 @@
 
 /*
  * Those who run the organisation get its pages and its admin pages, too many tabs to share a
- * line with the name: the name takes the first row, then the tabs and the controls share the
- * second, the same on both sides so switching doesn't move anything.
+ * line with the controls: the tabs take a row of their own, under the name and the controls,
+ * the same on both sides so switching doesn't move anything.
  */
 .tiered {
   padding-bottom: 0;
 }
 
-@media (min-width: 641px) {
-  .tiered {
-    row-gap: 6px;
-  }
+.tiered .tabs {
+  order: 3;
+  flex-basis: 100%;
+}
 
-  /* The line break after the name. */
-  .tiered::after {
-    content: "";
-    order: 2;
-    flex-basis: 100%;
-  }
-
-  .tiered .tabs {
-    order: 3;
-    flex: 1 1 auto;
-    align-self: flex-end;
-  }
-
-  .tiered .tools {
-    order: 4;
-    margin-left: auto;
-    padding-bottom: 8px;
-  }
+.tiered .tools {
+  margin-left: auto;
 }
 
 /* Back to Tournament Leaderboard's home, beside the organisation's own name. */
