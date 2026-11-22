@@ -24,6 +24,28 @@
   font-size: 14px;
 }
 
+.intro-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 640px) {
+  .intro-side {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .intro-side .played {
+    align-self: flex-start;
+  }
+
+  .join {
+    text-align: center;
+  }
+}
+
 .notice {
   margin: 0;
   padding: 24px;

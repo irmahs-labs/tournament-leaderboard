@@ -10,12 +10,21 @@
       <h1 class="display">{{ t("leaderboard.title") }}</h1>
       <p class="lede muted">{{ t("leaderboard.lede") }}</p>
     </div>
-    @if (summary.hasValue()) {
-    <span class="pill played"
-      >{{ t("leaderboard.played", { played: summary.value().matchesPlayed,
-      planned: summary.value().matchCount }) }}</span
-    >
-    }
+    <div class="intro-side">
+      @if (canJoin(); as org) {
+      <a
+        class="button join"
+        [routerLink]="['/org', org.slug, 'claim']"
+        [queryParams]="{ join: 1 }"
+        >{{ t("leaderboard.join", { org: org.name }) }}</a
+      >
+      } @if (summary.hasValue()) {
+      <span class="pill played"
+        >{{ t("leaderboard.played", { played: summary.value().matchesPlayed,
+        planned: summary.value().matchCount }) }}</span
+      >
+      }
+    </div>
   </div>
 
   @if (current.failed() || board.error()) {

@@ -4,10 +4,13 @@ import { Router } from "@angular/router";
 import type { RouterTestingHarness } from "@angular/router/testing";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { Me } from "../../shared/session";
+import { SessionService } from "../../shared/session";
 import {
   ALSACE,
   answer,
   LEADERBOARD,
+  ME,
   openAlsace,
   rendered,
   RULES,
@@ -59,6 +62,37 @@ describe("the season leaderboard", () => {
 
     return rendered(harness);
   };
+
+  /** Says who is signed in before the page opens: nobody when null. */
+  const signedIn = async (me: Me | null): Promise<void> => {
+    const loading = TestBed.inject(SessionService).load();
+    const request = http.expectOne("/api/me");
+
+    if (me) {
+      request.flush(me);
+    } else {
+      request.flush(null, { status: 401, statusText: "Unauthorized" });
+    }
+
+    await loading;
+  };
+
+  it("invites anyone who isn't a member to join, above the matches played", async () => {
+    await signedIn(null);
+    const page = await open();
+    const join = page.querySelector<HTMLAnchorElement>(".intro-side a.join");
+
+    expect(text(join)).toBe("Join Alsace Arena");
+    expect(join?.getAttribute("href")).toBe("/org/alsace-arena/claim?join=1");
+    expect(page.querySelector(".intro-side")?.firstElementChild).toBe(join);
+  });
+
+  it("doesn't invite a member", async () => {
+    await signedIn(ME);
+    const page = await open();
+
+    expect(page.querySelector("a.join")).toBeNull();
+  });
 
   it("shows the most recent season by default", async () => {
     const page = await open();

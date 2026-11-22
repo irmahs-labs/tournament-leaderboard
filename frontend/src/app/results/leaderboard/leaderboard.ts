@@ -1,9 +1,11 @@
 import { httpResource } from "@angular/common/http";
 import { Component, computed, inject } from "@angular/core";
+import { RouterLink } from "@angular/router";
 import { TranslocoDirective, TranslocoService } from "@jsverse/transloco";
 
 import { LanguageService } from "../../shared/language";
 import { RankPill } from "../../shared/rank-pill";
+import { SessionService } from "../../shared/session";
 import type { Leaderboard, Rules, Summary } from "../api";
 import { CurrentSeason } from "../current-season";
 import { StandingsTable } from "../standings-table/standings-table";
@@ -15,7 +17,7 @@ import { formulaOf, splitRiotId, winnableBonuses } from "../stats";
  * points are counted. Shows the season picked in the header.
  */
 @Component({
-  imports: [RankPill, StandingsTable, TranslocoDirective],
+  imports: [RankPill, RouterLink, StandingsTable, TranslocoDirective],
   selector: "app-leaderboard",
   styleUrl: "./leaderboard.css",
   templateUrl: "./leaderboard.html",
@@ -23,6 +25,22 @@ import { formulaOf, splitRiotId, winnableBonuses } from "../stats";
 export class LeaderboardPage {
   protected readonly current = inject(CurrentSeason);
   protected readonly language = inject(LanguageService);
+  readonly #session = inject(SessionService);
+
+  /**
+   * The organisation, when whoever is looking isn't one of its members yet, signed in or not: the
+   * page then offers to join it and play in its matches.
+   */
+  protected readonly canJoin = computed(() => {
+    const org = this.current.organization();
+    const me = this.#session.me();
+
+    return org &&
+      me !== undefined &&
+      !me?.memberships.some((membership) => membership.slug === org.slug)
+      ? org
+      : null;
+  });
 
   protected readonly board = httpResource<Leaderboard>(() =>
     this.#api("leaderboard")

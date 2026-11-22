@@ -75,7 +75,8 @@
     "perBonus": "{{points}} per bonus",
     "perWin": "{{points}} per win",
     "bonuses": "Bonuses:",
-    "setBy": "Set by {{org}} admins for {{season}}."
+    "setBy": "Set by {{org}} admins for {{season}}.",
+    "join": "Join {{org}}"
   },
   "matches": {
     "title": "Matches",
