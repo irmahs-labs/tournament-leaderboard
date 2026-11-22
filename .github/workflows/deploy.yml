@@ -1,9 +1,8 @@
 name: Deploy
 
-# Run by CI (ci.yml) after the build and tests pass on a push to migration, the rewrite's branch
-# for now, so nothing that failed them goes live. Once the rewrite replaces the legacy site, it
-# deploys version tags. Before each deploy it dumps the database; after it, it checks the address
-# through Caddy.
+# Run by CI (ci.yml) after the build and tests pass on a push to main, so nothing that failed them
+# goes live. Before each deploy it dumps the database; after it, it checks the address through
+# Caddy.
 on:
   workflow_call:
   # Also by hand (Actions → Deploy → Run workflow), once this file is on the default branch.

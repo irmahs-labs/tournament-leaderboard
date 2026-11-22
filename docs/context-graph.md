@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-22, with the Help page (phase 10b).
+Last updated: 2026-11-22: `main` is the app's branch and deploys production; the legacy site is asleep.
 
 ## System
 
@@ -16,7 +16,7 @@ flowchart LR
     app -->|JDBC as leaderboard_app| db[(Postgres 17<br/>internal network)]
     app -->|OAuth 2 / OIDC| google[Google sign-in]
     flyway[Flyway, as leaderboard_owner] --> db
-    legacy[legacy/ Next.js on Vercel<br/>frozen, live until cutover] -.-> supabase[(Supabase)]
+    legacy[legacy/ Next.js on Vercel<br/>asleep, frozen] -.-> supabase[(Supabase)]
     supabase -.->|deploy/import, on-server.sh at cutover| db
 ```
 
@@ -30,7 +30,7 @@ flowchart TD
     be --> mig[db/migration<br/>Flyway scripts]
     deploy[deploy/<br/>db-init, import, rollout.sh, README] --> prod[compose.prod.yaml]
     ci[.github/workflows/ci.yml<br/>mvnw verify + SonarQube Cloud] --> root
-    ci -->|"after build, on a push to migration"| dep[.github/workflows/deploy.yml<br/>dump, rollout.sh: the new app beside the old, then the old stopped; health check through Caddy]
+    ci -->|"after build, on a push to main"| dep[.github/workflows/deploy.yml<br/>dump, rollout.sh: the new app beside the old, then the old stopped; health check through Caddy]
     dep --> prod
     legacy[legacy/<br/>frozen: never touch]
 ```
@@ -344,10 +344,9 @@ flowchart LR
     p10b --> p11[11 Exports and poster] --> p12[12 Moderation] --> p13[13 Merge tool and scan]
 ```
 
-✓ done · ▶ next. Until the switch-over (6), every merge into `migration` that passes CI deploys
-production, and the Protect migration ruleset lets a pull request merge only once Build and test
-(quality gate included) has passed; version tags, a staging copy from `main` and release-please
-come with it. The full plan, with each phase's exit criterion, is the migration plan page
+✓ done · ▶ next. Every merge into `main` that passes CI deploys production, and the main
+ruleset lets a pull request merge only once Build and test (quality gate included) has passed.
+Until 2026-11-22 that branch was `migration`, now retired. The full plan, with each phase's exit criterion, is the migration plan page
 kept with the project designs.
 
 Phases 7, 8, 9, 9b, 10 and 10b are built. Phase 10 has creating one's own profile, the

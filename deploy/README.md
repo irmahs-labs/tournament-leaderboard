@@ -16,7 +16,7 @@ visitor ──HTTPS──▶ Cloudflare ──▶ Caddy (irmahs-labs/proxy) ─�
 | `Dockerfile` (repo root) | Builds the Spring Boot jar, Angular included, into one image on port 8080 |
 | `compose.prod.yaml` (repo root) | Postgres on `internal` only; the app on `internal` and `proxy`, publishing no port |
 | `deploy/db-init/01-app-role.sh` | First start only: creates `leaderboard_app`, the role the app connects with |
-| `.github/workflows/deploy.yml` | Called by CI after the build and tests pass on a merge into `migration`: SSH in as `deploy`, check out the run's commit, write `.env`, dump the database, `deploy/rollout.sh`, then check the address through Caddy |
+| `.github/workflows/deploy.yml` | Called by CI after the build and tests pass on a merge into `main`: SSH in as `deploy`, check out the run's commit, write `.env`, dump the database, `deploy/rollout.sh`, then check the address through Caddy |
 | `deploy/rollout.sh` | Builds the new image and starts it next to the running app; once healthy, stops the old one gracefully. See below |
 
 ## Database roles
@@ -55,7 +55,7 @@ the GitHub secret **and** run `ALTER ROLE … PASSWORD '…'` in the database.
    the other apps.
 3. **Folder**, as admin on the server, if the deploy can't create it:
    `sudo mkdir /srv/tournament-leaderboard && sudo chown deploy:deploy /srv/tournament-leaderboard`
-4. **Deploy**: every merge into `migration` that passes CI deploys that commit (Actions → CI, its
+4. **Deploy**: every merge into `main` that passes CI deploys that commit (Actions → CI, its
    Deploy job). It waits until the app's health check passes, so a broken start fails the run,
    then checks `https://tournament-leaderboard.irmahs.dev/actuator/health` through Caddy, from the
    server: Cloudflare answers 403 to GitHub's runners.
@@ -73,16 +73,12 @@ the GitHub secret **and** run `ALTER ROLE … PASSWORD '…'` in the database.
 
    Merge it after the DNS records exist; Caddy gets the certificate on the first visit.
 
-## Until the switch-over
+## Only what passed goes live
 
-Decided on 2026-11-18: every merge into `migration` that passes CI deploys production, as above,
-until the rewrite replaces the legacy site. Version tags deploying production, `main` deploying a
-staging copy, and release-please come with the switch-over (phase 6), not before.
-
-The **Protect migration** ruleset makes this safe: `migration` changes only through pull requests,
-can't be force-pushed or deleted, and a pull request merges only once its **Build and test** check
-has passed. On pull requests that check includes the SonarQube Cloud quality gate, so a failing
-gate stops a change before it can reach production.
+The **Protect main** ruleset makes this safe: `main` changes only through pull requests, can't be
+force-pushed or deleted, and a pull request merges only once its **Build and test** check has
+passed, SonarQube Cloud quality gate included. Until 2026-11-22 the rewrite lived in `migration`,
+which deployed the same way; it's retired now.
 
 ## Deploys without a gap
 
