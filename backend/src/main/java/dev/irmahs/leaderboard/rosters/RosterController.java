@@ -84,6 +84,12 @@ public class RosterController {
         return rosters.reorder(slug, match, input.players());
     }
 
+    @PostMapping(ADMIN + "/matches/{match}/remind")
+    @PreAuthorize("@orgAccess.isAdmin(#slug, authentication)")
+    public Reminder remind(@PathVariable String slug, @PathVariable int match) {
+        return new Reminder(rosters.remind(slug, match));
+    }
+
     @PostMapping(ADMIN + "/matches/{match}/lock")
     @PreAuthorize("@orgAccess.isAdmin(#slug, authentication)")
     public Roster lock(@PathVariable String slug, @PathVariable int match) {
@@ -113,6 +119,9 @@ public class RosterController {
     public record StatusInput(AttendanceStatus status) {}
 
     public record AnswerInput(Answer answer) {}
+
+    /** @param players how many players were reminded */
+    public record Reminder(int players) {}
 
     /** The players waiting, first to move up first. */
     public record OrderInput(List<UUID> players) {}

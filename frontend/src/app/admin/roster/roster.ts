@@ -247,6 +247,26 @@ export class RosterAdminPage {
     });
   }
 
+  /** Sends a reminder to the players who haven't answered yet. */
+  protected async remind(): Promise<void> {
+    const api = this.#api();
+
+    if (!api) {
+      return;
+    }
+
+    await this.action.run(async () => {
+      const sent = await firstValueFrom(
+        this.#http.post<{ players: number }>(`${api}/remind`, null)
+      );
+
+      return this.#transloco.translate(
+        this.language.plural("adminRoster.reminded", sent.players),
+        { count: String(sent.players) }
+      );
+    });
+  }
+
   protected async setLocked(locked: boolean): Promise<void> {
     await this.#change(
       (api) =>

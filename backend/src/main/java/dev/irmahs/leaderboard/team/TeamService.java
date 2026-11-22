@@ -2,6 +2,7 @@ package dev.irmahs.leaderboard.team;
 
 import dev.irmahs.leaderboard.accounts.AccountService;
 import dev.irmahs.leaderboard.accounts.AppUser;
+import dev.irmahs.leaderboard.events.AdminChanged;
 import dev.irmahs.leaderboard.members.MemberRole;
 import dev.irmahs.leaderboard.members.OrganizationMember;
 import dev.irmahs.leaderboard.members.OrganizationMemberRepository;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,16 +40,19 @@ public class TeamService {
     private final OrganizationMemberRepository members;
     private final InviteRepository invites;
     private final AccountService accounts;
+    private final ApplicationEventPublisher events;
 
     TeamService(
             OrganizationService organizations,
             OrganizationMemberRepository members,
             InviteRepository invites,
-            AccountService accounts) {
+            AccountService accounts,
+            ApplicationEventPublisher events) {
         this.organizations = organizations;
         this.members = members;
         this.invites = invites;
         this.accounts = accounts;
+        this.events = events;
     }
 
     /** Everyone who joined, and the invites still waiting to be used. */
@@ -112,6 +117,7 @@ public class TeamService {
         Instant expiresAt = Instant.now().plus(Duration.ofMinutes(input.expiresInMinutes()));
         Invite invite = invites.save(Invite.personal(
                 organization.getId(), email, InviteCodes.hash(InviteCodes.normalize(code)), inviter, expiresAt));
+        events.publishEvent(new AdminChanged(organization.getId(), "ADMIN_INVITED", Map.of("email", email)));
         return new NewInvite(invite.getId(), code, email, expiresAt);
     }
 
@@ -138,6 +144,10 @@ public class TeamService {
             throw ownerConflict();
         }
         member.changeRole(role);
+        events.publishEvent(new AdminChanged(
+                member.getOrganizationId(),
+                role == MemberRole.ADMIN ? "MADE_ADMIN" : "MADE_PLAYER",
+                Map.of("member", nameOf(userId))));
     }
 
     /**
@@ -151,6 +161,8 @@ public class TeamService {
             throw ownerConflict();
         }
         members.delete(member);
+        events.publishEvent(
+                new AdminChanged(member.getOrganizationId(), "MEMBER_REMOVED", Map.of("member", nameOf(userId))));
     }
 
     /**
@@ -190,6 +202,17 @@ public class TeamService {
         owner.giveUpOwnership();
         members.flush();
         next.takeOwnership();
+        events.publishEvent(
+                new AdminChanged(organization.getId(), "OWNERSHIP_TRANSFERRED", Map.of("member", nameOf(newOwnerId))));
+    }
+
+    /** A member's name for a notice: their Google name, or their email. */
+    private String nameOf(UUID userId) {
+        AppUser user = accounts.usersById(List.of(userId)).get(userId);
+        if (user == null) {
+            return "";
+        }
+        return user.getDisplayName() == null ? user.getEmail() : user.getDisplayName();
     }
 
     /**

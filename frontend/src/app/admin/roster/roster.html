@@ -102,7 +102,20 @@
       {{ t("adminRoster.lists." + list, { count: lines.length, places: r.places
       }) }}
     </h2>
-    @if (lines.length === 0) {
+    @if (list === "noAnswer" && lines.length > 0 && !r.locked && !r.played &&
+    r.status !== "CANCELLED") {
+    <div class="remind">
+      <button
+        type="button"
+        class="button-ghost small-button"
+        [disabled]="action.busy()"
+        (click)="remind()"
+      >
+        {{ t("adminRoster.remind") }}
+      </button>
+      <span class="muted small">{{ t("adminRoster.remindHelp") }}</span>
+    </div>
+    } @if (lines.length === 0) {
     <p class="muted">{{ t("adminRoster.empty." + list) }}</p>
     } @else {
     <ol class="lines" [class.numbered]="list === 'waiting'">

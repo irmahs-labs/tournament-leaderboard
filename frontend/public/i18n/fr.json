@@ -30,7 +30,11 @@
     "switchLanguage": "EN / FR : passer en anglais",
     "home": "Accueil de Tournament Leaderboard",
     "myOrganisations": "Mes organisations",
-    "darkTheme": "Thème sombre"
+    "darkTheme": "Thème sombre",
+    "notices": {
+      "one": "Notifications : {{count}} non lue",
+      "other": "Notifications : {{count}} non lues"
+    }
   },
   "leaderboard": {
     "title": "Classement de la saison",
@@ -1019,6 +1023,57 @@
     "autoOff": "Vous décidez qui remonte.",
     "up": "Faire monter {{name}}",
     "down": "Faire descendre {{name}}",
-    "reordered": "La liste d'attente est enregistrée."
+    "reordered": "La liste d'attente est enregistrée.",
+    "remind": "Leur rappeler",
+    "remindHelp": "Envoie une notification à chaque joueur·se avec un compte qui n'a pas répondu. Un rappel part aussi deux jours avant la date limite de réponse.",
+    "reminded": {
+      "one": "{{count}} joueur·se relancé·e.",
+      "other": "{{count}} joueur·ses relancé·es."
+    }
+  },
+  "notices": {
+    "eyebrow": "Votre compte",
+    "title": "Notifications",
+    "lede": "Les nouvelles de vos organisations : matchs prévus, déplacés ou annulés, places libérées, demandes, et ce que les autres admins ont changé.",
+    "empty": "Rien de nouveau pour l'instant.",
+    "loading": "Chargement de vos notifications…",
+    "someone": "Un·e admin",
+    "noDate": "date à venir",
+    "kinds": {
+      "MATCH_PLANNED": "Le match {{match}} de {{season}} est prévu : {{when}}. Dites si vous venez.",
+      "MATCH_MOVED": "Le match {{match}} de {{season}} a changé : désormais {{when}}.",
+      "MATCH_CANCELLED": "Le match {{match}} de {{season}} est annulé.",
+      "REMINDER": "Vous n'avez pas encore dit si vous venez au match {{match}} de {{season}} ({{when}}).",
+      "MOVED_UP": "Une place s'est libérée : vous êtes confirmé·e pour le match {{match}} de {{season}} ({{when}}).",
+      "CLAIM_ACCEPTED": "Votre demande pour {{riotId}} est acceptée : ses résultats sont désormais les vôtres.",
+      "CLAIM_DECLINED": "Votre demande pour {{riotId}} est refusée.",
+      "CLAIM_DECLINED_BECAUSE": "Votre demande pour {{riotId}} est refusée : « {{reason}} ».",
+      "CLAIM_RECEIVED": "{{by}} dit être {{riotId}}.",
+      "ORGANIZATION_SUSPENDED": "Votre organisation a été suspendue par la plateforme : ses pages sont masquées pour l'instant.",
+      "ORGANIZATION_REACTIVATED": "Votre organisation est de nouveau active : ses pages sont revenues."
+    },
+    "changes": {
+      "GAME_SAVED": "{{by}} a enregistré la partie {{game}} du match {{match}} de {{season}}.",
+      "GAME_CLEARED": "{{by}} a effacé la partie {{game}} du match {{match}} de {{season}}.",
+      "SEASON_STARTED": "{{by}} a lancé {{season}}.",
+      "SEASON_EDITED": "{{by}} a modifié {{season}}.",
+      "RULES_CHANGED": "{{by}} a changé le calcul des points de {{season}}.",
+      "BRANDING_CHANGED": "{{by}} a changé l'identité visuelle de l'organisation.",
+      "ADMIN_INVITED": "{{by}} a invité {{member}} comme admin.",
+      "MADE_ADMIN": "{{by}} a nommé {{member}} admin.",
+      "MADE_PLAYER": "{{by}} a fait de {{member}} un·e joueur·se.",
+      "MEMBER_REMOVED": "{{by}} a retiré {{member}} de l'organisation.",
+      "OWNERSHIP_TRANSFERRED": "{{by}} a confié l'organisation à {{member}}."
+    },
+    "open": {
+      "MATCH_PLANNED": "Mes saisons",
+      "MATCH_MOVED": "Mes saisons",
+      "MATCH_CANCELLED": "Mes saisons",
+      "REMINDER": "Mes saisons",
+      "MOVED_UP": "Mes saisons",
+      "CLAIM_ANSWERED": "Votre demande",
+      "CLAIM_RECEIVED": "Demandes",
+      "ADMIN_CHANGE": "Admin"
+    }
   }
 }

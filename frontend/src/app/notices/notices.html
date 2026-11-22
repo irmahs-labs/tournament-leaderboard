@@ -1,0 +1,31 @@
+<ng-container *transloco="let t">
+  <div class="intro-text">
+    <span class="eyebrow">{{ t("notices.eyebrow") }}</span>
+    <h1 class="display">{{ t("notices.title") }}</h1>
+    <p class="lede muted">{{ t("notices.lede") }}</p>
+  </div>
+
+  @if (notices.latest(); as latest) { @if (latest.notices.length === 0) {
+  <p class="panel empty muted">{{ t("notices.empty") }}</p>
+  } @else {
+  <ol class="list">
+    @for (notice of latest.notices; track notice.id) { @let link =
+    linkOf(notice);
+    <li class="panel notice" [class.unread]="!notice.read">
+      <div class="notice-head">
+        <span class="eyebrow">{{ notice.organizationName }}</span>
+        <span class="muted small">{{ language.moment(notice.at) }}</span>
+      </div>
+      <p>{{ text(notice) }}</p>
+      @if (link) {
+      <a class="small" [routerLink]="link"
+        >{{ t("notices.open." + notice.kind) }}</a
+      >
+      }
+    </li>
+    }
+  </ol>
+  } } @else {
+  <p class="muted" role="status">{{ t("notices.loading") }}</p>
+  }
+</ng-container>

@@ -2,6 +2,7 @@ package dev.irmahs.leaderboard.rosters;
 
 import dev.irmahs.leaderboard.accounts.AccountService;
 import dev.irmahs.leaderboard.accounts.AppUser;
+import dev.irmahs.leaderboard.events.MatchChanged;
 import dev.irmahs.leaderboard.matches.GameRepository;
 import dev.irmahs.leaderboard.matches.Match;
 import dev.irmahs.leaderboard.matches.Match.Plan;
@@ -131,10 +132,16 @@ public class RosterService {
             throw badRequest(season.getName() + " has matches 1 to " + season.getMatchCount());
         }
         Plan plan = check(input, organization.getPlayersPerMatch());
-        Match match = matches.findBySeasonAndMatchNumber(season, matchNumber)
+        Match existing = matches.findBySeasonAndMatchNumber(season, matchNumber)
                 .map(found ->
                         matches.lockById(found.getId(), organization.getId()).orElseThrow())
-                .orElseGet(() -> matches.save(new Match(season, matchNumber, plan.date())));
+                .orElse(null);
+        Match match = existing != null ? existing : matches.save(new Match(season, matchNumber, plan.date()));
+        boolean wasOn = existing != null && !existing.isCancelled() && existing.getMatchDate() != null;
+        List<Object> whenBefore = List.of(
+                String.valueOf(match.getMatchDate()),
+                String.valueOf(match.getStartTime()),
+                String.valueOf(match.getLocation()));
         requireRoomFor(match, plan.places());
         boolean roomBefore = match.isAutoPromote() && !match.isCancelled();
         int placesBefore = match.getPlaces();
@@ -152,6 +159,7 @@ public class RosterService {
             fillFromWaitingList(match);
         }
         matches.flush();
+        announce(match, wasOn, whenBefore);
         return schedule(slug, number);
     }
 
@@ -356,7 +364,58 @@ public class RosterService {
         return rosterOf(match);
     }
 
+    /**
+     * Reminds the players signed up for the season who haven't answered, those with an account.
+     *
+     * @return how many were reminded
+     * @throws ResponseStatusException 404 for an unknown match, 409 when it's called off, locked
+     *     or played
+     */
+    public int remind(String slug, int matchId) {
+        Organization organization = organizations.requireActive(slug);
+        Match match = requireMatch(organization, matchId);
+        if (match.isCancelled() || match.isLocked() || games.countByMatch(match) > 0) {
+            throw conflict("Only an open match's players are reminded");
+        }
+        List<UUID> notAnswered = notAnswered(match);
+        events.publishEvent(new Reminded(organization.getId(), match.getId(), notAnswered));
+        return notAnswered.size();
+    }
+
+    /** The players signed up for the match's season who haven't answered yet. */
+    public List<UUID> notAnswered(Match match) {
+        Set<UUID> answered = attendance.findByMatchId(match.getId()).stream()
+                .map(Attendance::getPlayerId)
+                .collect(Collectors.toSet());
+        return signUps.signedUp(match.getSeason()).stream()
+                .filter(id -> !answered.contains(id))
+                .toList();
+    }
+
     // Shared.
+
+    /**
+     * Tells the players signed up when a match is first planned with a date, moved, called off or
+     * put back on. A change to its places alone isn't news.
+     */
+    private void announce(Match match, boolean wasOn, List<Object> whenBefore) {
+        boolean isOn = !match.isCancelled() && match.getMatchDate() != null;
+        String change;
+        if (wasOn && !isOn && match.isCancelled()) {
+            change = "CANCELLED";
+        } else if (!wasOn && isOn) {
+            change = "PLANNED";
+        } else if (isOn
+                && !whenBefore.equals(List.of(
+                        String.valueOf(match.getMatchDate()),
+                        String.valueOf(match.getStartTime()),
+                        String.valueOf(match.getLocation())))) {
+            change = "MOVED";
+        } else {
+            return;
+        }
+        events.publishEvent(new MatchChanged(match.getOrganizationId(), match.getId(), change));
+    }
 
     /**
      * After a place frees up (a confirmed player leaves, a place is added, automatic moves or the

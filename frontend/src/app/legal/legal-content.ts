@@ -217,6 +217,12 @@ const EN: Record<LegalPageId, LegalDocument> = {
               "Deleted when you sign out, or 30 minutes after your last visit.",
             ],
             [
+              "People who sign in",
+              "Your notices: news about your matches, your claims and, for admins, what other admins changed, with when you read them.",
+              "Telling you what changed in your organisations, which you ask for by joining one. Necessary for the service you use (article 6(1)(b)).",
+              "Until 90 days after you read them, or until your account is deleted.",
+            ],
+            [
               "People invited to an organisation",
               "The email address the invitation is for.",
               "Making sure only that person can use it. Necessary for the service (article 6(1)(b)).",
@@ -494,6 +500,12 @@ const FR: Record<LegalPageId, LegalDocument> = {
               "Votre session de connexion : ce que Google a transmis à la connexion (identifiant du compte, adresse e-mail et nom), gardé dans la base de données du site pour qu'une mise à jour du site ne vous déconnecte pas.",
               "Vous garder connecté, ce que vous demandez en vous connectant. Nécessaire au service utilisé (article 6(1)(b)).",
               "Supprimée à la déconnexion, ou 30 minutes après votre dernière visite.",
+            ],
+            [
+              "Personnes qui se connectent",
+              "Vos notifications : les nouvelles de vos matchs, de vos demandes et, pour les admins, ce que les autres admins ont changé, avec la date à laquelle vous les avez lues.",
+              "Vous dire ce qui a changé dans vos organisations, ce que vous demandez en en rejoignant une. Nécessaire au service que vous utilisez (article 6(1)(b)).",
+              "Jusqu'à 90 jours après leur lecture, ou jusqu'à la suppression de votre compte.",
             ],
             [
               "Personnes invitées dans une organisation",

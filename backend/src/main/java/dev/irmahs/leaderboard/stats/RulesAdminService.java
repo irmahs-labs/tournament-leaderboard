@@ -1,5 +1,6 @@
 package dev.irmahs.leaderboard.stats;
 
+import dev.irmahs.leaderboard.events.AdminChanged;
 import dev.irmahs.leaderboard.scoring.BonusCalculator;
 import dev.irmahs.leaderboard.scoring.BonusCalculator.Entry;
 import dev.irmahs.leaderboard.seasons.BonusAward;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,13 +51,19 @@ public class RulesAdminService {
     private final GameStatRepository lines;
     private final BonusCalculator bonuses;
     private final NextSeasonRules nextSeason;
+    private final ApplicationEventPublisher events;
 
     RulesAdminService(
-            SeasonService seasons, GameStatRepository lines, BonusCalculator bonuses, NextSeasonRules nextSeason) {
+            SeasonService seasons,
+            GameStatRepository lines,
+            BonusCalculator bonuses,
+            NextSeasonRules nextSeason,
+            ApplicationEventPublisher events) {
         this.seasons = seasons;
         this.lines = lines;
         this.bonuses = bonuses;
         this.nextSeason = nextSeason;
+        this.events = events;
     }
 
     /**
@@ -68,6 +76,7 @@ public class RulesAdminService {
         Season season = requireOpen(slug, number);
         change(season, input);
         reaward(season);
+        rulesChanged(season);
         return seasons.rules(slug, number);
     }
 
@@ -90,10 +99,17 @@ public class RulesAdminService {
         change(draft, input);
         RulesSnapshot rules = RulesSnapshot.of(draft);
         nextSeason.save(season.getOrganizationId(), rules);
+        rulesChanged(season);
         return SeasonService.rulesOf(rules);
     }
 
     /** Applies the changes to the season; what the input leaves out stays as it is. */
+    /** Tells the other admins the scoring rules changed. */
+    private void rulesChanged(Season season) {
+        events.publishEvent(
+                new AdminChanged(season.getOrganizationId(), "RULES_CHANGED", Map.of("season", season.getName())));
+    }
+
     private static void change(Season season, RulesInput input) {
         if (input.stats() != null) {
             for (StatRuleInput rule : input.stats()) {
@@ -134,6 +150,7 @@ public class RulesAdminService {
         Season season = requireOpen(slug, number);
         season.usePlatformDefaults();
         reaward(season);
+        rulesChanged(season);
         return seasons.rules(slug, number);
     }
 
@@ -213,6 +230,7 @@ public class RulesAdminService {
         }
         season.addBonus(codeFor(season, label), label, award, stat, points, threshold);
         reaward(season);
+        rulesChanged(season);
         return seasons.rules(slug, number);
     }
 
@@ -231,6 +249,7 @@ public class RulesAdminService {
         lines.flush();
         season.removeBonus(bonus);
         reaward(season);
+        rulesChanged(season);
         return seasons.rules(slug, number);
     }
 

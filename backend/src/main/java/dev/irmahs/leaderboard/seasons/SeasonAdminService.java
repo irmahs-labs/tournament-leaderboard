@@ -1,11 +1,14 @@
 package dev.irmahs.leaderboard.seasons;
 
+import dev.irmahs.leaderboard.events.AdminChanged;
 import dev.irmahs.leaderboard.organizations.OrganizationService;
 import dev.irmahs.leaderboard.seasons.Season.GameRange;
 import dev.irmahs.leaderboard.seasons.SeasonService.SeasonView;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.UUID;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,16 +27,19 @@ public class SeasonAdminService {
     private final SeasonRepository seasons;
     private final SeasonService reader;
     private final NextSeasonRules nextSeason;
+    private final ApplicationEventPublisher events;
 
     SeasonAdminService(
             OrganizationService organizations,
             SeasonRepository seasons,
             SeasonService reader,
-            NextSeasonRules nextSeason) {
+            NextSeasonRules nextSeason,
+            ApplicationEventPublisher events) {
         this.organizations = organizations;
         this.seasons = seasons;
         this.reader = reader;
         this.nextSeason = nextSeason;
+        this.events = events;
     }
 
     /**
@@ -82,7 +88,9 @@ public class SeasonAdminService {
         } else {
             season.copyRulesFrom(source);
         }
-        return SeasonView.of(seasons.save(season));
+        Season started = seasons.save(season);
+        events.publishEvent(new AdminChanged(organizationId, "SEASON_STARTED", Map.of("season", started.getName())));
+        return SeasonView.of(started);
     }
 
     /**
@@ -113,6 +121,8 @@ public class SeasonAdminService {
         } else if (Boolean.FALSE.equals(input.finished())) {
             season.reopen();
         }
+        events.publishEvent(
+                new AdminChanged(season.getOrganizationId(), "SEASON_EDITED", Map.of("season", season.getName())));
         return SeasonView.of(season);
     }
 

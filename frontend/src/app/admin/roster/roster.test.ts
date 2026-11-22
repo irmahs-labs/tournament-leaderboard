@@ -225,4 +225,18 @@ describe("the Match roster page", () => {
     expect(moved.request.body).toStrictEqual({ players: ["moth", "heron"] });
     moved.flush(two);
   });
+
+  it("reminds the players who haven't answered", async () => {
+    button("Remind them")?.click();
+    const reminded = http.expectOne(`${API}/remind`);
+
+    expect(reminded.request.method).toBe("POST");
+    reminded.flush({ players: 1 });
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      expect(text(page.querySelector("[role=status]"))).toBe(
+        "1 player reminded."
+      );
+    });
+  });
 });

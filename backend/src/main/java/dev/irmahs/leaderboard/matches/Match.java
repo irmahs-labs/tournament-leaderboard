@@ -60,6 +60,9 @@ public class Match {
     @Column(nullable = false)
     private boolean autoPromote = true;
 
+    /** Set once the players who hadn't answered were reminded, two days before the reply-by date. */
+    private Instant remindedAt;
+
     /** Set once the admins lock the roster: nobody's answer changes any more. */
     private Instant lockedAt;
 
