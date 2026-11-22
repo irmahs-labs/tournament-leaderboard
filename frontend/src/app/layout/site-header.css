@@ -394,6 +394,35 @@
   white-space: nowrap;
 }
 
+.notices {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: var(--tool-size);
+  height: var(--tool-size);
+  box-sizing: border-box;
+  color: var(--nav-text);
+  border: 1px solid var(--nav-ghost);
+}
+
+.count {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .avatar {
   width: 26px;
   height: 26px;

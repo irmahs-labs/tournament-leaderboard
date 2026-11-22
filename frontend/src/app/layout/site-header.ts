@@ -6,6 +6,7 @@ import { TranslocoDirective } from "@jsverse/transloco";
 import { CurrentSeason } from "../results/current-season";
 import type { Language } from "../shared/language";
 import { LANGUAGES, LanguageService } from "../shared/language";
+import { NoticesService } from "../shared/notices";
 import { OnlineService } from "../shared/online";
 import type { Organization } from "../shared/organization";
 import { initials } from "../shared/organization";
@@ -35,6 +36,7 @@ export class SiteHeader {
 
   protected readonly online = inject(OnlineService);
   protected readonly session = inject(SessionService);
+  protected readonly notices = inject(NoticesService);
   protected readonly current = inject(CurrentSeason);
 
   readonly #router = inject(Router);

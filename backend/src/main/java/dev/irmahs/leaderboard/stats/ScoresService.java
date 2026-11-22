@@ -1,5 +1,6 @@
 package dev.irmahs.leaderboard.stats;
 
+import dev.irmahs.leaderboard.events.AdminChanged;
 import dev.irmahs.leaderboard.matches.Game;
 import dev.irmahs.leaderboard.matches.GameRepository;
 import dev.irmahs.leaderboard.matches.Match;
@@ -33,6 +34,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +61,7 @@ public class ScoresService {
     private final PlayerRepository players;
     private final BonusCalculator bonuses;
     private final ScoringService scoring;
+    private final ApplicationEventPublisher events;
 
     ScoresService(
             SeasonService seasons,
@@ -68,7 +71,8 @@ public class ScoresService {
             GameStatRepository lines,
             PlayerRepository players,
             BonusCalculator bonuses,
-            ScoringService scoring) {
+            ScoringService scoring,
+            ApplicationEventPublisher events) {
         this.seasons = seasons;
         this.organizations = organizations;
         this.matches = matches;
@@ -77,6 +81,7 @@ public class ScoresService {
         this.players = players;
         this.bonuses = bonuses;
         this.scoring = scoring;
+        this.events = events;
     }
 
     /** The game's lines, or none when it hasn't been saved. */
@@ -145,6 +150,10 @@ public class ScoresService {
             saved.add(lines.save(stat));
         }
         organizations.recordActivity(season.getOrganizationId());
+        events.publishEvent(new AdminChanged(
+                season.getOrganizationId(),
+                "GAME_SAVED",
+                Map.of("season", season.getName(), "match", matchNumber, "game", gameNumber)));
         return view(season, matchNumber, gameNumber, match.getMatchDate(), saved);
     }
 
@@ -159,6 +168,10 @@ public class ScoresService {
                     lines.deleteAll(lines.findByGame(game));
                     games.delete(game);
                     organizations.recordActivity(season.getOrganizationId());
+                    events.publishEvent(new AdminChanged(
+                            season.getOrganizationId(),
+                            "GAME_CLEARED",
+                            Map.of("season", season.getName(), "match", matchNumber, "game", gameNumber)));
                 });
     }
 

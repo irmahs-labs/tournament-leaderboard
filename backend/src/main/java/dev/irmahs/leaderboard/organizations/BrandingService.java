@@ -1,13 +1,16 @@
 package dev.irmahs.leaderboard.organizations;
 
+import dev.irmahs.leaderboard.events.AdminChanged;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,10 +32,13 @@ public class BrandingService {
 
     private final OrganizationService organizations;
     private final OrganizationLogoRepository logos;
+    private final ApplicationEventPublisher events;
 
-    BrandingService(OrganizationService organizations, OrganizationLogoRepository logos) {
+    BrandingService(
+            OrganizationService organizations, OrganizationLogoRepository logos, ApplicationEventPublisher events) {
         this.organizations = organizations;
         this.logos = logos;
+        this.events = events;
     }
 
     /** What every page of the organisation shows first. */
@@ -56,6 +62,7 @@ public class BrandingService {
     public OrganizationView rebrand(String slug, Branding input) {
         Organization organization = organizations.requireActive(slug);
         organization.rebrand(checked(input));
+        events.publishEvent(new AdminChanged(organization.getId(), "BRANDING_CHANGED", Map.of()));
         return view(organization);
     }
 
@@ -76,6 +83,7 @@ public class BrandingService {
                 logos.findById(organization.getId()).orElseGet(() -> new OrganizationLogo(organization.getId()));
         logo.replace(contentType, image, Instant.now());
         logos.saveAndFlush(logo);
+        events.publishEvent(new AdminChanged(organization.getId(), "BRANDING_CHANGED", Map.of()));
         return OrganizationView.of(organization, logo.getUpdatedAt());
     }
 
@@ -83,6 +91,7 @@ public class BrandingService {
     public OrganizationView removeLogo(String slug) {
         Organization organization = organizations.requireActive(slug);
         logos.deleteById(organization.getId());
+        events.publishEvent(new AdminChanged(organization.getId(), "BRANDING_CHANGED", Map.of()));
         return OrganizationView.of(organization, null);
     }
 

@@ -4,7 +4,7 @@ import {
   provideHttpClientTesting,
 } from "@angular/common/http/testing";
 import type { EnvironmentProviders, Provider } from "@angular/core";
-import { importProvidersFrom } from "@angular/core";
+import { importProvidersFrom, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { provideRouter, withComponentInputBinding } from "@angular/router";
 import { RouterTestingHarness } from "@angular/router/testing";
@@ -23,6 +23,8 @@ import type {
   Season,
   Summary,
 } from "./results/api";
+import type { Notices } from "./shared/notices";
+import { NoticesService } from "./shared/notices";
 import type { Organization } from "./shared/organization";
 import type { Me } from "./shared/session";
 
@@ -228,8 +230,30 @@ export const MATCH: MatchView = {
   season: { name: "Season 3", number: 3 },
 };
 
+/**
+ * Notices that never ask the server, so a test of another page doesn't have to answer the header's
+ * questions. The Notices page's own tests use the real service.
+ */
+export class QuietNotices {
+  readonly unread = signal(0);
+  readonly latest = signal<Notices | null>(null);
+
+  load(): Promise<Notices | null> {
+    return Promise.resolve(this.latest());
+  }
+
+  markRead(): Promise<void> {
+    this.unread.set(0);
+
+    return Promise.resolve();
+  }
+}
+
 /** The app's routes, a fake back end, and both languages loaded from the real files. */
-export const testProviders = (): (Provider | EnvironmentProviders)[] => [
+export const testProviders = ({
+  notices = false,
+}: { notices?: boolean } = {}): (Provider | EnvironmentProviders)[] => [
+  ...(notices ? [] : [{ provide: NoticesService, useClass: QuietNotices }]),
   provideHttpClient(),
   provideHttpClientTesting(),
   provideRouter(routes, withComponentInputBinding()),

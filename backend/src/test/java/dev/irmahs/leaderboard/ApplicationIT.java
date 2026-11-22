@@ -82,6 +82,7 @@ class ApplicationIT {
                 "/not-found",
                 "/platform",
                 "/account",
+                "/notices",
                 "/join",
                 "/join/K7QM-4FXP",
                 "/sign-in",

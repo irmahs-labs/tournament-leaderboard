@@ -3,6 +3,8 @@ package dev.irmahs.leaderboard.claims;
 import dev.irmahs.leaderboard.accounts.AccountService;
 import dev.irmahs.leaderboard.accounts.AppUser;
 import dev.irmahs.leaderboard.accounts.IdentityService;
+import dev.irmahs.leaderboard.events.ClaimAnswered;
+import dev.irmahs.leaderboard.events.ClaimSent;
 import dev.irmahs.leaderboard.members.MemberRole;
 import dev.irmahs.leaderboard.members.OrganizationMember;
 import dev.irmahs.leaderboard.members.OrganizationMemberRepository;
@@ -20,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -47,6 +50,7 @@ public class ClaimService {
     private final PlayerClaimRepository claims;
     private final PlayerAdminService playerAdmin;
     private final IdentityService identity;
+    private final ApplicationEventPublisher events;
 
     ClaimService(
             AccountService accounts,
@@ -55,7 +59,8 @@ public class ClaimService {
             PlayerRepository players,
             PlayerClaimRepository claims,
             PlayerAdminService playerAdmin,
-            IdentityService identity) {
+            IdentityService identity,
+            ApplicationEventPublisher events) {
         this.playerAdmin = playerAdmin;
         this.identity = identity;
         this.accounts = accounts;
@@ -63,6 +68,7 @@ public class ClaimService {
         this.members = members;
         this.players = players;
         this.claims = claims;
+        this.events = events;
     }
 
     /** Joins the organisation as a player; someone already a member stays as they are. */
@@ -139,6 +145,7 @@ public class ClaimService {
         }
         claims.saveAndFlush(
                 new PlayerClaim(organization.getId(), player.getId(), member.getUserId(), text(input.note())));
+        events.publishEvent(new ClaimSent(organization.getId(), member.getUserId(), player.getRiotId()));
         return mine(slug, googleSub);
     }
 
@@ -287,6 +294,7 @@ public class ClaimService {
             }
         }
         claims.flush();
+        events.publishEvent(new ClaimAnswered(organization.getId(), claim.getUserId(), riotIdOf(claim), true, null));
         return row(slug, adminSub, claim);
     }
 
@@ -302,7 +310,13 @@ public class ClaimService {
         PlayerClaim claim = requireWaiting(organization, id);
         claim.decline(admin, text(reason));
         claims.flush();
+        events.publishEvent(
+                new ClaimAnswered(organization.getId(), claim.getUserId(), riotIdOf(claim), false, claim.getReason()));
         return row(slug, adminSub, claim);
+    }
+
+    private String riotIdOf(PlayerClaim claim) {
+        return players.findById(claim.getPlayerId()).map(Player::getRiotId).orElse(null);
     }
 
     private ClaimRow row(String slug, String adminSub, PlayerClaim claim) {

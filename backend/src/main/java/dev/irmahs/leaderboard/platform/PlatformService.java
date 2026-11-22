@@ -2,6 +2,7 @@ package dev.irmahs.leaderboard.platform;
 
 import dev.irmahs.leaderboard.accounts.AccountService;
 import dev.irmahs.leaderboard.accounts.AppUser;
+import dev.irmahs.leaderboard.events.OrganizationStatusChanged;
 import dev.irmahs.leaderboard.members.MemberCount;
 import dev.irmahs.leaderboard.members.OrganizationMember;
 import dev.irmahs.leaderboard.members.OrganizationMemberRepository;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,11 +31,17 @@ public class PlatformService {
     private final AccountService accounts;
     private final OrganizationService organizations;
     private final OrganizationMemberRepository members;
+    private final ApplicationEventPublisher events;
 
-    PlatformService(AccountService accounts, OrganizationService organizations, OrganizationMemberRepository members) {
+    PlatformService(
+            AccountService accounts,
+            OrganizationService organizations,
+            OrganizationMemberRepository members,
+            ApplicationEventPublisher events) {
         this.accounts = accounts;
         this.organizations = organizations;
         this.members = members;
+        this.events = events;
     }
 
     /**
@@ -76,7 +84,9 @@ public class PlatformService {
         if (status == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The status is ACTIVE or SUSPENDED");
         }
-        organizations.changeStatus(slug, status);
+        Organization organization = organizations.changeStatus(slug, status);
+        events.publishEvent(
+                new OrganizationStatusChanged(organization.getId(), status == OrganizationStatus.SUSPENDED));
     }
 
     private void requirePlatformAdmin(String googleSub) {
