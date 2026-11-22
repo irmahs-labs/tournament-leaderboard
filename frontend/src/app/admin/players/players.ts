@@ -1,3 +1,4 @@
+import { DOCUMENT } from "@angular/common";
 import {
   HttpClient,
   HttpErrorResponse,
@@ -13,6 +14,7 @@ import { splitRiotId } from "../../results/stats";
 import { LanguageService } from "../../shared/language";
 import { RankPill } from "../../shared/rank-pill";
 import { isRiotId, RiotId } from "../../shared/riot-id";
+import { SessionService } from "../../shared/session";
 import type { AdminPlayer, Alias, PlayerInput, RankOption } from "../api";
 
 /** A player's aliases as one line: "Bram, bramblebush". */
@@ -84,7 +86,8 @@ interface Outcome {
 
 /**
  * The organisation's players: add one, search them, and edit a player's Riot ID, Discord
- * username, aliases and rank. Players are never deleted, so past results stay intact.
+ * username, aliases and rank. Only a platform admin deletes a player, and only one who never
+ * played, so past results stay intact.
  */
 @Component({
   imports: [RankPill, RiotId, TranslocoDirective],
@@ -126,6 +129,13 @@ export class PlayersAdminPage {
 
   readonly #http = inject(HttpClient);
   readonly #transloco = inject(TranslocoService);
+  readonly #document = inject(DOCUMENT);
+  readonly #session = inject(SessionService);
+
+  /** Whether the signed-in person runs the platform, and so can delete a player who never played. */
+  protected readonly platformAdmin = computed(
+    () => this.#session.me()?.platformAdmin ?? false
+  );
 
   readonly #api = computed(() => {
     const admin = this.current.adminApi();
@@ -196,6 +206,48 @@ export class PlayersAdminPage {
 
     if (saved) {
       this.editing.set(null);
+    }
+  }
+
+  /** Deletes a player who never played, after asking; platform admins only. */
+  protected async remove(player: AdminPlayer): Promise<void> {
+    const slug = this.current.organization()?.slug;
+    const { name } = splitRiotId(player.riotId);
+
+    if (
+      !slug ||
+      this.busy() ||
+      !this.#document.defaultView?.confirm(
+        this.#transloco.translate("adminPlayers.deleteConfirm", { name })
+      )
+    ) {
+      return;
+    }
+
+    this.busy.set(true);
+    this.outcome.set(null);
+
+    try {
+      await firstValueFrom(
+        this.#http.delete(
+          `/api/platform/organizations/${encodeURIComponent(slug)}/players/${encodeURIComponent(player.id)}`
+        )
+      );
+      this.outcome.set({
+        ok: true,
+        text: this.#transloco.translate("adminPlayers.deleted", { name }),
+      });
+      this.players.reload();
+    } catch (error) {
+      const status = error instanceof HttpErrorResponse ? error.status : 0;
+      this.outcome.set({
+        ok: false,
+        text: this.#transloco.translate(
+          status === 409 ? "adminPlayers.playedSince" : "adminPlayers.failed"
+        ),
+      });
+    } finally {
+      this.busy.set(false);
     }
   }
 

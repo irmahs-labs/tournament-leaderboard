@@ -273,7 +273,11 @@
     "waitingFor": "Linked at sign-in: {{email}}",
     "emailHelp": "The first person to sign in with this Google email gets this profile, with no claim. Only admins see it.",
     "linked": "Linked to an account",
-    "linkedNote": "Linked to an account: the player changes their Riot ID and Discord on My account."
+    "linkedNote": "Linked to an account: the player changes their Riot ID and Discord on My account.",
+    "delete": "Delete",
+    "deleteConfirm": "Delete {{name}}? They never played, so no result changes. Their aliases, claims and answers go with them, and an account linked to them stays a member. This can't be undone.",
+    "deleted": "{{name}} is deleted.",
+    "playedSince": "This player has played since: their results stay, so they can't be deleted."
   },
   "adminScores": {
     "title": "Enter scores",
@@ -686,11 +690,12 @@
     "failed": "That didn't work. Try again.",
     "loadFailed": "The organisations couldn't be loaded. Try again in a moment.",
     "loading": "Loading the organisations…",
-    "help": "Suspending hides an organisation's pages and its admin area, and takes it off the home page. Nothing is deleted; reactivating brings everything back. An organisation with no games and one admin at most can also be deleted, for example one created by mistake.",
+    "help": "Suspending hides an organisation's pages and its admin area, and takes it off the home page. Nothing is deleted; reactivating brings everything back. Deleting removes an organisation for good, after typing its name; one with games or other admins asks again.",
     "delete": "Delete",
-    "deleteConfirm": "Delete {{name}} for good? It has no games and one admin at most; its players, seasons and members go with it, and this can't be undone. Type its name to confirm.",
+    "deleteConfirm": "Delete {{name}} for good? Type its name to confirm. This can't be undone.",
     "deleteMismatch": "That isn't “{{name}}”: nothing was deleted.",
-    "deleted": "{{name}} is deleted."
+    "deleted": "{{name}} is deleted.",
+    "deleteNotEmpty": "{{name}} isn't empty: {{games}} games saved, {{admins}} admins. Its results, players, seasons and members are deleted with it, for everyone. Are you sure?"
   },
   "account": {
     "eyebrow": "Signed in with Google",

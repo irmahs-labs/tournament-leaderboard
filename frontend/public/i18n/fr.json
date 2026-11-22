@@ -273,7 +273,11 @@
     "waitingFor": "Lié à la connexion : {{email}}",
     "emailHelp": "La première personne à se connecter avec cet e-mail Google obtient ce profil, sans demande. Seuls les admins le voient.",
     "linked": "Lié à un compte",
-    "linkedNote": "Lié à un compte : le joueur modifie son Riot ID et son Discord dans Mon compte."
+    "linkedNote": "Lié à un compte : le joueur modifie son Riot ID et son Discord dans Mon compte.",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer {{name}} ? Ce joueur n'a jamais joué, aucun résultat ne change. Ses alias, demandes et réponses partent avec lui, et un compte lié reste membre. C'est définitif.",
+    "deleted": "{{name}} est supprimé.",
+    "playedSince": "Ce joueur a joué depuis : ses résultats restent, il ne peut pas être supprimé."
   },
   "adminScores": {
     "title": "Saisir les scores",
@@ -686,11 +690,12 @@
     "failed": "Ça n'a pas marché. Réessayez.",
     "loadFailed": "Les organisations n'ont pas pu être chargées. Réessayez dans un instant.",
     "loading": "Chargement des organisations…",
-    "help": "Suspendre masque les pages d'une organisation et son espace admin, et la retire de la page d'accueil. Rien n'est supprimé ; la réactiver rétablit tout. Une organisation sans partie et avec un·e admin au plus peut aussi être supprimée, par exemple créée par erreur.",
+    "help": "Suspendre masque les pages d'une organisation et son espace admin, et la retire de la page d'accueil. Rien n'est supprimé ; la réactiver rétablit tout. Supprimer efface une organisation définitivement, après avoir tapé son nom ; si elle a des parties ou d'autres admins, une seconde confirmation est demandée.",
     "delete": "Supprimer",
-    "deleteConfirm": "Supprimer {{name}} définitivement ? Elle n'a aucune partie et un·e admin au plus ; ses joueurs, saisons et membres partent avec elle, sans retour possible. Tapez son nom pour confirmer.",
+    "deleteConfirm": "Supprimer {{name}} définitivement ? Tapez son nom pour confirmer. C'est définitif.",
     "deleteMismatch": "Ce n'est pas « {{name}} » : rien n'a été supprimé.",
-    "deleted": "{{name}} est supprimée."
+    "deleted": "{{name}} est supprimée.",
+    "deleteNotEmpty": "{{name}} n'est pas vide : {{games}} parties enregistrées, {{admins}} admins. Ses résultats, joueurs, saisons et membres sont supprimés avec elle, pour tout le monde. Vous êtes sûr·e ?"
   },
   "account": {
     "eyebrow": "Connecté avec Google",

@@ -19,11 +19,17 @@ export interface PlatformOrganization {
   members: number;
   status: "ACTIVE" | "SUSPENDED";
   featured: boolean;
-  /** Whether it can be deleted: no game saved, one admin at most. */
-  deletable: boolean;
+  /** How many games it has saved. */
+  games: number;
+  /** How many admins it has. With no game and one admin at most, it's empty. */
+  admins: number;
 }
 
 const API = "/api/platform/organizations";
+
+/** Whether deleting it takes nothing from anyone else: no game saved, one admin at most. */
+export const isEmpty = (organization: PlatformOrganization): boolean =>
+  organization.games === 0 && organization.admins <= 1;
 
 /** The organisations whose name, address or owner's email contain the search, ignoring case. */
 export const matching = (
@@ -92,7 +98,10 @@ export class PlatformPage {
   readonly #transloco = inject(TranslocoService);
   readonly #document = inject(DOCUMENT);
 
-  /** Deletes an organisation nobody uses yet, once the platform admin types its name. */
+  /**
+   * Deletes an organisation once the platform admin types its name; one that isn't empty asks
+   * again, saying what goes with it.
+   */
   protected async remove(organization: PlatformOrganization): Promise<void> {
     const typed = this.#document.defaultView?.prompt(
       this.#transloco.translate("platform.deleteConfirm", {
@@ -114,10 +123,25 @@ export class PlatformPage {
       return;
     }
 
+    const notEmpty = !isEmpty(organization);
+
+    if (
+      notEmpty &&
+      !this.#document.defaultView?.confirm(
+        this.#transloco.translate("platform.deleteNotEmpty", {
+          admins: String(organization.admins),
+          games: String(organization.games),
+          name: organization.name,
+        })
+      )
+    ) {
+      return;
+    }
+
     await this.action.run(async () => {
       await firstValueFrom(
         this.#http.delete(`${API}/${encodeURIComponent(organization.slug)}`, {
-          body: { name: typed.trim() },
+          body: { name: typed.trim(), notEmpty },
         })
       );
       this.list.reload();

@@ -15,9 +15,10 @@ const PLATFORM_ADMIN: Me = { ...ME, platformAdmin: true };
 
 const ORGANIZATIONS: PlatformOrganization[] = [
   {
+    admins: 2,
     createdAt: "2026-11-01T10:00:00Z",
-    deletable: false,
     featured: true,
+    games: 12,
     lastActivityAt: "2026-11-18T20:00:00Z",
     members: 42,
     name: "Alsace Arena",
@@ -26,9 +27,10 @@ const ORGANIZATIONS: PlatformOrganization[] = [
     status: "ACTIVE",
   },
   {
+    admins: 1,
     createdAt: "2026-11-05T10:00:00Z",
-    deletable: true,
     featured: false,
+    games: 0,
     lastActivityAt: null,
     members: 2,
     name: "Lyon Game Bar",
@@ -129,9 +131,13 @@ describe("the platform page", () => {
   it("suspends after asking, then reactivates", async () => {
     const { harness, page } = await openAsPlatformAdmin();
     const confirm = vi.spyOn(globalThis, "confirm").mockReturnValue(true);
-    const buttons = page.querySelectorAll<HTMLButtonElement>("tbody button");
 
-    buttons[0]?.click();
+    const button = (label: string): HTMLButtonElement | undefined =>
+      [...page.querySelectorAll<HTMLButtonElement>("tbody button")].find(
+        (each) => text(each) === label
+      );
+
+    button("Suspend Alsace Arena")?.click();
 
     const suspend = await vi.waitFor(() =>
       http.expectOne(`${API}/alsace-arena/status`)
@@ -142,7 +148,7 @@ describe("the platform page", () => {
     suspend.flush(null);
     await vi.waitFor(() => http.expectOne(API).flush(ORGANIZATIONS));
 
-    buttons[1]?.click();
+    button("Reactivate Lyon Game Bar")?.click();
 
     const reactivate = await vi.waitFor(() =>
       http.expectOne(`${API}/lyon-game-bar/status`)
@@ -155,19 +161,15 @@ describe("the platform page", () => {
     harness.detectChanges();
   });
 
-  it("deletes an organisation nobody uses yet once its name is typed", async () => {
+  it("deletes an empty organisation once its name is typed", async () => {
     const { harness, page } = await openAsPlatformAdmin();
     const prompt = vi.spyOn(globalThis, "prompt").mockReturnValue("Lyon");
 
     const remove = (): void => {
       [...page.querySelectorAll<HTMLButtonElement>("tbody button")]
-        .find((button) => text(button)?.startsWith("Delete"))
+        .find((button) => text(button) === "Delete Lyon Game Bar")
         ?.click();
     };
-
-    expect(
-      texts(page, "tbody button").filter((label) => label?.startsWith("Delete"))
-    ).toStrictEqual(["Delete Lyon Game Bar"]);
 
     remove();
     harness.detectChanges();
@@ -184,7 +186,10 @@ describe("the platform page", () => {
     );
 
     expect(deleted.request.method).toBe("DELETE");
-    expect(deleted.request.body).toStrictEqual({ name: "Lyon Game Bar" });
+    expect(deleted.request.body).toStrictEqual({
+      name: "Lyon Game Bar",
+      notEmpty: false,
+    });
     deleted.flush(null);
     await vi.waitFor(() =>
       http.expectOne(API).flush(ORGANIZATIONS.slice(0, 1))
@@ -195,6 +200,38 @@ describe("the platform page", () => {
         "Lyon Game Bar is deleted."
       );
     });
+  });
+
+  it("asks again before deleting one that isn't empty", async () => {
+    const { page } = await openAsPlatformAdmin();
+    vi.spyOn(globalThis, "prompt").mockReturnValue("Alsace Arena");
+    const confirm = vi.spyOn(globalThis, "confirm").mockReturnValue(false);
+
+    const remove = (): void => {
+      [...page.querySelectorAll<HTMLButtonElement>("tbody button")]
+        .find((button) => text(button) === "Delete Alsace Arena")
+        ?.click();
+    };
+
+    remove();
+
+    expect(confirm).toHaveBeenCalledWith(
+      "Alsace Arena isn't empty: 12 games saved, 2 admins. Its results, players, seasons and members are deleted with it, for everyone. Are you sure?"
+    );
+
+    confirm.mockReturnValue(true);
+    remove();
+
+    const deleted = await vi.waitFor(() =>
+      http.expectOne(`${API}/alsace-arena`)
+    );
+
+    expect(deleted.request.body).toStrictEqual({
+      name: "Alsace Arena",
+      notEmpty: true,
+    });
+    deleted.flush(null);
+    await vi.waitFor(() => http.expectOne(API).flush(ORGANIZATIONS.slice(1)));
   });
 
   it("is Not found for anyone but a platform admin", async () => {

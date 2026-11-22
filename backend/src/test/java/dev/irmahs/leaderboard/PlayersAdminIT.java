@@ -145,9 +145,9 @@ class PlayersAdminIT {
         assertThat(mvc.get().uri(PLAYERS).with(ADMIN)).hasStatusOk().bodyJson().isStrictlyEqualTo("""
                 [{"id": "%s", "riotId": "Kestrel#EUW", "discordUsername": "kes_tv",
                   "rank": {"id": %d, "name": "Gold 2", "color": "#E5B842"},
-                  "aliases": [{"alias": "Birdie", "kind": "NICKNAME"}], "expectedEmail": null, "linked": false},
+                  "aliases": [{"alias": "Birdie", "kind": "NICKNAME"}], "expectedEmail": null, "linked": false, "played": false},
                  {"id": "%s", "riotId": "Osprey#EUW", "discordUsername": null, "rank": null, "aliases": [],
-                  "expectedEmail": null, "linked": false}]""".formatted(
+                  "expectedEmail": null, "linked": false, "played": false}]""".formatted(
                         kestrel, gold, idOf("Osprey#EUW")));
     }
 
