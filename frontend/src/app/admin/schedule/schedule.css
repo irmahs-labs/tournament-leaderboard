@@ -116,8 +116,33 @@ input::placeholder {
   padding-inline: 8px;
 }
 
-.table tr.editing input:not([type="checkbox"]) {
-  min-width: 140px;
+.table tr.editing .form-cell {
+  /* The form wraps inside the row instead of widening the table past its panel. */
+  white-space: normal;
+  padding-block: 14px;
+}
+
+.plan-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  align-items: end;
+  gap: 12px;
+}
+
+.where-field {
+  grid-column: span 2;
+}
+
+.form-actions {
+  justify-content: flex-end;
+  grid-column: -2 / -1;
+}
+
+@media (max-width: 480px) {
+  .where-field,
+  .form-actions {
+    grid-column: 1 / -1;
+  }
 }
 
 .actions {
@@ -157,7 +182,7 @@ input::placeholder {
 }
 
 .table tr.editing input.count {
-  min-width: 72px;
+  width: 100%;
 }
 
 .check {
