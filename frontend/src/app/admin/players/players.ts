@@ -10,10 +10,9 @@ import type { Observable } from "rxjs";
 import { firstValueFrom } from "rxjs";
 
 import { CurrentSeason } from "../../results/current-season";
-import { splitRiotId } from "../../results/stats";
 import { LanguageService } from "../../shared/language";
 import { RankPill } from "../../shared/rank-pill";
-import { isRiotId, RiotId } from "../../shared/riot-id";
+import { isRiotId, RiotId, splitRiotId } from "../../shared/riot-id";
 import { SessionService } from "../../shared/session";
 import type { AdminPlayer, Alias, PlayerInput, RankOption } from "../api";
 
@@ -124,7 +123,6 @@ export class PlayersAdminPage {
   protected readonly busy = signal(false);
   protected readonly outcome = signal<Outcome | null>(null);
 
-  protected readonly splitRiotId = splitRiotId;
   protected readonly aliasesText = aliasesText;
 
   readonly #http = inject(HttpClient);

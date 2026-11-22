@@ -7,9 +7,8 @@ import { firstValueFrom } from "rxjs";
 
 import { AdminAction } from "../admin/action";
 import { CurrentSeason } from "../results/current-season";
-import { splitRiotId } from "../results/stats";
 import { LanguageService } from "../shared/language";
-import { isRiotId, RiotId } from "../shared/riot-id";
+import { isRiotId, RiotId, splitRiotId } from "../shared/riot-id";
 import { SessionService } from "../shared/session";
 import type { ClaimState, PlayerSummary } from "./api";
 import { MAX_NAME, MAX_TEXT, matchingPlayers } from "./api";

@@ -4,9 +4,9 @@ import { RouterLink } from "@angular/router";
 import { TranslocoDirective } from "@jsverse/transloco";
 
 import { LanguageService } from "../../shared/language";
+import { splitRiotId } from "../../shared/riot-id";
 import type { MatchCard } from "../api";
 import { CurrentSeason } from "../current-season";
-import { splitRiotId } from "../stats";
 
 /** Where a match stands: played, the next one to play, or further ahead. */
 export type MatchStatus = "played" | "next" | "scheduled";

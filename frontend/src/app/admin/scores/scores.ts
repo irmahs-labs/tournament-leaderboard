@@ -15,8 +15,8 @@ import { firstValueFrom } from "rxjs";
 
 import type { MatchCard, Rules, Stat } from "../../results/api";
 import { CurrentSeason } from "../../results/current-season";
-import { splitRiotId } from "../../results/stats";
 import { LanguageService } from "../../shared/language";
+import { splitRiotId } from "../../shared/riot-id";
 import { AdminAction } from "../action";
 import type { AdminPlayer } from "../api";
 import type { GameScores, PreviousRoster, Problem, Row } from "./scores-form";
@@ -241,8 +241,6 @@ export class ScoresAdminPage {
       ? "saved"
       : "notEntered";
   });
-
-  protected readonly splitRiotId = splitRiotId;
 
   /** Riot IDs by player, to name the lines. */
   readonly #riotIds = computed(

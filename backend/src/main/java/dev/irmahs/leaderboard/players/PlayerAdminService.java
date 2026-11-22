@@ -1,6 +1,5 @@
 package dev.irmahs.leaderboard.players;
 
-import dev.irmahs.leaderboard.members.OrganizationMember;
 import dev.irmahs.leaderboard.members.OrganizationMemberRepository;
 import dev.irmahs.leaderboard.organizations.OrganizationService;
 import dev.irmahs.leaderboard.players.Player.NewAlias;
@@ -14,7 +13,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,9 +49,7 @@ public class PlayerAdminService {
     public List<PlayerView> search(String slug, String query) {
         UUID organizationId = organizations.requireActive(slug).getId();
         String pattern = "%" + escapeLike(query == null ? "" : query.strip().toLowerCase(Locale.ROOT)) + "%";
-        Set<UUID> linked = members.findByOrganizationIdAndPlayerIdNotNull(organizationId).stream()
-                .map(OrganizationMember::getPlayerId)
-                .collect(Collectors.toSet());
+        Set<UUID> linked = members.linkedPlayerIds(organizationId);
         Set<UUID> played = Set.copyOf(players.playedIn(organizationId));
         return players.search(organizationId, pattern).stream()
                 .map(player -> PlayerView.of(player, linked.contains(player.getId()), played.contains(player.getId())))
