@@ -202,6 +202,17 @@ describe("the Claim page", () => {
     );
 
     if (riotId) {
+      riotId.value = "Moth";
+    }
+
+    form?.requestSubmit();
+    harness.detectChanges();
+
+    expect(text(page.querySelector("[role=status]"))).toBe(
+      "A Riot ID is a name of 3 to 16 characters, # and a tag of 3 to 5 letters or numbers, such as Kestrel#EUW."
+    );
+
+    if (riotId) {
       riotId.value = " Moth#EUW ";
     }
 

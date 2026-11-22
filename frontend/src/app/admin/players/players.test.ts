@@ -238,6 +238,43 @@ describe("the Players page", () => {
     );
   });
 
+  it("asks for Riot's format for a new or changed Riot ID only", () => {
+    const form = page.querySelector<HTMLFormElement>("form.add");
+    const riotId = form?.querySelector<HTMLInputElement>("[name=riotId]");
+
+    if (riotId) {
+      riotId.value = "Moth";
+    }
+
+    form?.requestSubmit();
+    harness.detectChanges();
+
+    expect(text(page.querySelector("[role=status]"))).toBe(
+      "A Riot ID is a name of 3 to 16 characters, # and a tag of 3 to 5 letters or numbers, such as Kestrel#EUW."
+    );
+
+    page.querySelector<HTMLButtonElement>("tbody tr button")?.click();
+    harness.detectChanges();
+    const editing = page.querySelector("tr.editing");
+
+    const rename = editing?.querySelector<HTMLInputElement>(
+      "[aria-label='Riot ID']"
+    );
+
+    if (rename) {
+      rename.value = "Bramble";
+    }
+
+    [...(editing?.querySelectorAll("button") ?? [])]
+      .find((each) => text(each) === "Save")
+      ?.click();
+    harness.detectChanges();
+
+    expect(text(page.querySelector("[role=status]"))).toBe(
+      "A Riot ID is a name of 3 to 16 characters, # and a tag of 3 to 5 letters or numbers, such as Kestrel#EUW."
+    );
+  });
+
   it("adds a player, then lists them", async () => {
     const form = page.querySelector<HTMLFormElement>("form.add");
 

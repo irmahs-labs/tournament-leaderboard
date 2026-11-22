@@ -363,6 +363,10 @@ class ClaimsIT {
                 .isEqualTo("wren#euw is already another player at Alsace Arena");
         assertThat(send(HttpMethod.PUT, "/api/me/identity", "{\"riotId\": \" \"}", PLAYER))
                 .hasStatus(400);
+        assertThat(send(HttpMethod.PUT, "/api/me/identity", "{\"riotId\": \"Kestrel\"}", PLAYER))
+                .hasStatus(400);
+        assertThat(send(HttpMethod.PUT, "/api/me/identity", "{\"riotId\": \"Kestrel#EUW\"}", PLAYER))
+                .hasStatusOk();
         assertThat(send(HttpMethod.PUT, "/api/me/identity", "{\"riotId\": \"A#1\"}", null))
                 .hasStatus(401);
     }
