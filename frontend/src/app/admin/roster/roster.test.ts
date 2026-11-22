@@ -68,6 +68,7 @@ const player = (id: string, riotId: string): AdminPlayer => ({
   expectedEmail: null,
   id,
   linked: false,
+  played: false,
   rank: null,
   riotId,
 });

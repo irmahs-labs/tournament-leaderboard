@@ -26,6 +26,7 @@ const player = (id: string, riotId: string, linked: boolean): AdminPlayer => ({
   expectedEmail: null,
   id,
   linked,
+  played: false,
   rank: null,
   riotId,
 });

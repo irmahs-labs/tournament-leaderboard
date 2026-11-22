@@ -90,10 +90,10 @@ class PlatformIT {
                 .isStrictlyEqualTo("""
                         [{"slug": "alsace-arena", "name": "Alsace Arena", "ownerEmail": null,
                           "createdAt": "2026-11-01T10:00:00Z", "lastActivityAt": "2026-11-18T20:00:00Z",
-                          "members": 2, "status": "ACTIVE", "featured": true, "deletable": true},
+                          "members": 2, "status": "ACTIVE", "featured": true, "games": 0, "admins": 1},
                          {"slug": "lyon-game-bar", "name": "Lyon Game Bar", "ownerEmail": "lyon@example.com",
                           "createdAt": "2026-11-05T10:00:00Z", "lastActivityAt": null,
-                          "members": 1, "status": "ACTIVE", "featured": false, "deletable": true}]""");
+                          "members": 1, "status": "ACTIVE", "featured": false, "games": 0, "admins": 1}]""");
     }
 
     @Test
@@ -184,24 +184,20 @@ class PlatformIT {
     }
 
     @Test
-    void anOrganisationWithAGameOrASecondAdminIsKept() {
+    void anOrganisationWithAGameOrASecondAdminGoesOnlyOnceThatIsConfirmed() {
         UUID lyon = jdbc.sql("SELECT id FROM organizations WHERE slug = 'lyon-game-bar'")
                 .query(UUID.class)
                 .single();
         jdbc.sql("""
                         INSERT INTO organization_members (user_id, organization_id, role)
                         SELECT id, :org, 'ADMIN' FROM app_users WHERE google_sub = 'google-nobody'""").param("org", lyon).update();
-
-        assertThat(call(mvc, HttpMethod.GET, API, null, PLATFORM)).bodyJson().isLenientlyEqualTo("""
-                        [{"slug": "alsace-arena", "deletable": true}, {"slug": "lyon-game-bar", "deletable": false}]""");
-        assertThat(call(mvc, HttpMethod.DELETE, API + "/lyon-game-bar", "{\"name\": \"Lyon Game Bar\"}", PLATFORM))
-                .hasStatus(409);
-
         UUID alsace = jdbc.sql("SELECT id FROM organizations WHERE slug = 'alsace-arena'")
                 .query(UUID.class)
                 .single();
         Season season = new Season(alsace, 1, "Season 1", 6, new GameRange(1, 3), 50);
+        Player kestrel = new Player(alsace, "Kestrel#EUW", null, null);
         em.persist(season);
+        em.persist(kestrel);
         em.flush();
         int match = jdbc.sql("INSERT INTO matches (organization_id, season_id, match_number) VALUES (:org, :season, 1)"
                         + " RETURNING id")
@@ -209,11 +205,89 @@ class PlatformIT {
                 .param("season", season.getId())
                 .query(Integer.class)
                 .single();
-        jdbc.sql("INSERT INTO games (match_id, game_number) VALUES (:match, 1)")
+        int game = jdbc.sql("INSERT INTO games (match_id, game_number) VALUES (:match, 1) RETURNING id")
                 .param("match", match)
+                .query(Integer.class)
+                .single();
+        jdbc.sql("INSERT INTO game_stats (game_id, player_id) VALUES (:game, :player)")
+                .param("game", game)
+                .param("player", kestrel.getId())
                 .update();
+        em.clear();
 
+        assertThat(call(mvc, HttpMethod.GET, API, null, PLATFORM)).bodyJson().isLenientlyEqualTo("""
+                        [{"slug": "alsace-arena", "games": 1, "admins": 1}, {"slug": "lyon-game-bar", "games": 0, "admins": 2}]""");
+        assertThat(call(mvc, HttpMethod.DELETE, API + "/lyon-game-bar", "{\"name\": \"Lyon Game Bar\"}", PLATFORM))
+                .hasStatus(409);
         assertThat(call(mvc, HttpMethod.DELETE, API + "/alsace-arena", "{\"name\": \"Alsace Arena\"}", PLATFORM))
                 .hasStatus(409);
+        assertThat(call(
+                        mvc,
+                        HttpMethod.DELETE,
+                        API + "/alsace-arena",
+                        "{\"name\": \"Alsace Arena\", \"notEmpty\": true}",
+                        PLATFORM))
+                .hasStatus(204);
+        assertThat(jdbc.sql("SELECT count(*) FROM game_stats").query(Long.class).single())
+                .isZero();
+        assertThat(call(mvc, HttpMethod.GET, API, null, PLATFORM))
+                .bodyJson()
+                .isLenientlyEqualTo("[{\"slug\": \"lyon-game-bar\"}]");
+    }
+
+    @Test
+    void aPlayerWhoNeverPlayedIsDeletedByThePlatformAdminOnly() throws Exception {
+        UUID alsace = jdbc.sql("SELECT id FROM organizations WHERE slug = 'alsace-arena'")
+                .query(UUID.class)
+                .single();
+        Season season = new Season(alsace, 1, "Season 1", 6, new GameRange(1, 3), 50);
+        Player kestrel = new Player(alsace, "Kestrel#EUW", null, null);
+        Player wren = new Player(alsace, "Wren#EUW", null, null);
+        em.persist(season);
+        em.persist(kestrel);
+        em.persist(wren);
+        em.flush();
+        jdbc.sql("UPDATE organization_members SET player_id = :player WHERE organization_id = :org AND role = 'PLAYER'")
+                .param("player", wren.getId())
+                .param("org", alsace)
+                .update();
+        int match = jdbc.sql("INSERT INTO matches (organization_id, season_id, match_number) VALUES (:org, :season, 1)"
+                        + " RETURNING id")
+                .param("org", alsace)
+                .param("season", season.getId())
+                .query(Integer.class)
+                .single();
+        int game = jdbc.sql("INSERT INTO games (match_id, game_number) VALUES (:match, 1) RETURNING id")
+                .param("match", match)
+                .query(Integer.class)
+                .single();
+        jdbc.sql("INSERT INTO game_stats (game_id, player_id) VALUES (:game, :player)")
+                .param("game", game)
+                .param("player", kestrel.getId())
+                .update();
+        em.clear();
+        String players = API + "/alsace-arena/players/";
+
+        assertThat(call(mvc, HttpMethod.GET, "/api/orgs/alsace-arena/admin/players", null, ADMIN))
+                .bodyJson()
+                .isLenientlyEqualTo("""
+                        [{"riotId": "Kestrel#EUW", "played": true}, {"riotId": "Wren#EUW", "played": false, "linked": true}]""");
+        assertThat(call(mvc, HttpMethod.DELETE, players + wren.getId(), null, ADMIN))
+                .hasStatus(403);
+        assertThat(call(mvc, HttpMethod.DELETE, players + kestrel.getId(), null, PLATFORM))
+                .hasStatus(409);
+        assertThat(call(mvc, HttpMethod.DELETE, API + "/lyon-game-bar/players/" + wren.getId(), null, PLATFORM))
+                .hasStatus(404);
+        assertThat(call(mvc, HttpMethod.DELETE, players + wren.getId(), null, PLATFORM))
+                .hasStatus(204);
+
+        assertThat(call(mvc, HttpMethod.GET, "/api/orgs/alsace-arena/admin/players", null, ADMIN))
+                .bodyJson()
+                .isLenientlyEqualTo("[{\"riotId\": \"Kestrel#EUW\"}]");
+        assertThat(jdbc.sql("SELECT count(*) FROM organization_members WHERE organization_id = :org")
+                        .param("org", alsace)
+                        .query(Long.class)
+                        .single())
+                .isEqualTo(2);
     }
 }

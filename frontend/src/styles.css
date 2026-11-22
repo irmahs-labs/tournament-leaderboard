@@ -270,3 +270,8 @@ select {
   border-radius: 0;
   font: 500 15px var(--font-body);
 }
+
+/* A button that deletes something. */
+.button-ghost.danger {
+  color: var(--danger);
+}

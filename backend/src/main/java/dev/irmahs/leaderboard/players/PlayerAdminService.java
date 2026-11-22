@@ -54,8 +54,9 @@ public class PlayerAdminService {
         Set<UUID> linked = members.findByOrganizationIdAndPlayerIdNotNull(organizationId).stream()
                 .map(OrganizationMember::getPlayerId)
                 .collect(Collectors.toSet());
+        Set<UUID> played = Set.copyOf(players.playedIn(organizationId));
         return players.search(organizationId, pattern).stream()
-                .map(player -> PlayerView.of(player, linked.contains(player.getId())))
+                .map(player -> PlayerView.of(player, linked.contains(player.getId()), played.contains(player.getId())))
                 .toList();
     }
 
@@ -250,6 +251,7 @@ public class PlayerAdminService {
      * @param rank nothing when the player has none
      * @param linked whether someone's account is linked to the player: their Riot ID and Discord
      *     are then the account's, which only they change
+     * @param played whether the player has a line in a game: then only their details can change
      */
     public record PlayerView(
             UUID id,
@@ -258,9 +260,15 @@ public class PlayerAdminService {
             RankView rank,
             List<AliasView> aliases,
             String expectedEmail,
-            boolean linked) {
+            boolean linked,
+            boolean played) {
 
+        /** A player just added or edited; the screen fetches the list again, with whether they played. */
         static PlayerView of(Player player, boolean linked) {
+            return of(player, linked, false);
+        }
+
+        static PlayerView of(Player player, boolean linked, boolean played) {
             return new PlayerView(
                     player.getId(),
                     player.getRiotId(),
@@ -270,11 +278,12 @@ public class PlayerAdminService {
                             .map(alias -> new AliasView(alias.getAlias(), alias.getKind()))
                             .toList(),
                     player.getExpectedEmail(),
-                    linked);
+                    linked,
+                    played);
         }
 
         PlayerView withoutEmail() {
-            return new PlayerView(id, riotId, discordUsername, rank, aliases, null, linked);
+            return new PlayerView(id, riotId, discordUsername, rank, aliases, null, linked, played);
         }
     }
 }

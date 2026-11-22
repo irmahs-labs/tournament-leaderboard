@@ -140,10 +140,6 @@ input {
   margin-left: 8px;
 }
 
-.danger {
-  color: var(--danger);
-}
-
 .nowrap {
   white-space: nowrap;
 }
