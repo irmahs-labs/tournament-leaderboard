@@ -76,7 +76,7 @@ const EN: Record<LegalPageId, LegalDocument> = {
               "JSESSIONID",
               "Cookie, this site, only once you sign in",
               "Keeps you signed in. It can't be read by scripts.",
-              "Until you sign out or close the browser",
+              "Until you sign out, or 30 days after you signed in",
             ],
             [
               "lang",
@@ -214,7 +214,7 @@ const EN: Record<LegalPageId, LegalDocument> = {
               "People who sign in",
               "Your sign-in session: what Google sent when you signed in (account id, email address and name), kept in the site's database so an update of the site doesn't sign you out.",
               "Keeping you signed in, which you ask for by signing in. Necessary for the service you use (article 6(1)(b)).",
-              "Deleted when you sign out, or 30 minutes after your last visit.",
+              "Deleted when you sign out, or 30 days after your last visit.",
             ],
             [
               "People invited to an organisation",
@@ -350,7 +350,7 @@ const FR: Record<LegalPageId, LegalDocument> = {
               "JSESSIONID",
               "Cookie, ce site, seulement une fois connecté",
               "Vous garde connecté. Les scripts ne peuvent pas le lire.",
-              "Jusqu'à la déconnexion ou la fermeture du navigateur",
+              "Jusqu'à la déconnexion, ou 30 jours après la connexion",
             ],
             [
               "lang",
@@ -493,7 +493,7 @@ const FR: Record<LegalPageId, LegalDocument> = {
               "Personnes qui se connectent",
               "Votre session de connexion : ce que Google a transmis à la connexion (identifiant du compte, adresse e-mail et nom), gardé dans la base de données du site pour qu'une mise à jour du site ne vous déconnecte pas.",
               "Vous garder connecté, ce que vous demandez en vous connectant. Nécessaire au service utilisé (article 6(1)(b)).",
-              "Supprimée à la déconnexion, ou 30 minutes après votre dernière visite.",
+              "Supprimée à la déconnexion, ou 30 jours après votre dernière visite.",
             ],
             [
               "Personnes invitées dans une organisation",

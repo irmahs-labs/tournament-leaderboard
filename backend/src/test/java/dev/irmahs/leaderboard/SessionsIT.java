@@ -64,7 +64,7 @@ class SessionsIT {
                 .isEqualTo(1);
         SecurityContext context = sessions.findById(id).getAttribute(StoredSignIn.CONTEXT);
         assertThat(context.getAuthentication().getName()).isEqualTo("sessions-1");
-        assertThat(sessions.findById(id).getMaxInactiveInterval()).hasMinutes(30);
+        assertThat(sessions.findById(id).getMaxInactiveInterval()).hasDays(30);
     }
 
     @Test
@@ -97,5 +97,16 @@ class SessionsIT {
         assertThat(session).isNotNull();
         assertThat((Object) session.getAttribute(StoredSignIn.CONTEXT)).isNull();
         assertThat(mvc.get().uri("/api/me").cookie(StoredSignIn.cookie(id))).hasStatus(401);
+    }
+
+    @Test
+    void theSessionCookieOutlivesTheBrowserForThirtyDays() {
+        // Starting a Google sign-in keeps where it's going in a new session, which sets the cookie.
+        assertThat(mvc.get().uri("/oauth2/authorization/google"))
+                .cookies()
+                .hasCookieSatisfying("JSESSIONID", cookie -> {
+                    assertThat(cookie.getMaxAge()).isEqualTo(30 * 24 * 60 * 60);
+                    assertThat(cookie.isHttpOnly()).isTrue();
+                });
     }
 }

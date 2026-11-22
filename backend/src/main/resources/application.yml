@@ -17,6 +17,9 @@ spring:
     # Within compose.prod.yaml's stop_grace_period.
     timeout-per-shutdown-phase: 20s
   session:
+    # Signed out 30 days after the last request. The cookie lasts as long (SessionConfig), so
+    # closing the browser, or a phone dropping a tab in the background, doesn't sign anyone out.
+    timeout: 30d
     jdbc:
       # Flyway makes the tables (V2026_11_20_6__sessions.sql).
       initialize-schema: never
@@ -38,10 +41,6 @@ server:
   forward-headers-strategy: framework
   # On stop, during a deploy: take no new requests and finish the ones under way.
   shutdown: graceful
-  servlet:
-    session:
-      # Signed out 30 minutes after the last request, as before sessions moved to the database.
-      timeout: 30m
 
 leaderboard:
   access:

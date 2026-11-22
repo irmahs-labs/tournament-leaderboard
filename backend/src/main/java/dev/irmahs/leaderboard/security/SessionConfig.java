@@ -1,7 +1,9 @@
 package dev.irmahs.leaderboard.security;
 
+import java.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.session.autoconfigure.DefaultCookieSerializerCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,14 +25,16 @@ class SessionConfig {
 
     /**
      * The cookie the privacy page lists, JSESSIONID rather than Spring Session's SESSION, never
-     * readable by scripts, however the app is run. Secure comes from
-     * server.servlet.session.cookie.secure, set in production.
+     * readable by scripts, however the app is run, and kept by the browser as long as the session
+     * may last instead of until it closes. Secure comes from server.servlet.session.cookie.secure,
+     * set in production.
      */
     @Bean
-    DefaultCookieSerializerCustomizer sessionCookie() {
+    DefaultCookieSerializerCustomizer sessionCookie(@Value("${spring.session.timeout}") Duration timeout) {
         return cookie -> {
             cookie.setCookieName("JSESSIONID");
             cookie.setUseHttpOnlyCookie(true);
+            cookie.setCookieMaxAge((int) timeout.toSeconds());
         };
     }
 
