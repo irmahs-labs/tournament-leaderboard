@@ -29,7 +29,7 @@ describe("the legal pages", () => {
       `${LEGAL.en[id].title} · Tournament Leaderboard`
     );
     expect(page.querySelector("time")?.getAttribute("datetime")).toBe(
-      "2026-11-21"
+      "2026-11-22"
     );
   });
 

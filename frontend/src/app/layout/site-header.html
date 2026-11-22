@@ -55,6 +55,13 @@
           >{{ t("admin.seasons") }}</a
         >
         <a
+          [routerLink]="['/org', org.slug, 'admin', 'schedule']"
+          routerLinkActive="active"
+          queryParamsHandling="preserve"
+          ariaCurrentWhenActive="page"
+          >{{ t("admin.schedule") }}</a
+        >
+        <a
           [routerLink]="['/org', org.slug, 'admin', 'scoring']"
           routerLinkActive="active"
           queryParamsHandling="preserve"

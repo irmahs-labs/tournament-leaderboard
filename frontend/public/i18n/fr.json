@@ -234,7 +234,8 @@
     "scoring": "Barème",
     "members": "Membres",
     "branding": "Image",
-    "claims": "Demandes"
+    "claims": "Demandes",
+    "schedule": "Calendrier"
   },
   "adminPlayers": {
     "title": "Joueurs",
@@ -880,7 +881,19 @@
     "signedUp": "Vous êtes inscrit à {{name}}.",
     "withdrawn": "Vous vous êtes désinscrit de {{name}}.",
     "conflict": "Cela a changé entre-temps. Rechargez la page et réessayez.",
-    "failed": "Cela n'a pas marché. Réessayez dans un instant."
+    "failed": "Cela n'a pas marché. Réessayez dans un instant.",
+    "calledOff": "Annulé",
+    "youreIn": "Vous jouez",
+    "waitingAt": "Liste d'attente · n° {{position}}",
+    "cant": "Indisponible",
+    "imIn": "Je joue",
+    "cantMakeIt": "Je ne peux pas",
+    "locked": "La composition est verrouillée : demandez à un admin de changer votre réponse.",
+    "answered": {
+      "CONFIRMED": "Vous jouez le match {{number}}.",
+      "WAITING": "Le match {{number}} est complet : vous êtes n° {{position}} sur la liste d'attente.",
+      "DECLINED": "C'est noté : vous ne pouvez pas jouer le match {{number}}."
+    }
   },
   "adminSignUps": {
     "link": "Inscriptions",
@@ -911,6 +924,92 @@
     "remove": "Désinscrire",
     "removed": "{{name}} a été désinscrit. Il n'est plus prévenu des matchs de cette saison.",
     "conflict": "Cela a changé entre-temps. Rechargez la page et réessayez.",
+    "failed": "Cela n'a pas marché. Réessayez dans un instant."
+  },
+  "adminSchedule": {
+    "title": "Calendrier",
+    "lede": "Prévoyez chaque match de la saison : quand et où il se joue, la date limite de réponse et le nombre de places. Les joueurs inscrits à la saison répondent dans l'app.",
+    "matches": "Matchs de {{season}}",
+    "match": "Match",
+    "matchNumber": "Match {{number}}",
+    "when": "Quand",
+    "where": "Où",
+    "whereHint": "Une adresse ou un salon Discord",
+    "replyBy": "Réponse avant",
+    "places": "Places",
+    "date": "Date",
+    "startTime": "Heure de début",
+    "full": "{{confirmed}} places prises sur {{places}}",
+    "waitingCount": "{{count}} en attente",
+    "notPlanned": "Pas prévu",
+    "plannedPill": "Prévu",
+    "lockedPill": "Verrouillé",
+    "calledOffPill": "Annulé",
+    "played": "Joué",
+    "plan": "Prévoir",
+    "roster": "Composition",
+    "callOff": "Annuler",
+    "putBack": "Rétablir",
+    "saved": "Le match {{number}} est prévu.",
+    "calledOff": "Le match {{number}} est annulé.",
+    "backOn": "Le match {{number}} est rétabli.",
+    "over": "{{season}} est terminée : son calendrier ne peut plus changer.",
+    "invalid": "Vérifiez les informations, puis réessayez.",
+    "conflict": "Plus de joueurs sont confirmés : passez-en d'abord en liste d'attente.",
+    "failed": "Cela n'a pas marché. Réessayez dans un instant.",
+    "problems": {
+      "places": "Un match a de 2 à 40 places.",
+      "location": "Le lieu fait au plus 200 caractères.",
+      "replyBy": "La date limite de réponse précède le match."
+    }
+  },
+  "adminRoster": {
+    "title": "Composition du match {{number}} · {{season}}",
+    "notDated": "Pas encore de date",
+    "replyBy": "Réponse avant le {{day}}",
+    "back": "Calendrier",
+    "calledOff": "Ce match est annulé : les réponses ne peuvent pas changer tant qu'il n'est pas rétabli.",
+    "played": "Ce match a été joué : ses scores sont sur la page Scores.",
+    "settings": "Places et verrouillage",
+    "openPill": "Ouverte",
+    "lock": "Verrouiller la composition",
+    "unlock": "Déverrouiller la composition",
+    "lockHelp": "Une composition verrouillée est figée, par exemple le jour du match : les joueurs ne peuvent plus changer leur réponse. Vous, si.",
+    "lists": {
+      "confirmed": "Confirmés · {{count}} sur {{places}}",
+      "waiting": "Liste d'attente · {{count}}",
+      "declined": "Indisponibles · {{count}}",
+      "noAnswer": "Sans réponse · {{count}}"
+    },
+    "empty": {
+      "confirmed": "Personne n'est encore confirmé.",
+      "waiting": "Personne n'attend.",
+      "declined": "Personne ne s'est dit indisponible.",
+      "noAnswer": "Tous les inscrits ont répondu."
+    },
+    "to": {
+      "CONFIRMED": "Confirmer",
+      "WAITING": "En liste d'attente",
+      "DECLINED": "Indisponible"
+    },
+    "clear": "Effacer la réponse",
+    "inApp": "Dans l'app",
+    "byAdmin": "Par {{name}}",
+    "movedUp": "Remonté de la liste d'attente",
+    "moved": {
+      "CONFIRMED": "{{name}} est confirmé.",
+      "WAITING": "{{name}} est en liste d'attente.",
+      "DECLINED": "{{name}} est indisponible."
+    },
+    "cleared": "La réponse de {{name}} est effacée.",
+    "placesSaved": "Les places sont enregistrées.",
+    "lockedDone": "La composition est verrouillée.",
+    "unlockedDone": "La composition est déverrouillée.",
+    "addTitle": "Inscrire quelqu'un au match",
+    "addHelp": "N'importe quel joueur de l'organisation, y compris sans compte : il ne peut pas répondre lui-même, vous répondez pour lui.",
+    "noMatch": "Aucun joueur restant ne correspond.",
+    "invalid": "Vérifiez le nombre de places, puis réessayez.",
+    "conflict": "Le match est complet ou annulé : ajoutez une place, ou déplacez d'abord quelqu'un.",
     "failed": "Cela n'a pas marché. Réessayez dans un instant."
   }
 }

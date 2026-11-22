@@ -7,6 +7,8 @@ import { BrandingAdminPage } from "./admin/branding/branding";
 import { ClaimsAdminPage } from "./admin/claims/claims";
 import { MembersAdminPage } from "./admin/members/members";
 import { PlayersAdminPage } from "./admin/players/players";
+import { RosterAdminPage } from "./admin/roster/roster";
+import { ScheduleAdminPage } from "./admin/schedule/schedule";
 import { ScoresAdminPage } from "./admin/scores/scores";
 import { ScoringAdminPage } from "./admin/scoring/scoring";
 import { SeasonsAdminPage } from "./admin/seasons/seasons";
@@ -55,6 +57,8 @@ export const routes: Routes = [
             component: SignUpsAdminPage,
             path: "seasons/:season/sign-ups",
           },
+          { component: ScheduleAdminPage, path: "schedule" },
+          { component: RosterAdminPage, path: "matches/:match/roster" },
           { component: ScoringAdminPage, path: "scoring" },
           { component: MembersAdminPage, path: "members" },
           { component: BrandingAdminPage, path: "branding" },

@@ -124,6 +124,7 @@ describe("the admin pages", () => {
       "Scores",
       "Players",
       "Seasons",
+      "Schedule",
       "Scoring",
       "Members",
       "Claims",

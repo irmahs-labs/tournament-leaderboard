@@ -57,8 +57,72 @@
       </div>
       @if (dates(season); as when) {
       <p class="muted">{{ when }}</p>
-      } @if (season.signedUp) {
+      } @if (season.signedUp) { @let upcoming = matchesOf(season); @if
+      (upcoming.length === 0) {
       <p>{{ t("mySeasons.inHelp") }}</p>
+      } @else {
+      <ul class="matches">
+        @for (match of upcoming; track match.id) {
+        <li [class.off]="match.cancelled">
+          <div class="match-head">
+            <strong
+              >{{ t("adminSchedule.matchNumber", { number: match.number })
+              }}</strong
+            >
+            @if (match.cancelled) {
+            <span class="pill">{{ t("mySeasons.calledOff") }}</span>
+            } @else if (match.status === "CONFIRMED") {
+            <span class="pill live">{{ t("mySeasons.youreIn") }}</span>
+            } @else if (match.status === "WAITING") {
+            <span class="pill wait"
+              >{{ t("mySeasons.waitingAt", { position: match.position })
+              }}</span
+            >
+            } @else if (match.status === "DECLINED") {
+            <span class="pill">{{ t("mySeasons.cant") }}</span>
+            }
+          </div>
+          <p class="muted">{{ when(match) || t("adminRoster.notDated") }}</p>
+          <p class="muted small">
+            {{ t("adminSchedule.full", { confirmed: match.confirmed, places:
+            match.places }) }} @if (match.replyBy) { · {{
+            t("adminRoster.replyBy", { day: language.day(match.replyBy) }) }} }
+          </p>
+          @if (!match.cancelled) { @if (match.locked) {
+          <p class="muted small">{{ t("mySeasons.locked") }}</p>
+          } @else {
+          <div class="answers">
+            @if (match.status !== "CONFIRMED" && match.status !== "WAITING") {
+            <button
+              type="button"
+              class="button small-button"
+              [disabled]="action.busy()"
+              (click)="answer(match, 'YES')"
+            >
+              {{ t("mySeasons.imIn") }}<span class="visually-hidden">
+                {{ t("adminSchedule.matchNumber", { number: match.number })
+                }}</span
+              >
+            </button>
+            } @if (match.status !== "DECLINED") {
+            <button
+              type="button"
+              class="button-ghost small-button"
+              [disabled]="action.busy()"
+              (click)="answer(match, 'NO')"
+            >
+              {{ t("mySeasons.cantMakeIt") }}<span class="visually-hidden">
+                {{ t("adminSchedule.matchNumber", { number: match.number })
+                }}</span
+              >
+            </button>
+            }
+          </div>
+          } }
+        </li>
+        }
+      </ul>
+      }
       <button
         type="button"
         class="button-ghost start"

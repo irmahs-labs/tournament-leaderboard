@@ -61,3 +61,53 @@ p {
   justify-content: space-between;
   gap: 8px 16px;
 }
+
+.matches {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.matches li {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 0;
+  border-top: 1px solid var(--row-line);
+}
+
+.matches li.off {
+  opacity: 0.7;
+}
+
+.match-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.small {
+  font-size: 13px;
+}
+
+.answers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.small-button {
+  min-height: 40px;
+  padding: 0 14px;
+  font-size: 13px;
+}
+
+.pill.wait {
+  color: var(--warn);
+  border-color: var(--warn);
+}

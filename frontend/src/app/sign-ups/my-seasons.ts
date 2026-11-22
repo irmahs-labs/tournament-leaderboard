@@ -8,7 +8,7 @@ import { firstValueFrom } from "rxjs";
 import { AdminAction } from "../admin/action";
 import { CurrentSeason } from "../results/current-season";
 import { LanguageService } from "../shared/language";
-import type { MySeason, MySeasons } from "./api";
+import type { MyMatch, MyMatches, MySeason, MySeasons } from "./api";
 
 /**
  * My seasons: the organisation's seasons not over yet, signing up for one and withdrawing. Signing
@@ -37,6 +37,14 @@ export class MySeasonsPage {
     return org ? `${org}/me/seasons` : undefined;
   });
 
+  /** The upcoming matches of the seasons they're signed up for. */
+  protected readonly matches = httpResource<MyMatches>(() => {
+    const org = this.#org();
+    const state = this.mine.hasValue() ? this.mine.value() : null;
+
+    return org && state?.player ? `${org}/me/matches` : undefined;
+  });
+
   protected readonly action = new AdminAction((status) =>
     this.#transloco.translate(
       status === 409 ? "mySeasons.conflict" : "mySeasons.failed"
@@ -60,6 +68,51 @@ export class MySeasonsPage {
       (api) => this.#http.delete<MySeasons>(api),
       "mySeasons.withdrawn"
     );
+  }
+
+  /** A season's upcoming matches. */
+  protected matchesOf(season: MySeason): MyMatch[] {
+    return this.matches.hasValue()
+      ? this.matches
+          .value()
+          .matches.filter((match) => match.seasonNumber === season.number)
+      : [];
+  }
+
+  /** When and where: "Sat, Dec 5 · 8:30 PM · Discord #matchs". */
+  protected when(match: MyMatch): string {
+    return [
+      match.date ? this.language.day(match.date) : null,
+      match.startTime ? this.language.time(match.startTime) : null,
+      match.location,
+    ]
+      .flatMap((part) => (part === null ? [] : [part]))
+      .join(" · ");
+  }
+
+  /** "I'm in" or "Can't make it". */
+  protected async answer(match: MyMatch, answer: "YES" | "NO"): Promise<void> {
+    const org = this.#org();
+
+    if (!org) {
+      return;
+    }
+
+    await this.action.run(async () => {
+      const after = await firstValueFrom(
+        this.#http.put<MyMatches>(`${org}/matches/${match.id}/attendance`, {
+          answer,
+        })
+      );
+
+      this.matches.set(after);
+      const mine = after.matches.find((each) => each.id === match.id);
+
+      return this.#transloco.translate(
+        `mySeasons.answered.${mine?.status ?? "DECLINED"}`,
+        { number: match.number, position: mine?.position ?? "" }
+      );
+    });
   }
 
   /** The season's dates, such as "1 Sept – 15 Dec 2026", or nothing. */
@@ -86,6 +139,8 @@ export class MySeasonsPage {
           request(`${org}/seasons/${season.number}/registration`)
         )
       );
+
+      this.matches.reload();
 
       return this.#transloco.translate(done, { name: season.name });
     });
