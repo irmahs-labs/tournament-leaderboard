@@ -21,7 +21,6 @@ import { PlatformShell } from "./layout/platform-shell";
 import { LEGAL_PAGES } from "./legal/legal-content";
 import { LegalPage } from "./legal/legal-page";
 import { NotFoundPage } from "./not-found/not-found";
-import { NoticesPage } from "./notices/notices";
 import { PlatformPage } from "./platform/platform";
 import { platformGuard } from "./platform/platform-guard";
 import { LeaderboardPage } from "./results/leaderboard/leaderboard";
@@ -83,7 +82,6 @@ export const routes: Routes = [
         path: "platform",
       },
       { canActivate: [accountGuard], component: AccountPage, path: "account" },
-      { canActivate: [accountGuard], component: NoticesPage, path: "notices" },
       { component: JoinPage, path: "join" },
       { component: JoinPage, path: "join/:code" },
       ...LEGAL_PAGES.map((page) => ({
