@@ -71,15 +71,28 @@
           {{ t("adminPlayers.save") }}
         </button>
       </form>
-      <button
-        type="button"
-        class="button-ghost"
-        [disabled]="action.busy()"
-        (click)="setLocked(!r.locked)"
-      >
-        {{ t(r.locked ? "adminRoster.unlock" : "adminRoster.lock") }}
-      </button>
+      <div class="toggles">
+        <label class="check">
+          <input
+            type="checkbox"
+            name="autoPromote"
+            [checked]="r.autoPromote"
+            [disabled]="action.busy()"
+            (change)="setAutoPromote(r, !r.autoPromote)"
+          />
+          {{ t("adminRoster.auto") }}
+        </label>
+        <button
+          type="button"
+          class="button-ghost"
+          [disabled]="action.busy()"
+          (click)="setLocked(!r.locked)"
+        >
+          {{ t(r.locked ? "adminRoster.unlock" : "adminRoster.lock") }}
+        </button>
+      </div>
     </div>
+    <p class="muted small">{{ t("adminRoster.autoHelp") }}</p>
     <p class="muted small">{{ t("adminRoster.lockHelp") }}</p>
   </section>
 
@@ -93,8 +106,8 @@
     <p class="muted">{{ t("adminRoster.empty." + list) }}</p>
     } @else {
     <ol class="lines" [class.numbered]="list === 'waiting'">
-      @for (line of lines; track line.playerId) { @let id =
-      splitRiotId(line.riotId ?? "");
+      @for (line of lines; track line.playerId; let index = $index, last =
+      $last) { @let id = splitRiotId(line.riotId ?? "");
       <li>
         <div class="line-text">
           <strong><app-riot-id [value]="line.riotId" /></strong>
@@ -109,7 +122,28 @@
           }
         </div>
         <div class="actions">
-          @for (status of moves[list]; track status) {
+          @if (list === "waiting") {
+          <button
+            type="button"
+            class="button-ghost small-button"
+            [disabled]="action.busy() || index === 0"
+            (click)="shift(r, index, -1)"
+          >
+            ↑<span class="visually-hidden">
+              {{ t("adminRoster.up", { name: id.name }) }}</span
+            >
+          </button>
+          <button
+            type="button"
+            class="button-ghost small-button"
+            [disabled]="action.busy() || last"
+            (click)="shift(r, index, 1)"
+          >
+            ↓<span class="visually-hidden">
+              {{ t("adminRoster.down", { name: id.name }) }}</span
+            >
+          </button>
+          } @for (status of moves[list]; track status) {
           <button
             type="button"
             class="button-ghost small-button"

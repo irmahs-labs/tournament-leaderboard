@@ -169,7 +169,6 @@ export class RosterAdminPage {
   /** Saves the places through the match's plan, keeping the rest of it. */
   protected async savePlaces(roster: Roster, value: string): Promise<void> {
     const places = Number(value);
-    const admin = this.current.adminApi();
 
     if (!Number.isInteger(places) || places < 2 || places > 40) {
       this.action.refuse(
@@ -178,6 +177,50 @@ export class RosterAdminPage {
 
       return;
     }
+
+    await this.#replan(roster, { places }, "adminRoster.placesSaved");
+  }
+
+  /** Turns automatic moves up the waiting list on or off. */
+  protected async setAutoPromote(
+    roster: Roster,
+    autoPromote: boolean
+  ): Promise<void> {
+    await this.#replan(
+      roster,
+      { autoPromote },
+      autoPromote ? "adminRoster.autoOn" : "adminRoster.autoOff"
+    );
+  }
+
+  /** Moves a waiting player one place up or down the waiting list. */
+  protected async shift(
+    roster: Roster,
+    index: number,
+    by: -1 | 1
+  ): Promise<void> {
+    const order = roster.waiting.map((line) => line.playerId);
+    const [moved] = order.splice(index, 1);
+
+    if (moved === undefined) {
+      return;
+    }
+
+    order.splice(index + by, 0, moved);
+    await this.#change(
+      (api) => this.#http.put<Roster>(`${api}/waiting`, { players: order }),
+      "adminRoster.reordered",
+      null
+    );
+  }
+
+  /** Changes part of the match's plan, keeping the rest of it. */
+  async #replan(
+    roster: Roster,
+    change: { places?: number; autoPromote?: boolean },
+    done: string
+  ): Promise<void> {
+    const admin = this.current.adminApi();
 
     if (!admin) {
       return;
@@ -188,10 +231,11 @@ export class RosterAdminPage {
         this.#http.put(
           `${admin}/seasons/${roster.seasonNumber}/schedule/${roster.number}`,
           {
+            autoPromote: change.autoPromote ?? null,
             cancelled: null,
             date: roster.date,
             location: roster.location,
-            places,
+            places: change.places ?? roster.places,
             replyBy: roster.replyBy,
             startTime: roster.startTime,
           }
@@ -199,7 +243,7 @@ export class RosterAdminPage {
       );
       this.roster.reload();
 
-      return this.#transloco.translate("adminRoster.placesSaved");
+      return this.#transloco.translate(done);
     });
   }
 

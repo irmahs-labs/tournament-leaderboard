@@ -34,6 +34,7 @@ const line = (
 });
 
 const ROSTER: Roster = {
+  autoPromote: true,
   confirmed: [line("kestrel", "Kestrel#EUW")],
   date: "2026-12-05",
   declined: [],
@@ -163,6 +164,7 @@ describe("the Match roster page", () => {
 
     expect(saved.request.method).toBe("PUT");
     expect(saved.request.body).toStrictEqual({
+      autoPromote: null,
       cancelled: null,
       date: "2026-12-05",
       location: "Discord #matchs",
@@ -187,5 +189,40 @@ describe("the Match roster page", () => {
 
     expect(locked.request.method).toBe("POST");
     locked.flush({ ...ROSTER, locked: true });
+  });
+
+  it("reorders the waiting list and turns automatic moves off", async () => {
+    await vi.waitFor(() => {
+      harness.detectChanges();
+    });
+
+    const two: Roster = {
+      ...ROSTER,
+      waiting: [
+        ...ROSTER.waiting,
+        line("moth", "Moth#EUW", { answeredBy: "Camille", source: "ADMIN" }),
+      ],
+    };
+
+    harness.detectChanges();
+    page.querySelector<HTMLInputElement>("[name=autoPromote]")?.click();
+    const off = http.expectOne(`${ADMIN}/seasons/3/schedule/3`);
+
+    expect(off.request.body).toMatchObject({ autoPromote: false, places: 2 });
+    off.flush({});
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      http.expectOne(`${API}/roster`).flush(two);
+    });
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      expect(button("↓ Move Heron down")).toBeDefined();
+    });
+
+    button("↓ Move Heron down")?.click();
+    const moved = http.expectOne(`${API}/waiting`);
+
+    expect(moved.request.body).toStrictEqual({ players: ["moth", "heron"] });
+    moved.flush(two);
   });
 });

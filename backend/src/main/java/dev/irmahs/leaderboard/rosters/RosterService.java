@@ -30,6 +30,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +60,7 @@ public class RosterService {
     private final MatchRepository matches;
     private final GameRepository games;
     private final AttendanceRepository attendance;
+    private final ApplicationEventPublisher events;
 
     RosterService(
             AccountService accounts,
@@ -69,7 +71,8 @@ public class RosterService {
             SignUpService signUps,
             MatchRepository matches,
             GameRepository games,
-            AttendanceRepository attendance) {
+            AttendanceRepository attendance,
+            ApplicationEventPublisher events) {
         this.accounts = accounts;
         this.organizations = organizations;
         this.members = members;
@@ -79,6 +82,7 @@ public class RosterService {
         this.matches = matches;
         this.games = games;
         this.attendance = attendance;
+        this.events = events;
     }
 
     // Admins: the schedule.
@@ -132,11 +136,20 @@ public class RosterService {
                         matches.lockById(found.getId(), organization.getId()).orElseThrow())
                 .orElseGet(() -> matches.save(new Match(season, matchNumber, plan.date())));
         requireRoomFor(match, plan.places());
+        boolean roomBefore = match.isAutoPromote() && !match.isCancelled();
+        int placesBefore = match.getPlaces();
         match.plan(plan);
         if (Boolean.TRUE.equals(input.cancelled())) {
             match.cancel();
         } else if (Boolean.FALSE.equals(input.cancelled())) {
             match.restore();
+        }
+        if (input.autoPromote() != null) {
+            match.setAutoPromote(input.autoPromote());
+        }
+        // A place added, automatic moves turned back on, or the match back on: places may be free.
+        if (plan.places() > placesBefore || !roomBefore) {
+            fillFromWaitingList(match);
         }
         matches.flush();
         return schedule(slug, number);
@@ -169,6 +182,7 @@ public class RosterService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There's no such player"));
         Attendance answer =
                 attendance.findByMatchIdAndPlayerId(match.getId(), playerId).orElse(null);
+        boolean wasIn = answer != null && answer.is(AttendanceStatus.CONFIRMED);
         if (status == null) {
             if (answer != null) {
                 attendance.delete(answer);
@@ -187,6 +201,9 @@ public class RosterService {
                     requireUser(adminSub).getId());
         }
         attendance.flush();
+        if (wasIn && status != AttendanceStatus.CONFIRMED) {
+            fillFromWaitingList(match);
+        }
         return rosterOf(match);
     }
 
@@ -198,6 +215,7 @@ public class RosterService {
             match.lock(Instant.now());
         } else {
             match.unlock();
+            fillFromWaitingList(match);
         }
         matches.flush();
         return rosterOf(match);
@@ -293,15 +311,78 @@ public class RosterService {
             status = AttendanceStatus.DECLINED;
         } else if (current != null && current.is(AttendanceStatus.CONFIRMED)) {
             status = AttendanceStatus.CONFIRMED;
+        } else if (current != null && current.is(AttendanceStatus.WAITING)) {
+            status = AttendanceStatus.WAITING;
         } else {
-            status = isFull(match) ? AttendanceStatus.WAITING : AttendanceStatus.CONFIRMED;
+            // Nobody jumps the queue: with players waiting, a new "I'm in" waits too.
+            boolean someoneWaiting = attendance.countByMatchIdAndStatus(match.getId(), AttendanceStatus.WAITING) > 0;
+            status = isFull(match) || someoneWaiting ? AttendanceStatus.WAITING : AttendanceStatus.CONFIRMED;
         }
+        boolean gaveUpPlace = current != null && current.is(AttendanceStatus.CONFIRMED);
         record(match, playerId, current, status, AttendanceSource.APP, member.getUserId());
         attendance.flush();
+        if (gaveUpPlace && status != AttendanceStatus.CONFIRMED) {
+            fillFromWaitingList(match);
+        }
         return mine(slug, googleSub);
     }
 
+    /**
+     * Puts the waiting list in the order the admin gives, first to move up first.
+     *
+     * @throws ResponseStatusException 404 for an unknown match, 409 when the list given isn't
+     *     exactly who's waiting, because it changed in the meantime
+     */
+    public Roster reorder(String slug, int matchId, List<UUID> order) {
+        Organization organization = organizations.requireActive(slug);
+        Match match = lockMatch(organization, matchId);
+        List<Attendance> waiting = attendance.findByMatchId(match.getId()).stream()
+                .filter(answer -> answer.is(AttendanceStatus.WAITING))
+                .sorted(Comparator.comparing(Attendance::getQueuedAt))
+                .toList();
+        Map<UUID, Attendance> byPlayer =
+                waiting.stream().collect(Collectors.toMap(Attendance::getPlayerId, Function.identity()));
+        if (order == null
+                || order.size() != waiting.size()
+                || !byPlayer.keySet().containsAll(order)) {
+            throw conflict("The waiting list changed in the meantime: reload and try again");
+        }
+        // The same times, handed out in the new order.
+        List<Instant> times = waiting.stream().map(Attendance::getQueuedAt).toList();
+        for (int i = 0; i < order.size(); i++) {
+            byPlayer.get(order.get(i)).requeue(times.get(i));
+        }
+        attendance.flush();
+        return rosterOf(match);
+    }
+
     // Shared.
+
+    /**
+     * After a place frees up (a confirmed player leaves, a place is added, automatic moves or the
+     * match are back on, the roster is unlocked): while there's a free place, the first player
+     * waiting takes it, unless the roster is locked, the match is called off, or the admins decide
+     * by hand. Each move is published.
+     */
+    private void fillFromWaitingList(Match match) {
+        if (match.isLocked() || match.isCancelled() || !match.isAutoPromote()) {
+            return;
+        }
+        List<Attendance> waiting = attendance.findByMatchId(match.getId()).stream()
+                .filter(answer -> answer.is(AttendanceStatus.WAITING))
+                .sorted(Comparator.comparing(Attendance::getQueuedAt))
+                .toList();
+        long confirmed = attendance.countByMatchIdAndStatus(match.getId(), AttendanceStatus.CONFIRMED);
+        for (Attendance next : waiting) {
+            if (confirmed >= match.getPlaces()) {
+                break;
+            }
+            next.answer(AttendanceStatus.CONFIRMED, AttendanceSource.WAITING_LIST, null, Instant.now());
+            confirmed++;
+            events.publishEvent(new MovedUp(match.getOrganizationId(), match.getId(), next.getPlayerId()));
+        }
+        attendance.flush();
+    }
 
     private Roster rosterOf(Match match) {
         List<Attendance> answers = attendance.findByMatchId(match.getId());
@@ -354,6 +435,7 @@ public class RosterService {
                 match.getPlaces(),
                 match.getStatus(),
                 match.isLocked(),
+                match.isAutoPromote(),
                 games.countByMatch(match) > 0,
                 lists.getOrDefault(AttendanceStatus.CONFIRMED, List.of()),
                 lists.getOrDefault(AttendanceStatus.WAITING, List.of()),
@@ -467,6 +549,8 @@ public class RosterService {
      *
      * @param places nothing: the organisation's players per match
      * @param cancelled true calls it off, false puts it back on, nothing leaves it as it is
+     * @param autoPromote whether the first player waiting takes a place that frees up; nothing
+     *     leaves it as it is
      */
     public record PlanInput(
             LocalDate date,
@@ -474,7 +558,8 @@ public class RosterService {
             String location,
             LocalDate replyBy,
             Integer places,
-            Boolean cancelled) {}
+            Boolean cancelled,
+            Boolean autoPromote) {}
 
     /**
      * A match on the season's schedule.
@@ -554,6 +639,7 @@ public class RosterService {
             int places,
             MatchStatus status,
             boolean locked,
+            boolean autoPromote,
             boolean played,
             List<RosterLine> confirmed,
             List<RosterLine> waiting,

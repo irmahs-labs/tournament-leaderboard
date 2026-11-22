@@ -5,6 +5,7 @@ import dev.irmahs.leaderboard.rosters.RosterService.MyMatches;
 import dev.irmahs.leaderboard.rosters.RosterService.PlanInput;
 import dev.irmahs.leaderboard.rosters.RosterService.Roster;
 import dev.irmahs.leaderboard.rosters.RosterService.Schedule;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -77,6 +78,12 @@ public class RosterController {
         return rosters.setAnswer(slug, admin.getSubject(), match, player, null);
     }
 
+    @PutMapping(ADMIN + "/matches/{match}/waiting")
+    @PreAuthorize("@orgAccess.isAdmin(#slug, authentication)")
+    public Roster reorder(@PathVariable String slug, @PathVariable int match, @RequestBody OrderInput input) {
+        return rosters.reorder(slug, match, input.players());
+    }
+
     @PostMapping(ADMIN + "/matches/{match}/lock")
     @PreAuthorize("@orgAccess.isAdmin(#slug, authentication)")
     public Roster lock(@PathVariable String slug, @PathVariable int match) {
@@ -106,4 +113,7 @@ public class RosterController {
     public record StatusInput(AttendanceStatus status) {}
 
     public record AnswerInput(Answer answer) {}
+
+    /** The players waiting, first to move up first. */
+    public record OrderInput(List<UUID> players) {}
 }
