@@ -22,6 +22,7 @@ public class SpaController {
         "/join",
         "/join/*",
         "/sign-in",
+        "/help",
         "/legal",
         "/privacy",
         "/cookies",

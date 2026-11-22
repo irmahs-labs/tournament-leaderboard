@@ -85,6 +85,7 @@ class ApplicationIT {
                 "/join",
                 "/join/K7QM-4FXP",
                 "/sign-in",
+                "/help",
                 "/legal",
                 "/privacy",
                 "/cookies",

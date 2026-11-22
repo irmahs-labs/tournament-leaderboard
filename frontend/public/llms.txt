@@ -26,6 +26,7 @@ Errors are JSON problem details (RFC 9457).
 - [Leaderboard](/org/alsace-arena): the season's podium, numbers, standings and scoring rules
 - [Matches](/org/alsace-arena/matches)
 - [Players](/org/alsace-arena/players): a card per player, and each player's page
+- [Help](/help): how joining, matches, notices and the admin pages work
 - [Legal notice](/legal), [Privacy policy](/privacy), [Cookie policy](/cookies), [Terms of use](/terms)
 
 ## Source

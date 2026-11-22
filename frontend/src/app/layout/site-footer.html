@@ -22,6 +22,7 @@
         <a class="strong" href="https://irmahs.dev">Irma HS</a>
       </p>
       <nav class="links" [attr.aria-label]="t('footer.legalLabel')">
+        <a routerLink="/help">{{ t("footer.help") }}</a>
         @for (page of legalPages; track page) {
         <a [routerLink]="['/', page]">{{ t("footer.legal." + page) }}</a>
         }
