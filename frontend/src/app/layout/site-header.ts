@@ -1,4 +1,4 @@
-import { DOCUMENT } from "@angular/common";
+import { DOCUMENT, NgTemplateOutlet } from "@angular/common";
 import { Component, computed, inject, input, signal } from "@angular/core";
 import { Router, RouterLink, RouterLinkActive } from "@angular/router";
 import { TranslocoDirective } from "@jsverse/transloco";
@@ -20,7 +20,13 @@ import { ThemeService } from "../shared/theme";
  */
 @Component({
   host: { "(document:click)": "closeMenus($event)" },
-  imports: [NoticesPanel, RouterLink, RouterLinkActive, TranslocoDirective],
+  imports: [
+    NgTemplateOutlet,
+    NoticesPanel,
+    RouterLink,
+    RouterLinkActive,
+    TranslocoDirective,
+  ],
   selector: "app-site-header",
   styleUrl: "./site-header.css",
   templateUrl: "./site-header.html",
