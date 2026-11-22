@@ -66,7 +66,6 @@ public class PlayerAdminService {
     public PlayerView add(String slug, PlayerInput input) {
         UUID organizationId = organizations.requireActive(slug).getId();
         Details details = check(input);
-        RiotIds.require(details.riotId());
         requireFree(organizationId, details.riotId(), null);
         String expected = checkEmail(input.expectedEmail());
         requireEmailFree(organizationId, expected, null);
@@ -92,10 +91,6 @@ public class PlayerAdminService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There's no player " + playerId));
         Details details = check(input);
         boolean linked = members.existsByOrganizationIdAndPlayerId(organizationId, playerId);
-        if (!linked) {
-            // A linked player's Riot ID is their account's, which they change themselves.
-            RiotIds.require(details.riotId());
-        }
         if (linked
                 && (!details.riotId().equals(player.getRiotId())
                         || !Objects.equals(details.discordUsername(), player.getDiscordUsername()))) {

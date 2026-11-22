@@ -12,7 +12,7 @@ import { CurrentSeason } from "../../results/current-season";
 import { splitRiotId } from "../../results/stats";
 import { LanguageService } from "../../shared/language";
 import { RankPill } from "../../shared/rank-pill";
-import { isRiotId, RiotId } from "../../shared/riot-id";
+import { RiotId } from "../../shared/riot-id";
 import type { AdminPlayer, Alias, PlayerInput, RankOption } from "../api";
 
 /** A player's aliases as one line: "Bram, bramblebush". */
@@ -155,12 +155,6 @@ export class PlayersAdminPage {
       null
     );
 
-    if (!isRiotId(input.riotId)) {
-      this.#refuseRiotId();
-
-      return;
-    }
-
     const added = await this.#send(
       (api) => this.#http.post<AdminPlayer>(api, input),
       "adminPlayers.added"
@@ -176,13 +170,6 @@ export class PlayersAdminPage {
     player: AdminPlayer,
     fields: PlayerFields
   ): Promise<void> {
-    // A linked player's Riot ID is their account's; an old one without a tag gets one when edited.
-    if (!player.linked && !isRiotId(fields.riotId)) {
-      this.#refuseRiotId();
-
-      return;
-    }
-
     const saved = await this.#send(
       (api) =>
         this.#http.put<AdminPlayer>(
@@ -195,13 +182,6 @@ export class PlayersAdminPage {
     if (saved) {
       this.editing.set(null);
     }
-  }
-
-  #refuseRiotId(): void {
-    this.outcome.set({
-      ok: false,
-      text: this.#transloco.translate("players.riotIdShape"),
-    });
   }
 
   async #send(

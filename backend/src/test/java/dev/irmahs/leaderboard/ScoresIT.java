@@ -164,7 +164,7 @@ class ScoresIT {
     static Stream<Arguments> adminRoutes() {
         return Stream.of(
                 Arguments.of(HttpMethod.GET, GAME, null),
-                Arguments.of(HttpMethod.PUT, GAME, "{\"lines\": [{\"riotId\": \"Abe#ONE\", \"stats\": {}}]}"),
+                Arguments.of(HttpMethod.PUT, GAME, "{\"lines\": [{\"riotId\": \"A#1\", \"stats\": {}}]}"),
                 Arguments.of(HttpMethod.DELETE, GAME, null),
                 Arguments.of(HttpMethod.GET, GAME + "/previous-roster", null),
                 Arguments.of(HttpMethod.POST, SEASON + "/bonus-check", "[{\"stats\": {\"KILLS\": 3}}]"),
@@ -350,7 +350,7 @@ class ScoresIT {
     }
 
     static Stream<Arguments> refusedSaves() {
-        String kills = "{\"lines\": [{\"riotId\": \"Abe#ONE\", \"stats\": {%s}}]}";
+        String kills = "{\"lines\": [{\"riotId\": \"A#1\", \"stats\": {%s}}]}";
         return Stream.of(
                 Arguments.of(GAME, kills.formatted("\"HEADSHOT_PCT\": 30"), "Season 3 doesn't record HEADSHOT_PCT"),
                 Arguments.of(GAME, kills.formatted("\"KAST_PCT\": 70"), "Season 3 doesn't record KAST_PCT"),
@@ -367,16 +367,12 @@ class ScoresIT {
                 Arguments.of(GAME, "{\"lines\": [{\"stats\": {\"KILLS\": 3}}]}", "Each line needs a player"),
                 Arguments.of(
                         GAME,
-                        "{\"lines\": [{\"riotId\": \"Abe#ONE\"}, {\"riotId\": \"abe#one\"}]}",
-                        "abe#one is in the game twice"),
+                        "{\"lines\": [{\"riotId\": \"A#1\"}, {\"riotId\": \"a#1\"}]}",
+                        "a#1 is in the game twice"),
                 Arguments.of(
                         GAME,
-                        "{\"lines\": [{\"riotId\": \"Abe#ONE\", \"manualBonuses\": [\"FB\"]}]}",
-                        "Season 3 has no manual bonus FB"),
-                Arguments.of(
-                        GAME,
-                        "{\"lines\": [{\"riotId\": \"Newcomer\"}]}",
-                        "A Riot ID is a name of 3 to 16 characters, # and a tag"));
+                        "{\"lines\": [{\"riotId\": \"A#1\", \"manualBonuses\": [\"FB\"]}]}",
+                        "Season 3 has no manual bonus FB"));
     }
 
     @ParameterizedTest
@@ -411,7 +407,7 @@ class ScoresIT {
 
     @Test
     void refusesAStatThatDoesNotExist() {
-        assertThat(put(GAME, "{\"lines\": [{\"riotId\": \"Abe#ONE\", \"stats\": {\"ACES\": 1}}]}"))
+        assertThat(put(GAME, "{\"lines\": [{\"riotId\": \"A#1\", \"stats\": {\"ACES\": 1}}]}"))
                 .hasStatus(400);
     }
 
@@ -426,7 +422,7 @@ class ScoresIT {
     @Test
     void keepsTheMatchDateWhenASaveSaysNone() {
         saveTwoLines();
-        put(GAME.replace("games/1", "games/2"), "{\"lines\": [{\"riotId\": \"Abe#ONE\"}]}");
+        put(GAME.replace("games/1", "games/2"), "{\"lines\": [{\"riotId\": \"A#1\"}]}");
 
         assertThat(flushed()
                         .sql("SELECT match_date FROM matches")

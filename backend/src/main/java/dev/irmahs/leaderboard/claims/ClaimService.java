@@ -13,7 +13,6 @@ import dev.irmahs.leaderboard.players.PlayerAdminService;
 import dev.irmahs.leaderboard.players.PlayerAdminService.PlayerView;
 import dev.irmahs.leaderboard.players.PlayerAlias;
 import dev.irmahs.leaderboard.players.PlayerRepository;
-import dev.irmahs.leaderboard.players.RiotIds;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -164,9 +163,6 @@ public class ClaimService {
         String riotId = user.getRiotId() != null ? user.getRiotId() : name(input.riotId(), "Your Riot ID");
         if (riotId == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your Riot ID can't be empty");
-        }
-        if (user.getRiotId() == null) {
-            RiotIds.require(riotId);
         }
         String discord = user.getRiotId() != null
                 ? user.getDiscordUsername()

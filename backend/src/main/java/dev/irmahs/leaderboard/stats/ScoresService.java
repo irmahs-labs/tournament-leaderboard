@@ -7,7 +7,6 @@ import dev.irmahs.leaderboard.matches.MatchRepository;
 import dev.irmahs.leaderboard.organizations.OrganizationService;
 import dev.irmahs.leaderboard.players.Player;
 import dev.irmahs.leaderboard.players.PlayerRepository;
-import dev.irmahs.leaderboard.players.RiotIds;
 import dev.irmahs.leaderboard.scoring.BonusCalculator;
 import dev.irmahs.leaderboard.scoring.BonusCalculator.Entry;
 import dev.irmahs.leaderboard.scoring.ScoringService;
@@ -241,9 +240,6 @@ public class ScoresService {
         List<Player> roster = new ArrayList<>();
         for (int i = 0; i < found.size(); i++) {
             String riotId = riotIds.get(i);
-            if (found.get(i).isEmpty()) {
-                RiotIds.require(riotId);
-            }
             roster.add(found.get(i).orElseGet(() -> players.save(new Player(organizationId, riotId, null, null))));
         }
         return roster;
