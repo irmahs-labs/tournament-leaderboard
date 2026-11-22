@@ -129,6 +129,18 @@
                   {{ org.name }}</span
                 >
               </button>
+              @if (org.deletable) {
+              <button
+                type="button"
+                class="button-ghost small-button danger"
+                [disabled]="action.busy()"
+                (click)="remove(org)"
+              >
+                {{ t("platform.delete") }}<span class="visually-hidden">
+                  {{ org.name }}</span
+                >
+              </button>
+              }
             </td>
           </tr>
           } @empty {

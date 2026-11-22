@@ -19,6 +19,8 @@ export interface PlatformOrganization {
   members: number;
   status: "ACTIVE" | "SUSPENDED";
   featured: boolean;
+  /** Whether it can be deleted: no game saved, one admin at most. */
+  deletable: boolean;
 }
 
 const API = "/api/platform/organizations";
@@ -42,7 +44,8 @@ export const matching = (
 
 /**
  * The platform admin's Organisations screen: every organisation with its owner, activity and
- * members, the one on the home page, and suspending or reactivating one. Nothing is deleted.
+ * members, the one on the home page, suspending or reactivating one, and deleting one nobody uses
+ * yet once its name is typed.
  */
 @Component({
   imports: [RouterLink, TranslocoDirective],
@@ -88,6 +91,42 @@ export class PlatformPage {
   readonly #http = inject(HttpClient);
   readonly #transloco = inject(TranslocoService);
   readonly #document = inject(DOCUMENT);
+
+  /** Deletes an organisation nobody uses yet, once the platform admin types its name. */
+  protected async remove(organization: PlatformOrganization): Promise<void> {
+    const typed = this.#document.defaultView?.prompt(
+      this.#transloco.translate("platform.deleteConfirm", {
+        name: organization.name,
+      })
+    );
+
+    if (typed === null || typed === undefined) {
+      return;
+    }
+
+    if (typed.trim() !== organization.name) {
+      this.action.refuse(
+        this.#transloco.translate("platform.deleteMismatch", {
+          name: organization.name,
+        })
+      );
+
+      return;
+    }
+
+    await this.action.run(async () => {
+      await firstValueFrom(
+        this.#http.delete(`${API}/${encodeURIComponent(organization.slug)}`, {
+          body: { name: typed.trim() },
+        })
+      );
+      this.list.reload();
+
+      return this.#transloco.translate("platform.deleted", {
+        name: organization.name,
+      });
+    });
+  }
 
   /** Suspends after asking, or reactivates straight away. */
   protected async toggle(organization: PlatformOrganization): Promise<void> {
