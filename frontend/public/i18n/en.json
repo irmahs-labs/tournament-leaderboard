@@ -234,7 +234,8 @@
     "scoring": "Scoring",
     "members": "Members",
     "branding": "Branding",
-    "claims": "Claims"
+    "claims": "Claims",
+    "schedule": "Schedule"
   },
   "adminPlayers": {
     "title": "Players",
@@ -880,7 +881,19 @@
     "signedUp": "You're signed up for {{name}}.",
     "withdrawn": "You withdrew from {{name}}.",
     "conflict": "That changed in the meantime. Reload the page and try again.",
-    "failed": "That didn't work. Try again in a moment."
+    "failed": "That didn't work. Try again in a moment.",
+    "calledOff": "Called off",
+    "youreIn": "You're in",
+    "waitingAt": "Waiting list · #{{position}}",
+    "cant": "Can't make it",
+    "imIn": "I'm in",
+    "cantMakeIt": "Can't make it",
+    "locked": "The roster is locked: ask an admin to change your answer.",
+    "answered": {
+      "CONFIRMED": "You're in for match {{number}}.",
+      "WAITING": "Match {{number}} is full: you're #{{position}} on the waiting list.",
+      "DECLINED": "Got it: you can't make match {{number}}."
+    }
   },
   "adminSignUps": {
     "link": "Sign-ups",
@@ -911,6 +924,92 @@
     "remove": "Withdraw",
     "removed": "{{name}} was withdrawn. They stop hearing about this season's matches.",
     "conflict": "That changed in the meantime. Reload the page and try again.",
+    "failed": "That didn't work. Try again in a moment."
+  },
+  "adminSchedule": {
+    "title": "Schedule",
+    "lede": "Plan each match of the season: when and where it's played, the reply-by date and how many places it has. Players signed up for the season answer in the app.",
+    "matches": "{{season}} matches",
+    "match": "Match",
+    "matchNumber": "Match {{number}}",
+    "when": "When",
+    "where": "Where",
+    "whereHint": "A venue address or a Discord channel",
+    "replyBy": "Reply by",
+    "places": "Places",
+    "date": "Date",
+    "startTime": "Start time",
+    "full": "{{confirmed}} of {{places}} places taken",
+    "waitingCount": "{{count}} waiting",
+    "notPlanned": "Not planned",
+    "plannedPill": "Planned",
+    "lockedPill": "Locked",
+    "calledOffPill": "Called off",
+    "played": "Played",
+    "plan": "Plan",
+    "roster": "Roster",
+    "callOff": "Call off",
+    "putBack": "Put back on",
+    "saved": "Match {{number}} is planned.",
+    "calledOff": "Match {{number}} is called off.",
+    "backOn": "Match {{number}} is back on.",
+    "over": "{{season}} is over: its schedule can't change.",
+    "invalid": "Check the details, then try again.",
+    "conflict": "More players are confirmed than that: move some to the waiting list first.",
+    "failed": "That didn't work. Try again in a moment.",
+    "problems": {
+      "places": "A match has 2 to 40 places.",
+      "location": "Where it's played has at most 200 characters.",
+      "replyBy": "The reply-by date comes before the match."
+    }
+  },
+  "adminRoster": {
+    "title": "Match {{number}} roster · {{season}}",
+    "notDated": "No date yet",
+    "replyBy": "Reply by {{day}}",
+    "back": "Schedule",
+    "calledOff": "This match is called off: answers can't change until it's back on.",
+    "played": "This match was played: its scores are on the Scores page.",
+    "settings": "Places and lock",
+    "openPill": "Open",
+    "lock": "Lock the roster",
+    "unlock": "Unlock the roster",
+    "lockHelp": "A locked roster is frozen, for example on match day: players can't change their answer. You still can.",
+    "lists": {
+      "confirmed": "Confirmed · {{count}} of {{places}}",
+      "waiting": "Waiting list · {{count}}",
+      "declined": "Can't make it · {{count}}",
+      "noAnswer": "No answer · {{count}}"
+    },
+    "empty": {
+      "confirmed": "Nobody is confirmed yet.",
+      "waiting": "Nobody is waiting.",
+      "declined": "Nobody said they can't make it.",
+      "noAnswer": "Everyone signed up has answered."
+    },
+    "to": {
+      "CONFIRMED": "Confirm",
+      "WAITING": "To the waiting list",
+      "DECLINED": "Can't make it"
+    },
+    "clear": "Clear the answer",
+    "inApp": "In the app",
+    "byAdmin": "By {{name}}",
+    "movedUp": "Moved up from the waiting list",
+    "moved": {
+      "CONFIRMED": "{{name}} is confirmed.",
+      "WAITING": "{{name}} is on the waiting list.",
+      "DECLINED": "{{name}} can't make it."
+    },
+    "cleared": "{{name}}'s answer is cleared.",
+    "placesSaved": "The places are saved.",
+    "lockedDone": "The roster is locked.",
+    "unlockedDone": "The roster is unlocked.",
+    "addTitle": "Write someone down",
+    "addHelp": "Any player of the organisation, players without an account too: they can't answer themselves, so you answer for them.",
+    "noMatch": "No player left to write down matches this.",
+    "invalid": "Check the number of places, then try again.",
+    "conflict": "The match is full or called off: add a place, or move someone first.",
     "failed": "That didn't work. Try again in a moment."
   }
 }

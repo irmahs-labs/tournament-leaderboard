@@ -78,8 +78,9 @@ public class SeasonResultsService {
         List<GameStat> seasonLines = lines.findBySeason(season);
         LocalDate today = LocalDate.now();
         NextMatch next = matches.findBySeasonOrderByMatchNumber(season).stream()
-                .filter(match ->
-                        match.getMatchDate() != null && !match.getMatchDate().isBefore(today))
+                .filter(match -> !match.isCancelled()
+                        && match.getMatchDate() != null
+                        && !match.getMatchDate().isBefore(today))
                 .min(Comparator.comparing(Match::getMatchDate))
                 .map(match -> new NextMatch(match.getMatchNumber(), match.getMatchDate()))
                 .orElse(null);

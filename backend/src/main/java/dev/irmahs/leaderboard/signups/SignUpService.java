@@ -201,6 +201,24 @@ public class SignUpService {
         return signUps(slug, number);
     }
 
+    /** The players signed up for a season, in the order they came. */
+    @Transactional(readOnly = true)
+    public List<UUID> signedUp(Season season) {
+        return registrations
+                .findBySeasonIdAndStatusOrderByRegisteredAt(season.getId(), RegistrationStatus.REGISTERED)
+                .stream()
+                .map(SeasonRegistration::getPlayerId)
+                .toList();
+    }
+
+    /** The seasons a player is signed up for, by their ids. */
+    @Transactional(readOnly = true)
+    public Set<Integer> seasonsOf(UUID playerId) {
+        return registrations.findByPlayerIdAndStatus(playerId, RegistrationStatus.REGISTERED).stream()
+                .map(SeasonRegistration::getSeasonId)
+                .collect(Collectors.toSet());
+    }
+
     /** Signs them up, again when they had withdrawn; by themselves when no admin is given. */
     private void register(
             Organization organization, Season season, UUID playerId, SeasonRegistration existing, UUID admin) {

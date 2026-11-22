@@ -105,3 +105,84 @@ export interface NewInvite {
 
 /** How long an invite lasts, in minutes: 30 minutes, 1, 12, 24 or 48 hours. */
 export const INVITE_MINUTES = [30, 60, 720, 1440, 2880] as const;
+
+/** A player's answer for a match. */
+export type AttendanceStatus = "CONFIRMED" | "WAITING" | "DECLINED";
+
+/** How an answer came in: the player in the app, an admin, or moving up from the waiting list. */
+export type AttendanceSource = "APP" | "ADMIN" | "WAITING_LIST";
+
+/** A match on a season's schedule; `id` is null until it's planned or played. */
+export interface ScheduledMatch {
+  id: number | null;
+  number: number;
+  date: string | null;
+  /** "20:30:00". */
+  startTime: string | null;
+  /** A venue address or a Discord channel. */
+  location: string | null;
+  replyBy: string | null;
+  places: number;
+  /** Null until it's planned. */
+  status: "PLANNED" | "CANCELLED" | null;
+  locked: boolean;
+  /** Whether a game was saved for it. */
+  played: boolean;
+  confirmed: number;
+  waiting: number;
+}
+
+/** `GET …/admin/seasons/{n}/schedule`. */
+export interface Schedule {
+  number: number;
+  name: string;
+  finished: boolean;
+  /** The organisation's players per match, for a match not planned yet. */
+  defaultPlaces: number;
+  matches: ScheduledMatch[];
+}
+
+/** What `PUT …/admin/seasons/{n}/schedule/{match}` takes. */
+export interface PlanInput {
+  date: string | null;
+  startTime: string | null;
+  location: string | null;
+  replyBy: string | null;
+  places: number;
+  /** True calls it off, false puts it back on, null leaves it. */
+  cancelled: boolean | null;
+}
+
+/** A player on a roster. */
+export interface RosterLine {
+  playerId: string;
+  riotId: string | null;
+  /** Linked to an account, so answers themselves. */
+  account: boolean;
+  /** Null when they haven't answered. */
+  source: AttendanceSource | null;
+  answeredAt: string | null;
+  answeredBy: string | null;
+}
+
+/** `GET …/admin/matches/{id}/roster`. */
+export interface Roster {
+  id: number;
+  seasonNumber: number;
+  seasonName: string;
+  number: number;
+  date: string | null;
+  startTime: string | null;
+  location: string | null;
+  replyBy: string | null;
+  places: number;
+  status: "PLANNED" | "CANCELLED";
+  locked: boolean;
+  played: boolean;
+  confirmed: RosterLine[];
+  /** In the order they'll move up. */
+  waiting: RosterLine[];
+  declined: RosterLine[];
+  /** Signed up for the season, but haven't answered. */
+  noAnswer: RosterLine[];
+}

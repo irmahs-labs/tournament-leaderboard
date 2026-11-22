@@ -1,0 +1,200 @@
+<ng-container *transloco="let t">
+  @if (roster.error()) {
+  <p class="panel notice" role="alert">{{ t("adminRoster.failed") }}</p>
+  } @else if (roster.hasValue()) { @let r = roster.value();
+  <div class="intro-text">
+    <span class="eyebrow"
+      >{{ t("admin.eyebrow", { org: current.organization()?.name ?? "" })
+      }}</span
+    >
+    <h1 class="display">
+      {{ t("adminRoster.title", { number: r.number, season: r.seasonName }) }}
+    </h1>
+    <p class="lede muted">{{ when(r) || t("adminRoster.notDated") }}</p>
+    <p class="muted">
+      @if (r.replyBy) { {{ t("adminRoster.replyBy", { day:
+      language.day(r.replyBy) }) }} · } {{ t("adminSchedule.full", { confirmed:
+      r.confirmed.length, places: r.places }) }}
+    </p>
+    <a
+      class="back"
+      [routerLink]="['/org', current.organization()?.slug, 'admin', 'schedule']"
+      [queryParams]="{ season: r.seasonNumber }"
+      >← {{ t("adminRoster.back") }}</a
+    >
+  </div>
+
+  <p
+    class="status"
+    role="status"
+    [class.failed]="action.outcome()?.ok === false"
+  >
+    {{ action.outcome()?.text }}
+  </p>
+
+  @if (r.status === "CANCELLED") {
+  <p class="panel notice">{{ t("adminRoster.calledOff") }}</p>
+  } @if (r.played) {
+  <p class="panel notice">{{ t("adminRoster.played") }}</p>
+  }
+
+  <section class="panel block" aria-labelledby="settings-title">
+    <div class="block-head">
+      <h2 class="heading" id="settings-title">
+        {{ t("adminRoster.settings") }}
+      </h2>
+      <span class="pill" [class.live]="!r.locked"
+        >{{ t(r.locked ? "adminSchedule.lockedPill" : "adminRoster.openPill")
+        }}</span
+      >
+    </div>
+    <div class="settings">
+      <form
+        class="places"
+        (submit)="$event.preventDefault(); savePlaces(places.value)"
+      >
+        <label class="field">
+          <span class="label">{{ t("adminSchedule.places") }}</span>
+          <input
+            #places
+            class="count"
+            type="number"
+            name="places"
+            min="2"
+            max="40"
+            [value]="r.places"
+          />
+        </label>
+        <button type="submit" class="button-ghost" [disabled]="action.busy()">
+          {{ t("adminPlayers.save") }}
+        </button>
+      </form>
+      <button
+        type="button"
+        class="button-ghost"
+        [disabled]="action.busy()"
+        (click)="setLocked(!r.locked)"
+      >
+        {{ t(r.locked ? "adminRoster.unlock" : "adminRoster.lock") }}
+      </button>
+    </div>
+    <p class="muted small">{{ t("adminRoster.lockHelp") }}</p>
+  </section>
+
+  @for (list of lists; track list) { @let lines = r[list];
+  <section class="panel block" [attr.aria-labelledby]="list + '-title'">
+    <h2 class="heading" [id]="list + '-title'">
+      {{ t("adminRoster.lists." + list, { count: lines.length, places: r.places
+      }) }}
+    </h2>
+    @if (lines.length === 0) {
+    <p class="muted">{{ t("adminRoster.empty." + list) }}</p>
+    } @else {
+    <ol class="lines" [class.numbered]="list === 'waiting'">
+      @for (line of lines; track line.playerId) { @let id =
+      splitRiotId(line.riotId ?? "");
+      <li>
+        <div class="line-text">
+          <strong>{{ id.name }}<span class="muted"> {{ id.tag }}</span></strong>
+          @if (!line.account) { &ngsp;<span class="pill"
+            >{{ t("adminSignUps.noAccount") }}</span
+          >
+          } @if (line.source) {
+          <span class="muted small"
+            >{{ how(line) }} · {{ language.moment(line.answeredAt ?? "")
+            }}</span
+          >
+          }
+        </div>
+        <div class="actions">
+          @for (status of moves[list]; track status) {
+          <button
+            type="button"
+            class="button-ghost small-button"
+            [disabled]="action.busy() || r.status === 'CANCELLED'"
+            (click)="move(line, status)"
+          >
+            {{ t("adminRoster.to." + status) }}<span class="visually-hidden">
+              {{ id.name }}</span
+            >
+          </button>
+          } @if (list !== "noAnswer") {
+          <button
+            type="button"
+            class="button-ghost small-button"
+            [disabled]="action.busy()"
+            (click)="clear(line)"
+          >
+            {{ t("adminRoster.clear") }}<span class="visually-hidden">
+              {{ id.name }}</span
+            >
+          </button>
+          }
+        </div>
+      </li>
+      }
+    </ol>
+    }
+  </section>
+  }
+
+  <section class="panel block" aria-labelledby="add-title">
+    <h2 class="heading" id="add-title">{{ t("adminRoster.addTitle") }}</h2>
+    <p class="muted">{{ t("adminRoster.addHelp") }}</p>
+    <label class="field search">
+      <span class="label">{{ t("adminSignUps.search") }}</span>
+      <input
+        #query
+        type="search"
+        name="search"
+        autocomplete="off"
+        [placeholder]="t('players.publicSearchHint')"
+        [value]="search()"
+        (input)="search.set(query.value)"
+      />
+    </label>
+    @if (search().trim() !== "") { @if (candidates().length === 0) {
+    <p class="muted">{{ t("adminRoster.noMatch") }}</p>
+    } @else {
+    <ul class="lines">
+      @for (player of candidates(); track player.id) { @let id =
+      splitRiotId(player.riotId);
+      <li>
+        <div class="line-text">
+          <strong>{{ id.name }}<span class="muted"> {{ id.tag }}</span></strong>
+          @if (!player.linked) { &ngsp;<span class="pill"
+            >{{ t("adminSignUps.noAccount") }}</span
+          >
+          }
+        </div>
+        <div class="actions">
+          <button
+            type="button"
+            class="button-ghost small-button"
+            [disabled]="action.busy() || r.status === 'CANCELLED'"
+            (click)="move({ playerId: player.id, riotId: player.riotId }, 'CONFIRMED')"
+          >
+            {{ t("adminRoster.to.CONFIRMED") }}<span class="visually-hidden">
+              {{ id.name }}</span
+            >
+          </button>
+          <button
+            type="button"
+            class="button-ghost small-button"
+            [disabled]="action.busy() || r.status === 'CANCELLED'"
+            (click)="move({ playerId: player.id, riotId: player.riotId }, 'WAITING')"
+          >
+            {{ t("adminRoster.to.WAITING") }}<span class="visually-hidden">
+              {{ id.name }}</span
+            >
+          </button>
+        </div>
+      </li>
+      }
+    </ul>
+    } }
+  </section>
+  } @else {
+  <p class="muted" aria-live="polite">{{ t("claim.loading") }}</p>
+  }
+</ng-container>

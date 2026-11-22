@@ -1,0 +1,153 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 900px;
+  min-width: 0;
+}
+
+.intro-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.back {
+  align-self: flex-start;
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.block {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.block-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+}
+
+p {
+  margin: 0;
+}
+
+.small {
+  font-size: 13px;
+}
+
+.status {
+  margin: 0;
+  color: var(--good);
+  font-weight: 600;
+}
+
+.status:empty {
+  display: none;
+}
+
+.status.failed {
+  color: var(--danger);
+}
+
+.notice {
+  padding: 16px 18px;
+}
+
+.settings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px 24px;
+}
+
+.places {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.search {
+  max-width: 420px;
+}
+
+input {
+  min-height: 44px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  width: 100%;
+  background: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--input-line);
+  border-radius: 0;
+  font: 500 15px var(--font-body);
+}
+
+input.count {
+  width: 90px;
+}
+
+.lines {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lines.numbered {
+  counter-reset: waiting;
+}
+
+.lines li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--row-line);
+}
+
+.lines.numbered li::before {
+  counter-increment: waiting;
+  content: counter(waiting);
+  min-width: 24px;
+  font-weight: 700;
+  color: var(--accent-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.line-text {
+  flex: 1 1 220px;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.small-button {
+  min-height: 40px;
+  padding: 0 14px;
+  font-size: 13px;
+}

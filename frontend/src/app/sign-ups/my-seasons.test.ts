@@ -12,9 +12,27 @@ import {
   text,
   texts,
 } from "../testing";
-import type { MySeason, MySeasons } from "./api";
+import type { MyMatch, MySeason, MySeasons } from "./api";
 
 const API = `/api/orgs/${ALSACE.slug}/me/seasons`;
+const MATCHES = `/api/orgs/${ALSACE.slug}/me/matches`;
+
+const MATCH: MyMatch = {
+  cancelled: false,
+  confirmed: 9,
+  date: "2026-12-05",
+  id: 41,
+  location: "Discord #matchs",
+  locked: false,
+  number: 2,
+  places: 10,
+  position: null,
+  replyBy: "2026-12-03",
+  seasonName: "Season 9",
+  seasonNumber: 9,
+  startTime: "20:30:00",
+  status: null,
+};
 
 const SEASON: MySeason = {
   endsOn: "2026-12-15",
@@ -30,12 +48,27 @@ describe("the My seasons page", () => {
   let harness: RouterTestingHarness;
   let page: HTMLElement;
 
-  const open = async (mine: MySeasons): Promise<void> => {
+  const answerMatches = async (matches: MyMatch[]): Promise<void> => {
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      http.expectOne(MATCHES).flush({ matches });
+    });
+  };
+
+  const open = async (
+    mine: MySeasons,
+    matches: MyMatch[] = []
+  ): Promise<void> => {
     harness = await openAs("/org/alsace-arena/me/seasons", ME);
     await vi.waitFor(() => {
       harness.detectChanges();
       http.expectOne(API).flush(mine);
     });
+
+    if (mine.player) {
+      await answerMatches(matches);
+    }
+
     harness.detectChanges();
     page = rendered(harness);
   };
@@ -85,6 +118,7 @@ describe("the My seasons page", () => {
       player: true,
       seasons: [{ ...SEASON, signedUp: true }],
     });
+    await answerMatches([]);
     await vi.waitFor(() => {
       harness.detectChanges();
       expect(text(page.querySelector("[role=status]"))).toBe(
@@ -104,6 +138,7 @@ describe("the My seasons page", () => {
       player: true,
       seasons: [SEASON],
     });
+    await answerMatches([]);
     await vi.waitFor(() => {
       harness.detectChanges();
       expect(button("Sign up")).toBeDefined();
@@ -125,6 +160,60 @@ describe("the My seasons page", () => {
     expect(button("Sign up")).toBeUndefined();
     expect(texts(page, ".seasons p").at(-1)).toBe(
       "Sign-ups are closed. An admin can still sign you up."
+    );
+  });
+
+  it("answers a match: in, then can't make it", async () => {
+    await open({ player: true, seasons: [{ ...SEASON, signedUp: true }] }, [
+      MATCH,
+    ]);
+
+    expect(text(page.querySelector(".matches strong"))).toBe("Match 2");
+    expect(texts(page, ".matches p")).toStrictEqual([
+      "Dec 5 · 8:30 PM · Discord #matchs",
+      "9 of 10 places taken · Reply by Dec 3",
+    ]);
+
+    button("I'm in")?.click();
+
+    const sent = await vi.waitFor(() =>
+      http.expectOne(`/api/orgs/${ALSACE.slug}/matches/41/attendance`)
+    );
+
+    expect(sent.request.body).toStrictEqual({ answer: "YES" });
+    sent.flush({
+      matches: [{ ...MATCH, confirmed: 10, status: "CONFIRMED" }],
+    });
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      expect(text(page.querySelector("[role=status]"))).toBe(
+        "You're in for match 2."
+      );
+    });
+    expect(text(page.querySelector(".matches .pill"))).toBe("You're in");
+    expect(button("I'm in")).toBeUndefined();
+
+    button("Can't make it")?.click();
+    http
+      .expectOne(`/api/orgs/${ALSACE.slug}/matches/41/attendance`)
+      .flush({ matches: [{ ...MATCH, status: "DECLINED" }] });
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      expect(text(page.querySelector(".matches .pill"))).toBe("Can't make it");
+    });
+  });
+
+  it("shows the waiting list position, and a locked roster", async () => {
+    await open({ player: true, seasons: [{ ...SEASON, signedUp: true }] }, [
+      { ...MATCH, locked: true, position: 2, status: "WAITING" },
+    ]);
+
+    expect(text(page.querySelector(".matches .pill"))).toBe(
+      "Waiting list · #2"
+    );
+    expect(button("I'm in")).toBeUndefined();
+    expect(texts(page, ".matches p").at(-1)).toBe(
+      "The roster is locked: ask an admin to change your answer."
     );
   });
 });

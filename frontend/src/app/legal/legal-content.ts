@@ -199,6 +199,12 @@ const EN: Record<LegalPageId, LegalDocument> = {
               "As long as the organisation keeps its tournament history, or until you object.",
             ],
             [
+              "Players of a tournament",
+              "Your answer for each match (in, waiting list or can't make it), when, and whether you or an admin gave it. The organisation's admins see it; you see your own.",
+              "Organising each match's players. Necessary for the service you ask for by answering (article 6(1)(b)); when an admin answers for you, legitimate interest of the organisers (article 6(1)(f)).",
+              "As long as the organisation keeps its tournament history, or until you object.",
+            ],
+            [
               "People who sign in (organisers)",
               "Google account id, email address and name, sent by Google when you sign in; which organisations you belong to and your role there. The site doesn't keep your Google picture or your password: it never sees it.",
               "Signing you in and letting you manage your organisation, which you ask for by signing in. Necessary for the service you use (article 6(1)(b)).",
@@ -472,6 +478,12 @@ const FR: Record<LegalPageId, LegalDocument> = {
               "Tant que l'organisation conserve l'historique de son tournoi, ou jusqu'à votre opposition.",
             ],
             [
+              "Joueurs d'un tournoi",
+              "Votre réponse pour chaque match (vous jouez, liste d'attente ou indisponible), quand, et si c'est vous ou un administrateur qui l'a donnée. Les administrateurs de l'organisation la voient ; vous voyez la vôtre.",
+              "Organiser les joueurs de chaque match. Nécessaire au service que vous demandez en répondant (article 6(1)(b)) ; quand un administrateur répond pour vous, intérêt légitime des organisateurs (article 6(1)(f)).",
+              "Tant que l'organisation conserve l'historique de son tournoi, ou jusqu'à votre opposition.",
+            ],
+            [
               "Personnes qui se connectent (organisateurs)",
               "Identifiant du compte Google, adresse e-mail et nom, transmis par Google à la connexion ; les organisations dont vous faites partie et votre rôle. Le site ne garde ni votre photo Google ni votre mot de passe : il ne le voit jamais.",
               "Vous connecter et vous permettre de gérer votre organisation, ce que vous demandez en vous connectant. Nécessaire au service utilisé (article 6(1)(b)).",
@@ -599,4 +611,4 @@ export const LEGAL: Record<Language, Record<LegalPageId, LegalDocument>> = {
 };
 
 /** When the legal pages last changed, as YYYY-MM-DD. */
-export const UPDATED = "2026-11-21";
+export const UPDATED = "2026-11-22";

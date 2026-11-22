@@ -131,6 +131,15 @@ export class LanguageService {
     }).format(new Date(instant));
   }
 
+  /** A time of day, such as "8:30 PM" or "20:30", from the API's "20:30:00". */
+  time(value: string): string {
+    return new Intl.DateTimeFormat(this.active, {
+      hour: "numeric",
+      minute: "2-digit",
+      timeZone: "UTC",
+    }).format(new Date(`1970-01-01T${value}Z`));
+  }
+
   /** A date as a short month and year, such as "Jan 2026" or "janv. 2026". */
   month(date: string): string {
     return new Intl.DateTimeFormat(this.active, {
