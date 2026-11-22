@@ -1,13 +1,6 @@
 import { HttpClient, httpResource } from "@angular/common/http";
-import {
-  Component,
-  computed,
-  effect,
-  inject,
-  input,
-  signal,
-} from "@angular/core";
-import { RouterLink } from "@angular/router";
+import { Component, computed, effect, inject, signal } from "@angular/core";
+import { ActivatedRoute, RouterLink } from "@angular/router";
 import { TranslocoDirective, TranslocoService } from "@jsverse/transloco";
 import type { Observable } from "rxjs";
 import { firstValueFrom } from "rxjs";
@@ -33,9 +26,8 @@ import { MAX_NAME, MAX_TEXT, matchingPlayers } from "./api";
 })
 export class ClaimPage {
   /** From the address: `?join=1` when they came from the leaderboard's Join button. */
-  readonly joinRequested = input<string | undefined>(undefined, {
-    alias: "join",
-  });
+  readonly #joinRequested =
+    inject(ActivatedRoute).snapshot.queryParamMap.has("join");
 
   protected readonly current = inject(CurrentSeason);
   protected readonly language = inject(LanguageService);
@@ -108,7 +100,7 @@ export class ClaimPage {
     effect(() => {
       const state = this.state.hasValue() ? this.state.value() : null;
 
-      if (this.joinRequested() && state && !state.member && !this.#joined) {
+      if (this.#joinRequested && state && !state.member && !this.#joined) {
         this.#joined = true;
         void this.becomeMember();
       }
