@@ -12,7 +12,7 @@ import { CurrentSeason } from "../../results/current-season";
 import { splitRiotId } from "../../results/stats";
 import { LanguageService } from "../../shared/language";
 import { RankPill } from "../../shared/rank-pill";
-import { RiotId } from "../../shared/riot-id";
+import { isRiotId, RiotId } from "../../shared/riot-id";
 import type { AdminPlayer, Alias, PlayerInput, RankOption } from "../api";
 
 /** A player's aliases as one line: "Bram, bramblebush". */
@@ -155,6 +155,12 @@ export class PlayersAdminPage {
       null
     );
 
+    if (!isRiotId(input.riotId)) {
+      this.#refuseRiotId();
+
+      return;
+    }
+
     const added = await this.#send(
       (api) => this.#http.post<AdminPlayer>(api, input),
       "adminPlayers.added"
@@ -170,6 +176,15 @@ export class PlayersAdminPage {
     player: AdminPlayer,
     fields: PlayerFields
   ): Promise<void> {
+    // A changed Riot ID takes Riot's format; one left as it is stays, tag or not.
+    const riotId = fields.riotId.trim();
+
+    if (riotId !== player.riotId && !isRiotId(riotId)) {
+      this.#refuseRiotId();
+
+      return;
+    }
+
     const saved = await this.#send(
       (api) =>
         this.#http.put<AdminPlayer>(
@@ -182,6 +197,13 @@ export class PlayersAdminPage {
     if (saved) {
       this.editing.set(null);
     }
+  }
+
+  #refuseRiotId(): void {
+    this.outcome.set({
+      ok: false,
+      text: this.#transloco.translate("players.riotIdShape"),
+    });
   }
 
   async #send(

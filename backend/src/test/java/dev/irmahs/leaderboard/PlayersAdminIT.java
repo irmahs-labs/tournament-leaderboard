@@ -253,6 +253,22 @@ class PlayersAdminIT {
     }
 
     @Test
+    void aRiotIdTakesRiotsFormatWhenNewOrChangedOnly() {
+        Player old = new Player(alsace, "Drrako", null, null);
+        em.persist(old);
+        em.flush();
+
+        assertThat(post("{\"riotId\": \"Newcomer\"}")).hasStatus(400);
+        assertThat(put(old.getId(), "{\"riotId\": \"Drrako\", \"discordUsername\": \"drr\"}"))
+                .hasStatusOk();
+        assertThat(put(old.getId(), "{\"riotId\": \"Drrako2\"}")).hasStatus(400);
+        assertThat(put(old.getId(), "{\"riotId\": \"Drrako#EUW\"}"))
+                .hasStatusOk()
+                .bodyJson()
+                .isLenientlyEqualTo("{\"riotId\": \"Drrako#EUW\"}");
+    }
+
+    @Test
     void anotherOrganisationsPlayerIsNotFound() {
         assertThat(put(lyonKestrel, "{\"riotId\": \"Stolen#EUW\"}")).hasStatus(404);
         assertThat(put(UUID.randomUUID(), "{\"riotId\": \"Ghost#EUW\"}")).hasStatus(404);

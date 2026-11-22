@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { splitRiotId } from "./riot-id";
+import { isRiotId, splitRiotId } from "./riot-id";
 
 describe(splitRiotId, () => {
   it("makes everything from the first # the tag", () => {
@@ -16,5 +16,31 @@ describe(splitRiotId, () => {
 
   it("leaves a name without a # whole", () => {
     expect(splitRiotId("Drrako")).toStrictEqual({ name: "Drrako", tag: "" });
+  });
+});
+
+describe(isRiotId, () => {
+  it("accepts a name and a tag as Riot makes them", () => {
+    for (const riotId of [
+      "Kestrel#EUW",
+      "Abe#ONE",
+      " Huzéguto#1234 ",
+      "Jett Main#FR1",
+    ]) {
+      expect(isRiotId(riotId)).toBeTruthy();
+    }
+  });
+
+  it("refuses anything else", () => {
+    for (const riotId of [
+      "Drrako",
+      "Ab#EUW",
+      "Kestrel#EU",
+      "Kestrel#EUROPE",
+      "A#B#CDE",
+      "",
+    ]) {
+      expect(isRiotId(riotId)).toBeFalsy();
+    }
   });
 });

@@ -6,6 +6,7 @@ import dev.irmahs.leaderboard.organizations.Organization;
 import dev.irmahs.leaderboard.organizations.OrganizationService;
 import dev.irmahs.leaderboard.players.Player;
 import dev.irmahs.leaderboard.players.PlayerRepository;
+import dev.irmahs.leaderboard.players.RiotIds;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -58,6 +59,9 @@ public class IdentityService {
         String riotId = name(input.riotId(), "Your Riot ID");
         if (riotId == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your Riot ID can't be empty");
+        }
+        if (!riotId.equals(user.getRiotId())) {
+            RiotIds.require(riotId);
         }
         String discord = name(input.discordUsername(), "Your Discord username");
         List<Player> linked = linkedPlayers(user.getId());
