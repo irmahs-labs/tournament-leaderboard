@@ -142,7 +142,7 @@
     "leaderboard": "Classement",
     "matches": "Matchs",
     "players": "Joueurs",
-    "mySeasons": "Mes saisons"
+    "myMatches": "Mes matchs"
   },
   "notFound": {
     "body": "Cette page n'existe pas, ou l'organisation à laquelle elle appartient n'est plus disponible. Vérifiez l'adresse, ou repartez de l'accueil.",
@@ -823,9 +823,9 @@
     "riotId": "Votre Riot ID",
     "discord": "Votre pseudo Discord (facultatif)",
     "create": "Créer mon profil",
-    "created": "Votre profil est créé. Inscrivez-vous maintenant à une saison.",
+    "created": "Votre profil est créé. Dites maintenant à quels matchs vous venez.",
     "riotIdNeeded": "Tapez votre Riot ID, par exemple Nom#TAG.",
-    "toSeasons": "M'inscrire à une saison"
+    "toSeasons": "Répondre aux matchs"
   },
   "adminClaims": {
     "title": "Demandes",
@@ -879,71 +879,9 @@
     "identityNote": "Votre Riot ID et votre Discord sont les mêmes dans chaque organisation :",
     "identityLink": "modifiez-les dans Mon compte"
   },
-  "mySeasons": {
-    "title": "Mes saisons",
-    "lede": "Inscrivez-vous à une saison pour être prévenu de ses matchs. Il n'y a pas de limite d'inscrits.",
-    "notMember": "Vous jouez à {{org}} ?",
-    "notMemberHelp": "Rejoignez d'abord en tant que joueur, puis revendiquez ou créez votre profil.",
-    "noProfile": "Il vous faut d'abord un profil joueur",
-    "noProfileHelp": "Revendiquez le profil pour lequel les admins saisissent déjà vos scores, ou créez-en un si vous n'avez jamais joué.",
-    "toClaim": "Revendiquer ou créer mon profil",
-    "none": "Aucune saison n'est en cours pour l'instant.",
-    "in": "Inscrit",
-    "inHelp": "Vous êtes inscrit : vous verrez ici chacun de ses matchs dès qu'il est prévu.",
-    "withdraw": "Me désinscrire",
-    "signUp": "M'inscrire",
-    "closed": "Les inscriptions sont fermées. Un admin peut encore vous inscrire.",
-    "signedUp": "Vous êtes inscrit à {{name}}.",
-    "withdrawn": "Vous vous êtes désinscrit de {{name}}.",
-    "conflict": "Cela a changé entre-temps. Rechargez la page et réessayez.",
-    "failed": "Cela n'a pas marché. Réessayez dans un instant.",
-    "calledOff": "Annulé",
-    "youreIn": "Vous jouez",
-    "waitingAt": "Liste d'attente · n° {{position}}",
-    "cant": "Indisponible",
-    "imIn": "Je joue",
-    "cantMakeIt": "Je ne peux pas",
-    "locked": "La composition est verrouillée : demandez à un admin de changer votre réponse.",
-    "answered": {
-      "CONFIRMED": "Vous jouez le match {{number}}.",
-      "WAITING": "Le match {{number}} est complet : vous êtes n° {{position}} sur la liste d'attente.",
-      "DECLINED": "C'est noté : vous ne pouvez pas jouer le match {{number}}."
-    }
-  },
-  "adminSignUps": {
-    "link": "Inscriptions",
-    "title": "Inscriptions : {{name}}",
-    "lede": "Les joueurs s'inscrivent eux-mêmes tant que les inscriptions sont ouvertes, sans limite. Vous pouvez inscrire n'importe qui à tout moment, y compris les joueurs sans compte.",
-    "back": "Toutes les saisons",
-    "over": "Cette saison est terminée : ses inscriptions ne peuvent plus changer.",
-    "settings": "Inscriptions",
-    "isOpen": "Ouvertes",
-    "isClosed": "Fermées",
-    "open": "Les joueurs peuvent s'inscrire eux-mêmes",
-    "settingsSaved": "Les inscriptions sont enregistrées.",
-    "addTitle": "Inscrire quelqu'un vous-même",
-    "addHelp": "Pour les joueurs sans compte, ou après la fermeture des inscriptions. Les joueurs sans compte ne peuvent pas répondre eux-mêmes : vous confirmerez leurs matchs sur la composition.",
-    "search": "Chercher parmi les joueurs",
-    "noMatch": "Aucun joueur restant à inscrire ne correspond.",
-    "noAccount": "Sans compte",
-    "add": "Inscrire",
-    "added": "{{name}} est inscrit.",
-    "signedUp": "Inscrits · {{count}}",
-    "nobody": "Personne ne s'est encore inscrit.",
-    "player": "Joueur",
-    "when": "Inscrit le",
-    "how": "Comment",
-    "themselves": "Lui-même",
-    "byAdmin": "Par {{name}}",
-    "anAdmin": "un admin",
-    "remove": "Désinscrire",
-    "removed": "{{name}} a été désinscrit. Il n'est plus prévenu des matchs de cette saison.",
-    "conflict": "Cela a changé entre-temps. Rechargez la page et réessayez.",
-    "failed": "Cela n'a pas marché. Réessayez dans un instant."
-  },
   "adminSchedule": {
     "title": "Calendrier",
-    "lede": "Prévoyez chaque match de la saison : quand et où il se joue, la date limite de réponse et le nombre de places. Les joueurs inscrits à la saison répondent dans l'app.",
+    "lede": "Prévoyez chaque match de la saison : quand et où il se joue, la date limite de réponse et le nombre de places. Chaque joueur de l'organisation avec un compte répond dans l'app.",
     "matches": "Matchs de {{season}}",
     "match": "Match",
     "matchNumber": "Match {{number}}",
@@ -994,13 +932,13 @@
       "confirmed": "Confirmés · {{count}} sur {{places}}",
       "waiting": "Liste d'attente · {{count}}",
       "declined": "Indisponibles · {{count}}",
-      "noAnswer": "Sans réponse · {{count}}"
+      "noAnswer": "Disponibles · {{count}}"
     },
     "empty": {
       "confirmed": "Personne n'est encore confirmé.",
       "waiting": "Personne n'attend.",
       "declined": "Personne ne s'est dit indisponible.",
-      "noAnswer": "Tous les inscrits ont répondu."
+      "noAnswer": "Tous les joueurs ont répondu."
     },
     "to": {
       "CONFIRMED": "Confirmer",
@@ -1020,9 +958,7 @@
     "placesSaved": "Les places sont enregistrées.",
     "lockedDone": "La composition est verrouillée.",
     "unlockedDone": "La composition est déverrouillée.",
-    "addTitle": "Inscrire quelqu'un au match",
-    "addHelp": "N'importe quel joueur de l'organisation, y compris sans compte : il ne peut pas répondre lui-même, vous répondez pour lui.",
-    "noMatch": "Aucun joueur restant ne correspond.",
+    "noMatch": "Aucun joueur disponible ne correspond.",
     "invalid": "Vérifiez le nombre de places, puis réessayez.",
     "conflict": "Le match est complet ou annulé : ajoutez une place, ou déplacez d'abord quelqu'un.",
     "failed": "Cela n'a pas marché. Réessayez dans un instant.",
@@ -1038,7 +974,11 @@
     "reminded": {
       "one": "{{count}} joueur·se relancé·e.",
       "other": "{{count}} joueur·ses relancé·es."
-    }
+    },
+    "availableHelp": "Chaque joueur de l'organisation qui n'a pas répondu. Les joueurs avec un compte répondent eux-mêmes ; pour les autres, vous répondez à leur place.",
+    "search": "Chercher parmi les joueurs",
+    "noAccount": "Sans compte",
+    "anAdmin": "un admin"
   },
   "notices": {
     "title": "Notifications",
@@ -1073,14 +1013,38 @@
       "OWNERSHIP_TRANSFERRED": "{{by}} a confié l'organisation à {{member}}."
     },
     "open": {
-      "MATCH_PLANNED": "Mes saisons",
-      "MATCH_MOVED": "Mes saisons",
-      "MATCH_CANCELLED": "Mes saisons",
-      "REMINDER": "Mes saisons",
-      "MOVED_UP": "Mes saisons",
+      "MATCH_PLANNED": "Mes matchs",
+      "MATCH_MOVED": "Mes matchs",
+      "MATCH_CANCELLED": "Mes matchs",
+      "REMINDER": "Mes matchs",
+      "MOVED_UP": "Mes matchs",
       "CLAIM_ANSWERED": "Votre demande",
       "CLAIM_RECEIVED": "Demandes",
       "ADMIN_CHANGE": "Admin"
+    }
+  },
+  "myMatches": {
+    "title": "Mes matchs",
+    "lede": "Les prochains matchs de chaque saison en cours. Dites pour chacun si vous venez.",
+    "none": "Aucun match n'est prévu pour l'instant. Vous verrez chacun ici dès qu'il l'est.",
+    "notMember": "Vous jouez à {{org}} ?",
+    "notMemberHelp": "Rejoignez d'abord en tant que joueur, puis revendiquez ou créez votre profil.",
+    "noProfile": "Il vous faut d'abord un profil joueur",
+    "noProfileHelp": "Revendiquez le profil pour lequel les admins saisissent déjà vos scores, ou créez-en un si vous n'avez jamais joué.",
+    "toClaim": "Revendiquer ou créer mon profil",
+    "conflict": "Cela a changé entre-temps. Rechargez la page et réessayez.",
+    "failed": "Cela n'a pas marché. Réessayez dans un instant.",
+    "calledOff": "Annulé",
+    "youreIn": "Vous jouez",
+    "waitingAt": "Liste d'attente · n° {{position}}",
+    "cant": "Indisponible",
+    "imIn": "Je joue",
+    "cantMakeIt": "Je ne peux pas",
+    "locked": "La composition est verrouillée : demandez à un admin de changer votre réponse.",
+    "answered": {
+      "CONFIRMED": "Vous jouez le match {{number}}.",
+      "WAITING": "Le match {{number}} est complet : vous êtes n° {{position}} sur la liste d'attente.",
+      "DECLINED": "C'est noté : vous ne pouvez pas jouer le match {{number}}."
     }
   }
 }

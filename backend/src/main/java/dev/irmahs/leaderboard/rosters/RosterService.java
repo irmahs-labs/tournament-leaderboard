@@ -16,13 +16,11 @@ import dev.irmahs.leaderboard.players.Player;
 import dev.irmahs.leaderboard.players.PlayerRepository;
 import dev.irmahs.leaderboard.seasons.Season;
 import dev.irmahs.leaderboard.seasons.SeasonService;
-import dev.irmahs.leaderboard.signups.SignUpService;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -57,7 +55,6 @@ public class RosterService {
     private final OrganizationMemberRepository members;
     private final PlayerRepository players;
     private final SeasonService seasons;
-    private final SignUpService signUps;
     private final MatchRepository matches;
     private final GameRepository games;
     private final AttendanceRepository attendance;
@@ -69,7 +66,6 @@ public class RosterService {
             OrganizationMemberRepository members,
             PlayerRepository players,
             SeasonService seasons,
-            SignUpService signUps,
             MatchRepository matches,
             GameRepository games,
             AttendanceRepository attendance,
@@ -79,7 +75,6 @@ public class RosterService {
         this.members = members;
         this.players = players;
         this.seasons = seasons;
-        this.signUps = signUps;
         this.matches = matches;
         this.games = games;
         this.attendance = attendance;
@@ -232,7 +227,7 @@ public class RosterService {
     // Players.
 
     /**
-     * The upcoming matches of the seasons the signed-in player is signed up for, with their answer.
+     * The upcoming matches of the seasons under way, with the signed-in player's answer.
      *
      * @throws ResponseStatusException 403 for someone who isn't a member
      */
@@ -241,14 +236,13 @@ public class RosterService {
         Organization organization = organizations.requireActive(slug);
         UUID playerId = requireMember(organization, googleSub).getPlayerId();
         if (playerId == null) {
-            return new MyMatches(List.of());
+            return new MyMatches(false, List.of());
         }
-        Set<Integer> signedUp = signUps.seasonsOf(playerId);
         List<Season> open = seasons.newestFirst(organization.getId()).stream()
-                .filter(season -> season.getFinishedAt() == null && signedUp.contains(season.getId()))
+                .filter(season -> season.getFinishedAt() == null)
                 .toList();
         if (open.isEmpty()) {
-            return new MyMatches(List.of());
+            return new MyMatches(true, List.of());
         }
         List<Match> upcoming = matches.findBySeasonInOrderBySeasonNumberDescMatchNumber(open).stream()
                 .filter(match -> games.countByMatch(match) == 0)
@@ -278,7 +272,7 @@ public class RosterService {
                             mine == null ? null : waitingPosition(ofMatch, mine));
                 })
                 .toList();
-        return new MyMatches(rows);
+        return new MyMatches(true, rows);
     }
 
     /**
@@ -286,8 +280,7 @@ public class RosterService {
      * waiting list after that; "Can't make it" gives their place or waiting spot up.
      *
      * @throws ResponseStatusException 403 for someone who isn't a member, 404 for an unknown match,
-     *     409 without a player profile, when they aren't signed up for the season, or when the
-     *     match is called off, played or locked
+     *     409 without a player profile, or when the match is called off, played or locked
      */
     public MyMatches answer(String slug, String googleSub, int matchId, Answer answer) {
         if (answer == null) {
@@ -300,9 +293,6 @@ public class RosterService {
             throw conflict("Claim or create your player profile first");
         }
         Match match = lockMatch(organization, matchId);
-        if (!signUps.seasonsOf(playerId).contains(match.getSeason().getId())) {
-            throw conflict("Sign up for " + match.getSeason().getName() + " first");
-        }
         if (match.isCancelled()) {
             throw conflict("This match is called off");
         }
@@ -382,20 +372,28 @@ public class RosterService {
         return notAnswered.size();
     }
 
-    /** The players signed up for the match's season who haven't answered yet. */
+    /**
+     * The players with an account who haven't answered yet: the ones a reminder reaches. A player
+     * without an account is answered for by an admin.
+     */
     public List<UUID> notAnswered(Match match) {
-        Set<UUID> answered = attendance.findByMatchId(match.getId()).stream()
-                .map(Attendance::getPlayerId)
-                .collect(Collectors.toSet());
-        return signUps.signedUp(match.getSeason()).stream()
+        Set<UUID> answered = answeredIn(match);
+        return members.findByOrganizationIdAndPlayerIdNotNull(match.getOrganizationId()).stream()
+                .map(OrganizationMember::getPlayerId)
                 .filter(id -> !answered.contains(id))
                 .toList();
+    }
+
+    private Set<UUID> answeredIn(Match match) {
+        return attendance.findByMatchId(match.getId()).stream()
+                .map(Attendance::getPlayerId)
+                .collect(Collectors.toSet());
     }
 
     // Shared.
 
     /**
-     * Tells the players signed up when a match is first planned with a date, moved, called off or
+     * Tells the players when a match is first planned with a date, moved, called off or
      * put back on. A change to its places alone isn't news.
      */
     private void announce(Match match, boolean wasOn, List<Object> whenBefore) {
@@ -446,13 +444,13 @@ public class RosterService {
     private Roster rosterOf(Match match) {
         List<Attendance> answers = attendance.findByMatchId(match.getId());
         Set<UUID> answered = answers.stream().map(Attendance::getPlayerId).collect(Collectors.toSet());
-        List<UUID> noAnswerIds = signUps.signedUp(match.getSeason()).stream()
+        // Every player of the organisation, by Riot ID: those who haven't answered are available.
+        List<Player> everyone = players.findByOrganizationIdOrderByRiotId(match.getOrganizationId());
+        Map<UUID, String> riotIds = everyone.stream().collect(Collectors.toMap(Player::getId, Player::getRiotId));
+        List<UUID> noAnswerIds = everyone.stream()
+                .map(Player::getId)
                 .filter(id -> !answered.contains(id))
                 .toList();
-        Set<UUID> everyone = new HashSet<>(answered);
-        everyone.addAll(noAnswerIds);
-        Map<UUID, String> riotIds =
-                players.findAllById(everyone).stream().collect(Collectors.toMap(Player::getId, Player::getRiotId));
         Set<UUID> linked = members.findByOrganizationIdAndPlayerIdNotNull(match.getOrganizationId()).stream()
                 .map(OrganizationMember::getPlayerId)
                 .collect(Collectors.toSet());
@@ -727,5 +725,6 @@ public class RosterService {
             AttendanceStatus status,
             Integer position) {}
 
-    public record MyMatches(List<MyMatch> matches) {}
+    /** @param player whether they have a player profile here, needed to answer */
+    public record MyMatches(boolean player, List<MyMatch> matches) {}
 }

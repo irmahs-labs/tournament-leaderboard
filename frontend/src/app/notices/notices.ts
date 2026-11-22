@@ -36,7 +36,7 @@ export const linkOf = (notice: Notice): string[] | null => {
     case "MATCH_CANCELLED":
     case "REMINDER":
     case "MOVED_UP": {
-      return [...org, "me", "seasons"];
+      return [...org, "me", "matches"];
     }
 
     case "CLAIM_ANSWERED": {

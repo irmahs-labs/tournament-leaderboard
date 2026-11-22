@@ -15,7 +15,6 @@ import dev.irmahs.leaderboard.members.OrganizationMemberRepository;
 import dev.irmahs.leaderboard.notices.NoticeStore.Notice;
 import dev.irmahs.leaderboard.rosters.MovedUp;
 import dev.irmahs.leaderboard.rosters.Reminded;
-import dev.irmahs.leaderboard.signups.SignUpService;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
@@ -52,19 +51,13 @@ public class NoticeService {
     private final AccountService accounts;
     private final OrganizationMemberRepository members;
     private final MatchRepository matches;
-    private final SignUpService signUps;
 
     NoticeService(
-            NoticeStore store,
-            AccountService accounts,
-            OrganizationMemberRepository members,
-            MatchRepository matches,
-            SignUpService signUps) {
+            NoticeStore store, AccountService accounts, OrganizationMemberRepository members, MatchRepository matches) {
         this.store = store;
         this.accounts = accounts;
         this.members = members;
         this.matches = matches;
-        this.signUps = signUps;
     }
 
     // Reading.
@@ -91,7 +84,10 @@ public class NoticeService {
         String subject = "match:" + match.getId();
         Instant shownFrom = Instant.now().plus(SETTLE);
         Map<String, Object> details = matchDetails(match);
-        for (UUID userId : usersOf(event.organizationId(), signUps.signedUp(match.getSeason()))) {
+        List<UUID> everyone = members.findByOrganizationIdAndPlayerIdNotNull(event.organizationId()).stream()
+                .map(OrganizationMember::getUserId)
+                .toList();
+        for (UUID userId : everyone) {
             NoticeKind merged = store.pending(userId, subject, Instant.now())
                     // Planned, then moved before anyone saw it: still news of a match planned.
                     .filter(before -> before == NoticeKind.MATCH_PLANNED && kind == NoticeKind.MATCH_MOVED)

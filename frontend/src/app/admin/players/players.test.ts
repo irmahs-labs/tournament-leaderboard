@@ -178,7 +178,7 @@ describe("the Site | Admin switch", () => {
       "Leaderboard",
       "Matches",
       "Players",
-      "My seasons",
+      "My matches",
     ]);
   });
 });

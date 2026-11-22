@@ -5,8 +5,8 @@
       (current.organization()?.tournamentName; as tournament) { · {{ tournament
       }} }</span
     >
-    <h1 class="display">{{ t("mySeasons.title") }}</h1>
-    <p class="lede muted">{{ t("mySeasons.lede") }}</p>
+    <h1 class="display">{{ t("myMatches.title") }}</h1>
+    <p class="lede muted">{{ t("myMatches.lede") }}</p>
   </div>
 
   <p
@@ -20,49 +20,37 @@
   @if (mine.error()) {
   <section class="panel block" aria-labelledby="join-title">
     <h2 class="heading" id="join-title">
-      {{ t("mySeasons.notMember", { org: current.organization()?.name ?? "" })
+      {{ t("myMatches.notMember", { org: current.organization()?.name ?? "" })
       }}
     </h2>
-    <p class="muted">{{ t("mySeasons.notMemberHelp") }}</p>
+    <p class="muted">{{ t("myMatches.notMemberHelp") }}</p>
     <a
       class="button start"
       [routerLink]="['/org', current.organization()?.slug, 'claim']"
-      >{{ t("mySeasons.toClaim") }}</a
+      >{{ t("myMatches.toClaim") }}</a
     >
   </section>
-  } @else if (mine.hasValue()) { @let state = mine.value(); @if (!state.player)
-  {
+  } @else if (mine.hasValue()) { @if (!mine.value().player) {
   <section class="panel block" aria-labelledby="profile-title">
-    <h2 class="heading" id="profile-title">{{ t("mySeasons.noProfile") }}</h2>
-    <p class="muted">{{ t("mySeasons.noProfileHelp") }}</p>
+    <h2 class="heading" id="profile-title">{{ t("myMatches.noProfile") }}</h2>
+    <p class="muted">{{ t("myMatches.noProfileHelp") }}</p>
     <a
       class="button start"
       [routerLink]="['/org', current.organization()?.slug, 'claim']"
-      >{{ t("mySeasons.toClaim") }}</a
+      >{{ t("myMatches.toClaim") }}</a
     >
   </section>
-  } @if (state.seasons.length === 0) {
-  <p class="panel notice muted">{{ t("mySeasons.none") }}</p>
+  } @else if (seasons().length === 0) {
+  <p class="panel notice muted">{{ t("myMatches.none") }}</p>
   } @else {
   <ul class="seasons">
-    @for (season of state.seasons; track season.number) {
+    @for (season of seasons(); track season.number) {
     <li class="panel block" [attr.aria-labelledby]="'season-' + season.number">
-      <div class="season-head">
-        <h2 class="heading" [id]="'season-' + season.number">
-          {{ season.name }}
-        </h2>
-        @if (season.signedUp) {
-        <span class="pill live">{{ t("mySeasons.in") }}</span>
-        }
-      </div>
-      @if (dates(season); as when) {
-      <p class="muted">{{ when }}</p>
-      } @if (season.signedUp) { @let upcoming = matchesOf(season); @if
-      (upcoming.length === 0) {
-      <p>{{ t("mySeasons.inHelp") }}</p>
-      } @else {
+      <h2 class="heading" [id]="'season-' + season.number">
+        {{ season.name }}
+      </h2>
       <ul class="matches">
-        @for (match of upcoming; track match.id) {
+        @for (match of season.matches; track match.id) {
         <li [class.off]="match.cancelled">
           <div class="match-head">
             <strong
@@ -70,16 +58,16 @@
               }}</strong
             >
             @if (match.cancelled) {
-            <span class="pill">{{ t("mySeasons.calledOff") }}</span>
+            <span class="pill">{{ t("myMatches.calledOff") }}</span>
             } @else if (match.status === "CONFIRMED") {
-            <span class="pill live">{{ t("mySeasons.youreIn") }}</span>
+            <span class="pill live">{{ t("myMatches.youreIn") }}</span>
             } @else if (match.status === "WAITING") {
             <span class="pill wait"
-              >{{ t("mySeasons.waitingAt", { position: match.position })
+              >{{ t("myMatches.waitingAt", { position: match.position })
               }}</span
             >
             } @else if (match.status === "DECLINED") {
-            <span class="pill">{{ t("mySeasons.cant") }}</span>
+            <span class="pill">{{ t("myMatches.cant") }}</span>
             }
           </div>
           <p class="muted">
@@ -91,7 +79,7 @@
             t("adminRoster.replyBy", { day: language.day(match.replyBy) }) }} }
           </p>
           @if (!match.cancelled) { @if (match.locked) {
-          <p class="muted small">{{ t("mySeasons.locked") }}</p>
+          <p class="muted small">{{ t("myMatches.locked") }}</p>
           } @else {
           <div class="answers">
             @if (match.status !== "CONFIRMED" && match.status !== "WAITING") {
@@ -101,7 +89,7 @@
               [disabled]="action.busy()"
               (click)="answer(match, 'YES')"
             >
-              {{ t("mySeasons.imIn") }}<span class="visually-hidden">
+              {{ t("myMatches.imIn") }}<span class="visually-hidden">
                 {{ t("adminSchedule.matchNumber", { number: match.number })
                 }}</span
               >
@@ -113,7 +101,7 @@
               [disabled]="action.busy()"
               (click)="answer(match, 'NO')"
             >
-              {{ t("mySeasons.cantMakeIt") }}<span class="visually-hidden">
+              {{ t("myMatches.cantMakeIt") }}<span class="visually-hidden">
                 {{ t("adminSchedule.matchNumber", { number: match.number })
                 }}</span
               >
@@ -124,31 +112,6 @@
         </li>
         }
       </ul>
-      }
-      <button
-        type="button"
-        class="button-ghost start"
-        [disabled]="action.busy()"
-        (click)="withdraw(season)"
-      >
-        {{ t("mySeasons.withdraw") }}<span class="visually-hidden">
-          {{ season.name }}</span
-        >
-      </button>
-      } @else if (season.takesSignUps) {
-      <button
-        type="button"
-        class="button start"
-        [disabled]="action.busy() || !state.player"
-        (click)="signUp(season)"
-      >
-        {{ t("mySeasons.signUp") }}<span class="visually-hidden">
-          {{ season.name }}</span
-        >
-      </button>
-      } @else {
-      <p class="muted">{{ t("mySeasons.closed") }}</p>
-      }
     </li>
     }
   </ul>

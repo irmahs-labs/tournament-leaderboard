@@ -142,7 +142,7 @@
     "leaderboard": "Leaderboard",
     "matches": "Matches",
     "players": "Players",
-    "mySeasons": "My seasons"
+    "myMatches": "My matches"
   },
   "notFound": {
     "body": "This page doesn't exist, or the organisation behind it is no longer available. Check the address, or start from the home page.",
@@ -823,9 +823,9 @@
     "riotId": "Your Riot ID",
     "discord": "Your Discord username (optional)",
     "create": "Create my profile",
-    "created": "Your profile is created. Now sign up for a season.",
+    "created": "Your profile is created. Now say which matches you can make.",
     "riotIdNeeded": "Type your Riot ID, such as Name#TAG.",
-    "toSeasons": "Sign up for a season"
+    "toSeasons": "Answer the matches"
   },
   "adminClaims": {
     "title": "Claims",
@@ -879,71 +879,9 @@
     "identityNote": "Your Riot ID and Discord are the same in every organisation:",
     "identityLink": "change them on My account"
   },
-  "mySeasons": {
-    "title": "My seasons",
-    "lede": "Sign up for a season to hear about its matches. There's no limit on how many sign up.",
-    "notMember": "Play at {{org}}?",
-    "notMemberHelp": "Join as a player and claim or create your profile first.",
-    "noProfile": "You need a player profile first",
-    "noProfileHelp": "Claim the profile admins already enter your scores for, or create one if you've never played.",
-    "toClaim": "Claim or create my profile",
-    "none": "No season is under way right now.",
-    "in": "Signed up",
-    "inHelp": "You're signed up: you'll see each of its matches here once they're planned.",
-    "withdraw": "Withdraw",
-    "signUp": "Sign up",
-    "closed": "Sign-ups are closed. An admin can still sign you up.",
-    "signedUp": "You're signed up for {{name}}.",
-    "withdrawn": "You withdrew from {{name}}.",
-    "conflict": "That changed in the meantime. Reload the page and try again.",
-    "failed": "That didn't work. Try again in a moment.",
-    "calledOff": "Called off",
-    "youreIn": "You're in",
-    "waitingAt": "Waiting list · #{{position}}",
-    "cant": "Can't make it",
-    "imIn": "I'm in",
-    "cantMakeIt": "Can't make it",
-    "locked": "The roster is locked: ask an admin to change your answer.",
-    "answered": {
-      "CONFIRMED": "You're in for match {{number}}.",
-      "WAITING": "Match {{number}} is full: you're #{{position}} on the waiting list.",
-      "DECLINED": "Got it: you can't make match {{number}}."
-    }
-  },
-  "adminSignUps": {
-    "link": "Sign-ups",
-    "title": "{{name}} sign-ups",
-    "lede": "Players sign up themselves while sign-ups are open, with no limit. You can sign anyone up at any time, players without an account too.",
-    "back": "All seasons",
-    "over": "This season is over: its sign-ups can't change.",
-    "settings": "Sign-ups",
-    "isOpen": "Open",
-    "isClosed": "Closed",
-    "open": "Players can sign up themselves",
-    "settingsSaved": "Sign-ups are saved.",
-    "addTitle": "Sign someone up yourself",
-    "addHelp": "For players without an account, or after sign-ups close. Players without an account can't answer themselves, so you'll confirm their matches on the roster.",
-    "search": "Search the players",
-    "noMatch": "No player left to sign up matches this.",
-    "noAccount": "No account",
-    "add": "Sign up",
-    "added": "{{name}} is signed up.",
-    "signedUp": "Signed up · {{count}}",
-    "nobody": "Nobody has signed up yet.",
-    "player": "Player",
-    "when": "Signed up",
-    "how": "How",
-    "themselves": "Themselves",
-    "byAdmin": "By {{name}}",
-    "anAdmin": "an admin",
-    "remove": "Withdraw",
-    "removed": "{{name}} was withdrawn. They stop hearing about this season's matches.",
-    "conflict": "That changed in the meantime. Reload the page and try again.",
-    "failed": "That didn't work. Try again in a moment."
-  },
   "adminSchedule": {
     "title": "Schedule",
-    "lede": "Plan each match of the season: when and where it's played, the reply-by date and how many places it has. Players signed up for the season answer in the app.",
+    "lede": "Plan each match of the season: when and where it's played, the reply-by date and how many places it has. Every player of the organisation with an account answers in the app.",
     "matches": "{{season}} matches",
     "match": "Match",
     "matchNumber": "Match {{number}}",
@@ -994,13 +932,13 @@
       "confirmed": "Confirmed · {{count}} of {{places}}",
       "waiting": "Waiting list · {{count}}",
       "declined": "Can't make it · {{count}}",
-      "noAnswer": "No answer · {{count}}"
+      "noAnswer": "Available · {{count}}"
     },
     "empty": {
       "confirmed": "Nobody is confirmed yet.",
       "waiting": "Nobody is waiting.",
       "declined": "Nobody said they can't make it.",
-      "noAnswer": "Everyone signed up has answered."
+      "noAnswer": "Every player has answered."
     },
     "to": {
       "CONFIRMED": "Confirm",
@@ -1020,9 +958,7 @@
     "placesSaved": "The places are saved.",
     "lockedDone": "The roster is locked.",
     "unlockedDone": "The roster is unlocked.",
-    "addTitle": "Write someone down",
-    "addHelp": "Any player of the organisation, players without an account too: they can't answer themselves, so you answer for them.",
-    "noMatch": "No player left to write down matches this.",
+    "noMatch": "No available player matches this.",
     "invalid": "Check the number of places, then try again.",
     "conflict": "The match is full or called off: add a place, or move someone first.",
     "failed": "That didn't work. Try again in a moment.",
@@ -1038,7 +974,11 @@
     "reminded": {
       "one": "{{count}} player reminded.",
       "other": "{{count}} players reminded."
-    }
+    },
+    "availableHelp": "Every player of the organisation who hasn't answered. Players with an account answer themselves; for the others, you answer for them.",
+    "search": "Search the players",
+    "noAccount": "No account",
+    "anAdmin": "an admin"
   },
   "notices": {
     "title": "Notices",
@@ -1073,14 +1013,38 @@
       "OWNERSHIP_TRANSFERRED": "{{by}} handed the organisation over to {{member}}."
     },
     "open": {
-      "MATCH_PLANNED": "My seasons",
-      "MATCH_MOVED": "My seasons",
-      "MATCH_CANCELLED": "My seasons",
-      "REMINDER": "My seasons",
-      "MOVED_UP": "My seasons",
+      "MATCH_PLANNED": "My matches",
+      "MATCH_MOVED": "My matches",
+      "MATCH_CANCELLED": "My matches",
+      "REMINDER": "My matches",
+      "MOVED_UP": "My matches",
       "CLAIM_ANSWERED": "Your claim",
       "CLAIM_RECEIVED": "Claims",
       "ADMIN_CHANGE": "Admin"
+    }
+  },
+  "myMatches": {
+    "title": "My matches",
+    "lede": "The upcoming matches of every season under way. Say whether you can make each one.",
+    "notMember": "Play at {{org}}?",
+    "notMemberHelp": "Join as a player and claim or create your profile first.",
+    "noProfile": "You need a player profile first",
+    "noProfileHelp": "Claim the profile admins already enter your scores for, or create one if you've never played.",
+    "toClaim": "Claim or create my profile",
+    "none": "No match is planned right now. You'll see each one here once it is.",
+    "conflict": "That changed in the meantime. Reload the page and try again.",
+    "failed": "That didn't work. Try again in a moment.",
+    "calledOff": "Called off",
+    "youreIn": "You're in",
+    "waitingAt": "Waiting list · #{{position}}",
+    "cant": "Can't make it",
+    "imIn": "I'm in",
+    "cantMakeIt": "Can't make it",
+    "locked": "The roster is locked: ask an admin to change your answer.",
+    "answered": {
+      "CONFIRMED": "You're in for match {{number}}.",
+      "WAITING": "Match {{number}} is full: you're #{{position}} on the waiting list.",
+      "DECLINED": "Got it: you can't make match {{number}}."
     }
   }
 }

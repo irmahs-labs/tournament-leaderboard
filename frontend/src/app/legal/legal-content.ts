@@ -194,9 +194,9 @@ const EN: Record<LegalPageId, LegalDocument> = {
             ],
             [
               "Players of a tournament",
-              "The seasons you signed up for, when, whether you withdrew, and whether an admin signed you up or withdrew you. Only you and the organisation's admins see it.",
-              "Organising the season's matches. Necessary for the service you ask for by signing up (article 6(1)(b)); when an admin signs you up, legitimate interest of the organisers (article 6(1)(f)).",
-              "As long as the organisation keeps its tournament history, or until you object.",
+              "Season sign-ups made before November 2026, when they were replaced by answering each match: the seasons you signed up for and when. No longer collected or shown.",
+              "None any more: kept only until the next update of the site removes them.",
+              "Deleted with the next update of the site.",
             ],
             [
               "Players of a tournament",
@@ -479,9 +479,9 @@ const FR: Record<LegalPageId, LegalDocument> = {
             ],
             [
               "Joueurs d'un tournoi",
-              "Les saisons auxquelles vous vous êtes inscrit, quand, si vous vous êtes désinscrit, et si un administrateur vous a inscrit ou désinscrit. Seuls vous et les administrateurs de l'organisation le voient.",
-              "Organiser les matchs de la saison. Nécessaire au service que vous demandez en vous inscrivant (article 6(1)(b)) ; quand un administrateur vous inscrit, intérêt légitime des organisateurs (article 6(1)(f)).",
-              "Tant que l'organisation conserve l'historique de son tournoi, ou jusqu'à votre opposition.",
+              "Les inscriptions aux saisons faites avant novembre 2026, remplacées depuis par la réponse à chaque match : les saisons auxquelles vous vous êtes inscrit et quand. Plus collectées ni affichées.",
+              "Aucune désormais : conservées seulement jusqu'à ce que la prochaine mise à jour du site les supprime.",
+              "Supprimées à la prochaine mise à jour du site.",
             ],
             [
               "Joueurs d'un tournoi",
