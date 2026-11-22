@@ -1,4 +1,36 @@
 <header class="bar" *transloco="let t">
+  <ng-template #onlineCount>
+    @if (online.count(); as count) {
+    <span class="online" [attr.title]="t('header.onlineTitle')">
+      <span class="dot" aria-hidden="true"></span>
+      <strong>{{ language.number(count) }}</strong>
+      <svg
+        class="eye"
+        viewBox="0 0 24 24"
+        width="16"
+        height="16"
+        aria-hidden="true"
+      >
+        <path
+          d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linejoin="round"
+        />
+        <circle
+          cx="12"
+          cy="12"
+          r="2.8"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+        />
+      </svg>
+      &ngsp;<span class="visually-hidden">{{ t("header.online") }}</span>
+    </span>
+    }
+  </ng-template>
   <a class="skip" href="#main" (click)="skipToContent($event)"
     >{{ t("header.skip") }}</a
   >
@@ -32,6 +64,7 @@
       }
       <span class="name">{{ org.name }}</span>
     </a>
+    <ng-container [ngTemplateOutlet]="onlineCount" />
     <div class="tabs">
       @if (inAdmin()) {
       <nav class="nav" [attr.aria-label]="t('admin.navLabel')">
@@ -152,6 +185,7 @@
       </svg>
       <span class="name">Tournament Leaderboard</span>
     </a>
+    <ng-container [ngTemplateOutlet]="onlineCount" />
     <nav class="nav" [attr.aria-label]="t('platform.navLabel')">
       @let joined = session.me()?.memberships ?? []; @if (joined.length === 1) {
       @let only = joined[0];
@@ -182,15 +216,7 @@
     </nav>
     }
     <div class="tools">
-      @if (online.count(); as count) {
-      <span class="online" [attr.title]="t('header.onlineTitle')">
-        <span class="dot" aria-hidden="true"></span>
-        <strong>{{ language.number(count) }}</strong>&ngsp;<span
-          class="visually-hidden"
-          >{{ t("header.online") }}</span
-        >
-      </span>
-      } @if (organization() && !inAdmin() && current.seasons().length > 0) {
+      @if (organization() && !inAdmin() && current.seasons().length > 0) {
       <select
         #picker
         class="tool season"

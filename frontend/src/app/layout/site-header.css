@@ -210,20 +210,36 @@
 
 /*
  * Those who run the organisation get its pages and its admin pages, too many tabs to share a
- * line with the controls: the tabs take a row of their own, under the name and the controls,
- * the same on both sides so switching doesn't move anything.
+ * line with the name: the name takes the first row, then the tabs and the controls share the
+ * second, the same on both sides so switching doesn't move anything.
  */
 .tiered {
   padding-bottom: 0;
 }
 
-.tiered .tabs {
-  order: 3;
-  flex-basis: 100%;
-}
+@media (min-width: 641px) {
+  .tiered {
+    row-gap: 6px;
+  }
 
-.tiered .tools {
-  margin-left: auto;
+  /* The line break after the name. */
+  .tiered::after {
+    content: "";
+    order: 2;
+    flex-basis: 100%;
+  }
+
+  .tiered .tabs {
+    order: 3;
+    flex: 1 1 auto;
+    align-self: flex-end;
+  }
+
+  .tiered .tools {
+    order: 4;
+    margin-left: auto;
+    padding-bottom: 8px;
+  }
 }
 
 /* Back to Tournament Leaderboard's home, beside the organisation's own name. */
@@ -353,14 +369,11 @@
   cursor: pointer;
 }
 
+/* How many pages are open, beside the name: a quiet count, not a control. */
 .online {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: var(--tool-size);
-  padding: 0 12px;
-  box-sizing: border-box;
-  border: 1px solid var(--nav-ghost);
+  gap: 6px;
   color: var(--nav-muted);
   font-size: 13px;
   white-space: nowrap;
@@ -504,7 +517,6 @@
     min-width: 40px;
   }
 
-  .online,
   .account {
     padding-inline: 10px;
   }
