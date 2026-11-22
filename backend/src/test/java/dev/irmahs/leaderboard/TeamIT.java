@@ -288,4 +288,29 @@ class TeamIT {
                 .asArray()
                 .containsExactly("admin@example.com");
     }
+
+    @Test
+    void thePlatformAdminRunsAnOrganisationAndGivesOneWithoutAnOwnerItsOwner() {
+        accounts.signIn(new GoogleProfile("google-platform", "platform@example.com", "Irma"));
+        OidcLoginRequestPostProcessor platform = as("google-platform");
+        jdbc.sql("UPDATE organization_members SET is_owner = false WHERE user_id = :owner")
+                .param("owner", owner)
+                .update();
+        em.clear();
+        String toAdmin = ADMIN_API + "/members/" + admin + "/ownership";
+
+        assertThat(send(HttpMethod.GET, ADMIN_API + "/members", null, platform))
+                .hasStatusOk()
+                .bodyJson()
+                .extractingPath("$.members[?(@.owner == true)]")
+                .asArray()
+                .isEmpty();
+        assertThat(send(HttpMethod.POST, toAdmin, null, OWNER)).hasStatus(403);
+        assertThat(send(HttpMethod.POST, toAdmin, null, platform)).hasStatus(204);
+        assertThat(send(HttpMethod.GET, ADMIN_API + "/members", null, platform))
+                .bodyJson()
+                .extractingPath("$.members[?(@.owner == true)].email")
+                .asArray()
+                .containsExactly("admin@example.com");
+    }
 }

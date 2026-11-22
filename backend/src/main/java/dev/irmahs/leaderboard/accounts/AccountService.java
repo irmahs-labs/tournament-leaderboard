@@ -113,16 +113,20 @@ public class AccountService {
         }
     }
 
-    /** Whether the account with this Google id is an admin of the active organisation. */
+    /**
+     * Whether the account with this Google id runs the active organisation: one of its admins, or
+     * a platform admin, who runs every organisation.
+     */
     @Transactional(readOnly = true)
     public boolean isAdmin(String googleSub, String slug) {
         return users.findByGoogleSub(googleSub)
                 .flatMap(user -> organizations
                         .findActive(slug)
-                        .flatMap(organization ->
-                                members.findById(new OrganizationMember.Key(user.getId(), organization.getId()))))
-                .filter(member -> member.getRole() == MemberRole.ADMIN)
-                .isPresent();
+                        .map(organization -> user.isPlatformAdmin()
+                                || members.findById(new OrganizationMember.Key(user.getId(), organization.getId()))
+                                        .filter(member -> member.getRole() == MemberRole.ADMIN)
+                                        .isPresent()))
+                .orElse(false);
     }
 
     /** The signed-in person, or nothing when their account no longer exists. */

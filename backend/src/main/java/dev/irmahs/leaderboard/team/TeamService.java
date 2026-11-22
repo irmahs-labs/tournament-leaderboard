@@ -179,19 +179,24 @@ public class TeamService {
     }
 
     /**
-     * Hands ownership to another admin; the former owner stays an admin.
+     * Hands ownership to another admin; the former owner stays an admin. The platform admin can
+     * do it too, for an organisation without an owner, such as one imported.
      *
-     * @throws ResponseStatusException 403 when the person asking isn't the owner, 404 for someone
-     *     who isn't a member, 409 when the new owner isn't an admin
+     * @throws ResponseStatusException 403 when the person asking is neither the owner nor the
+     *     platform admin, 404 for someone who isn't a member, 409 when the new owner isn't an admin
      */
-    public void transferOwnership(String slug, String ownerSub, UUID newOwnerId) {
+    public void transferOwnership(String slug, String askerSub, UUID newOwnerId) {
         Organization organization = organizations.requireActive(slug);
-        UUID ownerId = accounts.user(ownerSub)
-                .map(AppUser::getId)
+        AppUser asker = accounts.user(askerSub)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the owner can do that"));
-        OrganizationMember owner = members.findById(new OrganizationMember.Key(ownerId, organization.getId()))
+        OrganizationMember owner = members.findByOrganizationIdOrderByJoinedAt(organization.getId()).stream()
                 .filter(OrganizationMember::isOwner)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the owner can do that"));
+                .findFirst()
+                .orElse(null);
+        boolean asksAsOwner = owner != null && owner.getUserId().equals(asker.getId());
+        if (!asksAsOwner && !asker.isPlatformAdmin()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the owner can do that");
+        }
         OrganizationMember next = requireMember(slug, newOwnerId);
         if (next == owner) {
             return;
@@ -199,8 +204,10 @@ public class TeamService {
         if (next.getRole() != MemberRole.ADMIN) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Make them an admin first");
         }
-        owner.giveUpOwnership();
-        members.flush();
+        if (owner != null) {
+            owner.giveUpOwnership();
+            members.flush();
+        }
         next.takeOwnership();
         events.publishEvent(
                 new AdminChanged(organization.getId(), "OWNERSHIP_TRANSFERRED", Map.of("member", nameOf(newOwnerId))));

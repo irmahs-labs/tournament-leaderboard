@@ -57,16 +57,17 @@ export class MembersAdminPage {
   /** The invite just made; its message can be copied until the page is left. */
   protected readonly created = signal<Created | null>(null);
 
-  /** Whether the signed-in person owns the organisation. */
+  /** Whether the signed-in person can hand ownership on: the owner, or the platform admin. */
   protected readonly isOwner = computed(() => {
     const slug = this.current.organization()?.slug;
+    const me = this.session.me();
 
     return (
-      this.session
-        .me()
-        ?.memberships.some(
-          (membership) => membership.slug === slug && membership.owner
-        ) ?? false
+      (me?.platformAdmin ?? false) ||
+      (me?.memberships.some(
+        (membership) => membership.slug === slug && membership.owner
+      ) ??
+        false)
     );
   });
 
