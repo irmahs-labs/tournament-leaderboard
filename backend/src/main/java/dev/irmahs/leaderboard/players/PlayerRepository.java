@@ -33,4 +33,10 @@ public interface PlayerRepository extends JpaRepository<Player, UUID> {
             order by lower(player.riotId)
             """)
     List<Player> search(UUID organizationId, String pattern);
+
+    /** The organisation's players with a line in a game. */
+    @Query(value = """
+            SELECT DISTINCT gs.player_id FROM game_stats gs JOIN players p ON p.id = gs.player_id
+            WHERE p.organization_id = :organizationId""", nativeQuery = true)
+    List<UUID> playedIn(UUID organizationId);
 }

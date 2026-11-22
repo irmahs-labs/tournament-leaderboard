@@ -36,6 +36,7 @@ const PLAYERS: AdminPlayer[] = [
     expectedEmail: null,
     id: "bramble",
     linked: false,
+    played: true,
     rank: RANKS[1] ?? null,
     riotId: "Bramble#EUW",
   },
@@ -45,6 +46,7 @@ const PLAYERS: AdminPlayer[] = [
     expectedEmail: null,
     id: "wren",
     linked: false,
+    played: false,
     rank: null,
     riotId: "Wren#EUW",
   },
@@ -67,9 +69,10 @@ let http: HttpTestingController;
 
 /** Opens the Players page as an admin, with its players and the ranks. */
 const openPlayers = async (
-  seasons: Season[] = []
+  seasons: Season[] = [],
+  me: Me = ME
 ): Promise<RouterTestingHarness> => {
-  const harness = await openAs("/org/alsace-arena/admin/players", ME, seasons);
+  const harness = await openAs("/org/alsace-arena/admin/players", me, seasons);
   await vi.waitFor(() => {
     harness.detectChanges();
     http.expectOne((request) => request.url === API).flush(PLAYERS);
@@ -409,6 +412,62 @@ describe("a player's aliases", () => {
       expectedEmail: null,
       rankId: null,
       riotId: "A#1",
+    });
+  });
+});
+
+const deleteButtons = (page: HTMLElement): HTMLButtonElement[] =>
+  [...page.querySelectorAll<HTMLButtonElement>("tbody button")].filter(
+    (button) => text(button)?.startsWith("Delete")
+  );
+
+describe("deleting a player", () => {
+  beforeEach(() => {
+    localStorage.setItem("lang", "en");
+    TestBed.configureTestingModule({ providers: testProviders() });
+    http = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    http.verify();
+    localStorage.clear();
+    vi.restoreAllMocks();
+  });
+
+  it("is only for a platform admin, and only a player who never played", async () => {
+    const admin = rendered(await openPlayers());
+
+    expect(deleteButtons(admin)).toHaveLength(0);
+  });
+
+  it("deletes after asking, then lists the players again", async () => {
+    const harness = await openPlayers([], { ...ME, platformAdmin: true });
+    const page = rendered(harness);
+    const confirm = vi.spyOn(globalThis, "confirm").mockReturnValue(true);
+
+    expect(deleteButtons(page).map((button) => text(button))).toStrictEqual([
+      "Delete Wren#EUW",
+    ]);
+
+    deleteButtons(page)[0]?.click();
+
+    const deleted = await vi.waitFor(() =>
+      http.expectOne("/api/platform/organizations/alsace-arena/players/wren")
+    );
+
+    expect(confirm).toHaveBeenCalledOnce();
+    expect(deleted.request.method).toBe("DELETE");
+    deleted.flush(null);
+    await vi.waitFor(() =>
+      http
+        .expectOne((request) => request.url === API)
+        .flush(PLAYERS.slice(0, 1))
+    );
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      expect(text(page.querySelector("[role=status]"))).toBe(
+        "Wren is deleted."
+      );
     });
   });
 });

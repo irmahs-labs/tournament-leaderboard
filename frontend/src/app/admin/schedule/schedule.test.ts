@@ -151,9 +151,9 @@ describe("the Schedule page", () => {
     const row = page.querySelector("tr.editing");
 
     const set = (label: string, value: string): void => {
-      const input = row?.querySelector<HTMLInputElement>(
-        `[aria-label="${label}"]`
-      );
+      const input = [...(row?.querySelectorAll("label") ?? [])]
+        .find((each) => text(each.querySelector(".label")) === label)
+        ?.querySelector("input");
 
       if (input) {
         input.value = value;

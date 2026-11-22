@@ -215,6 +215,18 @@
                   {{ player.riotId }}</span
                 >
               </button>
+              @if (platformAdmin() && !player.played) {
+              <button
+                type="button"
+                class="button-ghost small-button danger"
+                [disabled]="busy()"
+                (click)="remove(player)"
+              >
+                {{ t("adminPlayers.delete") }}<span class="visually-hidden">
+                  {{ player.riotId }}</span
+                >
+              </button>
+              }
             </td>
           </tr>
           } }
