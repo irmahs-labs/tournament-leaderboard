@@ -19,6 +19,7 @@ import dev.irmahs.leaderboard.seasons.SeasonService;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -133,10 +134,7 @@ public class RosterService {
                 .orElse(null);
         Match match = existing != null ? existing : matches.save(new Match(season, matchNumber, plan.date()));
         boolean wasOn = existing != null && !existing.isCancelled() && existing.getMatchDate() != null;
-        List<Object> whenBefore = List.of(
-                String.valueOf(match.getMatchDate()),
-                String.valueOf(match.getStartTime()),
-                String.valueOf(match.getLocation()));
+        List<Object> whenBefore = whenOf(match);
         requireRoomFor(match, plan.places());
         boolean roomBefore = match.isAutoPromote() && !match.isCancelled();
         int placesBefore = match.getPlaces();
@@ -160,7 +158,7 @@ public class RosterService {
 
     // Admins: one match's roster.
 
-    /** Who's in, who's waiting, who can't make it, and who signed up but hasn't answered. */
+    /** Who's in, who's waiting, who can't make it, and every other player, still available. */
     @Transactional(readOnly = true)
     public Roster roster(String slug, int matchId) {
         Organization organization = organizations.requireActive(slug);
@@ -191,8 +189,7 @@ public class RosterService {
                 attendance.delete(answer);
             }
         } else {
-            boolean alreadyIn = answer != null && answer.is(AttendanceStatus.CONFIRMED);
-            if (status == AttendanceStatus.CONFIRMED && !alreadyIn && isFull(match)) {
+            if (status == AttendanceStatus.CONFIRMED && !wasIn && isFull(match)) {
                 throw conflict("This match is full: add a place, or move someone first");
             }
             record(
@@ -201,7 +198,7 @@ public class RosterService {
                     answer,
                     status,
                     AttendanceSource.ADMIN,
-                    requireUser(adminSub).getId());
+                    accounts.requireUser(adminSub).getId());
         }
         attendance.flush();
         if (wasIn && status != AttendanceStatus.CONFIRMED) {
@@ -234,7 +231,7 @@ public class RosterService {
     @Transactional(readOnly = true)
     public MyMatches mine(String slug, String googleSub) {
         Organization organization = organizations.requireActive(slug);
-        UUID playerId = requireMember(organization, googleSub).getPlayerId();
+        UUID playerId = accounts.requireMember(organization, googleSub).getPlayerId();
         if (playerId == null) {
             return new MyMatches(false, List.of());
         }
@@ -287,7 +284,7 @@ public class RosterService {
             throw badRequest("Say whether you're in");
         }
         Organization organization = organizations.requireActive(slug);
-        OrganizationMember member = requireMember(organization, googleSub);
+        OrganizationMember member = accounts.requireMember(organization, googleSub);
         UUID playerId = member.getPlayerId();
         if (playerId == null) {
             throw conflict("Claim or create your player profile first");
@@ -304,22 +301,21 @@ public class RosterService {
         }
         Attendance current =
                 attendance.findByMatchIdAndPlayerId(match.getId(), playerId).orElse(null);
+        boolean wasIn = current != null && current.is(AttendanceStatus.CONFIRMED);
         AttendanceStatus status;
         if (answer == Answer.NO) {
             status = AttendanceStatus.DECLINED;
-        } else if (current != null && current.is(AttendanceStatus.CONFIRMED)) {
-            status = AttendanceStatus.CONFIRMED;
-        } else if (current != null && current.is(AttendanceStatus.WAITING)) {
-            status = AttendanceStatus.WAITING;
+        } else if (current != null && !current.is(AttendanceStatus.DECLINED)) {
+            // Already in or waiting: "I'm in" again changes nothing.
+            status = current.getStatus();
         } else {
             // Nobody jumps the queue: with players waiting, a new "I'm in" waits too.
             boolean someoneWaiting = attendance.countByMatchIdAndStatus(match.getId(), AttendanceStatus.WAITING) > 0;
             status = isFull(match) || someoneWaiting ? AttendanceStatus.WAITING : AttendanceStatus.CONFIRMED;
         }
-        boolean gaveUpPlace = current != null && current.is(AttendanceStatus.CONFIRMED);
         record(match, playerId, current, status, AttendanceSource.APP, member.getUserId());
         attendance.flush();
-        if (gaveUpPlace && status != AttendanceStatus.CONFIRMED) {
+        if (wasIn && status != AttendanceStatus.CONFIRMED) {
             fillFromWaitingList(match);
         }
         return mine(slug, googleSub);
@@ -334,10 +330,7 @@ public class RosterService {
     public Roster reorder(String slug, int matchId, List<UUID> order) {
         Organization organization = organizations.requireActive(slug);
         Match match = lockMatch(organization, matchId);
-        List<Attendance> waiting = attendance.findByMatchId(match.getId()).stream()
-                .filter(answer -> answer.is(AttendanceStatus.WAITING))
-                .sorted(Comparator.comparing(Attendance::getQueuedAt))
-                .toList();
+        List<Attendance> waiting = waitingInOrder(match);
         Map<UUID, Attendance> byPlayer =
                 waiting.stream().collect(Collectors.toMap(Attendance::getPlayerId, Function.identity()));
         if (order == null
@@ -355,7 +348,7 @@ public class RosterService {
     }
 
     /**
-     * Reminds the players signed up for the season who haven't answered, those with an account.
+     * Reminds the players with an account who haven't answered.
      *
      * @return how many were reminded
      * @throws ResponseStatusException 404 for an unknown match, 409 when it's called off, locked
@@ -377,17 +370,12 @@ public class RosterService {
      * without an account is answered for by an admin.
      */
     public List<UUID> notAnswered(Match match) {
-        Set<UUID> answered = answeredIn(match);
-        return members.findByOrganizationIdAndPlayerIdNotNull(match.getOrganizationId()).stream()
-                .map(OrganizationMember::getPlayerId)
-                .filter(id -> !answered.contains(id))
-                .toList();
-    }
-
-    private Set<UUID> answeredIn(Match match) {
-        return attendance.findByMatchId(match.getId()).stream()
+        Set<UUID> answered = attendance.findByMatchId(match.getId()).stream()
                 .map(Attendance::getPlayerId)
                 .collect(Collectors.toSet());
+        return members.linkedPlayerIds(match.getOrganizationId()).stream()
+                .filter(id -> !answered.contains(id))
+                .toList();
     }
 
     // Shared.
@@ -403,11 +391,7 @@ public class RosterService {
             change = "CANCELLED";
         } else if (!wasOn && isOn) {
             change = "PLANNED";
-        } else if (isOn
-                && !whenBefore.equals(List.of(
-                        String.valueOf(match.getMatchDate()),
-                        String.valueOf(match.getStartTime()),
-                        String.valueOf(match.getLocation())))) {
+        } else if (isOn && !whenBefore.equals(whenOf(match))) {
             change = "MOVED";
         } else {
             return;
@@ -425,12 +409,8 @@ public class RosterService {
         if (match.isLocked() || match.isCancelled() || !match.isAutoPromote()) {
             return;
         }
-        List<Attendance> waiting = attendance.findByMatchId(match.getId()).stream()
-                .filter(answer -> answer.is(AttendanceStatus.WAITING))
-                .sorted(Comparator.comparing(Attendance::getQueuedAt))
-                .toList();
-        long confirmed = attendance.countByMatchIdAndStatus(match.getId(), AttendanceStatus.CONFIRMED);
-        for (Attendance next : waiting) {
+        long confirmed = confirmedIn(match);
+        for (Attendance next : waitingInOrder(match)) {
             if (confirmed >= match.getPlaces()) {
                 break;
             }
@@ -451,9 +431,7 @@ public class RosterService {
                 .map(Player::getId)
                 .filter(id -> !answered.contains(id))
                 .toList();
-        Set<UUID> linked = members.findByOrganizationIdAndPlayerIdNotNull(match.getOrganizationId()).stream()
-                .map(OrganizationMember::getPlayerId)
-                .collect(Collectors.toSet());
+        Set<UUID> linked = members.linkedPlayerIds(match.getOrganizationId());
         Map<UUID, AppUser> admins = accounts.usersById(answers.stream()
                 .map(Attendance::getAnsweredBy)
                 .filter(Objects::nonNull)
@@ -500,6 +478,11 @@ public class RosterService {
                 noAnswer);
     }
 
+    /** When and where a match is played, to tell whether it moved. */
+    private static List<Object> whenOf(Match match) {
+        return Arrays.asList(match.getMatchDate(), match.getStartTime(), match.getLocation());
+    }
+
     private void record(
             Match match, UUID playerId, Attendance current, AttendanceStatus status, AttendanceSource source, UUID by) {
         Attendance answer =
@@ -508,12 +491,24 @@ public class RosterService {
         attendance.save(answer);
     }
 
+    /** The waiting list, in the order it moves up. */
+    private List<Attendance> waitingInOrder(Match match) {
+        return attendance.findByMatchId(match.getId()).stream()
+                .filter(answer -> answer.is(AttendanceStatus.WAITING))
+                .sorted(Comparator.comparing(Attendance::getQueuedAt))
+                .toList();
+    }
+
+    private long confirmedIn(Match match) {
+        return attendance.countByMatchIdAndStatus(match.getId(), AttendanceStatus.CONFIRMED);
+    }
+
     private boolean isFull(Match match) {
-        return attendance.countByMatchIdAndStatus(match.getId(), AttendanceStatus.CONFIRMED) >= match.getPlaces();
+        return confirmedIn(match) >= match.getPlaces();
     }
 
     private void requireRoomFor(Match match, int places) {
-        long confirmed = attendance.countByMatchIdAndStatus(match.getId(), AttendanceStatus.CONFIRMED);
+        long confirmed = confirmedIn(match);
         if (confirmed > places) {
             throw conflict(confirmed + " players are already confirmed: move some to the waiting list first");
         }
@@ -573,18 +568,6 @@ public class RosterService {
     private Match lockMatch(Organization organization, int matchId) {
         return matches.lockById(matchId, organization.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There's no such match"));
-    }
-
-    private OrganizationMember requireMember(Organization organization, String googleSub) {
-        AppUser user = requireUser(googleSub);
-        return members.findById(new OrganizationMember.Key(user.getId(), organization.getId()))
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.FORBIDDEN, "Join " + organization.getName() + " as a player first"));
-    }
-
-    private AppUser requireUser(String googleSub) {
-        return accounts.user(googleSub)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Sign in again"));
     }
 
     private static ResponseStatusException badRequest(String reason) {
@@ -682,7 +665,7 @@ public class RosterService {
      * A match's roster.
      *
      * @param waiting in the order they'll move up
-     * @param noAnswer signed up for the season but haven't answered
+     * @param noAnswer every other player of the organisation, by Riot ID: still available
      */
     public record Roster(
             int id,

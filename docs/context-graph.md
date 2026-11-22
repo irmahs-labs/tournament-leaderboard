@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-22, with /org/{slug}/join, the link that invites players.
+Last updated: 2026-11-22, with /org/{slug}/join, the link that invites players, and the claim page sending someone already linked to My matches.
 
 ## System
 
@@ -263,7 +263,7 @@ flowchart TD
     shell -->|"/org/:slug/players"| plp["PlayersPage<br/>a card per player, search, sort, rank filter"]
     lb -->|Join| clp
     madm -->|"shares /org/:slug/join"| clp
-    shell -->|"/org/:slug/claim and /org/:slug/join, accountGuard"| clp["ClaimPage<br/>join (at once on /join), pick your profile, note, wait or cancel; or create one"]
+    shell -->|"/org/:slug/claim and /org/:slug/join, accountGuard"| clp["ClaimPage<br/>join (at once on /join), pick your profile, note, wait or cancel; or create one; already linked: to My matches"]
     shell -->|"/org/:slug/me/matches, accountGuard (/me/seasons redirects)"| mym["MyMatchesPage<br/>the upcoming matches of every season under way, by season: I'm in, Can't make it"]
     mym -->|"GET, PUT attendance"| mmApi["…/me/matches, …/matches/{id}/attendance"]
     mys -->|"GET, PUT"| mmApi["…/me/matches, …/matches/{id}/attendance"]

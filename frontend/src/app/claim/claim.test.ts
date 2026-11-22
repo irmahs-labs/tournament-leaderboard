@@ -184,18 +184,16 @@ describe("the Claim page", () => {
     });
   });
 
-  it("shows the linked profile once a claim is accepted", async () => {
+  it("sends someone already linked to My matches", async () => {
     await open({ ...MEMBER, linked: PLAYERS[0] ?? null });
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      http
+        .expectOne(`/api/orgs/${ALSACE.slug}/me/matches`)
+        .flush({ matches: [], player: true });
+    });
 
-    expect(text(page.querySelector("h2"))).toBe("Your profile is Kestrel");
-    expect(
-      [...page.querySelectorAll("a.start")].map((link) =>
-        link.getAttribute("href")
-      )
-    ).toStrictEqual([
-      "/org/alsace-arena/me/matches",
-      "/org/alsace-arena/players/kestrel",
-    ]);
+    expect(TestBed.inject(Router).url).toBe("/org/alsace-arena/me/matches");
   });
 
   it("lets a member who never played create their profile", async () => {

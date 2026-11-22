@@ -8,11 +8,10 @@ import { AdminAction } from "../../admin/action";
 import type { RankOption } from "../../admin/api";
 import { LanguageService } from "../../shared/language";
 import { RankPill } from "../../shared/rank-pill";
-import { RiotId } from "../../shared/riot-id";
+import { RiotId, splitRiotId } from "../../shared/riot-id";
 import { SessionService } from "../../shared/session";
 import type { PlayerMatch, PlayerSeason, Stat } from "../api";
 import { CurrentSeason } from "../current-season";
-import { splitRiotId } from "../stats";
 
 /** The season averages a profile shows, when the season records them. */
 const AVERAGES: readonly Stat[] = [

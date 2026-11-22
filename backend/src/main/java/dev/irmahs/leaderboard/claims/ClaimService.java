@@ -74,7 +74,7 @@ public class ClaimService {
     /** Joins the organisation as a player; someone already a member stays as they are. */
     public ClaimState join(String slug, String googleSub) {
         Organization organization = organizations.requireActive(slug);
-        AppUser user = requireUser(googleSub);
+        AppUser user = accounts.requireUser(googleSub);
         if (members.findById(new OrganizationMember.Key(user.getId(), organization.getId()))
                 .isEmpty()) {
             members.save(OrganizationMember.player(user.getId(), organization.getId()));
@@ -86,7 +86,7 @@ public class ClaimService {
     @Transactional(readOnly = true)
     public ClaimState mine(String slug, String googleSub) {
         Organization organization = organizations.requireActive(slug);
-        AppUser user = requireUser(googleSub);
+        AppUser user = accounts.requireUser(googleSub);
         OrganizationMember member = members.findById(new OrganizationMember.Key(user.getId(), organization.getId()))
                 .orElse(null);
         if (member == null) {
@@ -112,8 +112,8 @@ public class ClaimService {
     @Transactional(readOnly = true)
     public List<PlayerSummary> unclaimed(String slug, String googleSub) {
         Organization organization = organizations.requireActive(slug);
-        requireMember(organization, googleSub);
-        Set<UUID> linked = linkedPlayers(organization);
+        accounts.requireMember(organization, googleSub);
+        Set<UUID> linked = members.linkedPlayerIds(organization.getId());
         Map<UUID, Long> games = claims.countGames(organization.getId()).stream()
                 .collect(Collectors.toMap(GameCount::playerId, GameCount::games));
         return players.search(organization.getId(), "%").stream()
@@ -131,7 +131,7 @@ public class ClaimService {
      */
     public ClaimState claim(String slug, String googleSub, NewClaim input) {
         Organization organization = organizations.requireActive(slug);
-        OrganizationMember member = requireMember(organization, googleSub);
+        OrganizationMember member = accounts.requireMember(organization, googleSub);
         if (member.getPlayerId() != null) {
             throw conflict("Your profile is already linked");
         }
@@ -160,14 +160,14 @@ public class ClaimService {
      */
     public ClaimState create(String slug, String googleSub, NewProfile input) {
         Organization organization = organizations.requireActive(slug);
-        OrganizationMember member = requireMember(organization, googleSub);
+        OrganizationMember member = accounts.requireMember(organization, googleSub);
         if (member.getPlayerId() != null) {
             throw conflict("Your profile is already linked");
         }
         if (hasWaitingClaim(organization, member)) {
             throw conflict("Cancel the claim you sent before creating a profile");
         }
-        AppUser user = requireUser(googleSub);
+        AppUser user = accounts.requireUser(googleSub);
         String riotId = user.getRiotId() != null ? user.getRiotId() : name(input.riotId(), "Your Riot ID");
         if (riotId == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your Riot ID can't be empty");
@@ -201,7 +201,7 @@ public class ClaimService {
      */
     public ClaimState cancel(String slug, String googleSub) {
         Organization organization = organizations.requireActive(slug);
-        OrganizationMember member = requireMember(organization, googleSub);
+        OrganizationMember member = accounts.requireMember(organization, googleSub);
         PlayerClaim claim = claims.findFirstByOrganizationIdAndUserIdAndStatusNotOrderByCreatedAtDesc(
                         organization.getId(), member.getUserId(), ClaimStatus.CANCELLED)
                 .filter(waiting -> waiting.getStatus() == ClaimStatus.PENDING)
@@ -220,7 +220,7 @@ public class ClaimService {
      */
     public PlayerView editMine(String slug, String googleSub, OwnDetails input) {
         Organization organization = organizations.requireActive(slug);
-        OrganizationMember member = requireMember(organization, googleSub);
+        OrganizationMember member = accounts.requireMember(organization, googleSub);
         if (member.getPlayerId() == null) {
             throw conflict("Claim your profile first");
         }
@@ -231,7 +231,7 @@ public class ClaimService {
     @Transactional(readOnly = true)
     public List<ClaimRow> queue(String slug, String adminSub, ClaimStatus status) {
         Organization organization = organizations.requireActive(slug);
-        UUID admin = requireUser(adminSub).getId();
+        UUID admin = accounts.requireUser(adminSub).getId();
         List<PlayerClaim> found = claims.findByOrganizationIdAndStatusOrderByCreatedAt(
                 organization.getId(), status == null ? ClaimStatus.PENDING : status);
         Map<UUID, AppUser> users =
@@ -272,7 +272,7 @@ public class ClaimService {
      */
     public ClaimRow accept(String slug, String adminSub, UUID id) {
         Organization organization = organizations.requireActive(slug);
-        UUID admin = requireUser(adminSub).getId();
+        UUID admin = accounts.requireUser(adminSub).getId();
         PlayerClaim claim = requireWaiting(organization, id);
         boolean own = claim.getUserId().equals(admin);
         if (own && members.countByOrganizationIdAndRole(organization.getId(), MemberRole.ADMIN) > 1) {
@@ -306,7 +306,7 @@ public class ClaimService {
      */
     public ClaimRow decline(String slug, String adminSub, UUID id, String reason) {
         Organization organization = organizations.requireActive(slug);
-        UUID admin = requireUser(adminSub).getId();
+        UUID admin = accounts.requireUser(adminSub).getId();
         PlayerClaim claim = requireWaiting(organization, id);
         claim.decline(admin, text(reason));
         claims.flush();
@@ -340,24 +340,6 @@ public class ClaimService {
                         organization.getId(), member.getUserId(), ClaimStatus.CANCELLED)
                 .filter(claim -> claim.getStatus() == ClaimStatus.PENDING)
                 .isPresent();
-    }
-
-    private Set<UUID> linkedPlayers(Organization organization) {
-        return members.findByOrganizationIdAndPlayerIdNotNull(organization.getId()).stream()
-                .map(OrganizationMember::getPlayerId)
-                .collect(Collectors.toSet());
-    }
-
-    private OrganizationMember requireMember(Organization organization, String googleSub) {
-        AppUser user = requireUser(googleSub);
-        return members.findById(new OrganizationMember.Key(user.getId(), organization.getId()))
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.FORBIDDEN, "Join " + organization.getName() + " as a player first"));
-    }
-
-    private AppUser requireUser(String googleSub) {
-        return accounts.user(googleSub)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Sign in again"));
     }
 
     private ClaimView view(PlayerClaim claim) {

@@ -6,9 +6,8 @@ import { firstValueFrom } from "rxjs";
 import type { ClaimRow, ClaimStatus } from "../../claim/api";
 import { MAX_TEXT } from "../../claim/api";
 import { CurrentSeason } from "../../results/current-season";
-import { splitRiotId } from "../../results/stats";
 import { LanguageService } from "../../shared/language";
-import { RiotId } from "../../shared/riot-id";
+import { RiotId, splitRiotId } from "../../shared/riot-id";
 import { AdminAction } from "../action";
 
 /** The tabs of the queue. */

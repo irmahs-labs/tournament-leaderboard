@@ -12,7 +12,7 @@ import { RankPill } from "../../shared/rank-pill";
 import { RiotId } from "../../shared/riot-id";
 import type { Stat, Standing } from "../api";
 import type { Column } from "../stats";
-import { addsUp, columnsFor, decimalsOf, splitRiotId, valueOf } from "../stats";
+import { addsUp, columnsFor, decimalsOf, valueOf } from "../stats";
 
 /**
  * Players' standings: position, rank, player, games, one average per recorded stat, wins and
@@ -40,7 +40,6 @@ export class StandingsTable {
 
   protected readonly columns = computed(() => columnsFor(this.stats()));
   protected readonly language = inject(LanguageService);
-  protected readonly splitRiotId = splitRiotId;
   protected readonly valueOf = valueOf;
   protected readonly decimalsOf = decimalsOf;
 

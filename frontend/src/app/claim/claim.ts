@@ -1,22 +1,22 @@
 import { HttpClient, httpResource } from "@angular/common/http";
 import { Component, computed, effect, inject, signal } from "@angular/core";
-import { ActivatedRoute, RouterLink } from "@angular/router";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { TranslocoDirective, TranslocoService } from "@jsverse/transloco";
 import type { Observable } from "rxjs";
 import { firstValueFrom } from "rxjs";
 
 import { AdminAction } from "../admin/action";
 import { CurrentSeason } from "../results/current-season";
-import { splitRiotId } from "../results/stats";
 import { LanguageService } from "../shared/language";
-import { isRiotId, RiotId } from "../shared/riot-id";
+import { isRiotId, RiotId, splitRiotId } from "../shared/riot-id";
 import { SessionService } from "../shared/session";
 import type { ClaimState, PlayerSummary } from "./api";
 import { MAX_NAME, MAX_TEXT, matchingPlayers } from "./api";
 
 /**
  * Claim your profile: join the organisation as a player if needed, pick the player record admins
- * already enter scores for, add a note, and wait for an admin. The stats never move.
+ * already enter scores for, add a note, and wait for an admin. The stats never move. Someone
+ * already linked when they arrive goes to My matches instead.
  */
 @Component({
   imports: [RiotId, RouterLink, TranslocoDirective],
@@ -95,10 +95,28 @@ export class ClaimPage {
 
   /** Coming from Join, they become a player at once instead of pressing Join as a player again. */
   #joined = false;
+  /** Whether the page has seen where they stand yet. */
+  #seen = false;
+  readonly #router = inject(Router);
 
   constructor() {
     effect(() => {
       const state = this.state.hasValue() ? this.state.value() : null;
+      const slug = this.current.organization()?.slug;
+      const first = state !== null && !this.#seen;
+
+      if (state) {
+        this.#seen = true;
+      }
+
+      // Already linked when they arrive: nothing to claim, so their matches instead.
+      if (first && state.linked && slug) {
+        void this.#router.navigate(["/org", slug, "me", "matches"], {
+          replaceUrl: true,
+        });
+
+        return;
+      }
 
       if (this.#joinRequested && state && !state.member && !this.#joined) {
         this.#joined = true;

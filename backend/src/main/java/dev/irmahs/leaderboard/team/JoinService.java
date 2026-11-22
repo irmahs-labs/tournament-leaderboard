@@ -81,8 +81,7 @@ public class JoinService {
         if (state != InviteState.VALID) {
             throw new ResponseStatusException(HttpStatus.GONE, state.name());
         }
-        AppUser user = accounts.user(googleSub)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Sign in again"));
+        AppUser user = accounts.requireUser(googleSub);
         if (invite.getKind() == Invite.Kind.PERSONAL && !user.getEmail().equalsIgnoreCase(invite.getEmail())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This invite is for another Google account");
         }
