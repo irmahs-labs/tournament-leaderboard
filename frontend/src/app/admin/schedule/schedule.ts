@@ -95,16 +95,6 @@ export class ScheduleAdminPage {
   readonly #transloco = inject(TranslocoService);
   readonly #router = inject(Router);
 
-  /** When it's played: "Sat, Dec 5 · 8:30 PM", or nothing. */
-  protected when(match: ScheduledMatch): string {
-    return [
-      match.date ? this.language.day(match.date) : null,
-      match.startTime ? this.language.time(match.startTime) : null,
-    ]
-      .flatMap((part) => (part === null ? [] : [part]))
-      .join(" · ");
-  }
-
   protected pickSeason(value: string): void {
     this.editing.set(null);
     void this.#router.navigate([], {

@@ -19,8 +19,9 @@ import dev.irmahs.leaderboard.signups.SignUpService;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -89,18 +90,19 @@ public class RosterService {
         Season season = seasons.require(slug, number);
         Map<Integer, Match> byNumber = matches.findBySeasonOrderByMatchNumber(season).stream()
                 .collect(Collectors.toMap(Match::getMatchNumber, Function.identity()));
-        List<Attendance> answers = attendance.findByMatchIdIn(
-                byNumber.values().stream().map(Match::getId).toList());
+        Map<Integer, List<Attendance>> answers = byMatch(byNumber.values());
         List<ScheduledMatch> rows = IntStream.rangeClosed(1, season.getMatchCount())
                 .mapToObj(matchNumber -> {
                     Match match = byNumber.get(matchNumber);
-                    return match == null
-                            ? ScheduledMatch.unplanned(matchNumber, organization.getPlayersPerMatch())
-                            : ScheduledMatch.of(
-                                    match,
-                                    games.countByMatch(match) > 0,
-                                    count(answers, match, AttendanceStatus.CONFIRMED),
-                                    count(answers, match, AttendanceStatus.WAITING));
+                    if (match == null) {
+                        return ScheduledMatch.unplanned(matchNumber, organization.getPlayersPerMatch());
+                    }
+                    List<Attendance> ofMatch = answers.getOrDefault(match.getId(), List.of());
+                    return ScheduledMatch.of(
+                            match,
+                            games.countByMatch(match) > 0,
+                            count(ofMatch, AttendanceStatus.CONFIRMED),
+                            count(ofMatch, AttendanceStatus.WAITING));
                 })
                 .toList();
         return new Schedule(
@@ -188,23 +190,6 @@ public class RosterService {
         return rosterOf(match);
     }
 
-    /**
-     * Changes how many places the match has.
-     *
-     * @throws ResponseStatusException 400 for a number outside 2 to 40, 409 for fewer places than
-     *     players already confirmed
-     */
-    public Roster setPlaces(String slug, int matchId, int places) {
-        Organization organization = organizations.requireActive(slug);
-        Match match = lockMatch(organization, matchId);
-        checkPlaces(places);
-        requireRoomFor(match, places);
-        match.plan(
-                new Plan(match.getMatchDate(), match.getStartTime(), match.getLocation(), match.getReplyBy(), places));
-        matches.flush();
-        return rosterOf(match);
-    }
-
     /** Locks the roster, so players can't change their answer, or unlocks it. */
     public Roster setLocked(String slug, int matchId, boolean locked) {
         Organization organization = organizations.requireActive(slug);
@@ -242,13 +227,10 @@ public class RosterService {
         List<Match> upcoming = matches.findBySeasonInOrderBySeasonNumberDescMatchNumber(open).stream()
                 .filter(match -> games.countByMatch(match) == 0)
                 .toList();
-        List<Attendance> answers =
-                attendance.findByMatchIdIn(upcoming.stream().map(Match::getId).toList());
+        Map<Integer, List<Attendance>> answers = byMatch(upcoming);
         List<MyMatch> rows = upcoming.stream()
                 .map(match -> {
-                    List<Attendance> ofMatch = answers.stream()
-                            .filter(answer -> answer.getMatchId().equals(match.getId()))
-                            .toList();
+                    List<Attendance> ofMatch = answers.getOrDefault(match.getId(), List.of());
                     Attendance mine = ofMatch.stream()
                             .filter(answer -> answer.getPlayerId().equals(playerId))
                             .findFirst()
@@ -263,9 +245,7 @@ public class RosterService {
                             match.getLocation(),
                             match.getReplyBy(),
                             match.getPlaces(),
-                            (int) ofMatch.stream()
-                                    .filter(answer -> answer.is(AttendanceStatus.CONFIRMED))
-                                    .count(),
+                            (int) count(ofMatch, AttendanceStatus.CONFIRMED),
                             match.isCancelled(),
                             match.isLocked(),
                             mine == null ? null : mine.getStatus(),
@@ -325,47 +305,41 @@ public class RosterService {
 
     private Roster rosterOf(Match match) {
         List<Attendance> answers = attendance.findByMatchId(match.getId());
-        List<UUID> signedUp = signUps.signedUp(match.getSeason());
         Set<UUID> answered = answers.stream().map(Attendance::getPlayerId).collect(Collectors.toSet());
-        List<UUID> everyone =
-                new ArrayList<>(answers.stream().map(Attendance::getPlayerId).toList());
-        signedUp.stream().filter(id -> !answered.contains(id)).forEach(everyone::add);
-        Map<UUID, Player> byId =
-                players.findAllById(everyone).stream().collect(Collectors.toMap(Player::getId, Function.identity()));
+        List<UUID> noAnswerIds = signUps.signedUp(match.getSeason()).stream()
+                .filter(id -> !answered.contains(id))
+                .toList();
+        Set<UUID> everyone = new HashSet<>(answered);
+        everyone.addAll(noAnswerIds);
+        Map<UUID, String> riotIds =
+                players.findAllById(everyone).stream().collect(Collectors.toMap(Player::getId, Player::getRiotId));
         Set<UUID> linked = members.findByOrganizationIdAndPlayerIdNotNull(match.getOrganizationId()).stream()
                 .map(OrganizationMember::getPlayerId)
                 .collect(Collectors.toSet());
-        Map<UUID, AppUser> answeredBy = accounts.usersById(answers.stream()
+        Map<UUID, AppUser> admins = accounts.usersById(answers.stream()
                 .map(Attendance::getAnsweredBy)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet()));
-        Function<Attendance, RosterLine> line = answer -> new RosterLine(
-                answer.getPlayerId(),
-                riotId(byId, answer.getPlayerId()),
-                linked.contains(answer.getPlayerId()),
-                answer.getSource(),
-                answer.getAnsweredAt(),
-                answer.getAnsweredBy() == null || !answeredBy.containsKey(answer.getAnsweredBy())
-                        ? null
-                        : answeredBy.get(answer.getAnsweredBy()).getDisplayName());
-        List<RosterLine> confirmed = answers.stream()
-                .filter(answer -> answer.is(AttendanceStatus.CONFIRMED))
-                .sorted(Comparator.comparing(Attendance::getAnsweredAt))
-                .map(line)
-                .toList();
-        List<RosterLine> waiting = answers.stream()
-                .filter(answer -> answer.is(AttendanceStatus.WAITING))
-                .sorted(Comparator.comparing(Attendance::getQueuedAt))
-                .map(line)
-                .toList();
-        List<RosterLine> declined = answers.stream()
-                .filter(answer -> answer.is(AttendanceStatus.DECLINED))
-                .sorted(Comparator.comparing(Attendance::getAnsweredAt))
-                .map(line)
-                .toList();
-        List<RosterLine> noAnswer = signedUp.stream()
-                .filter(id -> !answered.contains(id))
-                .map(id -> new RosterLine(id, riotId(byId, id), linked.contains(id), null, null, null))
+        // The waiting list in the order it moves up; the others in the order they answered.
+        Map<AttendanceStatus, List<RosterLine>> lists = answers.stream()
+                .sorted(Comparator.comparing(
+                        answer -> answer.getQueuedAt() != null ? answer.getQueuedAt() : answer.getAnsweredAt()))
+                .collect(Collectors.groupingBy(
+                        Attendance::getStatus,
+                        Collectors.mapping(
+                                answer -> {
+                                    AppUser by = admins.get(answer.getAnsweredBy());
+                                    return new RosterLine(
+                                            answer.getPlayerId(),
+                                            riotIds.get(answer.getPlayerId()),
+                                            linked.contains(answer.getPlayerId()),
+                                            answer.getSource(),
+                                            answer.getAnsweredAt(),
+                                            by == null ? null : by.getDisplayName());
+                                },
+                                Collectors.toList())));
+        List<RosterLine> noAnswer = noAnswerIds.stream()
+                .map(id -> new RosterLine(id, riotIds.get(id), linked.contains(id), null, null, null))
                 .toList();
         Season season = match.getSeason();
         return new Roster(
@@ -381,9 +355,9 @@ public class RosterService {
                 match.getStatus(),
                 match.isLocked(),
                 games.countByMatch(match) > 0,
-                confirmed,
-                waiting,
-                declined,
+                lists.getOrDefault(AttendanceStatus.CONFIRMED, List.of()),
+                lists.getOrDefault(AttendanceStatus.WAITING, List.of()),
+                lists.getOrDefault(AttendanceStatus.DECLINED, List.of()),
                 noAnswer);
     }
 
@@ -400,9 +374,6 @@ public class RosterService {
     }
 
     private void requireRoomFor(Match match, int places) {
-        if (match.getId() == null) {
-            return;
-        }
         long confirmed = attendance.countByMatchIdAndStatus(match.getId(), AttendanceStatus.CONFIRMED);
         if (confirmed > places) {
             throw conflict(confirmed + " players are already confirmed: move some to the waiting list first");
@@ -420,20 +391,21 @@ public class RosterService {
                 + 1;
     }
 
-    private static long count(List<Attendance> answers, Match match, AttendanceStatus status) {
-        return answers.stream()
-                .filter(answer -> answer.getMatchId().equals(match.getId()) && answer.is(status))
-                .count();
+    /** These matches' answers, by match. */
+    private Map<Integer, List<Attendance>> byMatch(Collection<Match> ofMatches) {
+        return attendance.findByMatchIdIn(ofMatches.stream().map(Match::getId).toList()).stream()
+                .collect(Collectors.groupingBy(Attendance::getMatchId));
     }
 
-    private static String riotId(Map<UUID, Player> byId, UUID playerId) {
-        Player player = byId.get(playerId);
-        return player == null ? null : player.getRiotId();
+    private static long count(List<Attendance> answers, AttendanceStatus status) {
+        return answers.stream().filter(answer -> answer.is(status)).count();
     }
 
     private static Plan check(PlanInput input, int defaultPlaces) {
         int places = input.places() == null ? defaultPlaces : input.places();
-        checkPlaces(places);
+        if (places < MIN_PLACES || places > MAX_PLACES) {
+            throw badRequest("A match has " + MIN_PLACES + " to " + MAX_PLACES + " places");
+        }
         String location = input.location() == null || input.location().isBlank()
                 ? null
                 : input.location().strip();
@@ -444,12 +416,6 @@ public class RosterService {
             throw badRequest("The reply-by date comes before the match");
         }
         return new Plan(input.date(), input.startTime(), location, input.replyBy(), places);
-    }
-
-    private static void checkPlaces(int places) {
-        if (places < MIN_PLACES || places > MAX_PLACES) {
-            throw badRequest("A match has " + MIN_PLACES + " to " + MAX_PLACES + " places");
-        }
     }
 
     private Season requireNotOver(String slug, int number) {

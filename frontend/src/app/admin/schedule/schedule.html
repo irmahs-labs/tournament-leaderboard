@@ -141,7 +141,10 @@
             <th scope="row">
               {{ t("adminSchedule.matchNumber", { number: match.number }) }}
             </th>
-            <td>{{ when(match) || "–" }}</td>
+            <td>
+              {{ language.when({ date: match.date, startTime: match.startTime })
+              || "–" }}
+            </td>
             <td class="where">{{ match.location ?? "–" }}</td>
             <td>{{ match.replyBy ? language.day(match.replyBy) : "–" }}</td>
             <td class="num">

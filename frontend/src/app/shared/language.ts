@@ -140,6 +140,21 @@ export class LanguageService {
     }).format(new Date(`1970-01-01T${value}Z`));
   }
 
+  /** When and where a match is: "Dec 5 · 8:30 PM · Discord #matchs"; empty when none is known. */
+  when(match: {
+    date: string | null;
+    startTime: string | null;
+    location?: string | null;
+  }): string {
+    return [
+      match.date ? this.day(match.date) : null,
+      match.startTime ? this.time(match.startTime) : null,
+      match.location ?? null,
+    ]
+      .flatMap((part) => (part === null ? [] : [part]))
+      .join(" · ");
+  }
+
   /** A date as a short month and year, such as "Jan 2026" or "janv. 2026". */
   month(date: string): string {
     return new Intl.DateTimeFormat(this.active, {

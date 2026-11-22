@@ -10,6 +10,7 @@ import { splitRiotId } from "../../results/stats";
 import { LanguageService } from "../../shared/language";
 import { AdminAction } from "../action";
 import type { AdminPlayer, AttendanceStatus, Roster, RosterLine } from "../api";
+import { playersMatching } from "../api";
 
 /** The roster's lists, in the order they're shown. */
 export const ROSTER_LISTS = [
@@ -35,21 +36,14 @@ export const notOnRoster = (
   players: readonly AdminPlayer[],
   roster: Roster,
   search: string
-): AdminPlayer[] => {
-  const listed = new Set(
-    ROSTER_LISTS.flatMap((list) => roster[list].map((line) => line.playerId))
+): AdminPlayer[] =>
+  playersMatching(
+    players,
+    new Set(
+      ROSTER_LISTS.flatMap((list) => roster[list].map((line) => line.playerId))
+    ),
+    search
   );
-
-  const wanted = search.trim().toLowerCase();
-
-  return players.filter(
-    (player) =>
-      !listed.has(player.id) &&
-      [player.riotId, ...player.aliases.map((alias) => alias.alias)].some(
-        (name) => name.toLowerCase().includes(wanted)
-      )
-  );
-};
 
 /**
  * The admin Match roster screen: who's in, the waiting list in order, who can't make it and who
@@ -119,17 +113,6 @@ export class RosterAdminPage {
   readonly #http = inject(HttpClient);
   readonly #transloco = inject(TranslocoService);
 
-  /** When and where: "Sat, Dec 5 · 8:30 PM · Discord #matchs". */
-  protected when(roster: Roster): string {
-    return [
-      roster.date ? this.language.day(roster.date) : null,
-      roster.startTime ? this.language.time(roster.startTime) : null,
-      roster.location,
-    ]
-      .flatMap((part) => (part === null ? [] : [part]))
-      .join(" · ");
-  }
-
   /** How the answer came in: "In the app", "By Camille", "Moved up". */
   protected how(line: RosterLine): string {
     switch (line.source) {
@@ -182,8 +165,10 @@ export class RosterAdminPage {
     );
   }
 
-  protected async savePlaces(value: string): Promise<void> {
+  /** Saves the places through the match's plan, keeping the rest of it. */
+  protected async savePlaces(roster: Roster, value: string): Promise<void> {
     const places = Number(value);
+    const admin = this.current.adminApi();
 
     if (!Number.isInteger(places) || places < 2 || places > 40) {
       this.action.refuse(
@@ -193,11 +178,28 @@ export class RosterAdminPage {
       return;
     }
 
-    await this.#change(
-      (api) => this.#http.put<Roster>(`${api}/places`, { places }),
-      "adminRoster.placesSaved",
-      null
-    );
+    if (!admin) {
+      return;
+    }
+
+    await this.action.run(async () => {
+      await firstValueFrom(
+        this.#http.put(
+          `${admin}/seasons/${roster.seasonNumber}/schedule/${roster.number}`,
+          {
+            cancelled: null,
+            date: roster.date,
+            location: roster.location,
+            places,
+            replyBy: roster.replyBy,
+            startTime: roster.startTime,
+          }
+        )
+      );
+      this.roster.reload();
+
+      return this.#transloco.translate("adminRoster.placesSaved");
+    });
   }
 
   protected async setLocked(locked: boolean): Promise<void> {

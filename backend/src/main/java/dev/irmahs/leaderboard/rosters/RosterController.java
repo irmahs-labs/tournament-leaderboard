@@ -77,15 +77,6 @@ public class RosterController {
         return rosters.setAnswer(slug, admin.getSubject(), match, player, null);
     }
 
-    @PutMapping(ADMIN + "/matches/{match}/places")
-    @PreAuthorize("@orgAccess.isAdmin(#slug, authentication)")
-    public Roster setPlaces(@PathVariable String slug, @PathVariable int match, @RequestBody PlacesInput input) {
-        if (input.places() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Say how many places");
-        }
-        return rosters.setPlaces(slug, match, input.places());
-    }
-
     @PostMapping(ADMIN + "/matches/{match}/lock")
     @PreAuthorize("@orgAccess.isAdmin(#slug, authentication)")
     public Roster lock(@PathVariable String slug, @PathVariable int match) {
@@ -113,8 +104,6 @@ public class RosterController {
     }
 
     public record StatusInput(AttendanceStatus status) {}
-
-    public record PlacesInput(Integer places) {}
 
     public record AnswerInput(Answer answer) {}
 }
