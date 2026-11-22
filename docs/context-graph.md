@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-22, with platform admins deleting an organisation nobody uses yet.
+Last updated: 2026-11-22, with notices opening in a panel over the page from the header's bell.
 
 ## System
 
@@ -121,7 +121,7 @@ flowchart LR
 | `notices` | `NoticeStore` (notifications, through JDBC: a jsonb of details), `NoticeKind`, `NoticeService` (turns events into notices for the players linked to an account, or the admins but not the one who made the change; a match change waits 10 minutes and replaces one not shown yet, so a planned then moved match is one notice; read notices are forgotten after 90 days), `NoticeController` (`GET /api/me/notifications`, the latest 50 and the unread count; `POST /api/me/notifications/read`) |
 | `team` | `Invite` (organization_invites; only a hash of the code), `InviteCodes` (8 characters without look-alikes, SHA-256), `TeamService` (the Members screen: roles, removal, ownership, admin invites), `JoinService` (what a code is for; using it, its row locked), `MembershipController` (leaving an organisation, never as its owner), `CodeLookupLimit` (10 lookups a minute per address, in memory) |
 | `presence` | `OnlineCount` (open pages, in memory only; changes sent at most once a second, a heartbeat every 25 s), `GET /api/online` as server-sent events |
-| `system` | `/api/version`; `UnknownPageResolver` (a browser on an address nobody serves gets the app's Not found page with a 404; the API and files keep JSON problems); `SpaController` forwards the Angular router's addresses (`/org/**` (the claim page included), `/not-found`, `/platform`, `/account`, `/notices`, `/join`, `/join/*`, `/sign-in`, `/legal`, `/privacy`, `/cookies`, `/terms`) to `index.html` |
+| `system` | `/api/version`; `UnknownPageResolver` (a browser on an address nobody serves gets the app's Not found page with a 404; the API and files keep JSON problems); `SpaController` forwards the Angular router's addresses (`/org/**` (the claim page included), `/not-found`, `/platform`, `/account`, `/join`, `/join/*`, `/sign-in`, `/legal`, `/privacy`, `/cookies`, `/terms`) to `index.html` |
 
 ## API
 
@@ -250,13 +250,12 @@ flowchart TD
     platform --> padmin[PlatformPage /platform, platformGuard<br/>counts, search, every organisation, suspend or reactivate, delete one nobody uses yet]
     padmin -->|"GET, PUT …/status, DELETE"| platformApi["/api/platform/organizations"]
     platform --> acct[AccountPage /account, accountGuard<br/>profile, Riot ID and Discord for every organisation, sign out, organisations and leaving, deleting the account]
-    platform --> ntc[NoticesPage /notices, accountGuard<br/>notices from every organisation, newest first, each linking to its page; opening it marks them read]
     acct -->|"PUT /api/me/identity, DELETE /api/me, DELETE …/membership"| accountApi["/api/me, /api/orgs/{slug}/membership"]
     platform --> si[SignInPage<br/>Google, your organisations, sign out, create one]
     platform --> legal[LegalPage<br/>legal notice, privacy, cookies, terms]
     platform --> nf[NotFoundPage<br/>or, for its members, 'this organisation is suspended']
     platform --> join[JoinPage /join/:code<br/>what the code is for, sign in with the invited account, accept; or type a code]
-    shell --> header[SiteHeader<br/>skip link, logo, nav keeping ?season= (My seasons for members; Scores, Players, Seasons, Schedule, Scoring, Members and Branding on admin pages; a Site | Admin switch for admins), online count, season, one EN / FR button, a light/dark pill switch, a notices bell with the unread count, Sign in or My account]
+    shell --> header[SiteHeader<br/>skip link, logo, nav keeping ?season= (My seasons for members; Scores, Players, Seasons, Schedule, Scoring, Members and Branding on admin pages; a Site | Admin switch for admins), online count, season, one EN / FR button, a light/dark pill switch, a notices bell with the unread count opening NoticesPanel over the page (every organisation's notices, newest first, each linking to its page; opening it marks them read), Sign in or My account]
     shell --> footer[SiteFooter<br/>org name and its social links; credit, legal pages, GitHub and Contact on three centred lines]
     platform --> header
     platform --> footer

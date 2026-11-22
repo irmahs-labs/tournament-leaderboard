@@ -394,7 +394,13 @@
   white-space: nowrap;
 }
 
+.notices-menu {
+  position: relative;
+}
+
 .notices {
+  cursor: pointer;
+  list-style: none;
   position: relative;
   display: inline-grid;
   place-items: center;
@@ -423,6 +429,23 @@
   line-height: 1;
 }
 
+.notices::-webkit-details-marker {
+  display: none;
+}
+
+.notices-menu[open] .notices {
+  background: var(--nav-ghost);
+}
+
+.notices-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  width: min(380px, calc(100vw - 32px));
+  box-shadow: 0 12px 32px rgb(0 0 0 / 35%);
+}
+
 .avatar {
   width: 26px;
   height: 26px;
@@ -446,6 +469,22 @@
 @media (max-width: 640px) {
   .account-name {
     display: none;
+  }
+
+  /* On a phone the bell may sit anywhere in the wrapped tools: the panel spans the header instead. */
+  .inner {
+    position: relative;
+  }
+
+  .notices-menu {
+    position: static;
+  }
+
+  .notices-panel {
+    top: calc(100% - 4px);
+    left: 16px;
+    right: 16px;
+    width: auto;
   }
 
   .inner {
