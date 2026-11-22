@@ -25,9 +25,9 @@ import { MAX_NAME, MAX_TEXT, matchingPlayers } from "./api";
   templateUrl: "./claim.html",
 })
 export class ClaimPage {
-  /** From the address: `?join=1` when they came from the leaderboard's Join button. */
+  /** Opened as `/org/{slug}/join`, the link that invites players: they join at once. */
   readonly #joinRequested =
-    inject(ActivatedRoute).snapshot.queryParamMap.has("join");
+    inject(ActivatedRoute).snapshot.data["join"] === true;
 
   protected readonly current = inject(CurrentSeason);
   protected readonly language = inject(LanguageService);

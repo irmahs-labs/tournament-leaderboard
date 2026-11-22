@@ -26,6 +26,10 @@ export const memberName = (member: TeamMember): string =>
 export const joinLink = (origin: string, code: string): string =>
   `${origin}/join/${code}`;
 
+/** The link anyone opens to join an organisation as a player. */
+export const playerJoinLink = (origin: string, slug: string): string =>
+  `${origin}/org/${slug}/join`;
+
 /**
  * The Members screen: who belongs to the organisation and their role, the admin invites still
  * waiting, and ownership. Any admin invites admins, changes roles and removes members; only the
@@ -149,12 +153,23 @@ export class MembersAdminPage {
     }
   }
 
-  /** Puts the invite's message on the clipboard. */
-  protected async copy(message: string): Promise<void> {
-    await this.action.run(async () => {
-      await this.#document.defaultView?.navigator.clipboard.writeText(message);
+  /** The link to share to invite players. */
+  protected readonly playerLink = computed(() =>
+    playerJoinLink(
+      this.#document.location.origin,
+      this.current.organization()?.slug ?? ""
+    )
+  );
 
-      return this.#transloco.translate("adminMembers.copied");
+  /** Puts an invite's message, or the players' link, on the clipboard. */
+  protected async copy(
+    text: string,
+    done = "adminMembers.copied"
+  ): Promise<void> {
+    await this.action.run(async () => {
+      await this.#document.defaultView?.navigator.clipboard.writeText(text);
+
+      return this.#transloco.translate(done);
     });
   }
 

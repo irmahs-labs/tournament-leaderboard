@@ -40,6 +40,13 @@ export const routes: Routes = [
       { component: PlayersPage, path: "players" },
       { component: PlayerPage, path: "players/:player" },
       { canActivate: [accountGuard], component: ClaimPage, path: "claim" },
+      // The link admins share to invite players: the claim page, joining at once.
+      {
+        canActivate: [accountGuard],
+        component: ClaimPage,
+        data: { join: true },
+        path: "join",
+      },
       {
         canActivate: [accountGuard],
         component: MyMatchesPage,
