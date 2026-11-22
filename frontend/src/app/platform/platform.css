@@ -133,6 +133,15 @@ input {
 
 .table .end {
   text-align: right;
+  white-space: nowrap;
+}
+
+.end .small-button + .small-button {
+  margin-left: 8px;
+}
+
+.danger {
+  color: var(--danger);
 }
 
 .nowrap {
@@ -275,6 +284,10 @@ p {
 
   .cards .end .small-button {
     width: 100%;
+  }
+
+  .cards .end .small-button + .small-button {
+    margin: 8px 0 0;
   }
 
   .cards .pills {

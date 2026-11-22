@@ -16,6 +16,7 @@ const PLATFORM_ADMIN: Me = { ...ME, platformAdmin: true };
 const ORGANIZATIONS: PlatformOrganization[] = [
   {
     createdAt: "2026-11-01T10:00:00Z",
+    deletable: false,
     featured: true,
     lastActivityAt: "2026-11-18T20:00:00Z",
     members: 42,
@@ -26,6 +27,7 @@ const ORGANIZATIONS: PlatformOrganization[] = [
   },
   {
     createdAt: "2026-11-05T10:00:00Z",
+    deletable: true,
     featured: false,
     lastActivityAt: null,
     members: 2,
@@ -151,6 +153,48 @@ describe("the platform page", () => {
     reactivate.flush(null);
     await vi.waitFor(() => http.expectOne(API).flush(ORGANIZATIONS));
     harness.detectChanges();
+  });
+
+  it("deletes an organisation nobody uses yet once its name is typed", async () => {
+    const { harness, page } = await openAsPlatformAdmin();
+    const prompt = vi.spyOn(globalThis, "prompt").mockReturnValue("Lyon");
+
+    const remove = (): void => {
+      [...page.querySelectorAll<HTMLButtonElement>("tbody button")]
+        .find((button) => text(button)?.startsWith("Delete"))
+        ?.click();
+    };
+
+    expect(
+      texts(page, "tbody button").filter((label) => label?.startsWith("Delete"))
+    ).toStrictEqual(["Delete Lyon Game Bar"]);
+
+    remove();
+    harness.detectChanges();
+
+    expect(text(page.querySelector("[role=status]"))).toBe(
+      "That isn't “Lyon Game Bar”: nothing was deleted."
+    );
+
+    prompt.mockReturnValue(" Lyon Game Bar ");
+    remove();
+
+    const deleted = await vi.waitFor(() =>
+      http.expectOne(`${API}/lyon-game-bar`)
+    );
+
+    expect(deleted.request.method).toBe("DELETE");
+    expect(deleted.request.body).toStrictEqual({ name: "Lyon Game Bar" });
+    deleted.flush(null);
+    await vi.waitFor(() =>
+      http.expectOne(API).flush(ORGANIZATIONS.slice(0, 1))
+    );
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      expect(text(page.querySelector("[role=status]"))).toBe(
+        "Lyon Game Bar is deleted."
+      );
+    });
   });
 
   it("is Not found for anyone but a platform admin", async () => {

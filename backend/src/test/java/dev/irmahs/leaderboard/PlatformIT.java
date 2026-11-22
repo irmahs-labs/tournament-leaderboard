@@ -9,9 +9,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import dev.irmahs.leaderboard.accounts.AccountService;
 import dev.irmahs.leaderboard.accounts.GoogleProfile;
 import dev.irmahs.leaderboard.organizations.Organization;
+import dev.irmahs.leaderboard.players.Player;
+import dev.irmahs.leaderboard.seasons.Season;
+import dev.irmahs.leaderboard.seasons.Season.GameRange;
 import jakarta.persistence.EntityManager;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,10 +90,10 @@ class PlatformIT {
                 .isStrictlyEqualTo("""
                         [{"slug": "alsace-arena", "name": "Alsace Arena", "ownerEmail": null,
                           "createdAt": "2026-11-01T10:00:00Z", "lastActivityAt": "2026-11-18T20:00:00Z",
-                          "members": 2, "status": "ACTIVE", "featured": true},
+                          "members": 2, "status": "ACTIVE", "featured": true, "deletable": true},
                          {"slug": "lyon-game-bar", "name": "Lyon Game Bar", "ownerEmail": "lyon@example.com",
                           "createdAt": "2026-11-05T10:00:00Z", "lastActivityAt": null,
-                          "members": 1, "status": "ACTIVE", "featured": false}]""");
+                          "members": 1, "status": "ACTIVE", "featured": false, "deletable": true}]""");
     }
 
     @Test
@@ -136,5 +140,80 @@ class PlatformIT {
                 .hasStatus(404);
         assertThat(call(mvc, HttpMethod.PUT, API + "/alsace-arena/status", "{}", PLATFORM))
                 .hasStatus(400);
+    }
+
+    @Test
+    void anOrganisationNobodyUsesYetIsDeletedOnceItsNameIsTyped() {
+        UUID alsace = jdbc.sql("SELECT id FROM organizations WHERE slug = 'alsace-arena'")
+                .query(UUID.class)
+                .single();
+        Season season = new Season(alsace, 1, "Season 1", 6, new GameRange(1, 3), 50);
+        em.persist(season);
+        em.persist(new Player(alsace, "Kestrel#EUW", null, null));
+        em.flush();
+        jdbc.sql("UPDATE organization_members SET player_id = (SELECT id FROM players WHERE riot_id = 'Kestrel#EUW')"
+                        + " WHERE organization_id = :org AND role = 'PLAYER'")
+                .param("org", alsace)
+                .update();
+        jdbc.sql("INSERT INTO matches (organization_id, season_id, match_number) VALUES (:org, :season, 1)")
+                .param("org", alsace)
+                .param("season", season.getId())
+                .update();
+        em.clear();
+        String alsaceApi = API + "/alsace-arena";
+
+        assertThat(call(mvc, HttpMethod.DELETE, alsaceApi, "{\"name\": \"Alsace\"}", PLATFORM))
+                .hasStatus(400);
+        assertThat(call(mvc, HttpMethod.DELETE, alsaceApi, "{\"name\": \"Alsace Arena\"}", ADMIN))
+                .hasStatus(403);
+        assertThat(call(mvc, HttpMethod.DELETE, API + "/nowhere", "{\"name\": \"Nowhere\"}", PLATFORM))
+                .hasStatus(404);
+        assertThat(call(mvc, HttpMethod.DELETE, alsaceApi, "{\"name\": \" Alsace Arena \"}", PLATFORM))
+                .hasStatus(204);
+
+        assertThat(call(mvc, HttpMethod.GET, "/api/orgs/alsace-arena", null, null))
+                .hasStatus(404);
+        assertThat(jdbc.sql("SELECT count(*) FROM players WHERE organization_id = :org")
+                        .param("org", alsace)
+                        .query(Long.class)
+                        .single())
+                .isZero();
+        assertThat(call(mvc, HttpMethod.GET, API, null, PLATFORM))
+                .bodyJson()
+                .isLenientlyEqualTo("[{\"slug\": \"lyon-game-bar\"}]");
+    }
+
+    @Test
+    void anOrganisationWithAGameOrASecondAdminIsKept() {
+        UUID lyon = jdbc.sql("SELECT id FROM organizations WHERE slug = 'lyon-game-bar'")
+                .query(UUID.class)
+                .single();
+        jdbc.sql("""
+                        INSERT INTO organization_members (user_id, organization_id, role)
+                        SELECT id, :org, 'ADMIN' FROM app_users WHERE google_sub = 'google-nobody'""").param("org", lyon).update();
+
+        assertThat(call(mvc, HttpMethod.GET, API, null, PLATFORM)).bodyJson().isLenientlyEqualTo("""
+                        [{"slug": "alsace-arena", "deletable": true}, {"slug": "lyon-game-bar", "deletable": false}]""");
+        assertThat(call(mvc, HttpMethod.DELETE, API + "/lyon-game-bar", "{\"name\": \"Lyon Game Bar\"}", PLATFORM))
+                .hasStatus(409);
+
+        UUID alsace = jdbc.sql("SELECT id FROM organizations WHERE slug = 'alsace-arena'")
+                .query(UUID.class)
+                .single();
+        Season season = new Season(alsace, 1, "Season 1", 6, new GameRange(1, 3), 50);
+        em.persist(season);
+        em.flush();
+        int match = jdbc.sql("INSERT INTO matches (organization_id, season_id, match_number) VALUES (:org, :season, 1)"
+                        + " RETURNING id")
+                .param("org", alsace)
+                .param("season", season.getId())
+                .query(Integer.class)
+                .single();
+        jdbc.sql("INSERT INTO games (match_id, game_number) VALUES (:match, 1)")
+                .param("match", match)
+                .update();
+
+        assertThat(call(mvc, HttpMethod.DELETE, API + "/alsace-arena", "{\"name\": \"Alsace Arena\"}", PLATFORM))
+                .hasStatus(409);
     }
 }

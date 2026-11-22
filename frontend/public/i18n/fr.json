@@ -686,7 +686,11 @@
     "failed": "Ça n'a pas marché. Réessayez.",
     "loadFailed": "Les organisations n'ont pas pu être chargées. Réessayez dans un instant.",
     "loading": "Chargement des organisations…",
-    "help": "Suspendre masque les pages d'une organisation et son espace admin, et la retire de la page d'accueil. Rien n'est supprimé ; la réactiver rétablit tout."
+    "help": "Suspendre masque les pages d'une organisation et son espace admin, et la retire de la page d'accueil. Rien n'est supprimé ; la réactiver rétablit tout. Une organisation sans partie et avec un·e admin au plus peut aussi être supprimée, par exemple créée par erreur.",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer {{name}} définitivement ? Elle n'a aucune partie et un·e admin au plus ; ses joueurs, saisons et membres partent avec elle, sans retour possible. Tapez son nom pour confirmer.",
+    "deleteMismatch": "Ce n'est pas « {{name}} » : rien n'a été supprimé.",
+    "deleted": "{{name}} est supprimée."
   },
   "account": {
     "eyebrow": "Connecté avec Google",

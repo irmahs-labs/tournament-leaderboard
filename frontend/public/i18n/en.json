@@ -686,7 +686,11 @@
     "failed": "That didn't work. Try again.",
     "loadFailed": "The organisations couldn't be loaded. Try again in a moment.",
     "loading": "Loading the organisations…",
-    "help": "Suspending hides an organisation's pages and its admin area, and takes it off the home page. Nothing is deleted; reactivating brings everything back."
+    "help": "Suspending hides an organisation's pages and its admin area, and takes it off the home page. Nothing is deleted; reactivating brings everything back. An organisation with no games and one admin at most can also be deleted, for example one created by mistake.",
+    "delete": "Delete",
+    "deleteConfirm": "Delete {{name}} for good? It has no games and one admin at most; its players, seasons and members go with it, and this can't be undone. Type its name to confirm.",
+    "deleteMismatch": "That isn't “{{name}}”: nothing was deleted.",
+    "deleted": "{{name}} is deleted."
   },
   "account": {
     "eyebrow": "Signed in with Google",

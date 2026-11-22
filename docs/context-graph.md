@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-22, with notices in the app and reminders to answer a match.
+Last updated: 2026-11-22, with platform admins deleting an organisation nobody uses yet.
 
 ## System
 
@@ -113,7 +113,7 @@ flowchart LR
 | `scoring` | `ScoringService` (the only place points are computed: per game, a match or season adding up its games; a stat not recorded doesn't count), `BonusCalculator` (HIGHEST/LOWEST, MVP/SVP from the place, AT_LEAST; ties all win; nothing from a stat not recorded) |
 | `stats` | `GameStat`, `StatLine`, `PlayerTally`, `SeasonResultsService` (public results; each standing carries the player's current rank), `ScoresService` (Enter scores), `RulesAdminService` (the Scoring screen: changes a season's rules and works out every saved game's automatic bonuses again; adds the admins' own bonuses, coded from their name, and removes bonuses with their awards; a finished season's rules can't change) |
 | `founding` | `FoundingService` (anyone signed in creates an organisation and owns it: address checked and not reserved, 3 owned at most except for platform admins, 409 when taken), `FoundingController` |
-| `platform` | `PlatformService` (platform admins only: every organisation with its owner, members, activity and whether the home page features it; suspending and reactivating), `PlatformController` |
+| `platform` | `PlatformService` (platform admins only: every organisation with its owner, members, activity and whether the home page features it; suspending and reactivating; deleting one with no game and one admin at most, once its name is typed), `EmptyOrganizations` (which can go, and deleting one with its players, seasons, matches and members through JDBC), `PlatformController` |
 | `claims` | `PlayerClaim` (player_claims), `ClaimService` (join as a player; claim an unclaimed player with a note; cancel; creating one's own profile with no admin (the account's Riot ID and Discord when it has them; refused while a claim waits or the Riot ID is taken); the admins' queue; accepting links the member and declines the other claims for that player; nobody accepts their own while another admin exists, the only admin's is marked self-approved; the linked player edits their own details), `ClaimController` |
 | `signups` | `SeasonRegistration` (season_registrations: REGISTERED or WITHDRAWN), `SignUpService` (a linked player signs up while `Season.takesSignUps`, and withdraws; admins open or close sign-ups, sign anyone up at any time before the season is over, players without an account too, and withdraw people), `SignUpController` |
 | `rosters` | `Attendance` (match_attendance: CONFIRMED, WAITING or DECLINED, from the app, an admin or the waiting list), `RosterService` (the season's schedule; planning, calling off; a match's roster with who hasn't answered; an admin moving anyone, even without an account or once locked, never past the places; places, set with the plan, never below those confirmed; locking; a signed-up player's upcoming matches and their answer: a place while there is one and nobody waiting, the waiting list after that, first come first served; when a place frees up (a confirmed player leaves, a place is added, automatic moves or the match back on, the roster unlocked) the first player waiting takes it unless locked or decided by hand, publishing `MovedUp`; admins reorder the waiting list; a match planned, moved or called off publishes `MatchChanged`; reminding those who haven't answered, by an admin or by `ReplyByReminders` two days before the reply-by date, once per match, publishes `Reminded`), `RosterController` |
@@ -152,7 +152,7 @@ flowchart LR
         su["/api/orgs/{slug}/me/seasons: GET; /seasons/{n}/registration: POST, DELETE"]
         mm["/api/orgs/{slug}/me/matches: GET; /matches/{id}/attendance: PUT"]
         nt["/api/me/notifications: GET; /read: POST"]
-        pl["/api/platform/organizations: GET; /{slug}/status: PUT (platform admins)"]
+        pl["/api/platform/organizations: GET; /{slug}/status: PUT; /{slug}: DELETE (platform admins)"]
     end
     jv["/api/invites/{code}: GET, public, 10 a minute"]
     subgraph admin["Admin: /api/orgs/{slug}/admin"]
@@ -247,8 +247,8 @@ flowchart TD
     routes -->|"/, /account, /platform, /sign-in, /join, /join/:code, /legal, /privacy, /cookies, /terms, /not-found, **"| platform[PlatformShell<br/>platform name and red]
     platform --> home[HomePage /<br/>what it does, create an organisation, the featured one]
     home -->|"GET /api/featured, POST /api/orgs"| foundApi["/api/featured, /api/orgs"]
-    platform --> padmin[PlatformPage /platform, platformGuard<br/>counts, search, every organisation, suspend or reactivate]
-    padmin -->|"GET, PUT …/status"| platformApi["/api/platform/organizations"]
+    platform --> padmin[PlatformPage /platform, platformGuard<br/>counts, search, every organisation, suspend or reactivate, delete one nobody uses yet]
+    padmin -->|"GET, PUT …/status, DELETE"| platformApi["/api/platform/organizations"]
     platform --> acct[AccountPage /account, accountGuard<br/>profile, Riot ID and Discord for every organisation, sign out, organisations and leaving, deleting the account]
     platform --> ntc[NoticesPage /notices, accountGuard<br/>notices from every organisation, newest first, each linking to its page; opening it marks them read]
     acct -->|"PUT /api/me/identity, DELETE /api/me, DELETE …/membership"| accountApi["/api/me, /api/orgs/{slug}/membership"]
@@ -351,7 +351,7 @@ flowchart LR
     p2 --> p3[3 Angular shell and public pages ✓] --> p4[4 Angular admin ✓] --> p5[5 Deploy pipelines ✓] --> p6[6 Cutover ✓]
     p6 --> p7[7 Open the platform<br/>release 2 ✓]
     p7 --> p8[8 Scoring rules editor ✓] --> p9[9 Players and claims ✓] --> p9b[9b Deploys players<br/>don't notice ✓]
-    p9b --> p10[10 Seasons, matches<br/>and waiting lists ▶] --> p10b[10b Help]
+    p9b --> p10[10 Seasons, matches<br/>and waiting lists ✓] --> p10b[10b Help ▶]
     p10b --> p11[11 Exports and poster] --> p12[12 Moderation] --> p13[13 Merge tool and scan]
 ```
 
@@ -361,7 +361,7 @@ production, and the Protect migration ruleset lets a pull request merge only onc
 come with it. The full plan, with each phase's exit criterion, is the migration plan page
 kept with the project designs.
 
-Phases 7, 8, 9 and 9b are built. Phase 10 has season sign-ups, creating one's own profile, the
-schedule and match rosters with players' answers, automatic moves up the waiting list, and
-notices with reminders; not built yet: deleting an empty organisation (10);
+Phases 7, 8, 9, 9b and 10 are built. Phase 10 has season sign-ups, creating one's own profile, the
+schedule and match rosters with players' answers, automatic moves up the waiting list, notices
+with reminders, and deleting an empty organisation; not built yet: the Help page (10b);
 exports (11); moderation (12); merging duplicate players (13).
