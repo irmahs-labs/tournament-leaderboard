@@ -71,68 +71,61 @@
             <th scope="row">
               {{ t("adminSchedule.matchNumber", { number: match.number }) }}
             </th>
-            <td>
-              <div class="pair">
-                <input
-                  #date
-                  type="date"
-                  [attr.aria-label]="t('adminSchedule.date')"
-                  [value]="match.date ?? ''"
-                />
-                <input
-                  #startTime
-                  type="time"
-                  [attr.aria-label]="t('adminSchedule.startTime')"
-                  [value]="match.startTime?.slice(0, 5) ?? ''"
-                />
-              </div>
-            </td>
-            <td>
-              <input
-                #location
-                [attr.maxlength]="maxLocation"
-                [attr.aria-label]="t('adminSchedule.where')"
-                [placeholder]="t('adminSchedule.whereHint')"
-                [value]="match.location ?? ''"
-              />
-            </td>
-            <td>
-              <input
-                #replyBy
-                type="date"
-                [attr.aria-label]="t('adminSchedule.replyBy')"
-                [value]="match.replyBy ?? ''"
-              />
-            </td>
-            <td>
-              <input
-                #places
-                class="count"
-                type="number"
-                min="2"
-                max="40"
-                [attr.aria-label]="t('adminSchedule.places')"
-                [value]="match.places"
-              />
-            </td>
-            <td></td>
-            <td>
-              <div class="actions">
-                <button
-                  type="button"
-                  class="button-ghost small-button"
-                  (click)="editing.set(null)"
-                >
-                  {{ t("adminPlayers.cancel") }}
-                </button>
-                <button
-                  type="button"
-                  class="button small-button"
-                  [disabled]="action.busy()"
-                  (click)="save(match, { date: date.value, startTime: startTime.value, location: location.value, replyBy: replyBy.value, places: places.value })"
-                >
-                  {{ t("adminPlayers.save") }}
-                </button>
+            <td colspan="6" class="form-cell">
+              <div class="plan-form">
+                <label class="field">
+                  <span class="label">{{ t("adminSchedule.date") }}</span>
+                  <input #date type="date" [value]="match.date ?? ''" />
+                </label>
+                <label class="field">
+                  <span class="label">{{ t("adminSchedule.startTime") }}</span>
+                  <input
+                    #startTime
+                    type="time"
+                    [value]="match.startTime?.slice(0, 5) ?? ''"
+                  />
+                </label>
+                <label class="field where-field">
+                  <span class="label">{{ t("adminSchedule.where") }}</span>
+                  <input
+                    #location
+                    [attr.maxlength]="maxLocation"
+                    [placeholder]="t('adminSchedule.whereHint')"
+                    [value]="match.location ?? ''"
+                  />
+                </label>
+                <label class="field">
+                  <span class="label">{{ t("adminSchedule.replyBy") }}</span>
+                  <input #replyBy type="date" [value]="match.replyBy ?? ''" />
+                </label>
+                <label class="field">
+                  <span class="label">{{ t("adminSchedule.places") }}</span>
+                  <input
+                    #places
+                    class="count"
+                    type="number"
+                    min="2"
+                    max="40"
+                    [value]="match.places"
+                  />
+                </label>
+                <div class="actions form-actions">
+                  <button
+                    type="button"
+                    class="button-ghost small-button"
+                    (click)="editing.set(null)"
+                  >
+                    {{ t("adminPlayers.cancel") }}
+                  </button>
+                  <button
+                    type="button"
+                    class="button small-button"
+                    [disabled]="action.busy()"
+                    (click)="save(match, { date: date.value, startTime: startTime.value, location: location.value, replyBy: replyBy.value, places: places.value })"
+                  >
+                    {{ t("adminPlayers.save") }}
+                  </button>
+                </div>
               </div>
             </td>
           </tr>
