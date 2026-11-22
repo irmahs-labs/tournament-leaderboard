@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, output } from "@angular/core";
 import type { OnInit } from "@angular/core";
 import { RouterLink } from "@angular/router";
 import { TranslocoDirective, TranslocoService } from "@jsverse/transloco";
@@ -58,16 +58,19 @@ export const linkOf = (notice: Notice): string[] | null => {
 };
 
 /**
- * The signed-in person's notices from every organisation they belong to, newest first. Opening
- * the page marks them read.
+ * The signed-in person's notices from every organisation they belong to, newest first, in a panel
+ * the header's bell opens over the page. Opening it marks them read; following a link closes it.
  */
 @Component({
   imports: [RouterLink, TranslocoDirective],
-  selector: "app-notices",
+  selector: "app-notices-panel",
   styleUrl: "./notices.css",
   templateUrl: "./notices.html",
 })
-export class NoticesPage implements OnInit {
+export class NoticesPanel implements OnInit {
+  /** Emitted when a link is followed, so the header closes the panel. */
+  readonly closed = output();
+
   protected readonly notices = inject(NoticesService);
   protected readonly language = inject(LanguageService);
   protected readonly linkOf = linkOf;

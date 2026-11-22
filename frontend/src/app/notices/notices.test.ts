@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Notice, Notices } from "../shared/notices";
 import { SessionService } from "../shared/session";
-import { ME, rendered, testProviders, text, texts } from "../testing";
+import { ME, testProviders, text, texts } from "../testing";
 import { keyOf, linkOf } from "./notices";
 
 const notice = (
@@ -100,39 +100,66 @@ describe("the Notices page", () => {
     localStorage.clear();
   });
 
-  it("counts the unread notices in the header, lists them and marks them read", async () => {
-    harness = await RouterTestingHarness.create("/notices");
+  /** Opens a page under the header, answering the notices it asks for. */
+  const openWith = async (notices: Notices): Promise<HTMLElement> => {
+    harness = await RouterTestingHarness.create("/legal");
+    const root: HTMLElement = harness.fixture.nativeElement;
     await vi.waitFor(() => {
       harness.detectChanges();
 
       for (const request of http.match("/api/me/notifications")) {
-        request.flush(NOTICES);
+        request.flush(notices);
       }
 
-      expect(text(harness.fixture.nativeElement.querySelector(".count"))).toBe(
-        "3"
+      expect(root.querySelector("summary.notices")).not.toBeNull();
+      expect(text(root.querySelector(".count"))).toBe(
+        notices.unread > 0 ? String(notices.unread) : undefined
       );
     });
 
-    const read = http.expectOne("/api/me/notifications/read");
+    return root;
+  };
 
-    expect(read.request.method).toBe("POST");
-    read.flush(null);
+  const openBell = (root: HTMLElement): void => {
+    const menu = root.querySelector<HTMLDetailsElement>("details.notices-menu");
+
+    if (menu) {
+      menu.open = true;
+      menu.dispatchEvent(new Event("toggle"));
+    }
+
+    harness.detectChanges();
+  };
+
+  it("counts the unread notices on the bell, lists them over the page and marks them read", async () => {
+    const root = await openWith(NOTICES);
+
+    expect(root.querySelector("app-notices-panel")).toBeNull();
+    expect(http.match("/api/me/notifications/read")).toHaveLength(0);
+
+    openBell(root);
+    await vi.waitFor(() => {
+      for (const request of http.match("/api/me/notifications")) {
+        request.flush(NOTICES);
+      }
+
+      http.expectOne("/api/me/notifications/read").flush(null);
+    });
     await vi.waitFor(() => {
       harness.detectChanges();
-      expect(harness.fixture.nativeElement.querySelector(".count")).toBeNull();
+      expect(root.querySelector(".count")).toBeNull();
     });
 
-    const page = rendered(harness);
+    const panel = root.querySelector<HTMLElement>("app-notices-panel");
 
-    expect(texts(page, ".notice p")).toStrictEqual([
+    expect(texts(panel ?? root, ".notice p")).toStrictEqual([
       "Match 3 of Season 9 is planned: Dec 5 · 8:30 PM · Discord #matchs. Say whether you can make it.",
       "Kestrel saved game 2 of match 3 in Season 9.",
       "Your claim to Wren#EUW was declined: “Not you”.",
       "Match 3 of Season 9 is called off.",
     ]);
-    expect(page.querySelectorAll(".notice.unread")).toHaveLength(3);
-    expect(texts(page, ".notice a")).toStrictEqual([
+    expect(panel?.querySelectorAll(".notice.unread")).toHaveLength(3);
+    expect(texts(panel ?? root, ".notice a")).toStrictEqual([
       "My matches",
       "Admin",
       "Your claim",
@@ -140,16 +167,43 @@ describe("the Notices page", () => {
     ]);
   });
 
-  it("says when there's nothing new", async () => {
-    harness = await RouterTestingHarness.create("/notices");
+  it("closes once a link is followed", async () => {
+    const root = await openWith(NOTICES);
+    openBell(root);
     await vi.waitFor(() => {
-      harness.detectChanges();
+      for (const request of http.match("/api/me/notifications")) {
+        request.flush(NOTICES);
+      }
 
+      http.expectOne("/api/me/notifications/read").flush(null);
+      harness.detectChanges();
+      expect(root.querySelector("app-notices-panel .notice a")).not.toBeNull();
+    });
+
+    root
+      .querySelector<HTMLAnchorElement>("app-notices-panel .notice a")
+      ?.click();
+    harness.detectChanges();
+
+    expect(
+      root.querySelector<HTMLDetailsElement>("details.notices-menu")?.open
+    ).toBeFalsy();
+
+    for (const request of http.match(() => true)) {
+      request.flush(null);
+    }
+  });
+
+  it("says when there's nothing new", async () => {
+    const root = await openWith({ notices: [], unread: 0 });
+    openBell(root);
+    await vi.waitFor(() => {
       for (const request of http.match("/api/me/notifications")) {
         request.flush({ notices: [], unread: 0 });
       }
 
-      expect(text(rendered(harness).querySelector(".empty"))).toBe(
+      harness.detectChanges();
+      expect(text(root.querySelector("app-notices-panel .empty"))).toBe(
         "Nothing new for now."
       );
     });

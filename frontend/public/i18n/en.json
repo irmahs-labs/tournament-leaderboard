@@ -981,9 +981,7 @@
     "anAdmin": "an admin"
   },
   "notices": {
-    "eyebrow": "Your account",
     "title": "Notices",
-    "lede": "News from your organisations: matches planned, moved or called off, places freed up, claims, and what other admins changed.",
     "empty": "Nothing new for now.",
     "loading": "Loading your notices…",
     "someone": "An admin",

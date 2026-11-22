@@ -981,9 +981,7 @@
     "anAdmin": "un admin"
   },
   "notices": {
-    "eyebrow": "Votre compte",
     "title": "Notifications",
-    "lede": "Les nouvelles de vos organisations : matchs prévus, déplacés ou annulés, places libérées, demandes, et ce que les autres admins ont changé.",
     "empty": "Rien de nouveau pour l'instant.",
     "loading": "Chargement de vos notifications…",
     "someone": "Un·e admin",

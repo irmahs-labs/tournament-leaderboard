@@ -19,7 +19,6 @@ public class SpaController {
         "/not-found",
         "/platform",
         "/account",
-        "/notices",
         "/join",
         "/join/*",
         "/sign-in",

@@ -1,8 +1,9 @@
 import { DOCUMENT } from "@angular/common";
-import { Component, computed, inject, input } from "@angular/core";
+import { Component, computed, inject, input, signal } from "@angular/core";
 import { Router, RouterLink, RouterLinkActive } from "@angular/router";
 import { TranslocoDirective } from "@jsverse/transloco";
 
+import { NoticesPanel } from "../notices/notices";
 import { CurrentSeason } from "../results/current-season";
 import type { Language } from "../shared/language";
 import { LANGUAGES, LanguageService } from "../shared/language";
@@ -19,7 +20,7 @@ import { ThemeService } from "../shared/theme";
  */
 @Component({
   host: { "(document:click)": "closeMenus($event)" },
-  imports: [RouterLink, RouterLinkActive, TranslocoDirective],
+  imports: [NoticesPanel, RouterLink, RouterLinkActive, TranslocoDirective],
   selector: "app-site-header",
   styleUrl: "./site-header.css",
   templateUrl: "./site-header.html",
@@ -37,6 +38,8 @@ export class SiteHeader {
   protected readonly online = inject(OnlineService);
   protected readonly session = inject(SessionService);
   protected readonly notices = inject(NoticesService);
+  /** Whether the bell's panel is open: it's only made, and the notices marked read, then. */
+  protected readonly noticesOpen = signal(false);
   protected readonly current = inject(CurrentSeason);
 
   readonly #router = inject(Router);
