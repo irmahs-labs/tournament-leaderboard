@@ -38,7 +38,7 @@ const closeAfterChoice = (event: Event, menu: HTMLDetailsElement): void => {
     TranslocoDirective,
   ],
   selector: "app-site-header",
-  styleUrl: "./site-header.css",
+  styleUrls: ["./site-header.css", "./site-header-menus.css"],
   templateUrl: "./site-header.html",
 })
 export class SiteHeader {
