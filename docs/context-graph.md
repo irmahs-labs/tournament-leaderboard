@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-23, with the header's breadcrumb, account menu and phone menu.
+Last updated: 2026-11-23, with season sign-ups' table and column dropped.
 
 ## System
 
@@ -189,7 +189,7 @@ organization_invites and organization_logos), `V2026_11_18_1__drop_avatar_url.sq
 picture isn't kept: data minimisation), `V2026_11_19_1__weighted_scoring.sql`,
 `V2026_11_19_2__social_links.sql` (six `*_url` columns on organizations, https only),
 `V2026_11_20_1__player_claims.sql` (player_claims, one waiting per member, with the same policy),
-`V2026_11_20_2__expected_email.sql` (players.expected_email, once per organisation), `V2026_11_20_3__account_identity.sql` (app_users.riot_id and discord_username, filled from each linked account's first profile), `V2026_11_20_4__rank_colours.sql` (a colour per Valorant tier, for ranks that had none), `V2026_11_20_5__jpeg_logos.sql` (organization_logos also takes image/jpeg), `V2026_11_20_6__sessions.sql` (spring_session and spring_session_attributes, Spring Session's own schema), `V2026_11_20_7__season_sign_ups.sql` (seasons.signup_open; season_registrations, with the same policy; both unused since sign-ups were replaced by answering each match, to be dropped in a later release), `V2026_11_22_1__match_schedule.sql` (matches' start time, place, reply-by date, places, lock and status; match_attendance, with the same policy), `V2026_11_22_2__waiting_list_moves.sql` (matches.auto_promote), `V2026_11_22_3__notices.sql` (notifications, with the same policy; matches.reminded_at).
+`V2026_11_20_2__expected_email.sql` (players.expected_email, once per organisation), `V2026_11_20_3__account_identity.sql` (app_users.riot_id and discord_username, filled from each linked account's first profile), `V2026_11_20_4__rank_colours.sql` (a colour per Valorant tier, for ranks that had none), `V2026_11_20_5__jpeg_logos.sql` (organization_logos also takes image/jpeg), `V2026_11_20_6__sessions.sql` (spring_session and spring_session_attributes, Spring Session's own schema), `V2026_11_20_7__season_sign_ups.sql` (seasons.signup_open; season_registrations, with the same policy; dropped by `V2026_11_23_1__drop_season_sign_ups.sql` once sign-ups were replaced by answering each match), `V2026_11_22_1__match_schedule.sql` (matches' start time, place, reply-by date, places, lock and status; match_attendance, with the same policy), `V2026_11_22_2__waiting_list_moves.sql` (matches.auto_promote), `V2026_11_22_3__notices.sql` (notifications, with the same policy; matches.reminded_at), `V2026_11_23_1__drop_season_sign_ups.sql` (drops season_registrations and seasons.signup_open).
 
 ```mermaid
 erDiagram
