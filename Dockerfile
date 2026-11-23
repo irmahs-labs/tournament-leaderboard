@@ -7,8 +7,9 @@ WORKDIR /src
 COPY . .
 # The Maven and npm caches survive between builds (BuildKit cache mounts), so a deploy only
 # downloads what changed. Tests, lint and typechecks are skipped: CI has already run them.
+# The version is the last release's, from version.txt, which release-please keeps.
 RUN --mount=type=cache,target=/root/.m2 --mount=type=cache,target=/root/.npm \
-    ./mvnw -B -ntp package -DskipTests -Dfrontend.checks.skip
+    ./mvnw -B -ntp package -DskipTests -Dfrontend.checks.skip -Drevision="$(cat version.txt)"
 
 FROM eclipse-temurin:21-jre
 RUN useradd --system --uid 10001 --no-create-home app
