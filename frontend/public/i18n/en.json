@@ -34,7 +34,10 @@
     "notices": {
       "one": "Notices: {{count}} unread",
       "other": "Notices: {{count}} unread"
-    }
+    },
+    "yourAccount": "Your account",
+    "menu": "Menu",
+    "switchOrganisation": "{{name}}: switch organisation"
   },
   "leaderboard": {
     "title": "Season leaderboard",

@@ -179,7 +179,7 @@ describe("the Branding screen", () => {
       );
     });
 
-    expect(text(shell().querySelector("header .name"))).toBe(
+    expect(text(shell().querySelector("header .org-name"))).toBe(
       "Alsace Arena Strasbourg"
     );
     expect(texts(shell(), "footer nav:first-of-type a")).toContain("Twitch");

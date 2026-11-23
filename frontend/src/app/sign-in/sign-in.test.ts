@@ -144,7 +144,7 @@ describe("the sign-in page", () => {
     const { page } = await open("/sign-in", ME);
 
     expect(
-      page.querySelector("header a.account")?.getAttribute("aria-label")
+      page.querySelector("header .account")?.getAttribute("aria-label")
     ).toBe("Your account: Camille Martin");
   });
 });

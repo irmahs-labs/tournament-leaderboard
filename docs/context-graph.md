@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-22: `main` is the app's branch and deploys production; the legacy site is asleep.
+Last updated: 2026-11-23, with the header's breadcrumb, account menu and phone menu.
 
 ## System
 
@@ -243,7 +243,7 @@ flowchart TD
     platform --> help[HelpPage /help<br/>questions for players, admins and one's account, each opening on its own]
     platform --> nf[NotFoundPage<br/>or, for its members, 'this organisation is suspended']
     platform --> join[JoinPage /join/:code<br/>what the code is for, sign in with the invited account, accept; or type a code]
-    shell --> header[SiteHeader<br/>skip link, logo, nav keeping ?season= (My matches for members; Scores, Players, Seasons, Schedule, Scoring, Members and Branding on admin pages; a Site | Admin switch for admins), online count, season, one EN / FR button, a light/dark pill switch, a notices bell with the unread count opening NoticesPanel over the page (every organisation's notices, newest first, each linking to its page; opening it marks them read), Sign in or My account]
+    shell --> header[SiteHeader<br/>skip link; one top row on every page: the platform's mark and name, the organisation as a breadcrumb switching to the others one joined (or My organisations), online count, season, one EN / FR button, a light/dark pill switch, a notices bell with the unread count opening NoticesPanel over the page (every organisation's notices, newest first, each linking to its page; opening it marks them read), Sign in or the account menu (Your account, Platform admin, Sign out); inside an organisation a second row of tabs keeping ?season= (My matches for members; Scores, Schedule, Seasons, Scoring, Players, Members, Claims and Branding on admin pages) and a Site | Admin switch for admins; on a phone the tabs, the season, language and theme go in a menu]
     shell --> footer[SiteFooter<br/>org name and its social links; credit, Help and the legal pages, GitHub and Contact on three centred lines]
     platform --> header
     platform --> footer

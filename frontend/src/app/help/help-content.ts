@@ -48,7 +48,7 @@ const EN: HelpDocument = {
         },
         {
           answer: [
-            'Open My matches in the header. It lists the upcoming matches of every season under way. Press "I\'m in" or "Can\'t make it" for each one.',
+            'Open My matches in the header (on a phone, in its ☰ menu). It lists the upcoming matches of every season under way. Press "I\'m in" or "Can\'t make it" for each one.',
             "You can change your answer until the roster is locked, usually on match day. After that, ask an admin.",
           ],
           id: "answer",
@@ -183,7 +183,7 @@ const EN: HelpDocument = {
         },
         {
           answer: [
-            "Your account (your initial at the top right). Your Riot ID (Name#TAG) and Discord are the same in every organisation you belong to.",
+            "Your account: press your initial at the top right, then Your account. Your Riot ID (Name#TAG) and Discord are the same in every organisation you belong to.",
           ],
           id: "identity",
           question: "How do I change my Riot ID or Discord?",
@@ -197,7 +197,7 @@ const EN: HelpDocument = {
         },
         {
           answer: [
-            "The EN / FR button and the light / dark switch in the header. The site remembers your choice in this browser.",
+            "The EN / FR button and the light / dark switch in the header (on a phone, in its ☰ menu). The site remembers your choice in this browser.",
           ],
           id: "language",
           question: "How do I change the language or the theme?",
@@ -234,7 +234,7 @@ const FR: HelpDocument = {
         },
         {
           answer: [
-            "Ouvrez Mes matchs dans l'en-tête. Il liste les prochains matchs de chaque saison en cours. Appuyez sur « Je joue » ou « Je ne peux pas » pour chacun.",
+            "Ouvrez Mes matchs dans l'en-tête (sur un téléphone, dans son menu ☰). Il liste les prochains matchs de chaque saison en cours. Appuyez sur « Je joue » ou « Je ne peux pas » pour chacun.",
             "Vous pouvez changer votre réponse jusqu'au verrouillage de la composition, en général le jour du match. Ensuite, demandez à un admin.",
           ],
           id: "answer",
@@ -369,7 +369,7 @@ const FR: HelpDocument = {
         },
         {
           answer: [
-            "Dans votre compte (votre initiale en haut à droite). Votre Riot ID (Nom#TAG) et votre Discord sont les mêmes dans toutes vos organisations.",
+            "Dans votre compte : appuyez sur votre initiale en haut à droite, puis Votre compte. Votre Riot ID (Nom#TAG) et votre Discord sont les mêmes dans toutes vos organisations.",
           ],
           id: "identity",
           question: "Comment changer mon Riot ID ou mon Discord ?",
@@ -383,7 +383,7 @@ const FR: HelpDocument = {
         },
         {
           answer: [
-            "Le bouton EN / FR et l'interrupteur clair / sombre de l'en-tête. Le site retient votre choix dans ce navigateur.",
+            "Le bouton EN / FR et l'interrupteur clair / sombre de l'en-tête (sur un téléphone, dans son menu ☰). Le site retient votre choix dans ce navigateur.",
           ],
           id: "language",
           question: "Comment changer la langue ou le thème ?",

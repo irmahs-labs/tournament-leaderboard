@@ -14,9 +14,19 @@ import { initials } from "../shared/organization";
 import { canAdmin, SessionService } from "../shared/session";
 import { ThemeService } from "../shared/theme";
 
+/** Closes a menu once one of its links is chosen. */
+const closeAfterChoice = (event: Event, menu: HTMLDetailsElement): void => {
+  if (event.target instanceof Element && event.target.closest("a")) {
+    menu.open = false;
+  }
+};
+
 /**
- * The top bar: the organisation's logo and pages when there is one, the platform's name
- * otherwise; then how many pages are open, the season picker, the language and theme switches, and sign-in.
+ * The top bar, the same on every page: the platform's mark and name, then the organisation on
+ * screen as a breadcrumb that switches to another one, how many pages are open, the season
+ * picker, the language and theme switches, the notices and the account menu. Inside an
+ * organisation its pages (or its admin pages) follow on a row of their own; on a phone they go
+ * in a menu instead.
  */
 @Component({
   host: { "(document:click)": "closeMenus($event)" },
@@ -28,11 +38,13 @@ import { ThemeService } from "../shared/theme";
     TranslocoDirective,
   ],
   selector: "app-site-header",
-  styleUrl: "./site-header.css",
+  styleUrls: ["./site-header.css", "./site-header-menus.css"],
   templateUrl: "./site-header.html",
 })
 export class SiteHeader {
   readonly organization = input<Organization | null>(null);
+
+  protected readonly closeAfterChoice = closeAfterChoice;
 
   protected readonly theme = inject(ThemeService);
   protected readonly language = inject(LanguageService);
@@ -46,6 +58,8 @@ export class SiteHeader {
   protected readonly notices = inject(NoticesService);
   /** Whether the bell's panel is open: it's only made, and the notices marked read, then. */
   protected readonly noticesOpen = signal(false);
+  /** Whether the phone's menu is open: its links are only made then, not twice over. */
+  protected readonly menuOpen = signal(false);
   protected readonly current = inject(CurrentSeason);
 
   readonly #router = inject(Router);
@@ -56,6 +70,18 @@ export class SiteHeader {
     event.preventDefault();
     this.#document.querySelector<HTMLElement>("#main")?.focus();
   }
+
+  /** The organisations the signed-in person joined. */
+  protected readonly joined = computed(
+    () => this.session.me()?.memberships ?? []
+  );
+
+  /** The other organisations they joined, which the organisation's name switches to. */
+  protected readonly others = computed(() => {
+    const slug = this.organization()?.slug;
+
+    return this.joined().filter((membership) => membership.slug !== slug);
+  });
 
   /** Whether the signed-in person runs this organisation, so the header offers its admin pages. */
   protected readonly admin = computed(() => {
@@ -96,6 +122,11 @@ export class SiteHeader {
         menu.open = false;
       }
     }
+  }
+
+  protected async signOut(): Promise<void> {
+    await this.session.signOut();
+    await this.#router.navigateByUrl("/");
   }
 
   /** The page to come back to after signing in. */

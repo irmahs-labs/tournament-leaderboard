@@ -7,35 +7,97 @@
 }
 
 .inner {
+  position: relative;
   max-width: var(--page-width);
   margin: 0 auto;
-  padding: 14px var(--gutter);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px 20px;
+  padding: 0 var(--gutter);
 }
 
-.brand {
+/* The platform's row: the same on every page, so moving into an organisation moves nothing. */
+.top {
+  display: flex;
+  align-items: center;
+  gap: 12px 16px;
+  min-height: 72px;
+  padding-block: 12px;
+  box-sizing: border-box;
+}
+
+.home {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 12px;
+  min-height: 44px;
   color: var(--nav-text);
   text-decoration: none;
+}
+
+/* Inside an organisation the platform steps back: the organisation is what's on screen. */
+.home.quiet .platform-name {
+  font-size: 17px;
+  color: var(--nav-muted);
+}
+
+.home:hover .platform-name {
+  color: var(--nav-text);
+}
+
+.crumb {
+  color: var(--nav-ghost);
+  font-size: 26px;
+  font-weight: 300;
+}
+
+/* The organisation on screen: its logo and name, opening the others one joined. */
+.org,
+.switcher summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   min-width: 0;
+  color: var(--nav-text);
+  text-decoration: none;
+}
+
+.menu.switcher summary {
+  padding: 4px 10px 4px 4px;
+  border: 1px solid transparent;
+  color: var(--nav-text);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.menu.switcher summary::after {
+  flex-shrink: 0;
+  margin-left: 0;
+  vertical-align: 0;
+  transform: translateY(3px);
+}
+
+.menu.switcher summary:hover,
+.menu.switcher[open] summary {
+  border-color: var(--nav-ghost);
+}
+
+.org-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-wrap: normal;
 }
 
 .logo {
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   display: grid;
   place-items: center;
   background: var(--accent);
   color: var(--on-accent);
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 16px;
+  font-size: 15px;
 }
 
 /* An uploaded logo keeps its own colours, whole, inside the square. */
@@ -79,11 +141,6 @@
   gap: 4px;
 }
 
-/* On the platform's own pages the nav stands alone and pushes the controls right. */
-.inner > .nav {
-  flex-grow: 1;
-}
-
 .nav a {
   padding: 10px 14px;
   color: var(--nav-muted);
@@ -95,12 +152,16 @@
   border-bottom: 3px solid transparent;
 }
 
-/* The organisations one joined, when there are several: a menu opening under its tab. */
+/* The organisations one joined: a menu opening under the breadcrumb. */
 .menu {
   position: relative;
+  min-width: 0;
 }
 
 .menu summary {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   padding: 10px 14px;
   color: var(--nav-muted);
   font-weight: 600;
@@ -144,6 +205,7 @@
 
 .menu ul a {
   display: block;
+  text-decoration: none;
   padding: 10px 16px;
   border-bottom: 0;
   text-transform: none;
@@ -156,6 +218,12 @@
   background: var(--nav-ghost);
 }
 
+/* The organisation on screen, marked like the tab one is on. */
+.menu ul a[aria-current] {
+  font-weight: 700;
+  box-shadow: inset 3px 0 var(--accent);
+}
+
 .nav a:hover,
 .nav a.active {
   color: var(--nav-text);
@@ -166,17 +234,27 @@
   border-bottom-color: var(--accent);
 }
 
-/* The organisation's pages, then Site | Admin for those who run it, all as tabs. */
+/* The organisation's pages, then Site | Admin on the right for those who run it. */
 .tabs {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 6px;
-  flex-grow: 1;
+  border-top: 1px solid var(--nav-border);
+}
+
+.tabs .mode {
+  margin-left: auto;
 }
 
 .tools {
   display: flex;
+  margin-left: auto;
+}
+
+/* The season, language and theme: in the row on a wide screen, in the menu on a phone. */
+.wide {
+  display: contents;
 }
 
 /* Site | Admin: which side of the organisation is on screen, set apart by a thin rule. */
@@ -206,37 +284,6 @@
 .mode a[aria-current] {
   font-weight: 700;
   border-bottom-color: var(--nav-ghost);
-}
-
-/*
- * Those who run the organisation get its pages and its admin pages, too many tabs to share a
- * line with the controls: the tabs take a row of their own, under the name and the controls,
- * the same on both sides so switching doesn't move anything.
- */
-.tiered {
-  padding-bottom: 0;
-}
-
-.tiered .tabs {
-  order: 3;
-  flex-basis: 100%;
-}
-
-.tiered .tools {
-  margin-left: auto;
-}
-
-/* Back to Tournament Leaderboard's home, beside the organisation's own name. */
-/* The platform's rank-up mark, then a divider before the organisation's own logo. */
-.home {
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  min-width: 44px;
-  min-height: 44px;
-  padding-right: 14px;
-  border-right: 1px solid var(--nav-ghost);
-  margin-right: -6px;
 }
 
 .home .mark {
@@ -460,60 +507,8 @@
   width: var(--tool-size);
   padding: 0;
   justify-content: center;
-}
-
-@media (max-width: 640px) {
-  /* On a phone the bell may sit anywhere in the wrapped tools: the panel spans the header instead. */
-  .inner {
-    position: relative;
-  }
-
-  .notices-menu {
-    position: static;
-  }
-
-  .notices-panel {
-    top: calc(100% - 4px);
-    left: 16px;
-    right: 16px;
-    width: auto;
-  }
-
-  .inner {
-    padding-block: 12px;
-    gap: 10px 16px;
-  }
-
-  .tiered {
-    padding-bottom: 0;
-  }
-
-  .tools {
-    flex-basis: 100%;
-    gap: 6px;
-  }
-
-  .bar {
-    --tool-size: 40px;
-  }
-
-  .tool {
-    min-width: 40px;
-  }
-
-  .account {
-    padding-inline: 10px;
-  }
-
-  .season {
-    max-width: 140px;
-  }
-
-  .tabs,
-  .inner > .nav {
-    order: 3;
-    flex-basis: 100%;
-  }
+  cursor: pointer;
+  list-style: none;
 }
 
 .season {

@@ -112,20 +112,20 @@ describe("the home page", () => {
   it("links the organisations you joined from the header", async () => {
     await open(ME);
 
-    const links = [...page.querySelectorAll("header nav.nav a")];
+    const links = [...page.querySelectorAll("header details.menu a")];
 
     expect(links.map((link) => text(link))).toStrictEqual(["Alsace Arena"]);
     expect(links[0]?.getAttribute("href")).toBe("/org/alsace-arena");
   });
 
-  it("puts several organisations in a menu", async () => {
+  it("puts the organisations in a menu", async () => {
     await open(SEVERAL);
 
     expect(text(page.querySelector("header details summary"))).toBe(
       "My organisations"
     );
     expect(
-      [...page.querySelectorAll("header details a")].map((link) =>
+      [...page.querySelectorAll("header details.menu a")].map((link) =>
         link.getAttribute("href")
       )
     ).toStrictEqual(["/org/alsace-arena", "/org/metz-esport"]);

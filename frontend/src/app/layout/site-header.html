@@ -31,311 +31,403 @@
     </span>
     }
   </ng-template>
+
+  <!-- The organisation's pages, or its admin pages, then Site | Admin for those who run it. -->
+  <ng-template #pages>
+    @if (organization(); as org) { @if (inAdmin()) {
+    <nav class="nav" [attr.aria-label]="t('admin.navLabel')">
+      <a
+        [routerLink]="['/org', org.slug, 'admin', 'scores']"
+        routerLinkActive="active"
+        queryParamsHandling="preserve"
+        ariaCurrentWhenActive="page"
+        >{{ t("admin.scores") }}</a
+      >
+      <a
+        [routerLink]="['/org', org.slug, 'admin', 'schedule']"
+        routerLinkActive="active"
+        queryParamsHandling="preserve"
+        ariaCurrentWhenActive="page"
+        >{{ t("admin.schedule") }}</a
+      >
+      <a
+        [routerLink]="['/org', org.slug, 'admin', 'seasons']"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        >{{ t("admin.seasons") }}</a
+      >
+      <a
+        [routerLink]="['/org', org.slug, 'admin', 'scoring']"
+        routerLinkActive="active"
+        queryParamsHandling="preserve"
+        ariaCurrentWhenActive="page"
+        >{{ t("admin.scoring") }}</a
+      >
+      <a
+        [routerLink]="['/org', org.slug, 'admin', 'players']"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        >{{ t("admin.players") }}</a
+      >
+      <a
+        [routerLink]="['/org', org.slug, 'admin', 'members']"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        >{{ t("admin.members") }}</a
+      >
+      <a
+        [routerLink]="['/org', org.slug, 'admin', 'claims']"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        >{{ t("admin.claims") }}</a
+      >
+      <a
+        [routerLink]="['/org', org.slug, 'admin', 'branding']"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        >{{ t("admin.branding") }}</a
+      >
+    </nav>
+    } @else {
+    <nav class="nav" [attr.aria-label]="t('nav.label')">
+      <a
+        [routerLink]="['/org', org.slug]"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        queryParamsHandling="preserve"
+        ariaCurrentWhenActive="page"
+        >{{ t("nav.leaderboard") }}</a
+      >
+      <a
+        [routerLink]="['/org', org.slug, 'matches']"
+        routerLinkActive="active"
+        queryParamsHandling="preserve"
+        ariaCurrentWhenActive="page"
+        >{{ t("nav.matches") }}</a
+      >
+      <a
+        [routerLink]="['/org', org.slug, 'players']"
+        routerLinkActive="active"
+        queryParamsHandling="preserve"
+        ariaCurrentWhenActive="page"
+        >{{ t("nav.players") }}</a
+      >
+      @if (member()) {
+      <a
+        [routerLink]="['/org', org.slug, 'me', 'matches']"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        >{{ t("nav.myMatches") }}</a
+      >
+      }
+    </nav>
+    } @if (admin()) {
+    <nav class="mode" [attr.aria-label]="t('admin.mode')">
+      <a
+        [routerLink]="['/org', org.slug]"
+        [attr.aria-current]="inAdmin() ? null : 'true'"
+        >{{ t("admin.site") }}</a
+      >
+      <a
+        [routerLink]="['/org', org.slug, 'admin']"
+        [attr.aria-current]="inAdmin() ? 'true' : null"
+        >{{ t("admin.open") }}</a
+      >
+    </nav>
+    } }
+  </ng-template>
+
+  <ng-template #seasonPicker>
+    @if (organization() && !inAdmin() && current.seasons().length > 0) {
+    <select
+      #picker
+      class="tool season"
+      [attr.aria-label]="t('header.season')"
+      (change)="pickSeason(picker.value)"
+    >
+      @for (season of current.seasons(); track season.number) {
+      <option
+        [value]="season.number"
+        [selected]="season.number === current.season()?.number"
+      >
+        {{ season.name }}
+      </option>
+      }
+    </select>
+    }
+  </ng-template>
+
+  <ng-template #settings>
+    <button
+      type="button"
+      class="tool language"
+      [attr.aria-label]="t('header.switchLanguage')"
+      (click)="toggleLanguage()"
+    >
+      @for (lang of languages; track lang; let last = $last) {
+      <span [class.on]="language.active === lang" [attr.lang]="lang"
+        >{{ lang.toUpperCase() }}</span
+      >
+      @if (!last) {
+      <span class="slash" aria-hidden="true">/</span>
+      } }
+    </button>
+    <button
+      type="button"
+      class="theme"
+      role="switch"
+      [attr.aria-checked]="theme.theme() === 'dark'"
+      [attr.aria-label]="t('header.darkTheme')"
+      (click)="theme.toggle()"
+    >
+      <svg
+        class="side sun"
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <circle cx="12" cy="12" r="4"></circle>
+        <path
+          d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+        ></path>
+      </svg>
+      <svg
+        class="side moon"
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+      </svg>
+      <span class="knob" aria-hidden="true"></span>
+    </button>
+  </ng-template>
+
   <a class="skip" href="#main" (click)="skipToContent($event)"
     >{{ t("header.skip") }}</a
   >
-  <div class="inner" [class.tiered]="admin()">
-    @if (organization(); as org) {
-    <a
-      class="home"
-      routerLink="/"
-      [attr.aria-label]="t('header.home')"
-      [attr.title]="t('header.home')"
-    >
-      <svg
-        class="mark"
-        width="30"
-        height="30"
-        viewBox="0 0 40 40"
-        fill="none"
-        stroke-width="3"
-        aria-hidden="true"
+  <div class="inner">
+    <div class="top">
+      <a
+        class="home"
+        routerLink="/"
+        [class.quiet]="organization()"
+        [attr.aria-label]="t('header.home')"
+        [attr.title]="t('header.home')"
       >
-        <path class="badge" d="M20 2l16 9v18l-16 9-16-9V11z" />
-        <path class="up" d="M12 24l8-8 8 8" stroke-width="3.5" />
-        <path class="up below" d="M12 31l8-8 8 8" stroke-width="3.5" />
-      </svg>
-    </a>
-    <a class="brand" [routerLink]="['/org', org.slug]">
-      @if (org.logo) {
-      <img class="logo image" [src]="org.logo" alt="" width="40" height="40" />
-      } @else {
-      <span class="logo" aria-hidden="true">{{ initials() }}</span>
-      }
-      <span class="name">{{ org.name }}</span>
-    </a>
-    <ng-container [ngTemplateOutlet]="onlineCount" />
-    <div class="tabs">
-      @if (inAdmin()) {
-      <nav class="nav" [attr.aria-label]="t('admin.navLabel')">
-        <a
-          [routerLink]="['/org', org.slug, 'admin', 'scores']"
-          routerLinkActive="active"
-          queryParamsHandling="preserve"
-          ariaCurrentWhenActive="page"
-          >{{ t("admin.scores") }}</a
+        <svg
+          class="mark"
+          width="32"
+          height="32"
+          viewBox="0 0 40 40"
+          fill="none"
+          stroke-width="3"
+          aria-hidden="true"
         >
-        <a
-          [routerLink]="['/org', org.slug, 'admin', 'players']"
-          routerLinkActive="active"
-          ariaCurrentWhenActive="page"
-          >{{ t("admin.players") }}</a
-        >
-        <a
-          [routerLink]="['/org', org.slug, 'admin', 'seasons']"
-          routerLinkActive="active"
-          ariaCurrentWhenActive="page"
-          >{{ t("admin.seasons") }}</a
-        >
-        <a
-          [routerLink]="['/org', org.slug, 'admin', 'schedule']"
-          routerLinkActive="active"
-          queryParamsHandling="preserve"
-          ariaCurrentWhenActive="page"
-          >{{ t("admin.schedule") }}</a
-        >
-        <a
-          [routerLink]="['/org', org.slug, 'admin', 'scoring']"
-          routerLinkActive="active"
-          queryParamsHandling="preserve"
-          ariaCurrentWhenActive="page"
-          >{{ t("admin.scoring") }}</a
-        >
-        <a
-          [routerLink]="['/org', org.slug, 'admin', 'members']"
-          routerLinkActive="active"
-          ariaCurrentWhenActive="page"
-          >{{ t("admin.members") }}</a
-        >
-        <a
-          [routerLink]="['/org', org.slug, 'admin', 'claims']"
-          routerLinkActive="active"
-          ariaCurrentWhenActive="page"
-          >{{ t("admin.claims") }}</a
-        >
-        <a
-          [routerLink]="['/org', org.slug, 'admin', 'branding']"
-          routerLinkActive="active"
-          ariaCurrentWhenActive="page"
-          >{{ t("admin.branding") }}</a
-        >
-      </nav>
-      } @else {
-      <nav class="nav" [attr.aria-label]="t('nav.label')">
-        <a
-          [routerLink]="['/org', org.slug]"
-          routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: true }"
-          queryParamsHandling="preserve"
-          ariaCurrentWhenActive="page"
-          >{{ t("nav.leaderboard") }}</a
-        >
-        <a
-          [routerLink]="['/org', org.slug, 'matches']"
-          routerLinkActive="active"
-          queryParamsHandling="preserve"
-          ariaCurrentWhenActive="page"
-          >{{ t("nav.matches") }}</a
-        >
-        <a
-          [routerLink]="['/org', org.slug, 'players']"
-          routerLinkActive="active"
-          queryParamsHandling="preserve"
-          ariaCurrentWhenActive="page"
-          >{{ t("nav.players") }}</a
-        >
-        @if (member()) {
-        <a
-          [routerLink]="['/org', org.slug, 'me', 'matches']"
-          routerLinkActive="active"
-          ariaCurrentWhenActive="page"
-          >{{ t("nav.myMatches") }}</a
-        >
+          <path class="badge" d="M20 2l16 9v18l-16 9-16-9V11z" />
+          <path class="up" d="M12 24l8-8 8 8" stroke-width="3.5" />
+          <path class="up below" d="M12 31l8-8 8 8" stroke-width="3.5" />
+        </svg>
+        <span class="name platform-name">Tournament Leaderboard</span>
+      </a>
+
+      @if (organization(); as org) {
+      <span class="crumb" aria-hidden="true">/</span>
+      <ng-template #orgName>
+        @if (org.logo) {
+        <img
+          class="logo image"
+          [src]="org.logo"
+          alt=""
+          width="36"
+          height="36"
+        />
+        } @else {
+        <span class="logo" aria-hidden="true">{{ initials() }}</span>
         }
-      </nav>
-      } @if (admin()) {
-      <nav class="mode" [attr.aria-label]="t('admin.mode')">
-        <a
-          [routerLink]="['/org', org.slug]"
-          [attr.aria-current]="inAdmin() ? null : 'true'"
-          >{{ t("admin.site") }}</a
-        >
-        <a
-          [routerLink]="['/org', org.slug, 'admin']"
-          [attr.aria-current]="inAdmin() ? 'true' : null"
-          >{{ t("admin.open") }}</a
-        >
-      </nav>
-      }
-    </div>
-    } @else {
-    <a class="brand" routerLink="/">
-      <svg
-        class="mark"
-        width="36"
-        height="36"
-        viewBox="0 0 40 40"
-        fill="none"
-        stroke-width="3"
-        aria-hidden="true"
+        <span class="name org-name">{{ org.name }}</span>
+      </ng-template>
+      @if (others().length > 0) {
+      <details
+        class="menu switcher"
+        #switcher
+        (keydown.escape)="switcher.open = false"
       >
-        <path class="badge" d="M20 2l16 9v18l-16 9-16-9V11z" />
-        <path class="up" d="M12 24l8-8 8 8" stroke-width="3.5" />
-        <path class="up below" d="M12 31l8-8 8 8" stroke-width="3.5" />
-      </svg>
-      <span class="name">Tournament Leaderboard</span>
-    </a>
-    <ng-container [ngTemplateOutlet]="onlineCount" />
-    <nav class="nav" [attr.aria-label]="t('platform.navLabel')">
-      @let joined = session.me()?.memberships ?? []; @if (joined.length === 1) {
-      @let only = joined[0];
-      <a [routerLink]="['/org', only.slug]">{{ only.name }}</a>
-      } @else if (joined.length > 1) {
-      <details class="menu" #orgsMenu>
-        <summary>{{ t("header.myOrganisations") }}</summary>
-        <ul>
-          @for (membership of joined; track membership.slug) {
+        <summary
+          [attr.aria-label]="t('header.switchOrganisation', { name: org.name })"
+        >
+          <ng-container [ngTemplateOutlet]="orgName" />
+        </summary>
+        <ul class="panel" (click)="closeAfterChoice($event, switcher)">
           <li>
-            <a
-              [routerLink]="['/org', membership.slug]"
-              (click)="orgsMenu.open = false"
+            <a [routerLink]="['/org', org.slug]" aria-current="true"
+              >{{ org.name }}</a
+            >
+          </li>
+          @for (membership of others(); track membership.slug) {
+          <li>
+            <a [routerLink]="['/org', membership.slug]"
               >{{ membership.name }}</a
             >
           </li>
           }
         </ul>
       </details>
-      } @if (session.me()?.platformAdmin) {
-      <a
-        routerLink="/platform"
-        routerLinkActive="active"
-        ariaCurrentWhenActive="page"
-        >{{ t("platform.eyebrow") }}</a
-      >
-      }
-    </nav>
-    }
-    <div class="tools">
-      @if (organization() && !inAdmin() && current.seasons().length > 0) {
-      <select
-        #picker
-        class="tool season"
-        [attr.aria-label]="t('header.season')"
-        (change)="pickSeason(picker.value)"
-      >
-        @for (season of current.seasons(); track season.number) {
-        <option
-          [value]="season.number"
-          [selected]="season.number === current.season()?.number"
-        >
-          {{ season.name }}
-        </option>
-        }
-      </select>
-      }
-      <button
-        type="button"
-        class="tool language"
-        [attr.aria-label]="t('header.switchLanguage')"
-        (click)="toggleLanguage()"
-      >
-        @for (lang of languages; track lang; let last = $last) {
-        <span [class.on]="language.active === lang" [attr.lang]="lang"
-          >{{ lang.toUpperCase() }}</span
-        >
-        @if (!last) {
-        <span class="slash" aria-hidden="true">/</span>
-        } }
-      </button>
-      <button
-        type="button"
-        class="theme"
-        role="switch"
-        [attr.aria-checked]="theme.theme() === 'dark'"
-        [attr.aria-label]="t('header.darkTheme')"
-        (click)="theme.toggle()"
-      >
-        <svg
-          class="side sun"
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          aria-hidden="true"
-        >
-          <circle cx="12" cy="12" r="4"></circle>
-          <path
-            d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
-          ></path>
-        </svg>
-        <svg
-          class="side moon"
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
-        </svg>
-        <span class="knob" aria-hidden="true"></span>
-      </button>
-      @if (session.me(); as me) {
-      <details
-        class="notices-menu"
-        #noticesMenu
-        (toggle)="noticesOpen.set(noticesMenu.open)"
-        (keydown.escape)="noticesMenu.open = false"
-      >
-        <summary
-          class="notices"
-          [class.unread]="notices.unread() > 0"
-          [attr.aria-label]="t(language.plural('header.notices', notices.unread()), { count: notices.unread() })"
-        >
-          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-            <path
-              d="M12 3a6 6 0 0 0-6 6v3.5L4.5 15v1.5h15V15L18 12.5V9a6 6 0 0 0-6-6Zm-2 15a2 2 0 0 0 4 0"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linejoin="round"
-            />
-          </svg>
-          @if (notices.unread() > 0) {
-          <span class="count" aria-hidden="true"
-            >{{ notices.unread() > 99 ? "99+" : notices.unread() }}</span
-          >
-          }
-        </summary>
-        @if (noticesOpen()) {
-        <app-notices-panel
-          class="panel notices-panel"
-          (closed)="noticesMenu.open = false"
-        />
-        }
-      </details>
-      <a
-        class="account signed-in"
-        routerLink="/account"
-        [attr.aria-label]="t('header.account', { name: session.name() })"
-        [attr.title]="session.name()"
-      >
-        <span class="avatar" aria-hidden="true"
-          >{{ session.name().slice(0, 1).toUpperCase() }}</span
-        >
+      } @else {
+      <a class="org" [routerLink]="['/org', org.slug]">
+        <ng-container [ngTemplateOutlet]="orgName" />
       </a>
-      } @else if (session.me() === null && !here().startsWith("/sign-in")) {
-      <a class="account" routerLink="/sign-in" [queryParams]="{ from: here() }"
-        >{{ t("header.signIn") }}</a
-      >
+      } } @else if (joined().length > 0) {
+      <span class="crumb" aria-hidden="true">/</span>
+      <details class="menu" #orgsMenu (keydown.escape)="orgsMenu.open = false">
+        <summary>{{ t("header.myOrganisations") }}</summary>
+        <ul class="panel" (click)="closeAfterChoice($event, orgsMenu)">
+          @for (membership of joined(); track membership.slug) {
+          <li>
+            <a [routerLink]="['/org', membership.slug]"
+              >{{ membership.name }}</a
+            >
+          </li>
+          }
+        </ul>
+      </details>
       }
+
+      <ng-container [ngTemplateOutlet]="onlineCount" />
+
+      <div class="tools">
+        <div class="wide">
+          <ng-container [ngTemplateOutlet]="seasonPicker" />
+          <ng-container [ngTemplateOutlet]="settings" />
+        </div>
+        @if (session.me(); as me) {
+        <details
+          class="notices-menu"
+          #noticesMenu
+          (toggle)="noticesOpen.set(noticesMenu.open)"
+          (keydown.escape)="noticesMenu.open = false"
+        >
+          <summary
+            class="notices"
+            [class.unread]="notices.unread() > 0"
+            [attr.aria-label]="t(language.plural('header.notices', notices.unread()), { count: notices.unread() })"
+          >
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path
+                d="M12 3a6 6 0 0 0-6 6v3.5L4.5 15v1.5h15V15L18 12.5V9a6 6 0 0 0-6-6Zm-2 15a2 2 0 0 0 4 0"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linejoin="round"
+              />
+            </svg>
+            @if (notices.unread() > 0) {
+            <span class="count" aria-hidden="true"
+              >{{ notices.unread() > 99 ? "99+" : notices.unread() }}</span
+            >
+            }
+          </summary>
+          @if (noticesOpen()) {
+          <app-notices-panel
+            class="panel notices-panel"
+            (closed)="noticesMenu.open = false"
+          />
+          }
+        </details>
+        <details
+          class="account-menu"
+          #accountMenu
+          (keydown.escape)="accountMenu.open = false"
+        >
+          <summary
+            class="account signed-in"
+            [attr.aria-label]="t('header.account', { name: session.name() })"
+            [attr.title]="session.name()"
+          >
+            <span class="avatar" aria-hidden="true"
+              >{{ session.name().slice(0, 1).toUpperCase() }}</span
+            >
+          </summary>
+          <div
+            class="panel dropdown"
+            (click)="closeAfterChoice($event, accountMenu)"
+          >
+            <p class="who">
+              <strong>{{ session.name() }}</strong>
+              <span>{{ me.email }}</span>
+            </p>
+            <a routerLink="/account">{{ t("header.yourAccount") }}</a>
+            @if (me.platformAdmin) {
+            <a routerLink="/platform">{{ t("platform.eyebrow") }}</a>
+            }
+            <button type="button" (click)="signOut()">
+              {{ t("account.signOut") }}
+            </button>
+          </div>
+        </details>
+        } @else if (session.me() === null && !here().startsWith("/sign-in")) {
+        <a
+          class="account"
+          routerLink="/sign-in"
+          [queryParams]="{ from: here() }"
+          >{{ t("header.signIn") }}</a
+        >
+        }
+        <details
+          class="burger"
+          #burger
+          (toggle)="menuOpen.set(burger.open)"
+          (keydown.escape)="burger.open = false"
+        >
+          <summary class="burger-button" [attr.aria-label]="t('header.menu')">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              @if (menuOpen()) {
+              <path
+                d="M6 6l12 12M18 6L6 18"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+              } @else {
+              <path
+                d="M4 7h16M4 12h16M4 17h16"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+              }
+            </svg>
+          </summary>
+          @if (menuOpen()) {
+          <div
+            class="panel burger-panel"
+            (click)="closeAfterChoice($event, burger)"
+          >
+            <ng-container [ngTemplateOutlet]="pages" />
+            <div class="burger-tools">
+              <ng-container [ngTemplateOutlet]="seasonPicker" />
+              <ng-container [ngTemplateOutlet]="settings" />
+            </div>
+          </div>
+          }
+        </details>
+      </div>
     </div>
+    @if (organization()) {
+    <div class="tabs">
+      <ng-container [ngTemplateOutlet]="pages" />
+    </div>
+    }
   </div>
 </header>
