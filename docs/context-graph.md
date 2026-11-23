@@ -4,7 +4,7 @@ A map of the rewrite: what each part is, what it depends on, and what's built so
 current: any pull request that adds, removes or reconnects a package, endpoint, table, screen,
 workflow or phase updates this file in the same pull request.
 
-Last updated: 2026-11-23, with the header's breadcrumb, account menu and phone menu.
+Last updated: 2026-11-23, with releases from release-please.
 
 ## System
 
@@ -30,6 +30,7 @@ flowchart TD
     be --> mig[db/migration<br/>Flyway scripts]
     deploy[deploy/<br/>db-init, import, rollout.sh, README] --> prod[compose.prod.yaml]
     ci[.github/workflows/ci.yml<br/>mvnw verify + SonarQube Cloud] --> root
+    rel[.github/workflows/release.yml<br/>release-please: a release pull request on main; merged, it tags vX.Y.Z and sets version.txt] -->|"starts CI on its pull request"| ci
     ci -->|"after build, on a push to main"| dep[.github/workflows/deploy.yml<br/>dump, rollout.sh: the new app beside the old, then the old stopped; health check through Caddy]
     dep --> prod
     legacy[legacy/<br/>frozen: never touch]

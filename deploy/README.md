@@ -80,6 +80,28 @@ force-pushed or deleted, and a pull request merges only once its **Build and tes
 passed, SonarQube Cloud quality gate included. Until 2026-11-22 the rewrite lived in `migration`,
 which deployed the same way; it's retired now.
 
+## Versions and releases
+
+Every merge into `main` that passes CI deploys, as above. Versions move separately, with
+release-please (`.github/workflows/release.yml`):
+
+1. On each push to `main` it updates a **release pull request**: the next version, from the
+   Conventional Commits merged since the last release (`fix:` a patch, `feat:` a minor version,
+   `feat!:` or a `BREAKING CHANGE:` footer a major one), and the changelog in `CHANGELOG.md`.
+2. Its pull request is opened with the workflow's own token, which starts no workflow, so the same
+   job then starts CI on the release branch: **Build and test** reports on it, as the main ruleset
+   requires.
+3. Merging it tags `vX.Y.Z`, makes the GitHub release, and updates `version.txt`. That merge
+   deploys too, and from then on the app is built with that version (`-Drevision`, in the
+   `Dockerfile`): `/actuator/info` shows it.
+
+Needs, once, in the repository's Settings → Actions → General: **Allow GitHub Actions to create
+and approve pull requests**.
+
+The first release is forced to **1.0.0** (`release-as` in `release-please-config.json`), counting
+the commits since `main` became the app's branch (`bootstrap-sha`). Remove `release-as` once
+v1.0.0 exists, or every release pull request will keep asking for 1.0.0.
+
 ## Deploys without a gap
 
 Caddy reaches the app as `tournament-leaderboard:8080` on the `proxy` network, and Docker's DNS
