@@ -91,7 +91,7 @@
     </p>
     } @else {
     <div class="scroll">
-      <table class="table">
+      <table class="stacks table">
         <thead>
           <tr>
             <th scope="col">{{ t("adminPlayers.riotId") }}</th>
@@ -188,7 +188,7 @@
                 ><app-riot-id [value]="player.riotId"
               /></strong>
             </td>
-            <td>
+            <td [attr.data-label]="t('adminPlayers.discord')">
               {{ player.discordUsername ?? "–" }} @if (player.linked) {
               <span class="muted small expected"
                 >{{ t("adminPlayers.linked") }}</span
@@ -199,8 +199,10 @@
               >
               }
             </td>
-            <td class="aliases">{{ aliasesText(player.aliases) || "–" }}</td>
-            <td>
+            <td class="aliases" [attr.data-label]="t('adminPlayers.aliases')">
+              {{ aliasesText(player.aliases) || "–" }}
+            </td>
+            <td [attr.data-label]="t('adminPlayers.rank')">
               @if (player.rank; as rank) {
               <app-rank-pill [name]="rank.name" [color]="rank.color" fixed />
               }

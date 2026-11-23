@@ -48,7 +48,7 @@
       {{ t("adminSchedule.matches", { season: season.name }) }}
     </h2>
     <div class="scroll">
-      <table class="table">
+      <table class="stacks table">
         <thead>
           <tr>
             <th scope="col">{{ t("adminSchedule.match") }}</th>
@@ -134,13 +134,17 @@
             <th scope="row">
               {{ t("adminSchedule.matchNumber", { number: match.number }) }}
             </th>
-            <td>
+            <td [attr.data-label]="t('adminSchedule.when')">
               {{ language.when({ date: match.date, startTime: match.startTime })
               || "–" }}
             </td>
-            <td class="where">{{ match.location ?? "–" }}</td>
-            <td>{{ match.replyBy ? language.day(match.replyBy) : "–" }}</td>
-            <td class="num">
+            <td class="where" [attr.data-label]="t('adminSchedule.where')">
+              {{ match.location ?? "–" }}
+            </td>
+            <td [attr.data-label]="t('adminSchedule.replyBy')">
+              {{ match.replyBy ? language.day(match.replyBy) : "–" }}
+            </td>
+            <td class="num" [attr.data-label]="t('adminSchedule.places')">
               @if (match.id !== null) { {{ t("adminSchedule.full", { confirmed:
               match.confirmed, places: match.places }) }} @if (match.waiting) {
               <span class="muted small"
@@ -149,7 +153,7 @@
               >
               } } @else { – }
             </td>
-            <td>
+            <td [attr.data-label]="t('adminScores.status')">
               <span
                 class="pill"
                 [class.live]="match.status === 'PLANNED' && !match.played"

@@ -256,3 +256,17 @@
   height: 18px;
   accent-color: var(--accent);
 }
+
+/* The bonuses' table follows the shared .stacks layout over this page's own cell rules. */
+.table.stacks th,
+.table.stacks td {
+  white-space: normal;
+}
+
+@media (max-width: 900px) {
+  .table.stacks th,
+  .table.stacks td {
+    padding: 0;
+    border: 0;
+  }
+}

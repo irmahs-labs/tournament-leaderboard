@@ -218,7 +218,9 @@ a {
   text-transform: uppercase;
   letter-spacing: var(--button-track);
   text-decoration: none;
-  white-space: nowrap;
+  text-align: center;
+  /* Never wider than what holds it: a label longer than a phone's width wraps instead. */
+  max-width: 100%;
   cursor: pointer;
 }
 
@@ -284,6 +286,98 @@ select {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+/* Tables of records: uppercase headers, a rule under them, zebra rows. */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.table th {
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: var(--label-track);
+  border-bottom: 1px solid var(--head-line);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--row-line);
+  white-space: nowrap;
+}
+
+.table tbody tr:nth-child(even) {
+  background: var(--zebra);
+}
+
+/*
+ * A table whose rows end with buttons. Its text wraps, so the table fits its panel and the
+ * buttons stay in view. On a phone each row becomes a card: its first cell as the title, every
+ * other value under it beside its column's name (data-label), and the buttons last.
+ */
+table.table.stacks th,
+table.table.stacks td {
+  white-space: normal;
+}
+
+/* A row's title (Match 4, Season 2) stays on one line. */
+table.table.stacks th[scope="row"] {
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  table.table.stacks,
+  table.table.stacks tbody {
+    display: block;
+  }
+
+  table.table.stacks thead {
+    display: none;
+  }
+
+  table.table.stacks tr {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--row-line);
+  }
+
+  table.table.stacks th,
+  table.table.stacks td {
+    display: block;
+    padding: 0;
+    border: 0;
+    text-align: left;
+    white-space: normal;
+  }
+
+  table.table.stacks td[data-label] {
+    display: flex;
+    gap: 12px;
+    align-items: baseline;
+  }
+
+  table.table.stacks td[data-label]::before {
+    flex: 0 0 8.5rem;
+    content: attr(data-label);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: var(--label-track);
+  }
+
+  table.table.stacks td:empty {
+    display: none;
+  }
 }
 
 /*
