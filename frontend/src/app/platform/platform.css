@@ -208,13 +208,6 @@ tr.off {
   border-color: var(--accent);
 }
 
-.small-button {
-  min-height: 40px;
-  padding: 0 14px;
-  font-size: 13px;
-  white-space: nowrap;
-}
-
 p {
   margin: 0;
 }

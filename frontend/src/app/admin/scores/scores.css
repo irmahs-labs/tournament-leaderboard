@@ -101,12 +101,6 @@ input[aria-invalid="true"] {
   gap: 8px;
 }
 
-.small-button {
-  min-height: 44px;
-  padding: 0 14px;
-  font-size: 13px;
-}
-
 .note {
   margin: 0 0 14px;
 }
