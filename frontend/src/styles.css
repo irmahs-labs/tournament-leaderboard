@@ -275,3 +275,14 @@ select {
 .button-ghost.danger {
   color: var(--danger);
 }
+
+/*
+ * The smaller buttons of tables, lists and cards. One width for all of them, wide enough for the
+ * longest label in either language, so a row's actions line up with the next row's.
+ */
+.small-button {
+  min-width: 140px;
+  min-height: 40px;
+  padding: 0 14px;
+  font-size: 13px;
+}

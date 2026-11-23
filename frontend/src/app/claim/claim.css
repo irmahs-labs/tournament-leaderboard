@@ -110,12 +110,6 @@ input {
   overflow-wrap: anywhere;
 }
 
-.small-button {
-  min-height: 40px;
-  padding: 0 14px;
-  font-size: 13px;
-}
-
 .facts {
   display: grid;
   gap: 8px;

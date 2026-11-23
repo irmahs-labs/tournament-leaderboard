@@ -73,6 +73,11 @@ typecheck in `frontend/`, Spotless and a compile in `backend/`. In cloud session
 - [`docs/context-graph.md`](docs/context-graph.md) maps the rewrite: packages and their
   dependencies, endpoints, tables, screens and phases. Read it before starting work, and update it
   in the same pull request whenever a change adds, removes or reconnects any of those.
+- The design system, https://claude.ai/artifact/LJLikryobGFQ53nune6jnV, holds the tokens,
+  type, components and their rules, desktop and phone. `frontend/src/styles.css` is its source:
+  build every screen from its tokens and shared classes, put a pattern used by two pages or more
+  in `styles.css` rather than copying it, and update the design system in the same pull request
+  whenever a token, a shared class or a shared component changes.
 - The full plan (schema, endpoints, screens, phases) is the migration plan page kept with the
   project designs; ask the user for the link when you need it.
 
