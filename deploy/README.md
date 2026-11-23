@@ -16,7 +16,8 @@ visitor ──HTTPS──▶ Cloudflare ──▶ Caddy (irmahs-labs/proxy) ─�
 | `Dockerfile` (repo root) | Builds the Spring Boot jar, Angular included, into one image on port 8080 |
 | `compose.prod.yaml` (repo root) | Postgres on `internal` only; the app on `internal` and `proxy`, publishing no port |
 | `deploy/db-init/01-app-role.sh` | First start only: creates `leaderboard_app`, the role the app connects with |
-| `.github/workflows/deploy.yml` | On each merge into `migration`: SSH in as `deploy`, check out the run's commit, write `.env`, `docker compose up --build --wait` |
+| `.github/workflows/deploy.yml` | Called by CI after the build and tests pass on a merge into `main`: SSH in as `deploy`, check out the run's commit, write `.env`, dump the database, `deploy/rollout.sh`, then check the address through Caddy |
+| `deploy/rollout.sh` | Builds the new image and starts it next to the running app; once healthy, stops the old one gracefully. See below |
 
 ## Database roles
 
@@ -54,8 +55,10 @@ the GitHub secret **and** run `ALTER ROLE … PASSWORD '…'` in the database.
    the other apps.
 3. **Folder**, as admin on the server, if the deploy can't create it:
    `sudo mkdir /srv/tournament-leaderboard && sudo chown deploy:deploy /srv/tournament-leaderboard`
-4. **Deploy**: every merge into `migration` deploys that commit (Actions → Deploy shows the
-   runs). It waits until the app's health check passes, so a broken start fails the run.
+4. **Deploy**: every merge into `main` that passes CI deploys that commit (Actions → CI, its
+   Deploy job). It waits until the app's health check passes, so a broken start fails the run,
+   then checks `https://tournament-leaderboard.irmahs.dev/actuator/health` through Caddy, from the
+   server: Cloudflare answers 403 to GitHub's runners.
 5. **Route the name**: a pull request in irmahs-labs/proxy adding to `caddy/Caddyfile`:
 
    ```
@@ -69,3 +72,49 @@ the GitHub secret **and** run `ALTER ROLE … PASSWORD '…'` in the database.
    ```
 
    Merge it after the DNS records exist; Caddy gets the certificate on the first visit.
+
+## Only what passed goes live
+
+The **Protect main** ruleset makes this safe: `main` changes only through pull requests, can't be
+force-pushed or deleted, and a pull request merges only once its **Build and test** check has
+passed, SonarQube Cloud quality gate included. Until 2026-11-22 the rewrite lived in `migration`,
+which deployed the same way; it's retired now.
+
+## Deploys without a gap
+
+Caddy reaches the app as `tournament-leaderboard:8080` on the `proxy` network, and Docker's DNS
+answers with every running container under that alias (Caddy tries the next one when one refuses
+the connection). `deploy/rollout.sh` uses that:
+
+1. Builds the image, and makes sure `db` is up.
+2. Starts a second app container from the new image, next to the running one, under the same alias.
+   Flyway migrates as it starts, while the old version still serves: see the database-change rule
+   in [`CLAUDE.md`](../CLAUDE.md).
+3. Waits for its health check (`/actuator/health/readiness`, up to 4 minutes). If it fails, the new
+   container is removed and the deploy fails; the old version keeps serving.
+4. Stops the old container (graceful: it finishes its requests within 20 s and ends its online-count
+   streams, which pages reopen on the new one), then removes it.
+
+Sessions are in the database, so nobody is signed out. For a moment both versions run, so the
+server needs room for two apps (`mem_limit: 1g` each). On the very first start, with no app
+running, it simply starts one.
+
+Tried locally with `compose.prod.yaml` and a Caddy in front, sending requests every 0.2 s through a
+deploy: no errors.
+
+## Dumps before each deploy
+
+Before starting the new version, the deploy dumps the database with `pg_dump --format=custom`
+into `/srv/tournament-leaderboard/backups/` (readable by `deploy` only, ignored by git), named by
+date and commit. It keeps the last 14. An empty or failed dump stops the deploy before anything
+changes. They're on the same server as the database: they undo a bad migration, not a lost
+server; off-server backups are separate.
+
+To restore one, as `deploy` in `/srv/tournament-leaderboard`:
+
+```
+export COMPOSE_FILE=compose.prod.yaml
+docker compose stop app
+docker compose exec -T db pg_restore -U leaderboard_owner -d leaderboard --clean --if-exists < backups/<the dump>
+git reset --hard <the dump's commit> && docker compose up -d --build --wait
+```

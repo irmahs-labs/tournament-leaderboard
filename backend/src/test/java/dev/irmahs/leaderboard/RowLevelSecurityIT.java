@@ -248,7 +248,7 @@ class RowLevelSecurityIT {
 
     @Test
     void signingInWorksUnderRowLevelSecurity() {
-        accounts.signIn(new GoogleProfile("google-rls", "owner@example.com", "Owner", null));
+        accounts.signIn(new GoogleProfile("google-rls", "owner@example.com", "Owner"));
 
         assertThat(mvc.get().uri("/api/me").with(oidcLogin().idToken(token -> token.subject("google-rls"))))
                 .hasStatusOk()

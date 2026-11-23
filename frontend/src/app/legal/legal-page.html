@@ -1,0 +1,61 @@
+<article class="legal" *transloco="let t">
+  <header class="intro">
+    <h1 class="display">{{ doc().title }}</h1>
+    <p class="lede">{{ doc().intro }}</p>
+    <p class="muted small">
+      {{ t("legal.updated") }}
+      <time [attr.datetime]="updatedOn">{{ updated() }}</time>
+    </p>
+  </header>
+
+  @for (section of doc().sections; track section.heading) {
+  <section class="panel block">
+    <h2 class="heading">{{ section.heading }}</h2>
+    @if (section.table; as table) {
+    <div class="scroll" role="region" [attr.aria-label]="table.caption">
+      <table>
+        <caption class="visually-hidden">
+          {{ table.caption }}
+        </caption>
+        <thead>
+          <tr>
+            @for (cell of table.head; track $index) {
+            <th scope="col">{{ cell }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of table.rows; track $index) {
+          <tr>
+            @for (cell of row; track $index; let first = $first) { @if (first) {
+            <th scope="row">{{ cell }}</th>
+            } @else {
+            <td>{{ cell }}</td>
+            } }
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    } @for (paragraph of section.paragraphs; track $index) {
+    <p>{{ paragraph }}</p>
+    } @if (section.items; as items) {
+    <ul>
+      @for (item of items; track $index) {
+      <li>{{ item }}</li>
+      }
+    </ul>
+    } @if (section.links; as links) {
+    <ul class="links">
+      @for (link of links; track link.href) {
+      <li>
+        <a [href]="link.href" (click)="follow($event, link.href)"
+          >{{ link.text }}</a
+        >
+      </li>
+      }
+    </ul>
+    }
+  </section>
+  }
+</article>

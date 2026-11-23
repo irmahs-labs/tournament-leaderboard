@@ -13,19 +13,20 @@ class PlayerTallyTest {
     private final PlayerTally tally = new PlayerTally(kestrel);
 
     private static StatLine line(Integer kills, Integer deaths, Integer assists) {
-        return new StatLine(null, null, null, null, null, kills, deaths, assists, null, null, null, null, null, null);
+        return new StatLine(
+                null, null, null, null, null, kills, deaths, assists, null, null, null, null, null, null, null, null);
     }
 
     @Test
     void aPlayerWithNoDeathsHasAKdaOfKillsPlusAssists() {
-        tally.add(new GameStat(null, kestrel, line(7, 0, 3), true));
+        tally.add(new GameStat(null, kestrel, line(7, 0, 3), true), BigDecimal.ONE);
 
         assertThat(tally.kda()).isEqualByComparingTo("10");
     }
 
     @Test
     void thereIsNoKdaWhenNoneOfItsStatsWasRecorded() {
-        tally.add(new GameStat(null, kestrel, line(null, null, null), false));
+        tally.add(new GameStat(null, kestrel, line(null, null, null), false), BigDecimal.ONE);
 
         assertThat(tally.kda()).isNull();
         assertThat(tally.totals()).isEmpty();
@@ -36,16 +37,24 @@ class PlayerTallyTest {
 
     @Test
     void kdaStillWorksWhenOnlyKillsWereRecorded() {
-        tally.add(new GameStat(null, kestrel, line(9, null, null), false));
+        tally.add(new GameStat(null, kestrel, line(9, null, null), false), BigDecimal.ONE);
 
         assertThat(tally.kda()).isEqualByComparingTo("9");
     }
 
     @Test
+    void thePointsAreTheSumOfTheGamesPoints() {
+        tally.add(new GameStat(null, kestrel, line(7, 0, 3), true), new BigDecimal("53.50"));
+        tally.add(new GameStat(null, kestrel, line(2, 9, 1), false), new BigDecimal("-4.25"));
+
+        assertThat(tally.points()).isEqualByComparingTo("49.25");
+    }
+
+    @Test
     void anAverageOnlyCountsTheGamesThatRecordedTheStat() {
-        tally.add(new GameStat(null, kestrel, line(10, 4, null), false));
-        tally.add(new GameStat(null, kestrel, line(5, 5, 6), true));
-        tally.add(new GameStat(null, kestrel, line(null, 6, null), false));
+        tally.add(new GameStat(null, kestrel, line(10, 4, null), false), BigDecimal.ONE);
+        tally.add(new GameStat(null, kestrel, line(5, 5, 6), true), BigDecimal.ONE);
+        tally.add(new GameStat(null, kestrel, line(null, 6, null), false), BigDecimal.ONE);
 
         assertThat(tally.averages().get(dev.irmahs.leaderboard.seasons.Stat.KILLS))
                 .isEqualByComparingTo("7.50");

@@ -1,0 +1,34 @@
+# Tournament Leaderboard
+
+> Results, standings and statistics of community Valorant tournaments. Each organisation has its
+> own pages at /org/{slug}; the first one is Alsace Arena, at /org/alsace-arena. The pages are an
+> Angular app, so read the public JSON API below rather than the HTML.
+
+Everything listed here is public and needs no sign-in. Please read it at a reasonable pace.
+Valorant and Riot Games are trademarks of Riot Games, Inc.; this site isn't endorsed by them.
+
+## Public API (JSON, GET only)
+
+- [Organisation](/api/orgs/alsace-arena): its name and tournament
+- [Seasons](/api/orgs/alsace-arena/seasons): every season and its number
+- Season leaderboard: `/api/orgs/{slug}/seasons/{n}/leaderboard`, every player's points, wins and stats
+- Season summary: `/api/orgs/{slug}/seasons/{n}/summary`, matches and games played, players, next match
+- Scoring rules: `/api/orgs/{slug}/seasons/{n}/rules`, points per stat, per win and per bonus
+- Matches: `/api/orgs/{slug}/seasons/{n}/matches` and `/api/orgs/{slug}/seasons/{n}/matches/{m}`
+- [Players](/api/orgs/alsace-arena/players): every player's Riot ID and other names
+- A player's season: `/api/orgs/{slug}/seasons/{n}/players/{id}`, their standing and match by match
+- [Ranks](/api/ranks): the Valorant ranks and their colours
+
+Errors are JSON problem details (RFC 9457).
+
+## Pages
+
+- [Leaderboard](/org/alsace-arena): the season's podium, numbers, standings and scoring rules
+- [Matches](/org/alsace-arena/matches)
+- [Players](/org/alsace-arena/players): a card per player, and each player's page
+- [Help](/help): how joining, matches, notices and the admin pages work
+- [Legal notice](/legal), [Privacy policy](/privacy), [Cookie policy](/cookies), [Terms of use](/terms)
+
+## Source
+
+- [Source code (MIT)](https://github.com/irmahs-labs/tournament-leaderboard)

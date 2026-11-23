@@ -18,14 +18,18 @@ final class PlayerTally {
     private final Map<String, Integer> bonusCounts = new TreeMap<>();
     private int games;
     private int wins;
-    private long bonusPoints;
+    private BigDecimal points = BigDecimal.ZERO;
 
     PlayerTally(Player player) {
         this.player = player;
     }
 
-    void add(GameStat line) {
+    /**
+     * @param gamePoints the line's points under the season's rules
+     */
+    void add(GameStat line, BigDecimal gamePoints) {
         games++;
+        points = points.add(gamePoints);
         if (line.isWin()) {
             wins++;
         }
@@ -38,7 +42,6 @@ final class PlayerTally {
         }
         for (SeasonBonus bonus : line.getBonuses()) {
             bonusCounts.merge(bonus.getCode(), 1, Integer::sum);
-            bonusPoints += bonus.getPoints();
         }
     }
 
@@ -54,8 +57,9 @@ final class PlayerTally {
         return wins;
     }
 
-    long bonusPoints() {
-        return bonusPoints;
+    /** The points of all the games added. */
+    BigDecimal points() {
+        return points;
     }
 
     /** How many times the player won each bonus, by its code. */

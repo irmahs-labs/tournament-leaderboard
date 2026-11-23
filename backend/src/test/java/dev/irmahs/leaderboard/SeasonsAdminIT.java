@@ -103,7 +103,8 @@ class SeasonsAdminIT {
         return Stream.of(
                 Arguments.of(HttpMethod.POST, SEASONS, "{}"),
                 Arguments.of(HttpMethod.PUT, SEASON_1, "{\"name\": \"Season 1\", " + SHAPE + "}"),
-                Arguments.of(HttpMethod.PUT, SEASON_1 + "/recorded-stats", "{\"stats\": [\"KILLS\"]}"));
+                Arguments.of(HttpMethod.PUT, SEASON_1 + "/rules", "{}"),
+                Arguments.of(HttpMethod.POST, SEASON_1 + "/rules/platform-defaults", null));
     }
 
     @ParameterizedTest
@@ -133,13 +134,15 @@ class SeasonsAdminIT {
         assertThat(mvc.get().uri("/api/orgs/alsace-arena/seasons/2/rules"))
                 .bodyJson()
                 .isLenientlyEqualTo("""
-                        {"pointsPerWin": 50,
+                        {"pointsPerWin": 50, "kdaPoints": 10,
                          "bonuses": [{"code": "FB", "points": 10}, {"code": "LD"}, {"code": "MA"}, {"code": "MP"},
-                                     {"code": "MD"}]}""");
+                                     {"code": "MD"}, {"code": "MVP", "award": "TOP_WINNER", "points": 20},
+                                     {"code": "SVP", "award": "TOP_LOSER", "points": 10},
+                                     {"code": "HON", "award": "AT_LEAST", "stat": "HONOURS", "threshold": 3}]}""");
         assertThat(flushed().sql("""
                                 SELECT stat FROM season_stat_rules r JOIN seasons s ON s.id = r.season_id
                                 WHERE s.number = 2 AND s.name = 'Season 2' AND r.recorded ORDER BY stat""").query(String.class).list())
-                .containsExactly("ASSISTS", "DEATHS", "DEFUSES", "FIRST_BLOODS", "KILLS", "PLANTS");
+                .containsExactly("ASSISTS", "DEATHS", "DEFUSES", "FIRST_BLOODS", "KILLS", "PLACE", "PLANTS");
     }
 
     @Test
@@ -156,9 +159,9 @@ class SeasonsAdminIT {
                 .bodyJson()
                 .isLenientlyEqualTo("""
                         {"pointsPerWin": 40,
-                         "stats": [{"stat": "ADR", "recorded": true, "effect": 0},
-                                   {"stat": "KILLS", "recorded": true, "effect": 1},
-                                   {"stat": "DEATHS", "recorded": true, "effect": -1}],
+                         "stats": [{"stat": "ADR", "recorded": true, "points": 0},
+                                   {"stat": "KILLS", "recorded": true, "points": 1},
+                                   {"stat": "DEATHS", "recorded": true, "points": -1}],
                          "bonuses": [{"code": "MVP", "award": "MANUAL", "points": 25},
                                      {"code": "LD", "award": "LOWEST", "stat": "DEATHS"}]}""");
     }
@@ -289,35 +292,74 @@ class SeasonsAdminIT {
     }
 
     @Test
-    void theRecordSwitchesChangeOnlyWhatIsRecorded() {
-        MvcTestResult result =
-                send(HttpMethod.PUT, SEASON_1 + "/recorded-stats", "{\"stats\": [\"DEATHS\", \"KAST_PCT\"]}");
+    void anAdminChangesWhatEachThingIsWorth() {
+        MvcTestResult result = send(HttpMethod.PUT, SEASON_1 + "/rules", """
+                {"stats": [{"stat": "KILLS", "recorded": true, "points": 2.5},
+                           {"stat": "DEATHS", "recorded": false, "points": -1}],
+                 "pointsPerWin": 30, "kdaPoints": 10,
+                 "bonuses": [{"code": "MVP", "points": 40}]}""");
 
+        assertThat(result).hasStatusOk().bodyJson().isLenientlyEqualTo("""
+                {"pointsPerWin": 30, "kdaPoints": 10,
+                 "bonuses": [{"code": "MVP", "points": 40}, {"code": "LD", "points": 10}]}""");
         assertThat(result)
+                .bodyJson()
+                .extractingPath("$.stats[?(@.stat in ['KILLS', 'DEATHS', 'ADR'])].points")
+                .isEqualTo(List.of(0, 2.5, -1));
+        assertThat(flushed()
+                        .sql("SELECT stat FROM season_stat_rules WHERE recorded ORDER BY stat")
+                        .query(String.class)
+                        .list())
+                .containsExactly("ADR", "KILLS");
+    }
+
+    static Stream<Arguments> refusedRules() {
+        return Stream.of(
+                Arguments.of("{\"stats\": [{\"stat\": \"ADR\", \"recorded\": true, \"points\": 1}]}"),
+                Arguments.of("{\"stats\": [{\"stat\": \"KILLS\", \"recorded\": true, \"points\": 0.125}]}"),
+                Arguments.of("{\"stats\": [{\"stat\": \"KILLS\", \"recorded\": true, \"points\": 1001}]}"),
+                Arguments.of("{\"stats\": [{\"recorded\": true}]}"),
+                Arguments.of("{\"kdaPoints\": -1}"),
+                Arguments.of("{\"pointsPerWin\": 1001}"),
+                Arguments.of("{\"bonuses\": [{\"code\": \"ACE\", \"points\": 5}]}"),
+                Arguments.of("{\"bonuses\": [{\"code\": \"LD\", \"points\": -5}]}"),
+                Arguments.of("{\"bonuses\": [{\"code\": \"LD\", \"threshold\": 3}]}"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("refusedRules")
+    void wrongRulesAreRefusedAndChangeNothing(String body) {
+        assertThat(send(HttpMethod.PUT, SEASON_1 + "/rules", body)).hasStatus(400);
+        assertThat(mvc.get().uri("/api/orgs/alsace-arena/seasons/1/rules"))
+                .bodyJson()
+                .isLenientlyEqualTo("""
+                        {"pointsPerWin": 40, "kdaPoints": 0,
+                         "bonuses": [{"code": "MVP", "points": 25}, {"code": "LD", "points": 10}]}""");
+    }
+
+    @Test
+    void aFinishedSeasonsRulesCannotChange() {
+        send(HttpMethod.PUT, SEASON_1, "{\"name\": \"Season 1\", \"finished\": true, " + SHAPE + "}");
+
+        assertThat(send(HttpMethod.PUT, SEASON_1 + "/rules", "{\"pointsPerWin\": 10}"))
+                .hasStatus(409);
+        assertThat(send(HttpMethod.POST, SEASON_1 + "/rules/platform-defaults", null))
+                .hasStatus(409);
+    }
+
+    @Test
+    void thePlatformDefaultsReplaceTheRulesAndKeepTheSeasonsOtherBonuses() {
+        assertThat(send(HttpMethod.POST, SEASON_1 + "/rules/platform-defaults", null))
                 .hasStatusOk()
                 .bodyJson()
-                .extractingPath("$.stats")
-                .asArray()
-                .hasSize(14);
-        assertThat(result)
+                .extractingPath("$.bonuses[*].code")
+                .isEqualTo(List.of("MVP", "LD", "FB", "MA", "MP", "MD", "SVP", "HON"));
+        assertThat(mvc.get().uri("/api/orgs/alsace-arena/seasons/1/rules"))
                 .bodyJson()
-                .extractingPath("$.stats[?(@.recorded == true)].stat")
-                .isEqualTo(List.of("KAST_PCT", "DEATHS"));
-        assertThat(result)
-                .bodyJson()
-                .extractingPath("$.stats[?(@.stat in ['KILLS', 'DEATHS', 'KAST_PCT'])].effect")
-                .isEqualTo(List.of(0, 1, -1));
-        assertThat(flushed()
-                        .sql("SELECT count(*) FROM season_stat_rules WHERE recorded")
-                        .query(Long.class)
-                        .single())
-                .isEqualTo(2);
-        assertThat(send(HttpMethod.PUT, SEASON_1 + "/recorded-stats", "{\"stats\": [\"ACES\"]}"))
-                .hasStatus(400);
-        assertThat(send(HttpMethod.PUT, SEASON_1 + "/recorded-stats", "{}"))
-                .bodyJson()
-                .extractingPath("$.stats[?(@.recorded == true)]")
-                .asArray()
-                .isEmpty();
+                .isLenientlyEqualTo("""
+                        {"pointsPerWin": 50, "kdaPoints": 10,
+                         "bonuses": [{"code": "MVP", "award": "TOP_WINNER", "stat": "PLACE", "points": 20},
+                                     {"code": "LD"}, {"code": "FB"}, {"code": "MA"}, {"code": "MP"}, {"code": "MD"},
+                                     {"code": "SVP"}, {"code": "HON", "threshold": 3}]}""");
     }
 }

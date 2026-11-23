@@ -1,0 +1,166 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  min-width: 0;
+}
+
+.intro-text {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 760px;
+}
+
+.block {
+  padding: 22px;
+  /* Lets the table scroll inside its panel rather than widen the page. */
+  min-width: 0;
+}
+
+.spaced {
+  margin-bottom: 18px;
+}
+
+.block-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  margin-bottom: 18px;
+}
+
+.add {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+  align-items: end;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+input {
+  min-height: 44px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  width: 100%;
+  background: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--input-line);
+  border-radius: 0;
+  font: 500 15px var(--font-body);
+}
+
+input::placeholder {
+  color: var(--muted);
+}
+
+.search input {
+  min-width: min(260px, 100%);
+}
+
+.status {
+  margin: 14px 0 0;
+  color: var(--good);
+  font-weight: 600;
+}
+
+.status.failed {
+  color: var(--danger);
+}
+
+.scroll {
+  /* Positioned, so the hidden labels inside the table scroll with it instead of widening the page. */
+  position: relative;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.table th {
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: var(--label-track);
+  border-bottom: 1px solid var(--head-line);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--row-line);
+  white-space: nowrap;
+}
+
+.table tbody tr:nth-child(even) {
+  background: var(--zebra);
+}
+
+.table tr.editing {
+  background: var(--accent-soft);
+}
+
+.table tr.editing input,
+.table tr.editing select {
+  /* One under the other: Discord and the Google email share a cell, and cells never wrap. */
+  display: block;
+  min-width: 140px;
+}
+
+.player {
+  font-size: 16px;
+}
+
+.tag {
+  margin-left: 2px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.aliases {
+  white-space: normal;
+  min-width: 140px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.small-button {
+  min-height: 40px;
+  padding: 0 14px;
+  font-size: 13px;
+}
+
+.email-input {
+  margin-top: 6px;
+}
+
+.expected {
+  display: block;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+select {
+  width: 100%;
+}
+
+/* A linked player's Riot ID and Discord are theirs: shown, not editable. */
+.table tr.editing input:read-only {
+  color: var(--muted);
+  cursor: not-allowed;
+}

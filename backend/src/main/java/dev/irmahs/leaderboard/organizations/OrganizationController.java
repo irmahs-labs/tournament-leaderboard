@@ -1,41 +1,51 @@
 package dev.irmahs.leaderboard.organizations;
 
+import java.time.Duration;
+import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-/** What every page of an organisation needs first: its names, language and accent colour. */
+/** What every page of an organisation needs first, and its logo. */
 @RestController
 public class OrganizationController {
 
-    private final OrganizationService organizations;
+    /** An SVG opened on its own can't run anything or load anything. */
+    static final String LOGO_POLICY = "default-src 'none'; style-src 'unsafe-inline'; sandbox";
 
-    OrganizationController(OrganizationService organizations) {
-        this.organizations = organizations;
+    private final BrandingService branding;
+
+    OrganizationController(BrandingService branding) {
+        this.branding = branding;
     }
 
     @GetMapping("/api/orgs/{slug}")
     public OrganizationView organization(@PathVariable String slug) {
-        Organization organization = organizations.requireActive(slug);
-        return new OrganizationView(
-                organization.getSlug(),
-                organization.getName(),
-                organization.getTournamentName(),
-                organization.getDescription(),
-                organization.getDefaultLocale(),
-                organization.getAccentColor(),
-                organization.getPlayersPerMatch());
+        return branding.view(slug);
     }
 
-    /**
-     * @param accentColor #RRGGBB, or nothing to keep the template's red
-     */
-    public record OrganizationView(
-            String slug,
-            String name,
-            String tournamentName,
-            String description,
-            String defaultLocale,
-            String accentColor,
-            int playersPerMatch) {}
+    /** The home page's example: the most recently active organisation; 204 before any game. */
+    @GetMapping("/api/featured")
+    public ResponseEntity<OrganizationView> featured() {
+        return branding.featured()
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
+    /** Its address changes with the logo, so browsers can keep it for a year. */
+    @GetMapping("/api/orgs/{slug}/logo")
+    public ResponseEntity<byte[]> logo(@PathVariable String slug) {
+        return branding.logo(slug)
+                .map(logo -> ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType(logo.contentType()))
+                        .cacheControl(CacheControl.maxAge(Duration.ofDays(365)).cachePublic())
+                        .lastModified(logo.updatedAt())
+                        .header("Content-Security-Policy", LOGO_POLICY)
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
+                        .body(logo.bytes()))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
 }

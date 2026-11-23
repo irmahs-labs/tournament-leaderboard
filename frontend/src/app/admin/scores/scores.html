@@ -1,0 +1,248 @@
+<ng-container *transloco="let t">
+  <div class="intro-text">
+    <span class="eyebrow"
+      >{{ t("admin.eyebrow", { org: current.organization()?.name ?? "" })
+      }}</span
+    >
+    <h1 class="display">{{ t("adminScores.title") }}</h1>
+    <p class="lede muted">{{ t("adminScores.lede") }}</p>
+  </div>
+
+  @if (current.failed()) {
+  <p class="panel notice" role="alert">{{ t("adminScores.failed") }}</p>
+  } @else if (current.settled() && !current.season()) {
+  <p class="panel notice">{{ t("leaderboard.noSeason") }}</p>
+  } @else {
+  <section class="panel picks" [attr.aria-label]="t('adminScores.picks')">
+    <label class="field">
+      <span class="label">{{ t("header.season") }}</span>
+      <select
+        #seasonPicker
+        (change)="pick('season', seasonPicker.value, seasonPicker)"
+      >
+        @for (season of current.seasons(); track season.number) {
+        <option
+          [value]="season.number"
+          [selected]="season.number === current.season()?.number"
+        >
+          {{ season.name }}
+        </option>
+        }
+      </select>
+    </label>
+    <label class="field">
+      <span class="label">{{ t("adminScores.match") }}</span>
+      <select
+        #matchPicker
+        (change)="pick('match', matchPicker.value, matchPicker)"
+      >
+        @for (number of matchNumbers(); track number) {
+        <option [value]="number" [selected]="number === matchNumber()">
+          {{ t("matches.match", { match: number }) }}
+        </option>
+        }
+      </select>
+    </label>
+    <label class="field">
+      <span class="label">{{ t("adminScores.game") }}</span>
+      <select #gamePicker (change)="pick('game', gamePicker.value, gamePicker)">
+        @for (number of gameNumbers(); track number) {
+        <option [value]="number" [selected]="number === gameNumber()">
+          {{ t("match.game", { game: number }) }}
+        </option>
+        }
+      </select>
+    </label>
+    <label class="field">
+      <span class="label">{{ t("adminScores.date") }}</span>
+      <input
+        #datePicker
+        type="date"
+        [value]="matchDate()"
+        (change)="setDate(datePicker.value)"
+      />
+    </label>
+    <div class="field">
+      <span class="label">{{ t("adminScores.status") }}</span>
+      <span [class]="'pill state ' + status()"
+        >{{ t("adminScores.states." + status()) }}</span
+      >
+    </div>
+  </section>
+
+  @if (loaded.error() || rules.error()) {
+  <p class="panel notice" role="alert">{{ t("adminScores.failed") }}</p>
+  } @else if (loaded.hasValue() && rules.hasValue()) {
+  <section class="panel block" aria-labelledby="game-title">
+    <div class="block-head">
+      <h2 class="heading" id="game-title">
+        {{ t("match.game", { game: gameNumber() }) }} · {{ t("matches.match", {
+        match: matchNumber() }) }}
+      </h2>
+      <div class="tools">
+        <button
+          type="button"
+          class="button-ghost small-button"
+          [disabled]="busy()"
+          (click)="checkBonuses()"
+        >
+          {{ t("adminScores.check") }}
+        </button>
+        <button
+          type="button"
+          class="button-ghost small-button"
+          (click)="addNewPlayer()"
+        >
+          {{ t("adminScores.newPlayer") }}
+        </button>
+      </div>
+    </div>
+
+    @if (notRecorded().length > 0) {
+    <p class="muted small note">
+      {{ t("adminScores.notRecorded", { stats: notRecordedNames() }) }}
+    </p>
+    }
+
+    <div class="scroll">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">{{ t("standings.player") }}</th>
+            @for (stat of stats(); track stat) {
+            <th scope="col" class="num">
+              <abbr [attr.title]="t('stats.long.' + stat)"
+                >{{ t("stats.short." + stat) }}</abbr
+              >
+            </th>
+            }
+            <th scope="col" class="num">{{ t("standings.won") }}</th>
+            @for (bonus of bonuses(); track bonus.code) {
+            <th scope="col" class="num">
+              <abbr [attr.title]="bonus.label">{{ bonus.code }}</abbr>
+            </th>
+            }
+            <th scope="col" class="num">{{ t("adminScores.points") }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.key; let index = $index) { @let name =
+          nameOf(row, index);
+          <tr>
+            <td class="line">{{ index + 1 }}</td>
+            <td>
+              @if (row.player.kind === "new") {
+              <input
+                #riot
+                class="who"
+                [id]="'riot-' + row.key"
+                maxlength="100"
+                autocomplete="off"
+                [attr.aria-label]="t('adminScores.newPlayerLabel', { line: index + 1 })"
+                [placeholder]="t('adminPlayers.riotIdHint')"
+                [value]="row.player.riotId"
+                (input)="typeRiotId(row.key, riot.value)"
+              />
+              } @else {
+              <select
+                #who
+                class="who"
+                [attr.aria-label]="t('adminScores.playerLabel', { line: index + 1 })"
+                (change)="pickPlayer(row.key, who.value)"
+              >
+                <option value="" [selected]="row.player.kind === 'none'">
+                  —
+                </option>
+                @for (player of players(); track player.id) {
+                <option
+                  [value]="player.id"
+                  [selected]="row.player.kind === 'known' && row.player.playerId === player.id"
+                >
+                  {{ player.riotId }}
+                </option>
+                }
+              </select>
+              }
+            </td>
+            @for (stat of stats(); track stat) {
+            <td class="num">
+              <input
+                #box
+                class="stat"
+                autocomplete="off"
+                [attr.inputmode]="decimals(stat) ? 'decimal' : 'numeric'"
+                [attr.aria-label]="t('stats.long.' + stat) + ', ' + name"
+                [attr.aria-invalid]="invalid(row, stat)"
+                [value]="row.stats[stat] ?? ''"
+                [placeholder]="stat === 'PLACE' ? index + 1 : ''"
+                (input)="typeStat(row.key, stat, box.value)"
+              />
+            </td>
+            }
+            <td class="num">
+              <input
+                #won
+                type="checkbox"
+                [attr.aria-label]="t('adminScores.wonLabel', { name })"
+                [checked]="row.win"
+                (change)="toggleWin(row.key, won.checked)"
+              />
+            </td>
+            @for (bonus of bonuses(); track bonus.code) {
+            <td class="num">
+              @if (manualCodes().has(bonus.code)) {
+              <input
+                #manual
+                type="checkbox"
+                [attr.aria-label]="bonus.label + ', ' + name"
+                [checked]="row.bonuses.includes(bonus.code)"
+                (change)="toggleBonus(row.key, bonus.code, manual.checked)"
+              />
+              } @else {
+              <input
+                type="checkbox"
+                disabled
+                [attr.aria-label]="t('adminScores.automaticLabel', { bonus: bonus.label, name })"
+                [checked]="row.bonuses.includes(bonus.code)"
+              />
+              }
+            </td>
+            }
+            <td class="num points">{{ language.points(row.points) }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <p class="muted small note">
+      @if (!loaded.value().saved && roster.hasValue() &&
+      roster.value().matchNumber !== null) { {{ t("adminScores.carried", {
+      match: roster.value().matchNumber, game: roster.value().gameNumber }) }} }
+      {{ t("adminScores.bonusHelp") }} @if (bonusLegend()) { {{
+      t("leaderboard.bonuses") }} {{ bonusLegend() }}. }
+    </p>
+  </section>
+
+  <p class="status" role="status" [class.failed]="outcome()?.ok === false">
+    {{ outcome()?.text }}
+  </p>
+
+  <div class="actions">
+    <button
+      type="button"
+      class="button-ghost"
+      [disabled]="busy() || !loaded.value().saved"
+      (click)="clear()"
+    >
+      {{ t("adminScores.clear") }}
+    </button>
+    <button type="button" class="button" [disabled]="busy()" (click)="save()">
+      {{ t("adminScores.save", { game: gameNumber() }) }}
+    </button>
+  </div>
+  } @else {
+  <p class="muted" aria-live="polite">{{ t("adminScores.loading") }}</p>
+  } }
+</ng-container>

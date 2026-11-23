@@ -2,6 +2,7 @@ package dev.irmahs.leaderboard.stats;
 
 import dev.irmahs.leaderboard.matches.Game;
 import dev.irmahs.leaderboard.players.Player;
+import dev.irmahs.leaderboard.seasons.BonusAward;
 import dev.irmahs.leaderboard.seasons.SeasonBonus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -77,6 +78,13 @@ public class GameStat {
     @JdbcTypeCode(SqlTypes.SMALLINT)
     private Integer clutches;
 
+    /** The player's place on the in-game scoreboard, 1 at the top. */
+    @JdbcTypeCode(SqlTypes.SMALLINT)
+    private Integer place;
+
+    @JdbcTypeCode(SqlTypes.SMALLINT)
+    private Integer honours;
+
     @Column(nullable = false)
     private boolean win;
 
@@ -106,11 +114,24 @@ public class GameStat {
         this.defuses = line.defuses();
         this.headshotPct = line.headshotPct();
         this.clutches = line.clutches();
+        this.place = line.place();
+        this.honours = line.honours();
         this.win = win;
     }
 
     public void award(SeasonBonus bonus) {
         bonuses.add(bonus);
+    }
+
+    /** Takes a bonus away, before the bonus itself is removed from its season. */
+    public void withdraw(SeasonBonus bonus) {
+        bonuses.remove(bonus);
+    }
+
+    /** Replaces the automatic bonuses the line won; the manual ones an admin ticked stay. */
+    public void reaward(Set<SeasonBonus> automatic) {
+        bonuses.removeIf(bonus -> bonus.getAward() != BonusAward.MANUAL);
+        bonuses.addAll(automatic);
     }
 
     public Integer getId() {
@@ -140,7 +161,9 @@ public class GameStat {
                 plants,
                 defuses,
                 headshotPct,
-                clutches);
+                clutches,
+                place,
+                honours);
     }
 
     public boolean isWin() {

@@ -1,0 +1,370 @@
+<ng-container *transloco="let t">
+  <div class="intro">
+    <div class="intro-text">
+      <span class="eyebrow"
+        >{{ t("admin.eyebrow", { org: current.organization()?.name ?? "" })
+        }}</span
+      >
+      <h1 class="display">{{ t("adminScoring.title") }}</h1>
+      <p class="lede muted">{{ t("adminScoring.lede") }}</p>
+    </div>
+    @if (current.seasons().length > 0) {
+    <label class="field">
+      <span class="label">{{ t("header.season") }}</span>
+      <select #picker (change)="pickSeason(picker.value)">
+        @for (season of current.seasons(); track season.number) {
+        <option
+          [value]="season.number"
+          [selected]="season.number === current.season()?.number"
+        >
+          {{ season.name }}
+        </option>
+        }
+      </select>
+    </label>
+    }
+  </div>
+
+  @if (current.failed() || rules.error()) {
+  <p class="panel notice" role="alert">{{ t("adminScoring.failed") }}</p>
+  } @else if (current.settled() && !current.season()) {
+  <p class="panel notice">{{ t("leaderboard.noSeason") }}</p>
+  } @else if (rules.hasValue()) { @let saved = rules.value(); @if (locked()) {
+  <p class="panel notice">
+    {{ t("adminScoring.locked", { season: current.season()?.name ?? "" }) }}
+  </p>
+  } @if (nextRules.hasValue() && nextRules.value()) {
+  <div class="panel notice next">
+    <p>{{ t("adminScoring.nextSaved") }}</p>
+    <button
+      type="button"
+      class="button-ghost small-button"
+      [disabled]="action.busy()"
+      (click)="discardNext()"
+    >
+      {{ t("adminScoring.discardNext") }}
+    </button>
+  </div>
+  }
+
+  <section class="panel block" aria-labelledby="stats-title">
+    <h2 class="heading" id="stats-title">{{ t("adminScoring.stats") }}</h2>
+    <p class="muted small note">{{ t("adminScoring.statsHelp") }}</p>
+    <div class="scroll">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">{{ t("adminScoring.stat") }}</th>
+            <th scope="col">{{ t("adminScoring.recordIt") }}</th>
+            <th scope="col">{{ t("adminScoring.pointsEach") }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (rule of saved.stats; track rule.stat) { @let typed =
+          statDraft(rule.stat); @let name = t("stats.long." + rule.stat);
+          <tr>
+            <th scope="row"><strong>{{ name }}</strong></th>
+            <td>
+              <label class="switch">
+                <input
+                  #box
+                  type="checkbox"
+                  role="switch"
+                  [disabled]="locked()"
+                  [checked]="typed.recorded"
+                  (change)="toggle(rule.stat, box.checked)"
+                />
+                <span class="visually-hidden"
+                  >{{ t("adminScoring.recordLabel", { stat: name }) }}</span
+                >
+                <span aria-hidden="true"
+                  >{{ t(typed.recorded ? "adminScoring.on" : "adminScoring.off")
+                  }}</span
+                >
+              </label>
+            </td>
+            <td>
+              @if (rule.countable) {
+              <input
+                #points
+                class="number"
+                inputmode="decimal"
+                autocomplete="off"
+                [disabled]="locked()"
+                [attr.aria-label]="t('adminScoring.pointsLabel', { stat: name })"
+                [value]="typed.points"
+                (input)="typeStatPoints(rule.stat, points.value)"
+              />
+              } @else {
+              <span class="muted"
+                >{{ t(rule.stat === "PLACE" ? "adminScoring.placeOnly" :
+                "adminScoring.shownOnly") }}</span
+              >
+              }
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel block" aria-labelledby="game-title">
+    <h2 class="heading" id="game-title">{{ t("adminScoring.perGame") }}</h2>
+    <div class="fields">
+      <label class="field">
+        <span class="label">{{ t("adminScoring.kdaPoints") }}</span>
+        <input
+          #kda
+          class="number"
+          inputmode="decimal"
+          autocomplete="off"
+          [disabled]="locked()"
+          [value]="draft()?.kdaPoints ?? ''"
+          (input)="typeKda(kda.value)"
+        />
+        <span class="muted small">{{ t("adminScoring.kdaHelp") }}</span>
+      </label>
+      <label class="field">
+        <span class="label">{{ t("adminScoring.pointsPerWin") }}</span>
+        <input
+          #win
+          class="number"
+          inputmode="numeric"
+          autocomplete="off"
+          [disabled]="locked()"
+          [value]="draft()?.pointsPerWin ?? ''"
+          (input)="typeWin(win.value)"
+        />
+      </label>
+    </div>
+  </section>
+
+  <section class="panel block" aria-labelledby="bonuses-title">
+    <h2 class="heading" id="bonuses-title">{{ t("adminScoring.bonuses") }}</h2>
+    <p class="muted small note">{{ t("adminScoring.bonusesHelp") }}</p>
+    <div class="scroll">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">{{ t("adminScoring.bonus") }}</th>
+            <th scope="col">{{ t("adminScoring.howWon") }}</th>
+            <th scope="col">{{ t("adminScoring.points") }}</th>
+            <th scope="col">
+              <span class="visually-hidden"
+                >{{ t("adminPlayers.actions") }}</span
+              >
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (bonus of saved.bonuses; track bonus.code) { @let typed =
+          bonusDraft(bonus.code);
+          <tr>
+            <th scope="row">
+              <strong>{{ bonus.code }}</strong>
+              <span class="muted"> · {{ bonus.label }}</span>
+            </th>
+            <td>
+              @if (bonus.award === "AT_LEAST") {
+              <span class="threshold">
+                {{ t("adminScoring.won.AT_LEAST", { stat: t("stats.long." +
+                bonus.stat) }) }}
+                <input
+                  #threshold
+                  class="number small-number"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  [disabled]="locked()"
+                  [attr.aria-label]="t('adminScoring.thresholdLabel', { code: bonus.code })"
+                  [value]="typed.threshold"
+                  (input)="typeBonus(bonus.code, { threshold: threshold.value })"
+                />
+              </span>
+              } @else {
+              <span class="muted"
+                >{{ t("adminScoring.won." + bonus.award, { stat: bonus.stat ?
+                t("stats.long." + bonus.stat) : "" }) }}</span
+              >
+              }
+            </td>
+            <td>
+              <input
+                #bonusPoints
+                class="number"
+                inputmode="numeric"
+                autocomplete="off"
+                [disabled]="locked()"
+                [attr.aria-label]="t('adminScoring.bonusPointsLabel', { code: bonus.code })"
+                [value]="typed.points"
+                (input)="typeBonus(bonus.code, { points: bonusPoints.value })"
+              />
+            </td>
+            <td>
+              <button
+                type="button"
+                class="button-ghost small-button"
+                [disabled]="action.busy() || locked() || changed()"
+                (click)="removeBonus(bonus)"
+              >
+                {{ t("adminScoring.remove") }}<span class="visually-hidden">
+                  {{ bonus.code }}</span
+                >
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (!locked()) { @let added = newBonus();
+    <form class="new-bonus" (submit)="addBonus($event)">
+      <h3 class="subheading">{{ t("adminScoring.newBonus") }}</h3>
+      <div class="fields">
+        <label class="field">
+          <span class="label">{{ t("adminScoring.bonusName") }}</span>
+          <input
+            #label
+            name="label"
+            autocomplete="off"
+            [attr.maxlength]="maxBonusLabel"
+            [placeholder]="t('adminScoring.bonusNameHint')"
+            [value]="added.label"
+            (input)="typeNewBonus({ label: label.value })"
+          />
+        </label>
+        <label class="field">
+          <span class="label">{{ t("adminScoring.awardedTo") }}</span>
+          <select #award name="award" (change)="pickNewBonusAward(award.value)">
+            @for (each of customAwards; track each) {
+            <option [value]="each" [selected]="added.award === each">
+              {{ t("adminScoring.awards." + each) }}
+            </option>
+            }
+          </select>
+        </label>
+        @if (added.award !== "MANUAL") {
+        <label class="field">
+          <span class="label">{{ t("adminScoring.ofStat") }}</span>
+          <select #stat name="stat" (change)="pickNewBonusStat(stat.value)">
+            <option value="" [selected]="added.stat === ''">
+              {{ t("adminScoring.chooseStat") }}
+            </option>
+            @for (each of recordedStats(); track each) {
+            <option [value]="each" [selected]="added.stat === each">
+              {{ t("stats.long." + each) }}
+            </option>
+            }
+          </select>
+        </label>
+        } @if (added.award === "AT_LEAST") {
+        <label class="field">
+          <span class="label">{{ t("adminScoring.atLeast") }}</span>
+          <input
+            #reach
+            name="threshold"
+            class="number"
+            inputmode="decimal"
+            autocomplete="off"
+            [value]="added.threshold"
+            (input)="typeNewBonus({ threshold: reach.value })"
+          />
+        </label>
+        }
+        <label class="field">
+          <span class="label">{{ t("adminScoring.points") }}</span>
+          <input
+            #worth
+            name="points"
+            class="number"
+            inputmode="numeric"
+            autocomplete="off"
+            [value]="added.points"
+            (input)="typeNewBonus({ points: worth.value })"
+          />
+        </label>
+      </div>
+      <div class="row">
+        <button
+          type="submit"
+          class="button-ghost"
+          [disabled]="action.busy() || changed()"
+        >
+          {{ t("adminScoring.addBonus") }}
+        </button>
+        @if (changed()) {
+        <span class="muted small">{{ t("adminScoring.saveFirst") }}</span>
+        }
+      </div>
+    </form>
+    }
+  </section>
+
+  <section class="panel block" aria-labelledby="formula-title">
+    <h2 class="heading" id="formula-title">{{ t("adminScoring.formula") }}</h2>
+    <p class="muted small note">{{ t("adminScoring.formulaHelp") }}</p>
+    <ul class="formula">
+      @for (term of formula(); track $index) {
+      <li class="pill term" [class.win]="term.win">{{ term.text }}</li>
+      }
+    </ul>
+  </section>
+
+  <p
+    class="status"
+    role="status"
+    [class.failed]="action.outcome()?.ok === false"
+  >
+    {{ action.outcome()?.text }}
+  </p>
+
+  @if (!locked()) {
+  <fieldset class="apply">
+    <legend class="label">{{ t("adminScoring.applyTo") }}</legend>
+    <label class="choice">
+      <input
+        type="radio"
+        name="applyTo"
+        value="current"
+        [checked]="applyTo() === 'current'"
+        (change)="applyTo.set('current')"
+      />
+      {{ t("adminScoring.applyCurrent", { season: current.season()?.name ?? ""
+      }) }}
+    </label>
+    <label class="choice">
+      <input
+        type="radio"
+        name="applyTo"
+        value="next"
+        [checked]="applyTo() === 'next'"
+        (change)="applyTo.set('next')"
+      />
+      {{ t("adminScoring.applyNext") }}
+    </label>
+  </fieldset>
+  }
+
+  <div class="actions">
+    <button
+      type="button"
+      class="button-ghost"
+      [disabled]="action.busy() || locked()"
+      (click)="useDefaults()"
+    >
+      {{ t("adminScoring.useDefaults") }}
+    </button>
+    <button
+      type="button"
+      class="button"
+      [disabled]="action.busy() || locked() || !changed()"
+      (click)="save()"
+    >
+      {{ t("adminScoring.save") }}
+    </button>
+  </div>
+  } @else {
+  <p class="muted" aria-live="polite">{{ t("adminScoring.loading") }}</p>
+  }
+</ng-container>

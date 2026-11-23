@@ -1,0 +1,76 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.intro-text {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 760px;
+}
+
+.notice {
+  margin: 0;
+  padding: 24px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+  gap: 22px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 210px;
+  padding: 22px;
+  box-sizing: border-box;
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.status.next {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent);
+}
+
+.match-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 40px;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.facts {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  font-size: 14px;
+}
+
+.name {
+  color: var(--text);
+}
+
+.view {
+  margin-top: auto;
+  min-height: 44px;
+  font-size: 14px;
+}

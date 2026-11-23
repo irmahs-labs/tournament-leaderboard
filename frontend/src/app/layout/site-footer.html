@@ -1,0 +1,42 @@
+<footer class="foot" *transloco="let t">
+  <div class="inner">
+    @if (organization(); as org) {
+    <div class="row">
+      <span class="org">{{ fullName(org) }}</span>
+    </div>
+    @if (links().length > 0) {
+    <nav
+      class="links"
+      [attr.aria-label]="t('footer.socialLabel', { org: org.name })"
+    >
+      @for (link of links(); track link.site) {
+      <a [href]="link.address" rel="noopener" target="_blank"
+        >{{ t("footer.social." + link.site) }}</a
+      >
+      }
+    </nav>
+    } }
+    <div class="credit" [class.ruled]="organization()">
+      <p class="line">
+        Tournament Leaderboard · {{ t("footer.createdBy") }}
+        <a class="strong" href="https://irmahs.dev">Irma HS</a>
+      </p>
+      <nav class="links" [attr.aria-label]="t('footer.legalLabel')">
+        <a routerLink="/help">{{ t("footer.help") }}</a>
+        @for (page of legalPages; track page) {
+        <a [routerLink]="['/', page]">{{ t("footer.legal." + page) }}</a>
+        }
+      </nav>
+      <p class="links">
+        <a href="https://github.com/irmahs-labs/tournament-leaderboard"
+          >GitHub</a
+        >
+        <a [href]="'mailto:' + contact" [attr.title]="contact"
+          >{{ t("footer.contact") }}<span class="visually-hidden">
+            {{ contact }}</span
+          ></a
+        >
+      </p>
+    </div>
+  </div>
+</footer>

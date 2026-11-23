@@ -1,0 +1,157 @@
+<ng-container *transloco="let t">
+  <div class="intro-text">
+    <span class="eyebrow">{{ t("platform.eyebrow") }}</span>
+    <h1 class="display">{{ t("platform.title") }}</h1>
+    <p class="lede muted">{{ t("platform.lede") }}</p>
+  </div>
+
+  @if (list.error()) {
+  <p class="panel notice" role="alert">{{ t("platform.loadFailed") }}</p>
+  } @else if (list.hasValue()) {
+  <div class="tiles">
+    <div class="panel tile">
+      <span class="label">{{ t("platform.total") }}</span>
+      <strong class="number">{{ counts().total }}</strong>
+    </div>
+    <div class="panel tile">
+      <span class="label">{{ t("platform.active") }}</span>
+      <strong class="number">{{ counts().active }}</strong>
+    </div>
+    <div class="panel tile">
+      <span class="label">{{ t("platform.suspendedCount") }}</span>
+      <strong class="number">{{ counts().suspended }}</strong>
+      <span class="muted small">{{ t("platform.suspendedHelp") }}</span>
+    </div>
+    <div class="panel tile">
+      <span class="label">{{ t("platform.homePage") }}</span>
+      <strong class="number name">{{ featured()?.name ?? "–" }}</strong>
+      @if (featured()?.lastActivityAt; as at) {
+      <span class="muted small"
+        >{{ t("platform.savedOn", { date: language.moment(at) }) }}</span
+      >
+      }
+    </div>
+  </div>
+
+  <section class="panel block" aria-labelledby="all-title">
+    <div class="block-head">
+      <h2 class="heading" id="all-title">{{ t("platform.all") }}</h2>
+      <label class="field search">
+        <span class="label">{{ t("platform.search") }}</span>
+        <input
+          type="search"
+          [placeholder]="t('platform.searchHint')"
+          [value]="search()"
+          (input)="search.set(searchInput.value)"
+          #searchInput
+        />
+      </label>
+    </div>
+    <p
+      class="status"
+      role="status"
+      [class.failed]="action.outcome()?.ok === false"
+    >
+      {{ action.outcome()?.text }}
+    </p>
+    <div class="scroll">
+      <table class="cards table">
+        <thead>
+          <tr>
+            <th scope="col">{{ t("platform.organisation") }}</th>
+            <th scope="col">{{ t("platform.owner") }}</th>
+            <th scope="col">{{ t("platform.created") }}</th>
+            <th scope="col">{{ t("platform.lastActivity") }}</th>
+            <th scope="col" class="num">{{ t("platform.members") }}</th>
+            <th scope="col">{{ t("platform.status") }}</th>
+            <th scope="col">
+              <span class="visually-hidden"
+                >{{ t("adminPlayers.actions") }}</span
+              >
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (org of shown(); track org.slug) {
+          <tr [class.off]="org.status === 'SUSPENDED'">
+            <td>
+              <div class="org">
+                <span class="logo" aria-hidden="true"
+                  >{{ initials(org.name) }}</span
+                >
+                <div>
+                  @if (org.status === "ACTIVE") {
+                  <a class="strong" [routerLink]="['/org', org.slug]"
+                    >{{ org.name }}</a
+                  >
+                  } @else {
+                  <strong>{{ org.name }}</strong>
+                  }
+                  <span class="muted slug">/org/{{ org.slug }}</span>
+                </div>
+              </div>
+            </td>
+            <td [attr.data-label]="t('platform.owner')">
+              {{ org.ownerEmail ?? "–" }}
+            </td>
+            <td class="nowrap" [attr.data-label]="t('platform.created')">
+              {{ org.createdAt ? language.moment(org.createdAt) : "–" }}
+            </td>
+            <td [attr.data-label]="t('platform.lastActivity')">
+              {{ org.lastActivityAt ? language.moment(org.lastActivityAt) :
+              t("platform.noGames") }}
+            </td>
+            <td class="num" [attr.data-label]="t('platform.members')">
+              {{ org.members }}
+            </td>
+            <td [attr.data-label]="t('platform.status')">
+              <div class="pills">
+                <span
+                  class="pill"
+                  [class.good]="org.status === 'ACTIVE'"
+                  [class.warn]="org.status === 'SUSPENDED'"
+                  >{{ t("platform.state." + org.status) }}</span
+                >
+                @if (org.featured) {
+                <span class="pill home">{{ t("platform.onHomePage") }}</span>
+                }
+              </div>
+            </td>
+            <td class="end">
+              <button
+                type="button"
+                class="button-ghost small-button"
+                [disabled]="action.busy()"
+                (click)="toggle(org)"
+              >
+                {{ t(org.status === "ACTIVE" ? "platform.suspend" :
+                "platform.reactivate") }}<span class="visually-hidden">
+                  {{ org.name }}</span
+                >
+              </button>
+              <button
+                type="button"
+                class="button-ghost small-button danger"
+                [disabled]="action.busy()"
+                (click)="remove(org)"
+              >
+                {{ t("platform.delete") }}<span class="visually-hidden">
+                  {{ org.name }}</span
+                >
+              </button>
+            </td>
+          </tr>
+          } @empty {
+          <tr>
+            <td colspan="7" class="muted">{{ t("platform.none") }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="muted small">{{ t("platform.help") }}</p>
+  </section>
+  } @else {
+  <p class="muted" aria-live="polite">{{ t("platform.loading") }}</p>
+  }
+</ng-container>

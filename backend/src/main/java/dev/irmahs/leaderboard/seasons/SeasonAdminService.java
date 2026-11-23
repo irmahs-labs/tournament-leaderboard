@@ -1,21 +1,20 @@
 package dev.irmahs.leaderboard.seasons;
 
+import dev.irmahs.leaderboard.events.AdminChanged;
 import dev.irmahs.leaderboard.organizations.OrganizationService;
 import dev.irmahs.leaderboard.seasons.Season.GameRange;
-import dev.irmahs.leaderboard.seasons.SeasonService.RulesView;
 import dev.irmahs.leaderboard.seasons.SeasonService.SeasonView;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.UUID;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-/** The admin Seasons screen: start a season, edit one, and the Record switches of Scoring. */
+/** The admin Seasons screen: start a season, and edit one. */
 @Service
 @Transactional
 public class SeasonAdminService {
@@ -27,23 +26,44 @@ public class SeasonAdminService {
     private final OrganizationService organizations;
     private final SeasonRepository seasons;
     private final SeasonService reader;
+    private final NextSeasonRules nextSeason;
+    private final ApplicationEventPublisher events;
 
-    SeasonAdminService(OrganizationService organizations, SeasonRepository seasons, SeasonService reader) {
+    SeasonAdminService(
+            OrganizationService organizations,
+            SeasonRepository seasons,
+            SeasonService reader,
+            NextSeasonRules nextSeason,
+            ApplicationEventPublisher events) {
         this.organizations = organizations;
         this.seasons = seasons;
         this.reader = reader;
+        this.nextSeason = nextSeason;
+        this.events = events;
     }
 
     /**
-     * Starts the organisation's next season, numbered after its latest. It takes the rules of the
-     * season it copies, or the platform defaults; what the request leaves out comes from the same
-     * place.
+     * Starts the organisation's next season, numbered after its latest. It takes the rules saved
+     * for the next season (which are then used up), the rules of the season it copies, or the
+     * platform defaults; its shape comes from the season it copies, or the platform defaults.
      *
-     * @throws ResponseStatusException 400 when the details are wrong, 404 when the season to copy
-     *     doesn't exist
+     * @throws ResponseStatusException 400 when the details are wrong or both kinds of rules are
+     *     asked for, 404 when the season to copy doesn't exist, 409 when no rules are saved for the
+     *     next season
      */
     public SeasonView start(String slug, NewSeason input) {
         UUID organizationId = organizations.requireActive(slug).getId();
+        boolean useSaved = Boolean.TRUE.equals(input.useNextSeasonRules());
+        if (useSaved && input.copyRulesFrom() != null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Use either the rules saved for the next season or another season's");
+        }
+        RulesSnapshot saved = useSaved
+                ? nextSeason
+                        .load(organizationId)
+                        .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.CONFLICT, "No rules are saved for the next season"))
+                : null;
         Season source = input.copyRulesFrom() == null ? null : reader.require(slug, input.copyRulesFrom());
         int number = seasons.findFirstByOrganizationIdOrderByNumberDesc(organizationId)
                         .map(Season::getNumber)
@@ -60,12 +80,17 @@ public class SeasonAdminService {
 
         Season season = new Season(organizationId, number, name, matchCount, games, pointsPerWin);
         season.setDates(input.startsOn(), input.endsOn());
-        if (source == null) {
+        if (saved != null) {
+            season.useRules(saved);
+            nextSeason.clear(organizationId);
+        } else if (source == null) {
             PlatformDefaults.apply(season);
         } else {
             season.copyRulesFrom(source);
         }
-        return SeasonView.of(seasons.save(season));
+        Season started = seasons.save(season);
+        events.publishEvent(new AdminChanged(organizationId, "SEASON_STARTED", Map.of("season", started.getName())));
+        return SeasonView.of(started);
     }
 
     /**
@@ -96,18 +121,9 @@ public class SeasonAdminService {
         } else if (Boolean.FALSE.equals(input.finished())) {
             season.reopen();
         }
+        events.publishEvent(
+                new AdminChanged(season.getOrganizationId(), "SEASON_EDITED", Map.of("season", season.getName())));
         return SeasonView.of(season);
-    }
-
-    /** The Record switches: exactly these stats are asked for in games entered from now on. */
-    public RulesView recordStats(String slug, int number, RecordedStats input) {
-        Season season = reader.require(slug, number);
-        Set<Stat> recorded = EnumSet.noneOf(Stat.class);
-        if (input.stats() != null) {
-            recorded.addAll(input.stats());
-        }
-        season.recordOnly(recorded);
-        return reader.rules(slug, number);
     }
 
     private static String checkName(String value) {
@@ -160,7 +176,8 @@ public class SeasonAdminService {
             Integer matchCount,
             Integer minGames,
             Integer maxGames,
-            Integer copyRulesFrom) {}
+            Integer copyRulesFrom,
+            Boolean useNextSeasonRules) {}
 
     /**
      * @param finished true closes the season, false reopens it, empty leaves it as it is
@@ -173,6 +190,4 @@ public class SeasonAdminService {
             Integer minGames,
             Integer maxGames,
             Boolean finished) {}
-
-    public record RecordedStats(List<Stat> stats) {}
 }

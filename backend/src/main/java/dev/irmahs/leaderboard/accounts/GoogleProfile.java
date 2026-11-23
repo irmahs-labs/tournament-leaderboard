@@ -6,4 +6,4 @@ package dev.irmahs.leaderboard.accounts;
  * @param sub Google's stable id for the account
  * @param email always one Google has verified
  */
-public record GoogleProfile(String sub, String email, String name, String picture) {}
+public record GoogleProfile(String sub, String email, String name) {}

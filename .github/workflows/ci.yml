@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, dev, migration]
+    branches: [main]
   pull_request:
 
 permissions:
@@ -10,7 +10,9 @@ permissions:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # A new push replaces a pull request's run, but never cuts off a run on main: it ends with a
+  # deploy, which must finish.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
@@ -37,7 +39,19 @@ jobs:
       - name: Check compose.prod.yaml
         run: docker compose -f compose.prod.yaml config --quiet --no-interpolate
 
-      # Runs once the SONAR_TOKEN secret exists; fails the job when the quality gate fails.
+      # Runs once the SONAR_TOKEN secret exists. On pull requests it fails the job when the quality
+      # gate fails, so nothing reaches main without passing it; pushes to main send the analysis
+      # without waiting, so the deploy of what already passed isn't held up.
       - name: SonarQube Cloud
         if: ${{ env.SONAR_TOKEN != '' }}
-        run: ./mvnw -B -ntp sonar:sonar -Dsonar.qualitygate.wait=true
+        run: >-
+          ./mvnw -B -ntp sonar:sonar
+          -Dsonar.qualitygate.wait=${{ github.event_name == 'pull_request' }}
+
+  # Every merge into main that passed the build and tests goes live; see deploy.yml.
+  deploy:
+    name: Deploy
+    needs: build
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit

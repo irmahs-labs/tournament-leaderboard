@@ -6,6 +6,7 @@ import dev.irmahs.leaderboard.matches.Game;
 import dev.irmahs.leaderboard.matches.Match;
 import dev.irmahs.leaderboard.organizations.Organization;
 import dev.irmahs.leaderboard.players.Player;
+import dev.irmahs.leaderboard.ranks.Rank;
 import dev.irmahs.leaderboard.seasons.BonusAward;
 import dev.irmahs.leaderboard.seasons.Season;
 import dev.irmahs.leaderboard.seasons.Season.GameRange;
@@ -67,16 +68,22 @@ class PublicApiIT {
     TransactionTemplate tx;
 
     UUID kestrelId;
+    UUID wrenId;
+    UUID heronId;
+    UUID ospreyId;
 
     @BeforeAll
     void seed() {
         tx.executeWithoutResult(status -> {
             UUID alsace = save(new Organization("alsace-arena", "Alsace Arena", "Spike Tournament"))
                     .getId();
-            Player kestrel = save(new Player(alsace, "Kestrel#EUW", null, null));
+            Rank radiant = save(new Rank("Radiant", 27, "#D6C07E"));
+            Player kestrel = save(new Player(alsace, "Kestrel#EUW", null, radiant));
             Player wren = save(new Player(alsace, "Wren#EUW", null, null));
             Player heron = save(new Player(alsace, "Heron#EUW", null, null));
             kestrelId = kestrel.getId();
+            wrenId = wren.getId();
+            heronId = heron.getId();
 
             Season first = save(todaysRules(alsace, 1));
             Game oldGame = save(new Game(save(new Match(first, 1, LocalDate.of(2025, 3, 6))), 1));
@@ -88,8 +95,8 @@ class PublicApiIT {
             save(new Match(third, 2, LocalDate.of(2099, 1, 1)));
             Game one = save(new Game(played, 1));
             Game two = save(new Game(played, 2));
-            StatLine withAdr =
-                    new StatLine(240, null, new BigDecimal("152.3"), null, null, 18, 12, 5, 60, 3, 2, 1, null, null);
+            StatLine withAdr = new StatLine(
+                    240, null, new BigDecimal("152.3"), null, null, 18, 12, 5, 60, 3, 2, 1, null, null, null, null);
             award(save(new GameStat(one, kestrel, withAdr, true)), third, "FB", "MP");
             award(save(new GameStat(one, wren, line(180, 12, 9, 8, 40, 1, 0, 1), false)), third, "LD", "MA", "MD");
             award(save(new GameStat(two, kestrel, line(200, 15, 14, 3, 55, 2, 1, 0), false)), third, "FB", "MP");
@@ -98,6 +105,7 @@ class PublicApiIT {
             UUID lyon = save(new Organization("lyon-game-bar", "Lyon Game Bar", "Friday Clash"))
                     .getId();
             Player osprey = save(new Player(lyon, "Osprey#EUW", null, null));
+            ospreyId = osprey.getId();
             Season lyonThird = save(todaysRules(lyon, 3));
             Game lyonGame = save(new Game(save(new Match(lyonThird, 1, LocalDate.of(2026, 10, 9))), 1));
             save(new GameStat(lyonGame, osprey, line(999, 40, 1, 20, 99, 9, 9, 9), true));
@@ -142,11 +150,11 @@ class PublicApiIT {
         assertThat(rules)
                 .bodyJson()
                 .extractingPath("$.stats[?(@.stat == 'DEATHS')]")
-                .isEqualTo(List.of(Map.of("stat", "DEATHS", "recorded", true, "effect", -1, "countable", true)));
+                .isEqualTo(List.of(Map.of("stat", "DEATHS", "recorded", true, "points", -1, "countable", true)));
         assertThat(rules)
                 .bodyJson()
                 .extractingPath("$.stats[?(@.stat == 'ADR')]")
-                .isEqualTo(List.of(Map.of("stat", "ADR", "recorded", true, "effect", 0, "countable", false)));
+                .isEqualTo(List.of(Map.of("stat", "ADR", "recorded", true, "points", 0, "countable", false)));
         assertThat(rules)
                 .bodyJson()
                 .extractingPath("$.bonuses[*].code")
@@ -154,8 +162,10 @@ class PublicApiIT {
         assertThat(rules)
                 .bodyJson()
                 .extractingPath("$.bonuses[1]")
-                .isEqualTo(Map.of(
-                        "code", "LD", "label", "Fewest deaths", "award", "LOWEST", "stat", "DEATHS", "points", 10));
+                .asMap()
+                .containsAllEntriesOf(Map.of(
+                        "code", "LD", "label", "Fewest deaths", "award", "LOWEST", "stat", "DEATHS", "points", 10))
+                .containsEntry("threshold", null);
     }
 
     @Test
@@ -168,6 +178,7 @@ class PublicApiIT {
                              "FIRST_BLOODS", "PLANTS", "DEFUSES"],
                  "standings": [
                    {"rank": 1, "riotId": "Kestrel#EUW", "games": 2, "wins": 1, "points": 669,
+                    "currentRank": {"name": "Radiant", "color": "#D6C07E"},
                     "totals": {"PERFORMANCE_SCORE": 440, "KILLS": 33, "DEATHS": 26, "ASSISTS": 8,
                                "ECON_RATING": 115, "FIRST_BLOODS": 5, "PLANTS": 3, "DEFUSES": 1},
                     "kda": 1.58, "bonuses": {"FB": 2, "MP": 2}},
@@ -175,6 +186,10 @@ class PublicApiIT {
                     "bonuses": {"LD": 1, "MA": 1, "MD": 1}},
                    {"rank": 3, "riotId": "Heron#EUW", "games": 1, "wins": 1, "points": 261}
                  ]}""");
+        assertThat(leaderboard)
+                .bodyJson()
+                .extractingPath("$.standings[1].currentRank")
+                .isNull();
         // An average is per game that recorded the stat: ADR was recorded in one of Kestrel's two games.
         assertThat(leaderboard)
                 .bodyJson()
@@ -207,6 +222,50 @@ class PublicApiIT {
                 .bodyJson()
                 .extractingPath("$.standings[*].riotId")
                 .isEqualTo(List.of("Wren#EUW"));
+    }
+
+    @Test
+    void listsTheOrganisationsOwnPlayers() {
+        assertThat(get("/api/orgs/alsace-arena/players"))
+                .hasStatusOk()
+                .bodyJson()
+                .extractingPath("$[*].riotId")
+                .isEqualTo(List.of("Heron#EUW", "Kestrel#EUW", "Wren#EUW"));
+    }
+
+    @Test
+    void showsAPlayersSeasonMatchByMatch() {
+        assertThat(get("/api/orgs/alsace-arena/seasons/3/players/" + kestrelId))
+                .hasStatusOk()
+                .bodyJson()
+                .isLenientlyEqualTo("""
+                        {"season": {"number": 3}, "players": 3, "ahead": null,
+                         "player": {"riotId": "Kestrel#EUW", "aliases": [],
+                                    "currentRank": {"name": "Radiant"}},
+                         "standing": {"rank": 1, "points": 669, "games": 2, "wins": 1},
+                         "matches": [{"matchNumber": 1, "matchDate": "2026-10-02",
+                                      "standing": {"rank": 1, "points": 669, "games": 2}}]}""");
+    }
+
+    @Test
+    void showsWhoIsJustAheadAndBy() {
+        assertThat(get("/api/orgs/alsace-arena/seasons/3/players/" + heronId))
+                .bodyJson()
+                .isLenientlyEqualTo(
+                        "{\"standing\": {\"rank\": 3}, \"ahead\": {\"riotId\": \"Wren#EUW\", \"points\": 2}}");
+    }
+
+    @Test
+    void aPlayerWhoDidntPlayTheSeasonHasNoStanding() {
+        assertThat(get("/api/orgs/alsace-arena/seasons/1/players/" + heronId))
+                .hasStatusOk()
+                .bodyJson()
+                .isLenientlyEqualTo("{\"standing\": null, \"ahead\": null, \"matches\": [], \"players\": 1}");
+    }
+
+    @Test
+    void anotherOrganisationsPlayerIsNotFound() {
+        assertThat(get("/api/orgs/alsace-arena/seasons/3/players/" + ospreyId)).hasStatus(404);
     }
 
     @Test
@@ -352,6 +411,8 @@ class PublicApiIT {
                 firstBloods,
                 plants,
                 defuses,
+                null,
+                null,
                 null,
                 null);
     }

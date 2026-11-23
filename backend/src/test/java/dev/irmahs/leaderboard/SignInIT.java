@@ -64,19 +64,18 @@ class SignInIT {
     }
 
     private static GoogleProfile profile(String sub, String email) {
-        return new GoogleProfile(sub, email, "Name of " + sub, "https://example.com/" + sub + ".png");
+        return new GoogleProfile(sub, email, "Name of " + sub);
     }
 
     @Test
     void theFirstSignInCreatesTheAccountAndTheNextOnesUpdateIt() {
         AppUser first = accounts.signIn(profile("google-1", "kes@example.com"));
-        AppUser second = accounts.signIn(new GoogleProfile("google-1", "kestrel@example.com", "Kestrel", null));
+        AppUser second = accounts.signIn(new GoogleProfile("google-1", "kestrel@example.com", "Kestrel"));
 
         assertThat(second.getId()).isEqualTo(first.getId());
         assertThat(second.getGoogleSub()).isEqualTo("google-1");
         assertThat(second.getEmail()).isEqualTo("kestrel@example.com");
         assertThat(second.getDisplayName()).isEqualTo("Kestrel");
-        assertThat(second.getAvatarUrl()).isNull();
         assertThat(second.getCreatedAt()).isNotNull();
         assertThat(second.isPlatformAdmin()).isFalse();
         assertThat(count("app_users")).isEqualTo(1);
@@ -149,9 +148,12 @@ class SignInIT {
                 .hasStatusOk()
                 .bodyJson()
                 .isStrictlyEqualTo("""
-                        {"email": "owner@example.com", "displayName": "Name of google-1",
-                         "avatarUrl": "https://example.com/google-1.png", "platformAdmin": false,
-                         "memberships": [{"slug": "alsace-arena", "name": "Alsace Arena", "role": "ADMIN", "owner": true}]}""");
+                        {"email": "owner@example.com", "displayName": "Name of google-1", "platformAdmin": false,
+                         "riotId": null, "discordUsername": null,
+                         "memberships": [{"slug": "alsace-arena", "name": "Alsace Arena", "role": "ADMIN", "owner": true,
+                                          "playerId": null}],
+                         "suspended": [{"slug": "closed-bar", "name": "Closed Bar", "role": "ADMIN", "owner": false,
+                                        "playerId": null}]}""");
     }
 
     @Test
@@ -170,6 +172,21 @@ class SignInIT {
                 .contains("client_id=test-client-id")
                 .contains("scope=openid%20email%20profile")
                 .contains("redirect_uri=http://localhost/login/oauth2/code/google");
+    }
+
+    @Test
+    void aFailedSignInComesBackToTheAngularSignInPage() {
+        MvcTestResult result = mvc.get()
+                .uri("/login/oauth2/code/google?error=access_denied&state=unknown")
+                .exchange();
+
+        assertThat(result).hasStatus(302);
+        assertThat(result.getResponse().getHeader("Location")).isEqualTo("/sign-in?error");
+    }
+
+    @Test
+    void springsOwnLoginPageIsOff() {
+        assertThat(mvc.get().uri("/login")).hasStatus(404);
     }
 
     @Test

@@ -15,6 +15,7 @@ import jakarta.persistence.MapKeyEnumerated;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -22,7 +23,6 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -69,6 +69,10 @@ public class Season {
     @Column(nullable = false)
     private int pointsPerWin;
 
+    /** What each game's KDA ratio is worth: (kills + assists) / max(deaths, 1) times this. */
+    @Column(nullable = false, precision = 6, scale = 2)
+    private BigDecimal kdaPoints = BigDecimal.ZERO;
+
     private Instant finishedAt;
 
     @ElementCollection
@@ -109,7 +113,7 @@ public class Season {
      *     percentage
      */
     public void setStatRule(Stat stat, StatRule rule) {
-        if (rule.effect() != 0 && !stat.isCountable()) {
+        if (rule.points().signum() != 0 && !stat.isCountable()) {
             throw new IllegalArgumentException(stat + " can be shown but can't count towards points");
         }
         statRules.put(stat, rule);
@@ -135,31 +139,69 @@ public class Season {
         finishedAt = null;
     }
 
+    /** Sets what a win and each game's KDA ratio are worth. */
+    public void setPoints(int pointsPerWin, BigDecimal kdaPoints) {
+        this.pointsPerWin = pointsPerWin;
+        this.kdaPoints = kdaPoints;
+    }
+
     /**
-     * The Record switches: the season asks for these stats in games entered from now on, and for
-     * no other. What each stat does to the points stays as it was.
+     * Gives the season the platform's rules: every stat rule, the points for a win and for KDA, and
+     * the platform's bonuses. A bonus it already has under the same code takes the platform's way of
+     * being won and its points; its other bonuses stay.
      */
-    public void recordOnly(Set<Stat> recorded) {
-        for (Stat stat : Stat.values()) {
-            StatRule rule = statRules.get(stat);
-            statRules.put(stat, new StatRule(recorded.contains(stat), rule == null ? 0 : rule.effect()));
-        }
+    public void usePlatformDefaults() {
+        PlatformDefaults.apply(this);
     }
 
     /** Takes another season's stat rules and bonuses, for a new season with no games yet. */
     public void copyRulesFrom(Season other) {
+        useRules(RulesSnapshot.of(other));
+    }
+
+    /** Takes these rules in place of its own, for a new season or a draft that's never saved. */
+    public void useRules(RulesSnapshot rules) {
         statRules.clear();
-        statRules.putAll(other.statRules);
+        statRules.putAll(rules.stats());
+        pointsPerWin = rules.pointsPerWin();
+        kdaPoints = rules.kdaPoints();
         bonuses.clear();
-        other.bonuses.forEach(bonus ->
-                addBonus(bonus.getCode(), bonus.getLabel(), bonus.getAward(), bonus.getStat(), bonus.getPoints()));
+        rules.bonuses()
+                .forEach(bonus -> addBonus(
+                        bonus.code(), bonus.label(), bonus.award(), bonus.stat(), bonus.points(), bonus.threshold()));
     }
 
     /** Adds a bonus at the end of the season's list. */
     public SeasonBonus addBonus(String code, String label, BonusAward award, Stat stat, int points) {
+        return addBonus(code, label, award, stat, points, null);
+    }
+
+    /**
+     * Adds a bonus at the end of the season's list.
+     *
+     * @param threshold for an {@link BonusAward#AT_LEAST} bonus, the value to reach; nothing otherwise
+     */
+    public SeasonBonus addBonus(
+            String code, String label, BonusAward award, Stat stat, int points, BigDecimal threshold) {
         SeasonBonus bonus = new SeasonBonus(this, code, label, award, stat, points, bonuses.size() + 1);
+        bonus.change(points, threshold);
         bonuses.add(bonus);
         return bonus;
+    }
+
+    /** Removes a bonus; the ones after it move up. Its awards go with it. */
+    public void removeBonus(SeasonBonus bonus) {
+        bonuses.remove(bonus);
+        for (int i = 0; i < bonuses.size(); i++) {
+            bonuses.get(i).moveTo(i + 1);
+        }
+    }
+
+    /** The bonus with this code, or nothing. */
+    public java.util.Optional<SeasonBonus> bonus(String code) {
+        return bonuses.stream()
+                .filter(bonus -> bonus.getCode().equalsIgnoreCase(code))
+                .findFirst();
     }
 
     public Integer getId() {
@@ -196,6 +238,10 @@ public class Season {
 
     public int getPointsPerWin() {
         return pointsPerWin;
+    }
+
+    public BigDecimal getKdaPoints() {
+        return kdaPoints;
     }
 
     public Instant getFinishedAt() {

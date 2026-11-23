@@ -1,0 +1,249 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  min-width: 0;
+}
+
+.intro-text {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 760px;
+}
+
+.block {
+  padding: 22px;
+  /* Lets the table scroll inside its panel rather than widen the page. */
+  min-width: 0;
+}
+
+.spaced {
+  margin-bottom: 18px;
+}
+
+.block-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  margin-bottom: 18px;
+}
+
+.start {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr));
+  align-items: end;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+input {
+  min-height: 44px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  width: 100%;
+  background: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--input-line);
+  border-radius: 0;
+  font: 500 15px var(--font-body);
+}
+
+input::placeholder {
+  color: var(--muted);
+}
+
+.search input {
+  min-width: min(260px, 100%);
+}
+
+.status {
+  margin: 0;
+  color: var(--good);
+  font-weight: 600;
+}
+
+.status.failed {
+  color: var(--danger);
+}
+
+.scroll {
+  /* Positioned, so the hidden labels inside the table scroll with it instead of widening the page. */
+  position: relative;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.table th {
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: var(--label-track);
+  border-bottom: 1px solid var(--head-line);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--row-line);
+  white-space: nowrap;
+}
+
+.table tbody tr:nth-child(even) {
+  background: var(--zebra);
+}
+
+.table tr.editing {
+  background: var(--accent-soft);
+}
+
+.table tr.editing td {
+  padding-inline: 8px;
+}
+
+.table tr.editing .form-cell {
+  /* The form wraps inside the row instead of widening the table past its panel. */
+  white-space: normal;
+  padding-block: 14px;
+}
+
+.plan-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  align-items: end;
+  gap: 12px;
+}
+
+.where-field {
+  grid-column: span 2;
+}
+
+.form-actions {
+  justify-content: flex-end;
+  grid-column: -2 / -1;
+}
+
+@media (max-width: 480px) {
+  .where-field,
+  .form-actions {
+    grid-column: 1 / -1;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.small-button {
+  min-height: 40px;
+  padding: 0 14px;
+  font-size: 13px;
+}
+
+.wide {
+  grid-column: span 2;
+}
+
+@media (max-width: 480px) {
+  .wide {
+    grid-column: auto;
+  }
+}
+
+.pair {
+  display: flex;
+  gap: 6px;
+}
+
+/* The start and end dates sit one above the other, so the row fits without scrolling. */
+.dates {
+  flex-direction: column;
+}
+
+.count {
+  width: 72px;
+  min-width: 72px;
+}
+
+.table tr.editing input.count {
+  width: 100%;
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.check input {
+  width: 18px;
+  min-height: 0;
+  height: 18px;
+  accent-color: var(--accent);
+}
+
+.pill.live {
+  color: var(--good);
+}
+
+select {
+  width: 100%;
+}
+
+.intro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.table th[scope="row"] {
+  color: var(--text);
+  font-size: 15px;
+  text-transform: none;
+  letter-spacing: normal;
+  border-bottom: 1px solid var(--row-line);
+}
+
+.where {
+  white-space: normal;
+  min-width: 140px;
+  max-width: 260px;
+  overflow-wrap: anywhere;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.small {
+  font-size: 13px;
+}
+
+.table tr.off td {
+  color: var(--muted);
+}
+
+.notice {
+  padding: 16px 18px;
+}

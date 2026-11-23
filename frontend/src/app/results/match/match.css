@@ -1,0 +1,183 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.crumbs {
+  font-size: 14px;
+}
+
+.crumbs a {
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.intro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.intro-text {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 760px;
+}
+
+.switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.switch button {
+  font-size: 14px;
+}
+
+.notice {
+  margin: 0;
+  padding: 24px;
+}
+
+.highlights {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 20px;
+}
+
+.mvp {
+  /* The name's size follows the tile's width. */
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 26px;
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.mvp .label {
+  color: inherit;
+  font-weight: 700;
+}
+
+.mvp-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  /* Big, but small enough that the whole name fits on one line, up to a point. */
+  font-size: max(
+    24px,
+    min(clamp(40px, 5vw, 56px), calc(100cqi / (var(--chars, 8) * 0.56)))
+  );
+  line-height: 0.95;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  overflow-wrap: anywhere;
+}
+
+.mvp-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-top: auto;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.mvp abbr {
+  text-decoration: none;
+}
+
+.leaders,
+.games {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.leader,
+.game {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px;
+  min-width: 0;
+}
+
+.leader-name {
+  font-size: 18px;
+  overflow-wrap: anywhere;
+}
+
+.leader-value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 1;
+  color: var(--accent-text);
+}
+
+.game {
+  gap: 8px;
+}
+
+.game-top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.game-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  text-transform: uppercase;
+}
+
+.block {
+  padding: 22px;
+}
+
+.block-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 18px;
+}
+
+@media (max-width: 720px) {
+  .highlights {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  margin-left: auto;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.toggle input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}

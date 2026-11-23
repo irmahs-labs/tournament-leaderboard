@@ -59,6 +59,41 @@ public class OrganizationMember {
         return new OrganizationMember(userId, organizationId, MemberRole.ADMIN, true);
     }
 
+    /** A player of the organisation, with no profile linked yet. */
+    public static OrganizationMember player(UUID userId, UUID organizationId) {
+        return new OrganizationMember(userId, organizationId, MemberRole.PLAYER, false);
+    }
+
+    /**
+     * Makes the member an admin or a player.
+     *
+     * @throws IllegalStateException for the owner, who is always an admin
+     */
+    public void changeRole(MemberRole newRole) {
+        if (owner && newRole != MemberRole.ADMIN) {
+            throw new IllegalStateException("The owner is always an admin");
+        }
+        this.role = newRole;
+    }
+
+    /** Hands ownership to this member, who must be an admin. */
+    public void takeOwnership() {
+        if (role != MemberRole.ADMIN) {
+            throw new IllegalStateException("Only an admin can own the organisation");
+        }
+        this.owner = true;
+    }
+
+    /** The former owner stays an admin. */
+    public void giveUpOwnership() {
+        this.owner = false;
+    }
+
+    /** Links the member to their player record, once an admin accepts their claim. */
+    public void linkPlayer(UUID player) {
+        this.playerId = player;
+    }
+
     public UUID getUserId() {
         return userId;
     }

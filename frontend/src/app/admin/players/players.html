@@ -1,0 +1,240 @@
+<ng-container *transloco="let t">
+  <div class="intro-text">
+    <span class="eyebrow"
+      >{{ t("admin.eyebrow", { org: current.organization()?.name ?? "" })
+      }}</span
+    >
+    <h1 class="display">{{ t("adminPlayers.title") }}</h1>
+    <p class="lede muted">{{ t("adminPlayers.lede") }}</p>
+  </div>
+
+  <section class="panel block" aria-labelledby="add-title">
+    <h2 class="heading spaced" id="add-title">{{ t("adminPlayers.add") }}</h2>
+    <form #form class="add" (submit)="add($event, form)">
+      <label class="field">
+        <span class="label">{{ t("adminPlayers.riotId") }}</span>
+        <input
+          name="riotId"
+          required
+          maxlength="100"
+          autocomplete="off"
+          [placeholder]="t('adminPlayers.riotIdHint')"
+        />
+      </label>
+      <label class="field">
+        <span class="label">{{ t("adminPlayers.discord") }}</span>
+        <input
+          name="discord"
+          maxlength="100"
+          autocomplete="off"
+          [placeholder]="t('adminPlayers.discordHint')"
+        />
+      </label>
+      <label class="field">
+        <span class="label">{{ t("adminPlayers.email") }}</span>
+        <input
+          name="email"
+          type="email"
+          maxlength="254"
+          autocomplete="off"
+          [placeholder]="t('adminPlayers.emailHint')"
+        />
+      </label>
+      <label class="field">
+        <span class="label">{{ t("adminPlayers.aliases") }}</span>
+        <input
+          name="aliases"
+          autocomplete="off"
+          [placeholder]="t('adminPlayers.aliasesHint')"
+        />
+      </label>
+      <label class="field">
+        <span class="label">{{ t("adminPlayers.rank") }}</span>
+        <select name="rank">
+          <option value="">{{ t("adminPlayers.unranked") }}</option>
+          @for (rank of ranks(); track rank.id) {
+          <option [value]="rank.id">{{ language.rank(rank.name) }}</option>
+          }
+        </select>
+      </label>
+      <button class="button" type="submit" [disabled]="busy()">
+        {{ t("adminPlayers.addButton") }}
+      </button>
+    </form>
+    <p class="status" role="status" [class.failed]="outcome()?.ok === false">
+      {{ outcome()?.text }}
+    </p>
+  </section>
+
+  <section class="panel block" aria-labelledby="all-title">
+    <div class="block-head">
+      <h2 class="heading" id="all-title">
+        {{ t("adminPlayers.all", { count: count() }) }}
+      </h2>
+      <label class="search">
+        <span class="visually-hidden">{{ t("adminPlayers.search") }}</span>
+        <input
+          #box
+          type="search"
+          [placeholder]="t('adminPlayers.search')"
+          (input)="search(box.value)"
+        />
+      </label>
+    </div>
+
+    @if (players.error()) {
+    <p class="muted" role="alert">{{ t("adminPlayers.failed") }}</p>
+    } @else if (players.hasValue()) { @if (players.value().length === 0) {
+    <p class="muted">
+      {{ query() ? t("adminPlayers.noMatch", { query: query() }) :
+      t("adminPlayers.none") }}
+    </p>
+    } @else {
+    <div class="scroll">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">{{ t("adminPlayers.riotId") }}</th>
+            <th scope="col">{{ t("adminPlayers.discord") }}</th>
+            <th scope="col">{{ t("adminPlayers.aliases") }}</th>
+            <th scope="col">{{ t("adminPlayers.rank") }}</th>
+            <th scope="col">
+              <span class="visually-hidden"
+                >{{ t("adminPlayers.actions") }}</span
+              >
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (player of players.value(); track player.id) { @if (editing() ===
+          player.id) {
+          <tr class="editing">
+            <td>
+              <input
+                #riotId
+                maxlength="100"
+                required
+                [attr.aria-label]="t('adminPlayers.riotId')"
+                [value]="player.riotId"
+                [readOnly]="player.linked"
+                [attr.title]="player.linked ? t('adminPlayers.linkedNote') : null"
+              />
+            </td>
+            <td>
+              <input
+                #discord
+                maxlength="100"
+                [attr.aria-label]="t('adminPlayers.discord')"
+                [value]="player.discordUsername ?? ''"
+                [readOnly]="player.linked"
+                [attr.title]="player.linked ? t('adminPlayers.linkedNote') : null"
+              />
+              <input
+                #email
+                type="email"
+                maxlength="254"
+                class="email-input"
+                [attr.aria-label]="t('adminPlayers.email')"
+                [placeholder]="t('adminPlayers.email')"
+                [value]="player.expectedEmail ?? ''"
+              />
+            </td>
+            <td>
+              <input
+                #aliases
+                [attr.aria-label]="t('adminPlayers.aliases')"
+                [value]="aliasesText(player.aliases)"
+              />
+            </td>
+            <td>
+              <select #rank [attr.aria-label]="t('adminPlayers.rank')">
+                <option value="" [selected]="!player.rank">
+                  {{ t("adminPlayers.unranked") }}
+                </option>
+                @for (option of ranks(); track option.id) {
+                <option
+                  [value]="option.id"
+                  [selected]="option.id === player.rank?.id"
+                >
+                  {{ language.rank(option.name) }}
+                </option>
+                }
+              </select>
+            </td>
+            <td>
+              <div class="actions">
+                <button
+                  type="button"
+                  class="button-ghost small-button"
+                  (click)="editing.set(null)"
+                >
+                  {{ t("adminPlayers.cancel") }}
+                </button>
+                <button
+                  type="button"
+                  class="button small-button"
+                  [disabled]="busy()"
+                  (click)="save(player, { riotId: riotId.value, discord: discord.value, aliases: aliases.value, rank: rank.value, email: email.value })"
+                >
+                  {{ t("adminPlayers.save") }}
+                </button>
+              </div>
+            </td>
+          </tr>
+          } @else {
+          <tr>
+            <td>
+              <strong class="player"
+                ><app-riot-id [value]="player.riotId"
+              /></strong>
+            </td>
+            <td>
+              {{ player.discordUsername ?? "–" }} @if (player.linked) {
+              <span class="muted small expected"
+                >{{ t("adminPlayers.linked") }}</span
+              >
+              } @if (player.expectedEmail; as email) {
+              <span class="muted small expected"
+                >{{ t("adminPlayers.waitingFor", { email }) }}</span
+              >
+              }
+            </td>
+            <td class="aliases">{{ aliasesText(player.aliases) || "–" }}</td>
+            <td>
+              @if (player.rank; as rank) {
+              <app-rank-pill [name]="rank.name" [color]="rank.color" fixed />
+              }
+            </td>
+            <td>
+              <button
+                type="button"
+                class="button-ghost small-button"
+                (click)="editing.set(player.id)"
+              >
+                {{ t("adminPlayers.edit") }}<span class="visually-hidden">
+                  {{ player.riotId }}</span
+                >
+              </button>
+              @if (platformAdmin() && !player.played) {
+              <button
+                type="button"
+                class="button-ghost small-button danger"
+                [disabled]="busy()"
+                (click)="remove(player)"
+              >
+                {{ t("adminPlayers.delete") }}<span class="visually-hidden">
+                  {{ player.riotId }}</span
+                >
+              </button>
+              }
+            </td>
+          </tr>
+          } }
+        </tbody>
+      </table>
+    </div>
+    } } @else {
+    <p class="muted" aria-live="polite">{{ t("adminPlayers.loading") }}</p>
+    }
+  </section>
+</ng-container>

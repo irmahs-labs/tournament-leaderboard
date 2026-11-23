@@ -35,7 +35,7 @@ class GoogleUserService implements OAuth2UserService<OidcUserRequest, OidcUser> 
             throw new OAuth2AuthenticationException(
                     new OAuth2Error("unverified_email", "Your Google email isn't verified", null));
         }
-        accounts.signIn(new GoogleProfile(user.getSubject(), user.getEmail(), user.getFullName(), user.getPicture()));
+        accounts.signIn(new GoogleProfile(user.getSubject(), user.getEmail(), user.getFullName()));
         return user;
     }
 }

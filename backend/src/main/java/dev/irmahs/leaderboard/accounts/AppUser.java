@@ -27,7 +27,10 @@ public class AppUser {
 
     private String displayName;
 
-    private String avatarUrl;
+    /** The Riot ID every linked player profile shows; nothing until one is linked or it's set. */
+    private String riotId;
+
+    private String discordUsername;
 
     @Column(name = "is_platform_admin", nullable = false)
     private boolean platformAdmin;
@@ -47,8 +50,21 @@ public class AppUser {
     void update(GoogleProfile profile, boolean platformAdmin) {
         this.email = profile.email();
         this.displayName = profile.name();
-        this.avatarUrl = profile.picture();
         this.platformAdmin = platformAdmin;
+    }
+
+    /** The Riot ID and Discord username that follow the person to every organisation. */
+    void identify(String riotId, String discordUsername) {
+        this.riotId = riotId;
+        this.discordUsername = discordUsername;
+    }
+
+    public String getRiotId() {
+        return riotId;
+    }
+
+    public String getDiscordUsername() {
+        return discordUsername;
     }
 
     public UUID getId() {
@@ -65,10 +81,6 @@ public class AppUser {
 
     public String getDisplayName() {
         return displayName;
-    }
-
-    public String getAvatarUrl() {
-        return avatarUrl;
     }
 
     public boolean isPlatformAdmin() {

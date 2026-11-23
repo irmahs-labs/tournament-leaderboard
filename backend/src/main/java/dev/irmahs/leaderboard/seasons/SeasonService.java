@@ -1,6 +1,7 @@
 package dev.irmahs.leaderboard.seasons;
 
 import dev.irmahs.leaderboard.organizations.OrganizationService;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -33,6 +34,11 @@ public class SeasonService {
                         () -> new ResponseStatusException(HttpStatus.NOT_FOUND, slug + " has no season " + number));
     }
 
+    /** The organisation's seasons themselves, newest first. */
+    public List<Season> newestFirst(UUID organizationId) {
+        return seasons.findByOrganizationIdOrderByNumber(organizationId).reversed();
+    }
+
     /** The organisation's seasons, oldest first. */
     public List<SeasonView> list(String slug) {
         return seasons
@@ -45,18 +51,20 @@ public class SeasonService {
 
     /** How the season counts points: each stat's rule, the bonuses, and the points for a win. */
     public RulesView rules(String slug, int number) {
-        Season season = require(slug, number);
-        List<StatRuleView> stats = season.getStatRules().entrySet().stream()
+        return rulesOf(RulesSnapshot.of(require(slug, number)));
+    }
+
+    /** Rules as the API shows them. */
+    public static RulesView rulesOf(RulesSnapshot rules) {
+        List<StatRuleView> stats = rules.stats().entrySet().stream()
                 .sorted(java.util.Map.Entry.comparingByKey())
                 .map(rule -> new StatRuleView(
                         rule.getKey(),
                         rule.getValue().recorded(),
-                        rule.getValue().effect(),
+                        Points.plain(rule.getValue().points()),
                         rule.getKey().isCountable()))
                 .toList();
-        List<BonusView> bonuses =
-                season.getBonuses().stream().map(BonusView::of).toList();
-        return new RulesView(season.getPointsPerWin(), stats, bonuses);
+        return new RulesView(rules.pointsPerWin(), Points.plain(rules.kdaPoints()), stats, rules.bonuses());
     }
 
     /**
@@ -86,10 +94,14 @@ public class SeasonService {
     }
 
     /**
-     * @param effect 1 adds to the points, -1 subtracts, 0 isn't counted
-     * @param countable false for averages and percentages, which can never count
+     * @param points what each unit is worth, negative to subtract; it counts only while recorded
+     * @param countable false for averages, percentages and the place, which can never count
      */
-    public record StatRuleView(Stat stat, boolean recorded, int effect, boolean countable) {}
+    public record StatRuleView(Stat stat, boolean recorded, BigDecimal points, boolean countable) {}
 
-    public record RulesView(int pointsPerWin, List<StatRuleView> stats, List<BonusView> bonuses) {}
+    /**
+     * @param kdaPoints what each game's KDA ratio, (kills + assists) / max(deaths, 1), is worth
+     */
+    public record RulesView(
+            int pointsPerWin, BigDecimal kdaPoints, List<StatRuleView> stats, List<BonusView> bonuses) {}
 }

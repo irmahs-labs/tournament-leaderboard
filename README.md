@@ -3,22 +3,20 @@
 Leaderboards, match stats, schedules and scoring for seasonal Valorant tournaments, run by
 organisations such as Alsace Arena's Spike Tournament.
 
-**Live site:** https://alsace-arena-spike-tournament.vercel.app/ (moving to
-https://tournament-leaderboard.irmahs.dev)
+**Live site:** https://tournament-leaderboard.irmahs.dev
 
 ## Repository layout
 
 | Folder | What it is |
 |---|---|
-| `legacy/` | The current live app: Next.js 16 on Supabase, deployed by Vercel with Root Directory `legacy`. See [`legacy/README.md`](legacy/README.md). |
-| `backend/` | The rewrite's API: Java 21, Spring Boot 4, PostgreSQL with Flyway. Its jar also serves the Angular app. |
-| `frontend/` | The rewrite's Angular 22 app, built by Maven into the backend jar. |
+| `backend/` | The API: Java 21, Spring Boot 4, PostgreSQL with Flyway. Its jar also serves the Angular app. |
+| `frontend/` | The Angular 22 app, built by Maven into the backend jar. |
 | `deploy/` | How it runs on the shared irmahs.dev server, with the root `Dockerfile` and `compose.prod.yaml`. See [`deploy/README.md`](deploy/README.md). |
+| `legacy/` | The old app, Next.js 16 on Supabase, which this one replaced. Asleep and frozen, kept for reference. See [`legacy/README.md`](legacy/README.md). |
 
-The legacy app is frozen: no more changes or builds. Its last deployment keeps running, and keeps taking scores, until the rewrite reaches parity and the
-site moves to `tournament-leaderboard.irmahs.dev`.
+Every merge into `main` that passes CI deploys the live site.
 
-## Building the rewrite
+## Building
 
 ```bash
 ./mvnw verify

@@ -1,0 +1,30 @@
+/* On top of the page's own 40px above and 72px below. The message sits in the middle. */
+:host {
+  display: flex;
+  justify-content: center;
+  padding-top: 56px;
+  padding-bottom: 48px;
+}
+
+.copy {
+  min-width: 0;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+}
+
+.code {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(96px, 20vw, 160px);
+  line-height: 0.85;
+  color: var(--accent-text);
+}
+
+.lede {
+  color: var(--muted);
+  font-size: 18px;
+}

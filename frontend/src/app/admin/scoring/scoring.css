@@ -1,0 +1,265 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+.intro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.intro-text {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 760px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 180px;
+}
+
+.notice {
+  margin: 0;
+  padding: 24px;
+}
+
+.block {
+  padding: 22px;
+  min-width: 0;
+}
+
+.note {
+  margin: 8px 0 16px;
+  max-width: 68ch;
+}
+
+.scroll {
+  position: relative;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.table thead th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: var(--label-track);
+  border-bottom: 1px solid var(--head-line);
+  white-space: nowrap;
+}
+
+.table tbody th {
+  text-align: left;
+  font-weight: 400;
+}
+
+.table tbody th,
+.table td {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--row-line);
+  white-space: nowrap;
+}
+
+.table tbody tr:nth-child(even) {
+  background: var(--zebra);
+}
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.switch input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.status {
+  margin: 0;
+  color: var(--good);
+  font-weight: 600;
+}
+
+.status.failed {
+  color: var(--danger);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.actions {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.fields {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 28px;
+}
+
+.fields .field {
+  max-width: 320px;
+}
+
+.number {
+  width: 96px;
+  min-height: 40px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  background: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--input-line);
+  border-radius: 0;
+  font: 500 15px var(--font-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.number:disabled {
+  opacity: 0.6;
+}
+
+.small-number {
+  width: 64px;
+}
+
+.threshold {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* The new bonus's name, styled like the selects beside it. */
+.new-bonus input:not(.number) {
+  min-height: 44px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  width: 100%;
+  background: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--input-line);
+  border-radius: 0;
+  font: 500 15px var(--font-body);
+}
+
+.new-bonus .number {
+  min-height: 44px;
+}
+
+.new-bonus .fields {
+  margin-top: 0;
+  align-items: flex-end;
+}
+
+.new-bonus {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--row-line);
+}
+
+.subheading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+  text-transform: uppercase;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+
+.small-button {
+  min-height: 40px;
+  padding: 0 14px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.formula {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.term {
+  font-size: 14px;
+}
+
+.term.win {
+  background: var(--accent-soft);
+}
+
+.next {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 18px;
+}
+
+.next p {
+  margin: 0;
+}
+
+.apply {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.apply legend {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.choice input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}

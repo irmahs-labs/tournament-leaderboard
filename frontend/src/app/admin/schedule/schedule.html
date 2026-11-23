@@ -1,0 +1,211 @@
+<ng-container *transloco="let t">
+  <div class="intro">
+    <div class="intro-text">
+      <span class="eyebrow"
+        >{{ t("admin.eyebrow", { org: current.organization()?.name ?? "" })
+        }}</span
+      >
+      <h1 class="display">{{ t("adminSchedule.title") }}</h1>
+      <p class="lede muted">{{ t("adminSchedule.lede") }}</p>
+    </div>
+    @if (current.seasons().length > 0) {
+    <label class="field">
+      <span class="label">{{ t("header.season") }}</span>
+      <select #picker (change)="pickSeason(picker.value)">
+        @for (season of current.seasons(); track season.number) {
+        <option
+          [value]="season.number"
+          [selected]="season.number === current.season()?.number"
+        >
+          {{ season.name }}
+        </option>
+        }
+      </select>
+    </label>
+    }
+  </div>
+
+  <p
+    class="status"
+    role="status"
+    [class.failed]="action.outcome()?.ok === false"
+  >
+    {{ action.outcome()?.text }}
+  </p>
+
+  @if (current.failed() || schedule.error()) {
+  <p class="panel notice" role="alert">{{ t("adminSchedule.failed") }}</p>
+  } @else if (current.settled() && !current.season()) {
+  <p class="panel notice">{{ t("leaderboard.noSeason") }}</p>
+  } @else if (schedule.hasValue()) { @let season = schedule.value(); @if
+  (season.finished) {
+  <p class="panel notice">
+    {{ t("adminSchedule.over", { season: season.name }) }}
+  </p>
+  }
+  <section class="panel block" aria-labelledby="matches-title">
+    <h2 class="heading spaced" id="matches-title">
+      {{ t("adminSchedule.matches", { season: season.name }) }}
+    </h2>
+    <div class="scroll">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">{{ t("adminSchedule.match") }}</th>
+            <th scope="col">{{ t("adminSchedule.when") }}</th>
+            <th scope="col">{{ t("adminSchedule.where") }}</th>
+            <th scope="col">{{ t("adminSchedule.replyBy") }}</th>
+            <th scope="col">{{ t("adminSchedule.places") }}</th>
+            <th scope="col">{{ t("adminScores.status") }}</th>
+            <th scope="col">
+              <span class="visually-hidden"
+                >{{ t("adminPlayers.actions") }}</span
+              >
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (match of season.matches; track match.number) { @if (editing()
+          === match.number) {
+          <tr class="editing">
+            <th scope="row">
+              {{ t("adminSchedule.matchNumber", { number: match.number }) }}
+            </th>
+            <td colspan="6" class="form-cell">
+              <div class="plan-form">
+                <label class="field">
+                  <span class="label">{{ t("adminSchedule.date") }}</span>
+                  <input #date type="date" [value]="match.date ?? ''" />
+                </label>
+                <label class="field">
+                  <span class="label">{{ t("adminSchedule.startTime") }}</span>
+                  <input
+                    #startTime
+                    type="time"
+                    [value]="match.startTime?.slice(0, 5) ?? ''"
+                  />
+                </label>
+                <label class="field where-field">
+                  <span class="label">{{ t("adminSchedule.where") }}</span>
+                  <input
+                    #location
+                    [attr.maxlength]="maxLocation"
+                    [placeholder]="t('adminSchedule.whereHint')"
+                    [value]="match.location ?? ''"
+                  />
+                </label>
+                <label class="field">
+                  <span class="label">{{ t("adminSchedule.replyBy") }}</span>
+                  <input #replyBy type="date" [value]="match.replyBy ?? ''" />
+                </label>
+                <label class="field">
+                  <span class="label">{{ t("adminSchedule.places") }}</span>
+                  <input
+                    #places
+                    class="count"
+                    type="number"
+                    min="2"
+                    max="40"
+                    [value]="match.places"
+                  />
+                </label>
+                <div class="actions form-actions">
+                  <button
+                    type="button"
+                    class="button-ghost small-button"
+                    (click)="editing.set(null)"
+                  >
+                    {{ t("adminPlayers.cancel") }}
+                  </button>
+                  <button
+                    type="button"
+                    class="button small-button"
+                    [disabled]="action.busy()"
+                    (click)="save(match, { date: date.value, startTime: startTime.value, location: location.value, replyBy: replyBy.value, places: places.value })"
+                  >
+                    {{ t("adminPlayers.save") }}
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+          } @else {
+          <tr [class.off]="match.status === 'CANCELLED'">
+            <th scope="row">
+              {{ t("adminSchedule.matchNumber", { number: match.number }) }}
+            </th>
+            <td>
+              {{ language.when({ date: match.date, startTime: match.startTime })
+              || "–" }}
+            </td>
+            <td class="where">{{ match.location ?? "–" }}</td>
+            <td>{{ match.replyBy ? language.day(match.replyBy) : "–" }}</td>
+            <td class="num">
+              @if (match.id !== null) { {{ t("adminSchedule.full", { confirmed:
+              match.confirmed, places: match.places }) }} @if (match.waiting) {
+              <span class="muted small"
+                >· {{ t("adminSchedule.waitingCount", { count: match.waiting })
+                }}</span
+              >
+              } } @else { – }
+            </td>
+            <td>
+              <span
+                class="pill"
+                [class.live]="match.status === 'PLANNED' && !match.played"
+                >{{ t(match.played ? "adminSchedule.played" : match.status ===
+                "CANCELLED" ? "adminSchedule.calledOffPill" : match.status ===
+                "PLANNED" ? (match.locked ? "adminSchedule.lockedPill" :
+                "adminSchedule.plannedPill") : "adminSchedule.notPlanned")
+                }}</span
+              >
+            </td>
+            <td>
+              <div class="actions">
+                @if (!season.finished && !match.played) {
+                <button
+                  type="button"
+                  class="button-ghost small-button"
+                  (click)="editing.set(match.number)"
+                >
+                  {{ t(match.id === null ? "adminSchedule.plan" :
+                  "adminPlayers.edit") }}<span class="visually-hidden">
+                    {{ t("adminSchedule.matchNumber", { number: match.number })
+                    }}</span
+                  >
+                </button>
+                } @if (match.id !== null && !match.played) {
+                <a
+                  class="button-ghost small-button"
+                  [routerLink]="['..', 'matches', match.id, 'roster']"
+                  >{{ t("adminSchedule.roster") }}<span class="visually-hidden">
+                    {{ t("adminSchedule.matchNumber", { number: match.number })
+                    }}</span
+                  ></a
+                >
+                } @if (match.id !== null && !match.played && !season.finished) {
+                <button
+                  type="button"
+                  class="button-ghost small-button"
+                  [disabled]="action.busy()"
+                  (click)="setCancelled(match, match.status !== 'CANCELLED')"
+                >
+                  {{ t(match.status === "CANCELLED" ? "adminSchedule.putBack" :
+                  "adminSchedule.callOff") }}<span class="visually-hidden">
+                    {{ t("adminSchedule.matchNumber", { number: match.number })
+                    }}</span
+                  >
+                </button>
+                }
+              </div>
+            </td>
+          </tr>
+          } }
+        </tbody>
+      </table>
+    </div>
+  </section>
+  } @else {
+  <p class="muted" aria-live="polite">{{ t("claim.loading") }}</p>
+  }
+</ng-container>

@@ -1,0 +1,121 @@
+<ng-container *transloco="let t">
+  <div class="intro-text">
+    <span class="eyebrow"
+      >{{ current.organization()?.name }}@if
+      (current.organization()?.tournamentName; as tournament) { · {{ tournament
+      }} }</span
+    >
+    <h1 class="display">{{ t("myMatches.title") }}</h1>
+    <p class="lede muted">{{ t("myMatches.lede") }}</p>
+  </div>
+
+  <p
+    class="status"
+    role="status"
+    [class.failed]="action.outcome()?.ok === false"
+  >
+    {{ action.outcome()?.text }}
+  </p>
+
+  @if (mine.error()) {
+  <section class="panel block" aria-labelledby="join-title">
+    <h2 class="heading" id="join-title">
+      {{ t("myMatches.notMember", { org: current.organization()?.name ?? "" })
+      }}
+    </h2>
+    <p class="muted">{{ t("myMatches.notMemberHelp") }}</p>
+    <a
+      class="button start"
+      [routerLink]="['/org', current.organization()?.slug, 'claim']"
+      >{{ t("myMatches.toClaim") }}</a
+    >
+  </section>
+  } @else if (mine.hasValue()) { @if (!mine.value().player) {
+  <section class="panel block" aria-labelledby="profile-title">
+    <h2 class="heading" id="profile-title">{{ t("myMatches.noProfile") }}</h2>
+    <p class="muted">{{ t("myMatches.noProfileHelp") }}</p>
+    <a
+      class="button start"
+      [routerLink]="['/org', current.organization()?.slug, 'claim']"
+      >{{ t("myMatches.toClaim") }}</a
+    >
+  </section>
+  } @else if (seasons().length === 0) {
+  <p class="panel notice muted">{{ t("myMatches.none") }}</p>
+  } @else {
+  <ul class="seasons">
+    @for (season of seasons(); track season.number) {
+    <li class="panel block" [attr.aria-labelledby]="'season-' + season.number">
+      <h2 class="heading" [id]="'season-' + season.number">
+        {{ season.name }}
+      </h2>
+      <ul class="matches">
+        @for (match of season.matches; track match.id) {
+        <li [class.off]="match.cancelled">
+          <div class="match-head">
+            <strong
+              >{{ t("adminSchedule.matchNumber", { number: match.number })
+              }}</strong
+            >
+            @if (match.cancelled) {
+            <span class="pill">{{ t("myMatches.calledOff") }}</span>
+            } @else if (match.status === "CONFIRMED") {
+            <span class="pill live">{{ t("myMatches.youreIn") }}</span>
+            } @else if (match.status === "WAITING") {
+            <span class="pill wait"
+              >{{ t("myMatches.waitingAt", { position: match.position })
+              }}</span
+            >
+            } @else if (match.status === "DECLINED") {
+            <span class="pill">{{ t("myMatches.cant") }}</span>
+            }
+          </div>
+          <p class="muted">
+            {{ language.when(match) || t("adminRoster.notDated") }}
+          </p>
+          <p class="muted small">
+            {{ t("adminSchedule.full", { confirmed: match.confirmed, places:
+            match.places }) }} @if (match.replyBy) { · {{
+            t("adminRoster.replyBy", { day: language.day(match.replyBy) }) }} }
+          </p>
+          @if (!match.cancelled) { @if (match.locked) {
+          <p class="muted small">{{ t("myMatches.locked") }}</p>
+          } @else {
+          <div class="answers">
+            @if (match.status !== "CONFIRMED" && match.status !== "WAITING") {
+            <button
+              type="button"
+              class="button small-button"
+              [disabled]="action.busy()"
+              (click)="answer(match, 'YES')"
+            >
+              {{ t("myMatches.imIn") }}<span class="visually-hidden">
+                {{ t("adminSchedule.matchNumber", { number: match.number })
+                }}</span
+              >
+            </button>
+            } @if (match.status !== "DECLINED") {
+            <button
+              type="button"
+              class="button-ghost small-button"
+              [disabled]="action.busy()"
+              (click)="answer(match, 'NO')"
+            >
+              {{ t("myMatches.cantMakeIt") }}<span class="visually-hidden">
+                {{ t("adminSchedule.matchNumber", { number: match.number })
+                }}</span
+              >
+            </button>
+            }
+          </div>
+          } }
+        </li>
+        }
+      </ul>
+    </li>
+    }
+  </ul>
+  } } @else {
+  <p class="muted" aria-live="polite">{{ t("claim.loading") }}</p>
+  }
+</ng-container>

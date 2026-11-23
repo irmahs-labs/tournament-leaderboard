@@ -1,0 +1,15 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  outline: none;
+  flex-grow: 1;
+  width: 100%;
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: 40px var(--gutter) 72px;
+  box-sizing: border-box;
+}

@@ -13,6 +13,16 @@ spring:
             client-id: ${GOOGLE_CLIENT_ID:}
             client-secret: ${GOOGLE_CLIENT_SECRET:}
             scope: openid, email, profile
+  lifecycle:
+    # Within compose.prod.yaml's stop_grace_period.
+    timeout-per-shutdown-phase: 20s
+  session:
+    # Signed out 30 days after the last request. The cookie lasts as long (SessionConfig), so
+    # closing the browser, or a phone dropping a tab in the background, doesn't sign anyone out.
+    timeout: 30d
+    jdbc:
+      # Flyway makes the tables (V2026_11_20_6__sessions.sql).
+      initialize-schema: never
   threads:
     virtual:
       enabled: true
@@ -29,6 +39,8 @@ spring:
 server:
   # Behind Caddy: build redirect URLs (Google sign-in) with https, not http.
   forward-headers-strategy: framework
+  # On stop, during a deploy: take no new requests and finish the ones under way.
+  shutdown: graceful
 
 leaderboard:
   access:

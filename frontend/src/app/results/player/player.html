@@ -1,0 +1,210 @@
+<ng-container *transloco="let t">
+  @if (current.failed() || profile.error()) {
+  <p class="panel notice" role="alert">{{ t("player.failed") }}</p>
+  } @else if (current.settled() && !current.season()) {
+  <p class="panel notice">{{ t("leaderboard.noSeason") }}</p>
+  } @else if (profile.hasValue()) { @let view = profile.value(); @let id =
+  splitRiotId(view.player.riotId);
+  <a class="back" [routerLink]="['..']" queryParamsHandling="preserve"
+    >← {{ t("player.allPlayers") }}</a
+  >
+
+  <section class="panel hero" [attr.aria-label]="id.name">
+    <div class="who">
+      <span class="initial" aria-hidden="true">{{ id.name.slice(0, 1) }}</span>
+      <div class="who-text">
+        <span class="eyebrow"
+          >{{ view.season.name }}@if (current.organization()?.tournamentName; as
+          tournament) { · {{ tournament }} }</span
+        >
+        <h1 class="display name">{{ id.name }}</h1>
+        <p class="muted">
+          <app-riot-id [value]="view.player.riotId" /> @if
+          (view.player.aliases.length) { · {{ t("players.also", { names:
+          view.player.aliases.join(", ") }) }} }
+        </p>
+      </div>
+      @if (view.player.currentRank; as rank) {
+      <app-rank-pill [name]="rank.name" [color]="rank.color" />
+      } @if (mine()) {
+      <span class="pill you">{{ t("mine.you") }}</span>
+      }
+    </div>
+
+    @if (mine()) { @if (editing()) {
+    <form class="edit" (submit)="$event.preventDefault(); saveMine(rank.value)">
+      <h2 class="heading">{{ t("mine.editTitle") }}</h2>
+      <div class="edit-fields">
+        <label class="field">
+          <span class="label">{{ t("adminPlayers.rank") }}</span>
+          <select #rank>
+            <option value="" [selected]="!view.player.currentRank">
+              {{ t("adminPlayers.unranked") }}
+            </option>
+            @for (option of ranks.hasValue() ? ranks.value() : []; track
+            option.id) {
+            <option
+              [value]="option.id"
+              [selected]="option.name === view.player.currentRank?.name"
+            >
+              {{ language.rank(option.name) }}
+            </option>
+            }
+          </select>
+        </label>
+      </div>
+      <p class="muted small">
+        {{ t("mine.identityNote") }}
+        <a routerLink="/account">{{ t("mine.identityLink") }}</a>
+      </p>
+      <div class="edit-actions">
+        <button class="button" type="submit" [disabled]="action.busy()">
+          {{ t("mine.save") }}
+        </button>
+        <button type="button" class="button-ghost" (click)="editing.set(false)">
+          {{ t("adminPlayers.cancel") }}
+        </button>
+      </div>
+    </form>
+    } @else {
+    <button
+      type="button"
+      class="button-ghost edit-open"
+      (click)="editing.set(true)"
+    >
+      {{ t("mine.edit") }}
+    </button>
+    } }
+    <p
+      class="status"
+      role="status"
+      [class.failed]="action.outcome()?.ok === false"
+    >
+      {{ action.outcome()?.text }}
+    </p>
+
+    @if (view.standing; as standing) {
+    <dl class="tiles">
+      <div>
+        <dt>{{ t("player.position") }}</dt>
+        <dd>
+          #{{ standing.rank }}
+          <span class="muted small"
+            >{{ t("player.ofPlayers", { count: view.players }) }}</span
+          >
+        </dd>
+      </div>
+      <div>
+        <dt>{{ t("player.total") }}</dt>
+        <dd>
+          {{ language.points(standing.points) }} @if (view.ahead; as ahead) {
+          <span class="muted small"
+            >{{ t("player.behind", { points: language.points(ahead.points),
+            name: splitRiotId(ahead.riotId).name }) }}</span
+          >
+          }
+        </dd>
+      </div>
+      @for (stat of averages(); track stat) {
+      <div>
+        <dt>{{ t("player.average", { stat: t("stats.long." + stat) }) }}</dt>
+        <dd>
+          {{ language.number(standing.averages[stat], stat === "FIRST_BLOODS" ?
+          2 : 0) }}
+        </dd>
+      </div>
+      }
+      <div>
+        <dt>{{ t("players.avgKda") }}</dt>
+        <dd>{{ language.number(standing.kda, 2) }}</dd>
+      </div>
+      <div>
+        <dt>{{ t("players.winRate") }}</dt>
+        <dd>{{ winRate(standing.wins, standing.games) }}</dd>
+      </div>
+      <div>
+        <dt>{{ t("player.gamesPlayed") }}</dt>
+        <dd>{{ standing.games }}</dd>
+      </div>
+    </dl>
+    } @else {
+    <p class="muted">
+      {{ t("player.notPlayed", { season: view.season.name }) }}
+    </p>
+    }
+  </section>
+
+  @if (view.matches.length) {
+  <section class="panel block" aria-labelledby="bars-title">
+    <h2 class="heading spaced" id="bars-title">{{ t("player.perMatch") }}</h2>
+    <ol class="bars">
+      @for (bar of bars(); track bar.match.matchNumber) {
+      <li>
+        <span class="bar-value"
+          >{{ language.points(bar.match.standing.points, 0) }}</span
+        >
+        <span
+          class="bar"
+          [class.best]="bar.best"
+          [style.height.px]="bar.height * 150"
+        ></span>
+        <span class="bar-label">M{{ bar.match.matchNumber }}</span>
+      </li>
+      }
+    </ol>
+  </section>
+
+  <section class="panel block" aria-labelledby="matches-title">
+    <h2 class="heading spaced" id="matches-title">{{ t("player.matches") }}</h2>
+    <div class="scroll">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">{{ t("player.match") }}</th>
+            <th scope="col">{{ t("player.date") }}</th>
+            <th scope="col" class="num">{{ t("player.games") }}</th>
+            @if (view.columns.includes("PERFORMANCE_SCORE")) {
+            <th scope="col" class="num">{{ t("player.avgPerf") }}</th>
+            }
+            <th scope="col" class="num">K / D / A</th>
+            <th scope="col" class="num">{{ t("player.won") }}</th>
+            <th scope="col" class="num">{{ t("player.place") }}</th>
+            <th scope="col" class="num">{{ t("player.points") }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (match of view.matches; track match.matchNumber) {
+          <tr>
+            <th scope="row">
+              <a
+                [routerLink]="['../../matches', match.matchNumber]"
+                queryParamsHandling="preserve"
+                >{{ t("matches.match", { match: match.matchNumber }) }}</a
+              >
+            </th>
+            <td>{{ match.matchDate ? language.day(match.matchDate) : "–" }}</td>
+            <td class="num">{{ match.standing.games }}</td>
+            @if (view.columns.includes("PERFORMANCE_SCORE")) {
+            <td class="num">
+              {{ language.number(match.standing.averages.PERFORMANCE_SCORE) }}
+            </td>
+            }
+            <td class="num">{{ kda(match) }}</td>
+            <td class="num">
+              {{ t("player.wonOf", { wins: match.standing.wins, games:
+              match.standing.games }) }}
+            </td>
+            <td class="num">#{{ match.standing.rank }}</td>
+            <td class="num">
+              <strong>{{ language.points(match.standing.points) }}</strong>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+  } } @else {
+  <p class="muted" aria-live="polite">{{ t("player.loading") }}</p>
+  }
+</ng-container>

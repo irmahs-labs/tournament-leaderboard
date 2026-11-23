@@ -1,12 +1,19 @@
 package dev.irmahs.leaderboard;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -28,6 +35,9 @@ class ApplicationIT {
     @Autowired
     MockMvcTester mvc;
 
+    @Autowired
+    MockMvc mockMvc;
+
     @Test
     void startsAndReportsHealthy() {
         assertThat(mvc.get().uri("/actuator/health"))
@@ -47,7 +57,68 @@ class ApplicationIT {
     }
 
     @Test
+    void streamsTheOnlineCountToAnyone() throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/online"))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        assertThat(result.getResponse().getContentType()).startsWith("text/event-stream");
+        assertThat(result.getResponse().getContentAsString())
+                .contains("event:online")
+                .containsPattern("data:\\d+");
+    }
+
+    @Test
     void servesTheAngularApp() {
         assertThat(mvc.get().uri("/index.html")).hasStatusOk().bodyText().contains("<app-root");
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+            strings = {
+                "/org/alsace-arena",
+                "/org/alsace-arena/matches",
+                "/org/alsace-arena/matches/3/4",
+                "/not-found",
+                "/platform",
+                "/account",
+                "/join",
+                "/join/K7QM-4FXP",
+                "/sign-in",
+                "/help",
+                "/legal",
+                "/privacy",
+                "/cookies",
+                "/terms"
+            })
+    void servesTheAngularAppForItsOwnAddresses(String address) {
+        assertThat(mvc.get().uri(address)).hasStatusOk().hasForwardedUrl("/index.html");
+    }
+
+    @Test
+    void leavesTheApiAlone() {
+        assertThat(mvc.get().uri("/api/orgs/nowhere")).hasStatus(404);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/nope", "/nope/deeper", "/org"})
+    void sendsABrowserOnAnUnknownAddressToTheNotFoundPage(String address) {
+        assertThat(mvc.get().uri(address).accept(MediaType.TEXT_HTML))
+                .hasStatus(404)
+                .hasForwardedUrl("/index.html");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/api/nope", "/nope.js", "/actuator/nope"})
+    void neverAnswersApiCallsAndFilesWithThePage(String address) {
+        assertThat(mvc.get().uri(address).accept(MediaType.TEXT_HTML, MediaType.ALL))
+                .hasForwardedUrl(null);
+    }
+
+    @Test
+    void answersAnUnknownAddressWithAProblemOutsideABrowser() {
+        assertThat(mvc.get().uri("/nope").accept(MediaType.APPLICATION_JSON))
+                .hasStatus(404)
+                .hasForwardedUrl(null);
     }
 }

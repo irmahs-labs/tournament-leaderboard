@@ -1,0 +1,248 @@
+<ng-container *transloco="let t">
+  <div class="intro-text">
+    <span class="eyebrow"
+      >{{ t("admin.eyebrow", { org: current.organization()?.name ?? "" })
+      }}</span
+    >
+    <h1 class="display">{{ t("adminBranding.title") }}</h1>
+    <p class="lede muted">
+      {{ t("adminBranding.lede", { org: current.organization()?.name ?? "" }) }}
+    </p>
+  </div>
+
+  @if (current.organization(); as org) {
+  <form #form class="layout" (submit)="save($event, form)">
+    <div class="column">
+      <section class="panel block" aria-labelledby="org-title">
+        <h2 class="heading spaced" id="org-title">
+          {{ t("adminBranding.organisation") }}
+        </h2>
+        <div class="fields">
+          <label class="field">
+            <span class="label">{{ t("adminBranding.name") }}</span>
+            <input
+              name="name"
+              required
+              [attr.maxlength]="limits.maxName"
+              [value]="org.name"
+            />
+          </label>
+          <label class="field">
+            <span class="label">{{ t("adminBranding.tournamentName") }}</span>
+            <input
+              name="tournamentName"
+              [attr.maxlength]="limits.maxName"
+              [value]="org.tournamentName ?? ''"
+              placeholder="Spike Tournament"
+            />
+          </label>
+          <label class="field wide">
+            <span class="label">{{ t("adminBranding.description") }}</span>
+            <input
+              name="description"
+              [attr.maxlength]="limits.maxDescription"
+              [value]="org.description ?? ''"
+            />
+            <span class="muted small"
+              >{{ t("adminBranding.descriptionHelp") }}</span
+            >
+          </label>
+          <div class="field wide">
+            <span class="label">{{ t("adminBranding.address") }}</span>
+            <code class="address">{{ address(org) }}</code>
+            <span class="muted small"
+              >{{ t("adminBranding.addressHelp") }}</span
+            >
+          </div>
+          <div
+            class="field wide"
+            role="group"
+            [attr.aria-label]="t('adminBranding.language')"
+          >
+            <span class="label" aria-hidden="true"
+              >{{ t("adminBranding.language") }}</span
+            >
+            <div class="toggle">
+              @for (code of ["en", "fr"]; track code) {
+              <button
+                type="button"
+                class="button-ghost small-button"
+                [class.on]="locale() === code"
+                [attr.aria-pressed]="locale() === code"
+                (click)="locale.set(code)"
+              >
+                {{ t("adminBranding.locale." + code) }}
+              </button>
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel block" aria-labelledby="logo-title">
+        <h2 class="heading spaced" id="logo-title">
+          {{ t("adminBranding.logo") }}
+        </h2>
+        <div class="logo-row">
+          @if (org.logo) {
+          <img class="logo" [src]="org.logo" alt="" width="72" height="72" />
+          } @else {
+          <span
+            class="logo initials"
+            aria-hidden="true"
+            [style.background]="shownAccent()"
+            [style.color]="onAccent()"
+            >{{ initials(org.name) }}</span
+          >
+          }
+          <div class="logo-actions">
+            <div class="row">
+              <label class="button small-button file">
+                {{ t("adminBranding.upload") }}
+                <input
+                  #file
+                  class="visually-hidden"
+                  type="file"
+                  [accept]="logoTypes"
+                  [disabled]="logoAction.busy()"
+                  (change)="upload(file)"
+                />
+              </label>
+              @if (org.logo) {
+              <button
+                type="button"
+                class="button-ghost small-button"
+                [disabled]="logoAction.busy()"
+                (click)="removeLogo()"
+              >
+                {{ t("adminBranding.removeLogo") }}
+              </button>
+              }
+            </div>
+            <span class="muted small">{{ t("adminBranding.logoHelp") }}</span>
+            <p
+              class="status"
+              role="status"
+              [class.failed]="logoAction.outcome()?.ok === false"
+            >
+              {{ logoAction.outcome()?.text }}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel block" aria-labelledby="accent-title">
+        <h2 class="heading spaced" id="accent-title">
+          {{ t("adminBranding.accent") }}
+        </h2>
+        <div class="swatches">
+          @for (swatch of swatches; track swatch) {
+          <button
+            type="button"
+            class="swatch"
+            [style.background]="swatch"
+            [class.on]="shownAccent().toUpperCase() === swatch"
+            [attr.aria-label]="t('adminBranding.useColour', { hex: swatch })"
+            (click)="pickAccent(swatch, hex)"
+          ></button>
+          }
+        </div>
+        <label class="field narrow">
+          <span class="label">{{ t("adminBranding.hex") }}</span>
+          <input
+            #hex
+            name="accentColor"
+            maxlength="7"
+            placeholder="#F0484E"
+            spellcheck="false"
+            [value]="org.accentColor ?? ''"
+            (input)="accent.set(hex.value)"
+          />
+        </label>
+        <dl class="ratios">
+          <div>
+            <dt>{{ t("adminBranding.buttonText") }}</dt>
+            <dd>
+              {{ ratio(ratios().button) }} : 1 · {{ t(ratios().button >= 4.5 ?
+              "adminBranding.pass" : "adminBranding.low") }}
+            </dd>
+          </div>
+          <div>
+            <dt>{{ t("adminBranding.asText") }}</dt>
+            <dd>
+              {{ t("adminBranding.shownAt", { raw: ratio(ratios().raw), shown:
+              ratio(ratios().text) }) }}
+            </dd>
+          </div>
+        </dl>
+        <p class="muted small">{{ t("adminBranding.accentHelp") }}</p>
+        <div class="preview" aria-hidden="true">
+          <span
+            class="preview-button"
+            [style.background]="shownAccent()"
+            [style.color]="onAccent()"
+            >{{ t("adminBranding.previewButton") }}</span
+          >
+          <span class="preview-line" [style.background]="shownAccent()"></span>
+        </div>
+      </section>
+
+      <section class="panel block" aria-labelledby="matches-title">
+        <h2 class="heading" id="matches-title">
+          {{ t("adminBranding.matches") }}
+        </h2>
+        <p class="muted small note">{{ t("adminBranding.matchesHelp") }}</p>
+        <label class="field narrow">
+          <span class="label">{{ t("adminBranding.playersPerMatch") }}</span>
+          <input
+            name="playersPerMatch"
+            type="number"
+            inputmode="numeric"
+            [attr.min]="limits.minPlayers"
+            [attr.max]="limits.maxPlayers"
+            [value]="org.playersPerMatch"
+          />
+        </label>
+      </section>
+
+      <section class="panel block" aria-labelledby="social-title">
+        <h2 class="heading" id="social-title">
+          {{ t("adminBranding.social") }}
+        </h2>
+        <p class="muted small note">
+          {{ t("adminBranding.socialHelp", { org: org.name }) }}
+        </p>
+        <div class="fields">
+          @for (site of sites; track site) {
+          <label class="field">
+            <span class="label">{{ t("adminBranding.site." + site) }}</span>
+            <input
+              type="url"
+              inputmode="url"
+              spellcheck="false"
+              [name]="site"
+              [attr.maxlength]="limits.maxLink"
+              [placeholder]="t('adminBranding.placeholder.' + site)"
+              [value]="org.socialLinks[site] ?? ''"
+            />
+          </label>
+          }
+        </div>
+      </section>
+
+      <div class="save">
+        <button class="button" type="submit" [disabled]="action.busy()">
+          {{ t("adminBranding.save") }}
+        </button>
+        <p
+          class="status"
+          role="status"
+          [class.failed]="action.outcome()?.ok === false"
+        >
+          {{ action.outcome()?.text }}
+        </p>
+      </div>
+    </div>
+  </form>
+  }
+</ng-container>

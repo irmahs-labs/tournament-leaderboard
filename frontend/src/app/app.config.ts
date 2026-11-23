@@ -1,9 +1,27 @@
+import { provideHttpClient, withFetch } from "@angular/common/http";
 import type { ApplicationConfig } from "@angular/core";
-import { provideBrowserGlobalErrorListeners } from "@angular/core";
-import { provideRouter } from "@angular/router";
+import { isDevMode, provideBrowserGlobalErrorListeners } from "@angular/core";
+import { provideRouter, withComponentInputBinding } from "@angular/router";
+import { provideTransloco } from "@jsverse/transloco";
 
 import { routes } from "./app.routes";
+import { LANGUAGES, startingLanguage } from "./shared/language";
+import { TranslocoHttpLoader } from "./shared/transloco-loader";
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideBrowserGlobalErrorListeners(), provideRouter(routes)],
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    provideHttpClient(withFetch()),
+    provideRouter(routes, withComponentInputBinding()),
+    provideTransloco({
+      config: {
+        availableLangs: [...LANGUAGES],
+        defaultLang: startingLanguage(),
+        fallbackLang: "en",
+        prodMode: !isDevMode(),
+        reRenderOnLangChange: true,
+      },
+      loader: TranslocoHttpLoader,
+    }),
+  ],
 };

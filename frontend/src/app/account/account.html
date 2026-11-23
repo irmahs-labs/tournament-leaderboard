@@ -1,0 +1,187 @@
+<ng-container *transloco="let t">
+  @if (session.me(); as me) {
+  <div class="intro-text">
+    <span class="eyebrow">{{ t("account.eyebrow") }}</span>
+    <h1 class="display">{{ t("account.title") }}</h1>
+    <p class="lede muted">{{ t("account.lede") }}</p>
+  </div>
+
+  <p
+    class="status"
+    role="status"
+    [class.failed]="action.outcome()?.ok === false"
+  >
+    {{ action.outcome()?.text }}
+  </p>
+
+  <section class="panel block" aria-labelledby="profile-title">
+    <h2 class="heading" id="profile-title">{{ t("account.profile") }}</h2>
+    <div class="who">
+      <span class="avatar" aria-hidden="true"
+        >{{ session.name().slice(0, 1).toUpperCase() }}</span
+      >
+      <div class="who-text">
+        <strong>{{ session.name() }}</strong>
+        <span class="muted small">{{ me.email }}</span>
+      </div>
+    </div>
+    <p class="muted small">{{ t("account.google") }}</p>
+    <button
+      type="button"
+      class="button-ghost align-start"
+      [disabled]="action.busy()"
+      (click)="signOut()"
+    >
+      {{ t("account.signOut") }}
+    </button>
+  </section>
+
+  <section class="panel block" aria-labelledby="identity-title">
+    <h2 class="heading" id="identity-title">{{ t("account.identity") }}</h2>
+    <p class="muted">{{ t("account.identityHelp") }}</p>
+    <form
+      class="identity"
+      (submit)="saveIdentity($event, riotId.value, discord.value)"
+    >
+      <label class="field">
+        <span class="label">{{ t("adminPlayers.riotId") }}</span>
+        <input
+          #riotId
+          name="riotId"
+          required
+          maxlength="100"
+          autocomplete="off"
+          [placeholder]="t('mine.riotIdHint')"
+          [value]="me.riotId ?? ''"
+        />
+      </label>
+      <label class="field">
+        <span class="label">{{ t("adminPlayers.discord") }}</span>
+        <input
+          #discord
+          name="discord"
+          maxlength="100"
+          autocomplete="off"
+          [value]="me.discordUsername ?? ''"
+        />
+      </label>
+      <button type="submit" class="button" [disabled]="identity.busy()">
+        {{ t("account.identitySave") }}
+      </button>
+    </form>
+    <p class="muted small">{{ t("mine.renameNote") }}</p>
+    <p
+      class="status"
+      role="status"
+      [class.failed]="identity.outcome()?.ok === false"
+    >
+      {{ identity.outcome()?.text }}
+    </p>
+  </section>
+
+  <section class="panel block" aria-labelledby="orgs-title">
+    <h2 class="heading" id="orgs-title">{{ t("account.organisations") }}</h2>
+    @if (me.memberships.length) {
+    <ul class="orgs">
+      @for (membership of me.memberships; track membership.slug) {
+      <li>
+        <span class="logo" aria-hidden="true"
+          >{{ initials(membership.name) }}</span
+        >
+        <div class="org-text">
+          <strong>{{ membership.name }}</strong>
+          @if (membership.owner) {
+          <span class="muted small">{{ t("account.ownerNote") }}</span>
+          }
+        </div>
+        <span class="pill"
+          >{{ t(membership.owner ? "roles.OWNER" : "roles." + membership.role)
+          }}</span
+        >
+        <div class="actions">
+          <a
+            class="button small-button"
+            [routerLink]="['/org', membership.slug]"
+            >{{ t("signIn.open") }}</a
+          >
+          @if (membership.playerId) {
+          <a
+            class="button-ghost small-button"
+            [routerLink]="['/org', membership.slug, 'players', membership.playerId]"
+            >{{ t("account.myProfile") }}</a
+          >
+          } @else {
+          <a
+            class="button-ghost small-button"
+            [routerLink]="['/org', membership.slug, 'claim']"
+            >{{ t("account.claimProfile") }}</a
+          >
+          } @if (!membership.owner) {
+          <button
+            type="button"
+            class="button-ghost small-button"
+            [disabled]="action.busy()"
+            (click)="leave(membership)"
+          >
+            {{ t("account.leave") }}<span class="visually-hidden">
+              {{ membership.name }}</span
+            >
+          </button>
+          }
+        </div>
+      </li>
+      }
+    </ul>
+    } @else if (!me.suspended.length) {
+    <p class="muted">{{ t("signIn.noOrganisations") }}</p>
+    } @if (me.suspended.length) {
+    <ul class="orgs">
+      @for (membership of me.suspended; track membership.slug) {
+      <li>
+        <span class="logo" aria-hidden="true"
+          >{{ initials(membership.name) }}</span
+        >
+        <div class="org-text">
+          <strong>{{ membership.name }}</strong>
+          <span class="muted small">{{ t("account.suspendedNote") }}</span>
+        </div>
+        <span class="pill suspended">{{ t("account.suspended") }}</span>
+      </li>
+      }
+    </ul>
+    }
+  </section>
+
+  <section class="panel danger-zone block" aria-labelledby="delete-title">
+    <h2 class="heading" id="delete-title">{{ t("account.delete") }}</h2>
+    <p class="muted">{{ t("account.deleteHelp") }}</p>
+    @if (owns()) {
+    <p class="notice">{{ t("account.ownerConflict") }}</p>
+    } @else {
+    <form class="confirm" (submit)="deleteAccount($event)">
+      <label class="field">
+        <span class="label"
+          >{{ t("account.typeToConfirm", { word: deleteWord }) }}</span
+        >
+        <input
+          name="confirm"
+          autocomplete="off"
+          spellcheck="false"
+          [placeholder]="deleteWord"
+          [value]="typed()"
+          (input)="typed.set(confirmInput.value)"
+          #confirmInput
+        />
+      </label>
+      <button
+        type="submit"
+        class="button danger"
+        [disabled]="typed().trim() !== deleteWord || action.busy()"
+      >
+        {{ t("account.deleteButton") }}
+      </button>
+    </form>
+    }
+  </section>
+  }
+</ng-container>

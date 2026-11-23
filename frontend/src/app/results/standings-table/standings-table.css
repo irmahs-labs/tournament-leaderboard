@@ -1,0 +1,70 @@
+.scroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.table th {
+  padding: 12px 12px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: var(--label-track);
+  border-bottom: 1px solid var(--head-line);
+  /* Headings may take two lines, such as French's "Moy. désam.", so every column fits. */
+  vertical-align: bottom;
+}
+
+.table abbr {
+  text-decoration: none;
+}
+
+.table td {
+  padding: 12px 12px;
+  border-bottom: 1px solid var(--row-line);
+  white-space: nowrap;
+}
+
+.table tbody tr:nth-child(even) {
+  background: var(--zebra);
+}
+
+.table tbody tr.leader {
+  background: var(--accent-soft);
+}
+
+.table .num {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.position,
+.total {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.position {
+  width: 40px;
+}
+
+.total {
+  color: var(--accent-text);
+}
+
+.player {
+  font-size: 16px;
+}
+
+.tag {
+  margin-left: 2px;
+  color: var(--muted);
+  font-size: 13px;
+}

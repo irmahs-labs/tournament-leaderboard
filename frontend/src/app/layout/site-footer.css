@@ -1,0 +1,64 @@
+.foot {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.inner {
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: 22px var(--gutter);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  /* Everything in the footer sits in the middle of the page. */
+  text-align: center;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Three lines: the credit, the legal pages, then GitHub and contact. */
+.credit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.line {
+  margin: 0;
+}
+
+.ruled {
+  padding-top: 16px;
+  border-top: 1px solid var(--row-line);
+}
+
+.org {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 14px;
+  margin: 0;
+}
+
+a {
+  color: var(--muted);
+}
+
+.strong {
+  color: var(--text);
+  font-weight: 600;
+}

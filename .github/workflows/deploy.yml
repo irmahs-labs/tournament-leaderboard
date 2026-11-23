@@ -1,11 +1,10 @@
 name: Deploy
 
-# Deploys every merge into migration, the rewrite's branch for now. Pull requests into
-# migration have already passed CI, and the run fails if the app doesn't become healthy.
-# Once the rewrite replaces the legacy site, it deploys version tags.
+# Run by CI (ci.yml) after the build and tests pass on a push to main, so nothing that failed them
+# goes live. Before each deploy it dumps the database; after it, it checks the address through
+# Caddy.
 on:
-  push:
-    branches: [migration]
+  workflow_call:
   # Also by hand (Actions → Deploy → Run workflow), once this file is on the default branch.
   workflow_dispatch:
 
@@ -55,6 +54,33 @@ jobs:
             git reset --hard FETCH_HEAD
             (umask 077 && cat > .env)
             export COMPOSE_FILE=compose.prod.yaml
-            docker compose up -d --build --remove-orphans --wait
+            # A dump before every deploy, so a migration that goes wrong can be undone: the
+            # last 14 are kept in backups/, readable by the deploy user only.
+            if [ -n "$(docker compose ps -q db)" ]; then
+              mkdir -p backups && chmod 700 backups
+              dump="backups/$(date -u +%Y%m%dT%H%M%SZ)-${{ github.sha }}.dump"
+              (umask 077 && docker compose exec -T db pg_dump -U leaderboard_owner -d leaderboard --format=custom > "$dump")
+              [ -s "$dump" ] || { echo "The database dump is empty"; exit 1; }
+              ls -1t backups/*.dump | tail -n +15 | xargs -r rm --
+            fi
+            # The new app next to the old one, then the old one stopped: no gap.
+            ./deploy/rollout.sh
             docker image prune -f
             docker builder prune -f --filter until=168h'
+
+      # The app is healthy inside the server; this checks that Caddy reaches it too, with its
+      # certificate, as visitors do. From the server rather than this runner: Cloudflare turns
+      # away requests from data centres such as GitHub's with a 403.
+      - name: Check the address through Caddy
+        run: |
+          ssh deploy@${{ secrets.DEPLOY_HOST }} 'for _ in $(seq 1 12); do
+              if docker run --rm --network host curlimages/curl:8.11.1 -fsS --max-time 10 \
+                  --resolve tournament-leaderboard.irmahs.dev:443:127.0.0.1 \
+                  https://tournament-leaderboard.irmahs.dev/actuator/health | grep -q "\"status\":\"UP\""; then
+                echo "Healthy through Caddy at https://tournament-leaderboard.irmahs.dev"
+                exit 0
+              fi
+              sleep 5
+            done
+            echo "Caddy does not reach a healthy app"
+            exit 1'

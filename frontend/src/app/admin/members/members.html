@@ -1,0 +1,264 @@
+<ng-container *transloco="let t">
+  <div class="intro-text">
+    <span class="eyebrow"
+      >{{ t("admin.eyebrow", { org: current.organization()?.name ?? "" })
+      }}</span
+    >
+    <h1 class="display">{{ t("adminMembers.title") }}</h1>
+    <p class="lede muted">
+      {{ t("adminMembers.lede", { org: current.organization()?.name ?? "" }) }}
+    </p>
+  </div>
+
+  <section class="panel block" aria-labelledby="players-title">
+    <h2 class="heading" id="players-title">
+      {{ t("adminMembers.invitePlayers") }}
+    </h2>
+    <p class="muted small note">
+      {{ t("adminMembers.invitePlayersHelp", { org: current.organization()?.name
+      ?? "" }) }}
+    </p>
+    <div class="player-link">
+      <code>{{ playerLink() }}</code>
+      <button
+        type="button"
+        class="button-ghost small-button"
+        [disabled]="action.busy()"
+        (click)="copy(playerLink(), 'adminMembers.linkCopied')"
+      >
+        {{ t("adminMembers.copyLink") }}
+      </button>
+    </div>
+  </section>
+
+  <section class="panel block" aria-labelledby="invite-title">
+    <h2 class="heading" id="invite-title">{{ t("adminMembers.invite") }}</h2>
+    <p class="muted small note">{{ t("adminMembers.inviteHelp") }}</p>
+    <form #form class="invite" (submit)="invite($event, form)">
+      <label class="field wide">
+        <span class="label">{{ t("adminMembers.email") }}</span>
+        <input
+          name="email"
+          type="email"
+          autocomplete="off"
+          required
+          maxlength="254"
+          placeholder="name@example.com"
+        />
+      </label>
+      <label class="field">
+        <span class="label">{{ t("adminMembers.expiresAfter") }}</span>
+        <select name="expiry">
+          @for (minutes of expiries; track minutes) {
+          <option
+            [value]="minutes"
+            [attr.selected]="minutes === 1440 ? '' : null"
+          >
+            {{ expiry(minutes) }}
+          </option>
+          }
+        </select>
+      </label>
+      <button class="button" type="submit" [disabled]="action.busy()">
+        {{ t("adminMembers.create") }}
+      </button>
+    </form>
+
+    @if (created(); as made) {
+    <div class="created">
+      <strong
+        >{{ t("adminMembers.createdFor", { email: made.invite.email, code:
+        made.invite.code, date: language.moment(made.invite.expiresAt) })
+        }}</strong
+      >
+      <textarea
+        readonly
+        rows="4"
+        [attr.aria-label]="t('adminMembers.messageLabel')"
+        [value]="made.message"
+      ></textarea>
+      <div class="row">
+        <button
+          type="button"
+          class="button small-button"
+          (click)="copy(made.message)"
+        >
+          {{ t("adminMembers.copy") }}
+        </button>
+        <span class="muted small">{{ t("adminMembers.pasteHelp") }}</span>
+      </div>
+    </div>
+    }
+  </section>
+
+  <p
+    class="status"
+    role="status"
+    [class.failed]="action.outcome()?.ok === false"
+  >
+    {{ action.outcome()?.text }}
+  </p>
+
+  @if (team.error()) {
+  <p class="panel notice" role="alert">{{ t("adminMembers.failed") }}</p>
+  } @else if (team.hasValue()) { @let loaded = team.value(); @if
+  (loaded.invites.length > 0) {
+  <section class="panel block" aria-labelledby="waiting-title">
+    <h2 class="heading spaced" id="waiting-title">
+      {{ t("adminMembers.waiting") }}
+    </h2>
+    <div class="scroll">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">{{ t("adminMembers.email") }}</th>
+            <th scope="col">{{ t("adminMembers.invitedBy") }}</th>
+            <th scope="col">{{ t("adminMembers.validUntil") }}</th>
+            <th scope="col">
+              <span class="visually-hidden"
+                >{{ t("adminPlayers.actions") }}</span
+              >
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (waiting of loaded.invites; track waiting.id) {
+          <tr>
+            <td>{{ waiting.email }}</td>
+            <td>{{ waiting.invitedBy ?? "–" }}</td>
+            <td>{{ language.moment(waiting.expiresAt) }}</td>
+            <td>
+              <button
+                type="button"
+                class="button-ghost small-button"
+                [disabled]="action.busy()"
+                (click)="revoke(waiting.id, waiting.email)"
+              >
+                {{ t("adminMembers.revoke") }}<span class="visually-hidden">
+                  {{ waiting.email }}</span
+                >
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+  }
+
+  <section class="panel block" aria-labelledby="members-title">
+    <h2 class="heading spaced" id="members-title">
+      {{ t("adminMembers.all", { count: loaded.members.length }) }}
+    </h2>
+    <div class="scroll">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">{{ t("adminMembers.member") }}</th>
+            <th scope="col">{{ t("adminMembers.role") }}</th>
+            <th scope="col">{{ t("adminMembers.joined") }}</th>
+            <th scope="col">
+              <span class="visually-hidden"
+                >{{ t("adminPlayers.actions") }}</span
+              >
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (member of loaded.members; track member.userId) { @let name =
+          memberName(member);
+          <tr>
+            <td>
+              <strong>{{ name }}</strong>
+              <span class="muted email">{{ member.email }}</span>
+            </td>
+            <td>
+              <span class="pill" [class.live]="member.role === 'ADMIN'"
+                >{{ t(member.owner ? "adminMembers.owner" : member.role ===
+                "ADMIN" ? "adminMembers.admin" : "adminMembers.player") }}</span
+              >
+            </td>
+            <td>{{ language.moment(member.joinedAt) }}</td>
+            <td>
+              @if (!member.owner) {
+              <div class="actions">
+                @if (member.role === "PLAYER") {
+                <button
+                  type="button"
+                  class="button-ghost small-button"
+                  [disabled]="action.busy()"
+                  (click)="setRole(member, 'ADMIN')"
+                >
+                  {{ t("adminMembers.makeAdmin") }}<span
+                    class="visually-hidden"
+                  >
+                    {{ name }}</span
+                  >
+                </button>
+                } @else {
+                <button
+                  type="button"
+                  class="button-ghost small-button"
+                  [disabled]="action.busy()"
+                  (click)="setRole(member, 'PLAYER')"
+                >
+                  {{ t("adminMembers.makePlayer") }}<span
+                    class="visually-hidden"
+                  >
+                    {{ name }}</span
+                  >
+                </button>
+                }
+                <button
+                  type="button"
+                  class="button-ghost small-button danger"
+                  [disabled]="action.busy()"
+                  (click)="remove(member)"
+                >
+                  {{ t("adminMembers.remove") }}<span class="visually-hidden">
+                    {{ name }}</span
+                  >
+                </button>
+              </div>
+              }
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel block" aria-labelledby="owner-title">
+    <h2 class="heading" id="owner-title">{{ t("adminMembers.ownership") }}</h2>
+    <p class="muted small note">{{ t("adminMembers.ownershipHelp") }}</p>
+    @if (isOwner()) { @if (otherAdmins().length > 0) {
+    <div class="transfer">
+      <label class="field">
+        <span class="label">{{ t("adminMembers.newOwner") }}</span>
+        <select #next>
+          @for (admin of otherAdmins(); track admin.userId) {
+          <option [value]="admin.userId">{{ memberName(admin) }}</option>
+          }
+        </select>
+      </label>
+      <button
+        type="button"
+        class="button-ghost"
+        [disabled]="action.busy()"
+        (click)="transfer(next.value)"
+      >
+        {{ t("adminMembers.transfer") }}
+      </button>
+    </div>
+    } @else {
+    <p class="muted">{{ t("adminMembers.noOtherAdmin") }}</p>
+    } } @else {
+    <p class="muted">{{ t("adminMembers.ownerOnly") }}</p>
+    }
+  </section>
+  } @else {
+  <p class="muted" aria-live="polite">{{ t("adminMembers.loading") }}</p>
+  }
+</ng-container>

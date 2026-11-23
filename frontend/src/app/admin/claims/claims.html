@@ -1,0 +1,155 @@
+<ng-container *transloco="let t">
+  <div class="intro-text">
+    <span class="eyebrow"
+      >{{ t("admin.eyebrow", { org: current.organization()?.name ?? "" })
+      }}</span
+    >
+    <h1 class="display">{{ t("adminClaims.title") }}</h1>
+    <p class="lede muted">{{ t("adminClaims.lede") }}</p>
+  </div>
+
+  <div class="tabs" role="group" [attr.aria-label]="t('adminClaims.title')">
+    @for (each of tabs; track each) {
+    <button
+      type="button"
+      class="button-ghost small-button"
+      [class.on]="tab() === each"
+      [attr.aria-pressed]="tab() === each"
+      (click)="tab.set(each)"
+    >
+      {{ t("adminClaims.tab." + each) }}
+    </button>
+    }
+  </div>
+
+  <p class="muted small note">{{ t("adminClaims.ownRule") }}</p>
+
+  <p
+    class="status"
+    role="status"
+    [class.failed]="action.outcome()?.ok === false"
+  >
+    {{ action.outcome()?.text }}
+  </p>
+
+  @if (claims.error()) {
+  <p class="panel notice" role="alert">{{ t("adminClaims.failed") }}</p>
+  } @else if (claims.hasValue()) { @if (claims.value().length === 0) {
+  <p class="panel notice">{{ t("adminClaims.none." + tab()) }}</p>
+  } @else {
+  <ul class="rows">
+    @for (row of claims.value(); track row.id) { @let player =
+    splitRiotId(row.player.riotId);
+    <li class="panel row">
+      <div class="who">
+        <span class="avatar" aria-hidden="true"
+          >{{ (row.name ?? row.email ?? "?").slice(0, 1).toUpperCase() }}</span
+        >
+        <div class="who-text">
+          <strong
+            >{{ row.name ?? row.email }}@if (row.own) { {{ t("adminClaims.you")
+            }} }</strong
+          >
+          <span class="muted small">{{ row.email }}</span>
+          @if (row.memberSince; as since) {
+          <span class="muted small"
+            >{{ t("adminClaims.memberSince", { date: language.moment(since) })
+            }}</span
+          >
+          }
+        </div>
+      </div>
+      <div class="wants">
+        <span class="label">{{ t(claimLabels[row.claim.status]) }}</span>
+        <strong class="player">{{ player.name }}</strong>
+        <span class="muted small">
+          <app-riot-id [value]="row.player.riotId" />@if (row.player.rank) { ·
+          {{ language.rank(row.player.rank) }} } · {{
+          t(language.plural("players.games", row.player.games), { count:
+          row.player.games }) }}
+        </span>
+        @if (row.competing > 1 && tab() === "PENDING") {
+        <span class="pill warn"
+          >{{ t("adminClaims.competing", { count: row.competing }) }}</span
+        >
+        }
+      </div>
+      @if (row.claim.note) {
+      <p class="note-text">
+        <span class="label"
+          >{{ t("adminClaims.noteSent", { date:
+          language.moment(row.claim.sentAt) }) }}</span
+        >
+        {{ row.claim.note }}
+      </p>
+      } @if (tab() === "PENDING") { @if (declining() === row.id) {
+      <div class="decline">
+        <label class="field">
+          <span class="label">{{ t("adminClaims.reasonLabel") }}</span>
+          <input
+            #reason
+            autocomplete="off"
+            [attr.maxlength]="maxText"
+            [placeholder]="t('adminClaims.reasonHint')"
+          />
+        </label>
+        <div class="actions">
+          <button
+            type="button"
+            class="button danger small-button"
+            [disabled]="action.busy()"
+            (click)="decline(row, reason.value)"
+          >
+            {{ t("adminClaims.declineClaim") }}
+          </button>
+          <button
+            type="button"
+            class="button-ghost small-button"
+            (click)="declining.set(null)"
+          >
+            {{ t("adminPlayers.cancel") }}
+          </button>
+        </div>
+      </div>
+      } @else {
+      <div class="actions">
+        @if (row.own) {
+        <span class="pill">{{ t("adminClaims.yourOwn") }}</span>
+        }
+        <button
+          type="button"
+          class="button small-button"
+          [disabled]="action.busy()"
+          (click)="accept(row)"
+        >
+          {{ t("adminClaims.accept") }}<span class="visually-hidden">
+            {{ row.name ?? row.email }}</span
+          >
+        </button>
+        <button
+          type="button"
+          class="button-ghost small-button"
+          [disabled]="action.busy()"
+          (click)="declining.set(row.id)"
+        >
+          {{ t("adminClaims.decline") }}<span class="visually-hidden">
+            {{ row.name ?? row.email }}</span
+          >
+        </button>
+      </div>
+      } } @else {
+      <p class="muted small">
+        {{ t(row.claim.status === "ACCEPTED" ? (row.claim.selfApproved ?
+        "adminClaims.selfApproved" : "adminClaims.wasAccepted") :
+        "adminClaims.wasDeclined", { date: row.claim.decidedAt ?
+        language.moment(row.claim.decidedAt) : "" }) }} @if (row.claim.reason) {
+        · {{ row.claim.reason }} }
+      </p>
+      }
+    </li>
+    }
+  </ul>
+  } } @else {
+  <p class="muted" aria-live="polite">{{ t("adminClaims.loading") }}</p>
+  }
+</ng-container>

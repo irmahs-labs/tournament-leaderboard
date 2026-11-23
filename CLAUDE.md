@@ -2,17 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-<!-- The sections down to "Checks before pushing" come from irmahs-labs/template. They are
-adapted here because, for now, all work on the rewrite goes into the `migration` branch. -->
-
 ## Git branches
 
 Always pull before making changes: run `git fetch origin` and start from the latest
-`origin/migration` before the first edit.
+`origin/main` before the first edit.
 
-- On a branch whose PR is open, bring it up to date with `origin/migration` first
-- On `migration`, `dev` or `main`, or on a branch whose PR is already merged, create a new branch
-  from `origin/migration` instead
+- On a branch whose PR is open, bring it up to date with `origin/main` first
+- On `main`, or on a branch whose PR is already merged, create a new branch from `origin/main`
+  instead
 
 Always name the branch after the feature or fix it contains, never a random or generated name.
 
@@ -24,12 +21,11 @@ Always name the branch after the feature or fix it contains, never a random or g
 
 ## Pull requests
 
-- For now, every change goes in through a pull request into `migration`. Never push to
-  `migration`, `dev` or `main` directly, and don't open pull requests into `dev` or `main`.
+- Every change goes in through a pull request into `main`. Never push to `main` directly.
+  `migration` and `dev` are retired: don't push to them or open pull requests into them.
 - Open the PR and stop there: never merge it, not even when CI is green. Irma reviews and clicks
   merge.
-- Vercel only builds production, from `main`: anything merged into `main` rebuilds the frozen
-  legacy site. Its last deployment stays live; don't trigger a Vercel deploy.
+- Every merge into `main` that passes CI deploys production (tournament-leaderboard.irmahs.dev).
 
 ## The context graph and the notes
 
@@ -57,11 +53,14 @@ typecheck in `frontend/`, Spotless and a compile in `backend/`. In cloud session
 
 ## Layout
 
-- `legacy/` — the current live app (Next.js 16 + Supabase), deployed by Vercel with **Root
-  Directory `legacy`**. It is **frozen**: don't change, install or build anything in it. Its last
-  Vercel deployment stays live until the rewrite replaces it. Its own guide is [`legacy/CLAUDE.md`](legacy/CLAUDE.md).
+- `legacy/` — the old app (Next.js 16 + Supabase), replaced by the rewrite and put to sleep: its
+  Vercel project no longer builds. It is **frozen**: don't change, install or build anything in
+  it. Kept for reference; its own guide is [`legacy/CLAUDE.md`](legacy/CLAUDE.md).
 - The rewrite, built with Maven from the root `pom.xml` (parent: Spring Boot 4.1, Java 21):
-  - `frontend/` — Angular 22 (standalone components, Vitest, tests named `*.test.ts`).
+  - `frontend/` — Angular 22 (standalone components, Vitest, tests named `*.test.ts`). Organised
+    by feature like the backend: `src/app/shared/` for what every feature uses, `layout/` for the
+    shells, then one folder per feature (`results/`, `sign-in/`, …). A component shared by several
+    features goes in `shared/`; one shared by pages of a single feature stays in that feature.
     `frontend/pom.xml` runs `npm ci`, `npm run check`, `npm run typecheck:test`, `npm run build` and
     `npm run test:ci` through frontend-maven-plugin and packages `dist/browser` under `static/` in
     a jar.
@@ -71,6 +70,9 @@ typecheck in `frontend/`, Spotless and a compile in `backend/`. In cloud session
     named by date (`V2026_11_05_1__description.sql`); Hibernate runs with `ddl-auto: validate`.
   - Deployment — on the shared irmahs.dev server, like the other irmahs-labs apps; see
     [`deploy/README.md`](deploy/README.md).
+- [`docs/context-graph.md`](docs/context-graph.md) maps the rewrite: packages and their
+  dependencies, endpoints, tables, screens and phases. Read it before starting work, and update it
+  in the same pull request whenever a change adds, removes or reconnects any of those.
 - The full plan (schema, endpoints, screens, phases) is the migration plan page kept with the
   project designs; ask the user for the link when you need it.
 
@@ -88,14 +90,21 @@ Signing in locally needs the dev Google client in `backend/local.yml` (ignored b
 `backend/local.example.yml`. Without it the backend doesn't start.
 
 CI (`.github/workflows/ci.yml`) runs `./mvnw verify` on pull requests and on pushes to `main`,
-`dev` and `migration`, then SonarQube Cloud once the `SONAR_TOKEN` secret exists. The version comes from
+then SonarQube Cloud (its quality gate blocks pull requests), then, on `main`, the deploy. The version comes from
 `-Drevision=…` (CI-friendly versions + flatten-maven-plugin); it defaults to `0.0.0-SNAPSHOT`.
 
 ## Rules
 
 - Don't touch `legacy/`: no edits, no dependency updates, no builds.
-- `main` is protected by a ruleset: changes land through pull requests only. Until the rewrite is
-  ready, work stays in `migration`; it reaches `dev` and `main` only when Irma decides.
+- `main` is protected by a ruleset: changes land through pull requests only, and only once the
+  **Build and test** check (with the quality gate) has passed, since every merge into it deploys
+  production.
+- Database changes must work with the previous version too: a deploy starts the new app next to
+  the old one (`deploy/rollout.sh`), so Flyway migrates while the old version still serves.
+  Expand, then contract: add columns as nullable or with a default, add tables freely; rename or
+  drop a column or table, or tighten a constraint, only in a later release, once no running
+  version uses the old shape. A migration that can't follow this says so in its PR, and is merged
+  outside match nights.
 - Commit messages and pull request titles follow Conventional Commits (`feat:`, `fix:`, `chore:`,
   `docs:`, `refactor:`, `test:`, `ci:`), since release versions will be derived from them.
 - Repository: `irmahs-labs/tournament-leaderboard` (moved from `irmahs/alsace-arena-spike-tournament`;

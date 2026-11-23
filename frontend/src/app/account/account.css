@@ -1,0 +1,184 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 760px;
+  min-width: 0;
+}
+
+.intro-text {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.block {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+p {
+  margin: 0;
+}
+
+.small {
+  font-size: 13px;
+}
+
+.status {
+  color: var(--good);
+  font-weight: 600;
+}
+
+.status:empty {
+  display: none;
+}
+
+.status.failed {
+  color: var(--danger);
+}
+
+.who {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--pill-line);
+}
+
+.who-text,
+.org-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.avatar {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--text);
+  color: var(--surface);
+  font-weight: 700;
+}
+
+.align-start {
+  align-self: flex-start;
+}
+
+.orgs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.orgs li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--row-line);
+}
+
+.org-text {
+  flex: 1 1 160px;
+}
+
+.logo {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  border: 1px solid var(--pill-line);
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.pill {
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--surface-2);
+  border: 1px solid var(--pill-line);
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.small-button {
+  min-height: 40px;
+  padding: 0 14px;
+  font-size: 13px;
+}
+
+.danger-zone {
+  border-color: var(--danger);
+}
+
+.notice {
+  padding: 12px 14px;
+  border: 1px solid var(--pill-line);
+}
+
+.confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 200px;
+}
+
+input {
+  min-height: 44px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  width: 100%;
+  background: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--input-line);
+  border-radius: 0;
+  font: 500 15px var(--font-body);
+}
+
+.button.danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #ffffff;
+}
+
+.button.danger:disabled {
+  opacity: 0.5;
+}
+
+/* Riot ID, Discord, then Save, on one line when there's room. */
+.identity {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  align-items: end;
+  gap: 12px 16px;
+}
+
+.pill.suspended {
+  color: var(--warn);
+  border-color: var(--warn);
+}

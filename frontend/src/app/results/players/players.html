@@ -1,0 +1,115 @@
+<ng-container *transloco="let t">
+  <div class="intro-text">
+    @if (current.season(); as season) {
+    <span class="eyebrow"
+      >{{ season.name }}@if (current.organization()?.tournamentName; as
+      tournament) { · {{ tournament }} }</span
+    >
+    }
+    <h1 class="display">{{ t("players.title") }}</h1>
+    <p class="lede muted">{{ t("players.lede") }}</p>
+    <a class="button-ghost claim-link" routerLink="../claim"
+      >{{ t("players.claimLink") }}</a
+    >
+  </div>
+
+  @if (current.failed() || board.error()) {
+  <p class="panel notice" role="alert">{{ t("players.failed") }}</p>
+  } @else if (current.settled() && !current.season()) {
+  <p class="panel notice">{{ t("leaderboard.noSeason") }}</p>
+  } @else if (board.hasValue()) {
+  <div class="filters">
+    <label class="field search">
+      <span class="label">{{ t("players.search") }}</span>
+      <input
+        #query
+        type="search"
+        autocomplete="off"
+        [placeholder]="t('players.publicSearchHint')"
+        (input)="search.set(query.value)"
+      />
+    </label>
+    <label class="field">
+      <span class="label">{{ t("players.sortBy") }}</span>
+      <select #sortPicker (change)="pickSort(sortPicker.value)">
+        @for (each of sorts; track each) {
+        <option [value]="each" [selected]="sortBy() === each">
+          {{ t("players.sort." + each) }}
+        </option>
+        }
+      </select>
+    </label>
+    <label class="field">
+      <span class="label">{{ t("players.rank") }}</span>
+      <select #rank (change)="tier.set(rank.value)">
+        <option value="">{{ t("players.allRanks") }}</option>
+        @for (each of tiers; track each) {
+        <option [value]="each">{{ language.rank(each) }}</option>
+        }
+      </select>
+    </label>
+  </div>
+
+  @if (board.value().standings.length === 0) {
+  <p class="panel notice">{{ t("players.none") }}</p>
+  } @else if (cards().length === 0) {
+  <p class="panel notice">{{ t("players.noMatch") }}</p>
+  } @else {
+  <ul class="grid">
+    @for (card of cards(); track card.standing.playerId) { @let standing =
+    card.standing; @let id = splitRiotId(standing.riotId);
+    <li class="panel card">
+      <div class="card-top">
+        <span class="position">#{{ standing.rank }}</span>
+        @if (standing.currentRank; as rank) {
+        <app-rank-pill [name]="rank.name" [color]="rank.color" />
+        }
+      </div>
+      <h2 class="name">
+        <app-riot-id [value]="standing.riotId" />
+      </h2>
+      <p class="muted small">
+        {{ t("leaderboard.points", { points: language.points(standing.points) })
+        }} · {{ t(language.plural("players.games", standing.games), { count:
+        standing.games }) }}
+      </p>
+      @if (card.aliases.length) {
+      <p class="muted small names">
+        {{ t("players.also", { names: card.aliases.join(", ") }) }}
+      </p>
+      }
+      <dl class="facts">
+        @if (standing.averages.PERFORMANCE_SCORE !== undefined) {
+        <div>
+          <dt>{{ t("players.avgPerformance") }}</dt>
+          <dd>{{ language.number(standing.averages.PERFORMANCE_SCORE) }}</dd>
+        </div>
+        }
+        <div>
+          <dt>{{ t("players.avgKda") }}</dt>
+          <dd>{{ language.number(standing.kda, 2) }}</dd>
+        </div>
+        <div>
+          <dt>{{ t("players.wins") }}</dt>
+          <dd>{{ standing.wins }}</dd>
+        </div>
+        <div>
+          <dt>{{ t("players.winRate") }}</dt>
+          <dd>{{ winRate(standing.wins, standing.games) }}</dd>
+        </div>
+      </dl>
+      <a
+        class="button-ghost view"
+        [routerLink]="['./', standing.playerId]"
+        queryParamsHandling="preserve"
+        >{{ t("players.viewProfile") }}<span class="visually-hidden">
+          {{ id.name }}</span
+        ></a
+      >
+    </li>
+    }
+  </ul>
+  } } @else {
+  <p class="muted" aria-live="polite">{{ t("players.loading") }}</p>
+  }
+</ng-container>

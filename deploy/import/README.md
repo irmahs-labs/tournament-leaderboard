@@ -8,6 +8,7 @@ until the real run at cutover is routine.
 |---|---|
 | `export.sh`, `export.sql` | Reads the five Supabase tables into `data/*.csv`. Read-only. |
 | `import.sh`, `import.sql` | Loads `data/*.csv` into a database that already has the schema, in one transaction. |
+| `on-server.sh` | Runs the import on the production server, after a dump. |
 | `parity-check.py` | Compares the new API with the live site, season by season and match by match. |
 | `data/` | The exports. Real player data: ignored by git, never committed. |
 
@@ -58,17 +59,43 @@ them and exits with 1; with none, it prints "No differences."
 Export again first if scores were entered on the live site since the last export, or those
 games will show up as differences.
 
+## 4. On the production server
+
+From your machine, with SSH access to the server as `deploy`:
+
+```bash
+deploy/import/on-server.sh deploy@<server>
+deploy/import/parity-check.py --new https://tournament-leaderboard.irmahs.dev
+```
+
+It dumps the production database into `/srv/tournament-leaderboard/backups/` first (the same
+place and rotation as the deploy's dumps; the README in `deploy/` says how to restore one), then
+streams `import.sql` and the CSVs over SSH into the database container and runs the import
+there as `leaderboard_owner`. They never land on the server's disk, and they're removed from the
+container afterwards, even when the import fails. It can run again, like the local import: the
+rehearsal and the cutover use the same command.
+
+Nobody needs to be made an admin by hand. The `TOURNAMENT_LEADERBOARD_INITIAL_MEMBERS` variable
+in GitHub lists the organisation's first owner and admins; each one becomes a member the next time
+they sign in, once `alsace-arena` exists. Sign out and back in after the import.
+
+Then give the current season the new scoring: on the Scoring screen, pick it and press **Use the
+platform defaults**. Riot's custom games no longer show the performance score or economy, so the
+defaults stop recording and counting both, for the whole season, and score kills, deaths, assists,
+first bloods, plants and defuses, each game's KDA, MVP and SVP instead. The imported seasons keep
+the old rules, so their points stay as on the live site.
+
 ## What maps where
 
 - `players.username` becomes the Riot ID. Nicknames aren't imported: players start with no
   alias and no Discord username.
 - Each `match_season` becomes a season: 8 matches, 1 to 5 games, 50 points per win, today's
   stat rules, and five bonuses at 10 (FB, LD, MA, MP, MD).
+- Each imported season's rules are today's: every stat worth 1 point, deaths -1, no points for
+  KDA, and no place or honours.
 - `acs` is Valorant's performance score, so it goes into `performance_score`. ACS (the
   tracker's), ADR, damage delta, KAST %, headshot % and clutches stay empty.
 - Each `bonus_*` flag becomes an awarded bonus, copied as recorded, so totals match the live
   site.
 - Ids of ranks, players, matches, games and stats are kept.
 - Not imported: `players.nickname`, `auth.users` and `profiles`. Admins sign in with Google on the new site.
-
-The production run, on the server, is part of the cutover checklist.

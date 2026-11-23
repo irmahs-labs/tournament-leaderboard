@@ -1,0 +1,222 @@
+<ng-container *transloco="let t">
+  <div class="intro-text">
+    <span class="eyebrow"
+      >{{ current.organization()?.name }}@if
+      (current.organization()?.tournamentName; as tournament) { · {{ tournament
+      }} }</span
+    >
+    <h1 class="display">{{ t("claim.title") }}</h1>
+    <p class="lede muted">{{ t("claim.lede") }}</p>
+  </div>
+
+  <p
+    class="status"
+    role="status"
+    [class.failed]="action.outcome()?.ok === false"
+  >
+    {{ action.outcome()?.text }}
+  </p>
+
+  @if (state.error()) {
+  <p class="panel notice" role="alert">{{ t("claim.failed") }}</p>
+  } @else if (state.hasValue()) { @let mine = state.value(); @if (!mine.member)
+  {
+  <section class="panel block" aria-labelledby="join-title">
+    <h2 class="heading" id="join-title">
+      {{ t("claim.joinTitle", { org: current.organization()?.name ?? "" }) }}
+    </h2>
+    <p class="muted">{{ t("claim.joinHelp") }}</p>
+    <button
+      type="button"
+      class="button start"
+      [disabled]="action.busy()"
+      (click)="becomeMember()"
+    >
+      {{ t("claim.join") }}
+    </button>
+  </section>
+  } @else if (mine.linked; as linked) {
+  <section class="panel block" aria-labelledby="linked-title">
+    <h2 class="heading" id="linked-title">
+      {{ t("claim.linkedTitle", { name: splitRiotId(linked.riotId).name }) }}
+    </h2>
+    <p class="muted">
+      {{ t(mine.claim?.selfApproved ? "claim.linkedSelf" : "claim.linkedHelp")
+      }}
+    </p>
+    <div class="row">
+      <a class="button start" [routerLink]="['../me', 'matches']"
+        >{{ t("claim.toSeasons") }}</a
+      >
+      <a class="button-ghost start" [routerLink]="['../players', linked.id]"
+        >{{ t("claim.viewProfile") }}</a
+      >
+    </div>
+  </section>
+  } @else if (mine.claim?.status === "PENDING" && mine.claim; as waiting) {
+  <section class="panel block" aria-labelledby="waiting-title">
+    <h2 class="heading" id="waiting-title">
+      {{ t("claim.waitingTitle", { name: splitRiotId(waiting.riotId ?? "").name
+      }) }}
+    </h2>
+    <p class="muted">
+      {{ t("claim.waitingHelp", { org: current.organization()?.name ?? "" }) }}
+    </p>
+    <dl class="facts">
+      <div>
+        <dt>{{ t("claim.sent") }}</dt>
+        <dd>{{ language.moment(waiting.sentAt) }}</dd>
+      </div>
+      @if (waiting.note) {
+      <div>
+        <dt>{{ t("claim.note") }}</dt>
+        <dd>{{ waiting.note }}</dd>
+      </div>
+      }
+    </dl>
+    <button
+      type="button"
+      class="button-ghost start"
+      [disabled]="action.busy()"
+      (click)="cancel()"
+    >
+      {{ t("claim.cancel") }}
+    </button>
+  </section>
+  } @else { @if (mine.claim?.status === "DECLINED" && mine.claim; as declined) {
+  <p class="panel notice declined">
+    {{ t("claim.declined", { name: splitRiotId(declined.riotId ?? "").name }) }}
+    @if (declined.reason) { {{ t("claim.because", { reason: declined.reason })
+    }} }
+  </p>
+  } @if (picked(); as player) {
+  <section class="panel block" aria-labelledby="note-title">
+    <h2 class="heading" id="note-title">
+      {{ t("claim.claiming", { name: splitRiotId(player.riotId).name }) }}
+    </h2>
+    <p class="muted">
+      {{ t("claim.adminsSee", { org: current.organization()?.name ?? "" }) }}
+    </p>
+    <label class="field">
+      <span class="label">{{ t("claim.noteLabel") }}</span>
+      <textarea
+        #note
+        rows="3"
+        [attr.maxlength]="maxText"
+        [placeholder]="t('claim.noteHint')"
+      ></textarea>
+    </label>
+    <div class="row">
+      <button
+        type="button"
+        class="button"
+        [disabled]="action.busy()"
+        (click)="send(note.value)"
+      >
+        {{ t("claim.send") }}
+      </button>
+      <button
+        type="button"
+        class="button-ghost"
+        [disabled]="action.busy()"
+        (click)="picked.set(null)"
+      >
+        {{ t("claim.pickAnother") }}
+      </button>
+    </div>
+  </section>
+  } @else {
+  <section class="panel block" aria-labelledby="pick-title">
+    <h2 class="heading" id="pick-title">{{ t("claim.pickTitle") }}</h2>
+    <label class="field search">
+      <span class="label">{{ t("claim.search") }}</span>
+      <input
+        #query
+        type="search"
+        autocomplete="off"
+        [placeholder]="t('players.searchHint')"
+        (input)="search.set(query.value)"
+      />
+    </label>
+    @if (loadingPlayers()) {
+    <p class="muted" aria-live="polite">{{ t("players.loading") }}</p>
+    } @else if (players().length === 0) {
+    <p class="muted">{{ t("claim.noneLeft") }}</p>
+    } @else {
+    <ul class="choices">
+      @for (player of players(); track player.id) { @let id =
+      splitRiotId(player.riotId);
+      <li>
+        <div class="choice-text">
+          <strong><app-riot-id [value]="player.riotId" /></strong>
+          <span class="muted small">
+            @if (player.rank) { {{ language.rank(player.rank) }} · } {{
+            t(language.plural("players.games", player.games), { count:
+            player.games }) }} @if (player.discordUsername) { · Discord {{
+            player.discordUsername }} } @if (player.aliases.length) { · {{
+            t("players.also", { names: player.aliases.join(", ") }) }} }
+          </span>
+        </div>
+        <button
+          type="button"
+          class="button-ghost small-button"
+          (click)="picked.set(player)"
+        >
+          {{ t("claim.thisIsMe") }}<span class="visually-hidden">
+            {{ id.name }}</span
+          >
+        </button>
+      </li>
+      }
+    </ul>
+    }
+    <p class="muted small">{{ t("claim.notListed") }}</p>
+  </section>
+  <section class="panel block" aria-labelledby="create-title">
+    <h2 class="heading" id="create-title">{{ t("claim.createTitle") }}</h2>
+    <p class="muted">{{ t("claim.createHelp") }}</p>
+    @if (accountRiotId(); as riotId) {
+    <p>{{ t("claim.createAs", { riotId }) }}</p>
+    <button
+      type="button"
+      class="button start"
+      [disabled]="action.busy()"
+      (click)="create('', '')"
+    >
+      {{ t("claim.create") }}
+    </button>
+    } @else {
+    <form
+      class="create"
+      (submit)="$event.preventDefault(); create(riotId.value, discord.value)"
+    >
+      <label class="field">
+        <span class="label">{{ t("claim.riotId") }}</span>
+        <input
+          #riotId
+          name="riotId"
+          required
+          autocomplete="off"
+          [attr.maxlength]="maxName"
+          placeholder="Name#TAG"
+        />
+      </label>
+      <label class="field">
+        <span class="label">{{ t("claim.discord") }}</span>
+        <input
+          #discord
+          name="discord"
+          autocomplete="off"
+          [attr.maxlength]="maxName"
+        />
+      </label>
+      <button type="submit" class="button" [disabled]="action.busy()">
+        {{ t("claim.create") }}
+      </button>
+    </form>
+    }
+  </section>
+  } } } @else {
+  <p class="muted" aria-live="polite">{{ t("claim.loading") }}</p>
+  }
+</ng-container>

@@ -142,11 +142,12 @@ class ImportIT {
                 .isTrue();
 
         assertThat(jdbc.sql("""
-                        SELECT r.stat || ' ' || r.recorded || ' ' || r.effect FROM season_stat_rules r
+                        SELECT r.stat || ' ' || r.recorded || ' ' || r.points FROM season_stat_rules r
                         JOIN seasons s ON s.id = r.season_id
                         WHERE s.number = 1 AND r.stat IN ('PERFORMANCE_SCORE', 'DEATHS', 'ACS', 'KAST_PCT')
                         ORDER BY r.stat""").query(String.class).list())
-                .containsExactly("ACS false 0", "DEATHS true -1", "KAST_PCT false 0", "PERFORMANCE_SCORE true 1");
+                .containsExactly(
+                        "ACS false 0.00", "DEATHS true -1.00", "KAST_PCT false 0.00", "PERFORMANCE_SCORE true 1.00");
         assertThat(jdbc.sql("""
                         SELECT string_agg(b.code, ',' ORDER BY b.code) FROM game_stat_bonuses a
                         JOIN season_bonuses b ON b.id = a.bonus_id WHERE a.game_stat_id = 105""").query(String.class).single()).isEqualTo("FB,LD,MD,MP");
@@ -229,7 +230,8 @@ class ImportIT {
             Map<String, Long> totals = new TreeMap<>();
             for (GameStat line : lines) {
                 Season season = line.getGame().getMatch().getSeason();
-                long points = scoring.gamePoints(season, line.getLine(), line.getBonuses(), line.isWin());
+                long points = scoring.gamePoints(season, line.getLine(), line.getBonuses(), line.isWin())
+                        .longValueExact();
                 totals.merge(line.getPlayer().getRiotId(), points, Long::sum);
             }
             return totals;
@@ -242,7 +244,7 @@ class ImportIT {
                 .containsEntry("players", 3L)
                 .containsEntry("player_aliases", 0L)
                 .containsEntry("seasons", 2L)
-                .containsEntry("season_stat_rules", 28L)
+                .containsEntry("season_stat_rules", 32L)
                 .containsEntry("season_bonuses", 10L)
                 .containsEntry("matches", 3L)
                 .containsEntry("games", 4L)

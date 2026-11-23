@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -46,6 +47,10 @@ public class SeasonBonus {
     @Column(nullable = false)
     private int points;
 
+    /** For an {@link BonusAward#AT_LEAST} bonus, the value of its stat to reach; nothing otherwise. */
+    @Column(precision = 6, scale = 2)
+    private BigDecimal threshold;
+
     /** Its order on screen. */
     @JdbcTypeCode(SqlTypes.SMALLINT)
     @Column(nullable = false)
@@ -60,6 +65,34 @@ public class SeasonBonus {
         this.award = award;
         this.stat = stat;
         this.points = points;
+        this.position = position;
+    }
+
+    /**
+     * Changes what the bonus is worth and, for an {@link BonusAward#AT_LEAST} bonus, its threshold.
+     *
+     * @throws IllegalArgumentException when the threshold is missing on an AT_LEAST bonus, or given
+     *     on another
+     */
+    public void change(int points, BigDecimal threshold) {
+        if ((award == BonusAward.AT_LEAST) != (threshold != null)) {
+            throw new IllegalArgumentException(
+                    award == BonusAward.AT_LEAST ? code + " needs a threshold" : code + " has no threshold");
+        }
+        this.points = points;
+        this.threshold = threshold;
+    }
+
+    /** Changes how the bonus is won and what it's worth, keeping its code and its place in the list. */
+    void redefine(String label, BonusAward award, Stat stat, int points, BigDecimal threshold) {
+        this.label = label;
+        this.award = award;
+        this.stat = stat;
+        change(points, threshold);
+    }
+
+    /** Its place in the season's list, after a bonus above it was removed. */
+    void moveTo(int position) {
         this.position = position;
     }
 
@@ -89,6 +122,10 @@ public class SeasonBonus {
 
     public int getPoints() {
         return points;
+    }
+
+    public BigDecimal getThreshold() {
+        return threshold;
     }
 
     public int getPosition() {
