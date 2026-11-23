@@ -140,12 +140,6 @@ input.count {
   gap: 4px 10px;
 }
 
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
 .toggles {
   display: flex;
   flex-wrap: wrap;

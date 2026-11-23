@@ -98,11 +98,6 @@ input::placeholder {
   background: var(--zebra);
 }
 
-.actions {
-  display: flex;
-  gap: 8px;
-}
-
 .pill.live {
   color: var(--good);
 }

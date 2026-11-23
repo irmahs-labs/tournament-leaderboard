@@ -21,12 +21,6 @@ p {
 }
 
 .tabs,
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
 .tabs .on {
   background: var(--accent);
   border-color: var(--accent);

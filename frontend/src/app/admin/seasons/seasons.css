@@ -120,11 +120,6 @@ input::placeholder {
   min-width: 140px;
 }
 
-.actions {
-  display: flex;
-  gap: 8px;
-}
-
 .wide {
   grid-column: span 2;
 }

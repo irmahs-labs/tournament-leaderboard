@@ -277,6 +277,16 @@ select {
 }
 
 /*
+ * A row's buttons. They wrap onto a second line when the row is too narrow, so none is cut off
+ * at the edge of a table.
+ */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/*
  * The smaller buttons of tables, lists and cards. One width for all of them, wide enough for the
  * longest label in either language, so a row's actions line up with the next row's.
  */

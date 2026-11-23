@@ -145,11 +145,6 @@ input::placeholder {
   }
 }
 
-.actions {
-  display: flex;
-  gap: 8px;
-}
-
 .wide {
   grid-column: span 2;
 }
