@@ -88,12 +88,6 @@ input::placeholder {
   gap: 8px;
 }
 
-.small-button {
-  min-height: 40px;
-  padding: 0 14px;
-  font-size: 13px;
-}
-
 .toggle .on {
   background: var(--accent);
   border-color: var(--accent);

@@ -201,13 +201,6 @@
   gap: 10px 14px;
 }
 
-.small-button {
-  min-height: 40px;
-  padding: 0 14px;
-  font-size: 13px;
-  white-space: nowrap;
-}
-
 .formula {
   display: flex;
   flex-wrap: wrap;

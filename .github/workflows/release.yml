@@ -1,0 +1,40 @@
+name: Release
+
+# Keeps a release pull request open on main, with the next version and its changelog, from the
+# Conventional Commits merged since the last release. Merging it tags vX.Y.Z, makes the GitHub
+# release and updates version.txt, which the deploy builds the app with. See deploy/README.md.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+  # To start CI on the release pull request; see the last step.
+  actions: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    name: Release pull request
+    runs-on: ubuntu-24.04
+    steps:
+      - id: release
+        # v4, pinned to its commit.
+        uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+      # A pull request opened with this workflow's token starts no workflow, so CI is started on
+      # the release branch by hand: Build and test then reports on its head commit, which the
+      # main ruleset requires before merging.
+      - name: Run CI on the release pull request
+        if: ${{ steps.release.outputs.pr }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ fromJSON(steps.release.outputs.pr).headBranchName }}
+        run: gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$BRANCH"

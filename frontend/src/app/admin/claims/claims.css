@@ -33,12 +33,6 @@ p {
   color: var(--on-accent);
 }
 
-.small-button {
-  min-height: 40px;
-  padding: 0 14px;
-  font-size: 13px;
-}
-
 .status {
   color: var(--good);
   font-weight: 600;

@@ -93,12 +93,6 @@ p {
   margin-top: 4px;
 }
 
-.small-button {
-  min-height: 40px;
-  padding: 0 14px;
-  font-size: 13px;
-}
-
 .pill.wait {
   color: var(--warn);
   border-color: var(--warn);

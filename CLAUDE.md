@@ -73,6 +73,11 @@ typecheck in `frontend/`, Spotless and a compile in `backend/`. In cloud session
 - [`docs/context-graph.md`](docs/context-graph.md) maps the rewrite: packages and their
   dependencies, endpoints, tables, screens and phases. Read it before starting work, and update it
   in the same pull request whenever a change adds, removes or reconnects any of those.
+- The design system, https://claude.ai/artifact/LJLikryobGFQ53nune6jnV, holds the tokens,
+  type, components and their rules, desktop and phone. `frontend/src/styles.css` is its source:
+  build every screen from its tokens and shared classes, put a pattern used by two pages or more
+  in `styles.css` rather than copying it, and update the design system in the same pull request
+  whenever a token, a shared class or a shared component changes.
 - The full plan (schema, endpoints, screens, phases) is the migration plan page kept with the
   project designs; ask the user for the link when you need it.
 
@@ -91,7 +96,11 @@ Signing in locally needs the dev Google client in `backend/local.yml` (ignored b
 
 CI (`.github/workflows/ci.yml`) runs `./mvnw verify` on pull requests and on pushes to `main`,
 then SonarQube Cloud (its quality gate blocks pull requests), then, on `main`, the deploy. The version comes from
-`-Drevision=…` (CI-friendly versions + flatten-maven-plugin); it defaults to `0.0.0-SNAPSHOT`.
+`-Drevision=…` (CI-friendly versions + flatten-maven-plugin); it defaults to `0.0.0-SNAPSHOT`, and
+the deploy builds with the last release's, from `version.txt`. Releases come from release-please
+(`.github/workflows/release.yml`): it keeps a release pull request open on `main`; Irma merges it
+when she wants a version, which tags `vX.Y.Z`. Don't edit `version.txt`, `CHANGELOG.md` or
+`.release-please-manifest.json` by hand.
 
 ## Rules
 
@@ -106,6 +115,7 @@ then SonarQube Cloud (its quality gate blocks pull requests), then, on `main`, t
   version uses the old shape. A migration that can't follow this says so in its PR, and is merged
   outside match nights.
 - Commit messages and pull request titles follow Conventional Commits (`feat:`, `fix:`, `chore:`,
-  `docs:`, `refactor:`, `test:`, `ci:`), since release versions will be derived from them.
+  `docs:`, `refactor:`, `test:`, `ci:`): release-please derives the versions and the changelog
+  from them (`feat:` a minor version, `fix:` a patch, `feat!:` or `BREAKING CHANGE:` a major one).
 - Repository: `irmahs-labs/tournament-leaderboard` (moved from `irmahs/alsace-arena-spike-tournament`;
   GitHub redirects the old address).

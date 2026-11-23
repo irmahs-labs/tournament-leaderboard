@@ -112,11 +112,6 @@
   font-size: 16px;
 }
 
-.small-button {
-  min-height: 40px;
-  font-size: 14px;
-}
-
 .divider {
   display: flex;
   align-items: center;
