@@ -125,10 +125,10 @@ describe("the admin pages", () => {
     expect(text(page.querySelector("h1"))).toBe("Players");
     expect(texts(page, "header nav.nav a")).toStrictEqual([
       "Scores",
-      "Players",
-      "Seasons",
       "Schedule",
+      "Seasons",
       "Scoring",
+      "Players",
       "Members",
       "Claims",
       "Branding",
@@ -180,6 +180,103 @@ describe("the Site | Admin switch", () => {
       "Players",
       "My matches",
     ]);
+  });
+});
+
+const SEVERAL_AND_PLATFORM: Me = {
+  ...ME,
+  memberships: [
+    ...ME.memberships,
+    {
+      name: "Metz Esport",
+      owner: false,
+      playerId: null,
+      role: "PLAYER",
+      slug: "metz-esport",
+    },
+  ],
+  platformAdmin: true,
+};
+
+/** Opens a menu of the header the way a click on its summary does. */
+const openMenu = (menu: HTMLDetailsElement | null): void => {
+  if (menu) {
+    menu.open = true;
+    menu.dispatchEvent(new Event("toggle"));
+  }
+};
+
+/** Opens an admin page of Alsace Arena as this person. */
+const openAdmin = async (me: Me): Promise<HTMLElement> => {
+  const harness = await openAs("/org/alsace-arena/admin/players", me);
+  await vi.waitFor(() => {
+    harness.detectChanges();
+    http.expectOne((request) => request.url === API).flush(PLAYERS);
+    http.expectOne("/api/ranks").flush(RANKS);
+  });
+  harness.detectChanges();
+
+  return rendered(harness);
+};
+
+describe("the header's menus", () => {
+  beforeEach(() => {
+    localStorage.setItem("lang", "en");
+    TestBed.configureTestingModule({ providers: testProviders() });
+    http = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    http.verify();
+    localStorage.clear();
+  });
+
+  it("switches to the other organisations one joined from the organisation's name", async () => {
+    const page = await openAdmin(SEVERAL_AND_PLATFORM);
+
+    expect(text(page.querySelector("header .switcher .org-name"))).toBe(
+      "Alsace Arena"
+    );
+    expect(
+      [...page.querySelectorAll("header .switcher a")].map((link) =>
+        link.getAttribute("href")
+      )
+    ).toStrictEqual(["/org/alsace-arena", "/org/metz-esport"]);
+    expect(
+      page.querySelector("header .switcher a[aria-current]")?.textContent
+    ).toContain("Alsace Arena");
+  });
+
+  it("offers the platform's admin in the account menu, to platform admins only", async () => {
+    const page = await openAdmin(SEVERAL_AND_PLATFORM);
+
+    expect(texts(page, "header .account-menu .dropdown a")).toStrictEqual([
+      "Your account",
+      "Platform admin",
+    ]);
+    expect(text(page.querySelector("header .account-menu button"))).toBe(
+      "Sign out"
+    );
+  });
+
+  it("lists Site | Admin and the side's pages in the phone's menu while it's open", async () => {
+    const page = await openAdmin(ME);
+    const menu = page.querySelector<HTMLDetailsElement>("header .burger");
+
+    expect(page.querySelector(".burger-panel")).toBeNull();
+
+    openMenu(menu);
+    await vi.waitFor(() => {
+      expect(texts(page, ".burger-panel .mode a")).toStrictEqual([
+        "Site",
+        "Admin",
+      ]);
+    });
+    expect(texts(page, ".burger-panel nav.nav a")).toHaveLength(8);
+
+    page.querySelector<HTMLAnchorElement>(".burger-panel nav.nav a")?.click();
+
+    expect(menu?.open).toBeFalsy();
   });
 });
 

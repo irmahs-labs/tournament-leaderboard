@@ -34,7 +34,10 @@
     "notices": {
       "one": "Notifications : {{count}} non lue",
       "other": "Notifications : {{count}} non lues"
-    }
+    },
+    "yourAccount": "Votre compte",
+    "menu": "Menu",
+    "switchOrganisation": "{{name}} : changer d’organisation"
   },
   "leaderboard": {
     "title": "Classement de la saison",
