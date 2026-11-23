@@ -23,7 +23,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - id: release
-        uses: googleapis/release-please-action@v4
+        # v4, pinned to its commit.
+        uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
