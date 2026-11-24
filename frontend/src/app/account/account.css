@@ -114,11 +114,6 @@ p {
   white-space: nowrap;
 }
 
-.actions {
-  display: flex;
-  gap: 8px;
-}
-
 .danger-zone {
   border-color: var(--danger);
 }

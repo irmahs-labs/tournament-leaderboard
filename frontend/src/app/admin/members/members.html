@@ -108,7 +108,7 @@
       {{ t("adminMembers.waiting") }}
     </h2>
     <div class="scroll">
-      <table class="table">
+      <table class="stacks table">
         <thead>
           <tr>
             <th scope="col">{{ t("adminMembers.email") }}</th>
@@ -125,8 +125,12 @@
           @for (waiting of loaded.invites; track waiting.id) {
           <tr>
             <td>{{ waiting.email }}</td>
-            <td>{{ waiting.invitedBy ?? "–" }}</td>
-            <td>{{ language.moment(waiting.expiresAt) }}</td>
+            <td [attr.data-label]="t('adminMembers.invitedBy')">
+              {{ waiting.invitedBy ?? "–" }}
+            </td>
+            <td [attr.data-label]="t('adminMembers.validUntil')">
+              {{ language.moment(waiting.expiresAt) }}
+            </td>
             <td>
               <button
                 type="button"
@@ -152,7 +156,7 @@
       {{ t("adminMembers.all", { count: loaded.members.length }) }}
     </h2>
     <div class="scroll">
-      <table class="table">
+      <table class="stacks table">
         <thead>
           <tr>
             <th scope="col">{{ t("adminMembers.member") }}</th>
@@ -173,13 +177,15 @@
               <strong>{{ name }}</strong>
               <span class="muted email">{{ member.email }}</span>
             </td>
-            <td>
+            <td [attr.data-label]="t('adminMembers.role')">
               <span class="pill" [class.live]="member.role === 'ADMIN'"
                 >{{ t(member.owner ? "adminMembers.owner" : member.role ===
                 "ADMIN" ? "adminMembers.admin" : "adminMembers.player") }}</span
               >
             </td>
-            <td>{{ language.moment(member.joinedAt) }}</td>
+            <td [attr.data-label]="t('adminMembers.joined')">
+              {{ language.moment(member.joinedAt) }}
+            </td>
             <td>
               @if (!member.owner) {
               <div class="actions">

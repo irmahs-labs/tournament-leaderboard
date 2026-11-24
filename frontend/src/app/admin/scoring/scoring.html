@@ -144,7 +144,7 @@
     <h2 class="heading" id="bonuses-title">{{ t("adminScoring.bonuses") }}</h2>
     <p class="muted small note">{{ t("adminScoring.bonusesHelp") }}</p>
     <div class="scroll">
-      <table class="table">
+      <table class="stacks table">
         <thead>
           <tr>
             <th scope="col">{{ t("adminScoring.bonus") }}</th>
@@ -165,7 +165,7 @@
               <strong>{{ bonus.code }}</strong>
               <span class="muted"> · {{ bonus.label }}</span>
             </th>
-            <td>
+            <td [attr.data-label]="t('adminScoring.howWon')">
               @if (bonus.award === "AT_LEAST") {
               <span class="threshold">
                 {{ t("adminScoring.won.AT_LEAST", { stat: t("stats.long." +
@@ -188,7 +188,7 @@
               >
               }
             </td>
-            <td>
+            <td [attr.data-label]="t('adminScoring.points')">
               <input
                 #bonusPoints
                 class="number"

@@ -80,34 +80,6 @@ input::placeholder {
   overflow-x: auto;
 }
 
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 15px;
-}
-
-.table th {
-  padding: 12px 14px;
-  text-align: left;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: var(--label-track);
-  border-bottom: 1px solid var(--head-line);
-  white-space: nowrap;
-}
-
-.table td {
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--row-line);
-  white-space: nowrap;
-}
-
-.table tbody tr:nth-child(even) {
-  background: var(--zebra);
-}
-
 .table tr.editing {
   background: var(--accent-soft);
 }
@@ -143,11 +115,6 @@ input::placeholder {
   .form-actions {
     grid-column: 1 / -1;
   }
-}
-
-.actions {
-  display: flex;
-  gap: 8px;
 }
 
 .wide {
