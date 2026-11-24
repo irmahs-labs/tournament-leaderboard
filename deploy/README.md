@@ -98,9 +98,8 @@ release-please (`.github/workflows/release.yml`):
 Needs, once, in the repository's Settings → Actions → General: **Allow GitHub Actions to create
 and approve pull requests**.
 
-The first release is forced to **1.0.0** (`release-as` in `release-please-config.json`), counting
-the commits since `main` became the app's branch (`bootstrap-sha`). Remove `release-as` once
-v1.0.0 exists, or every release pull request will keep asking for 1.0.0.
+The first release, **v1.0.0** on 2026-11-23, counted the commits since `main` became the app's
+branch (`bootstrap-sha`); every version since follows from the commits.
 
 ## Deploys without a gap
 
