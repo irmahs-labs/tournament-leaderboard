@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/irmahs-labs/tournament-leaderboard/compare/v1.0.0...v1.0.1) (2026-11-24)
+
+
+### Fixes
+
+* no button cut off at any width: tables wrap, then stack as cards on phones ([#93](https://github.com/irmahs-labs/tournament-leaderboard/issues/93)) ([27b0801](https://github.com/irmahs-labs/tournament-leaderboard/commit/27b08010bf511e68d0fbf5c491b5f9a3afe28e6f))
+
 ## 1.0.0 (2026-11-23)
 
 
